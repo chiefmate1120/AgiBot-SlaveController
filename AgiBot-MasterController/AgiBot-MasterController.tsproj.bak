@@ -1,220 +1,6 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
-		<DataType>
-			<Name GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}" AutoDeleteType="true">Vec7d</Name>
-			<BitSize>448</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>7</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}" AutoDeleteType="true">ST_MasterJointData</Name>
-			<Comment><![CDATA[ Output from master arm control task 
- Input to safety task and force controller task]]></Comment>
-			<BitSize>7168</BitSize>
-			<SubItem>
-				<Name>m_curMotorPos</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ joint position compute with motor encoder]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curLinkPos</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ joint position compute with link/abs encoder]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>896</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntPos</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ target joint position ]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>1792</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntPos</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>2688</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntVel</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ target joint velocity ]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>3584</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntVel</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>4480</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntTrq</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ command joint torque ]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>5376</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntTrq</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ current joint torque ]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>6272</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}" AutoDeleteType="true">Mat7d</Name>
-			<BitSize>3136</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>7</Elements>
-			</ArrayInfo>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>7</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{A0671BED-9207-4AD7-552A-01ED20F8D524}" AutoDeleteType="true">Mat6d</Name>
-			<BitSize>2304</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>6</Elements>
-			</ArrayInfo>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>6</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}" AutoDeleteType="true">ST_MasterDynaData</Name>
-			<BitSize>18048</BitSize>
-			<SubItem>
-				<Name>m_massMat</Name>
-				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ mass matrix in joint space]]></Comment>
-				<BitSize>6272</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_lambda</Name>
-				<Type GUID="{A0671BED-9207-4AD7-552A-01ED20F8D524}">Mat6d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ mass matrix in cartesian space]]></Comment>
-				<BitSize>4608</BitSize>
-				<BitOffs>6272</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_dynaNullspace</Name>
-				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ dynamic nullspace]]></Comment>
-				<BitSize>6272</BitSize>
-				<BitOffs>10880</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_gravity</Name>
-				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ gravity]]></Comment>
-				<BitSize>896</BitSize>
-				<BitOffs>17152</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}" AutoDeleteType="true">ST_MotorInputs</Name>
-			<BitSize>160</BitSize>
-			<SubItem>
-				<Name>m_driverError</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_statusWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<BitSize>16</BitSize>
-				<BitOffs>32</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_motorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_linkEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>96</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_current</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>128</BitOffs>
-			</SubItem>
-		</DataType>
 		<DataType>
 			<Name GUID="{B6C8C7C5-2E54-111D-7B78-DFD4024966D8}" AutoDeleteType="true">ST_UIData</Name>
 			<Comment><![CDATA[ Output from UI controller
@@ -590,35 +376,123 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}" AutoDeleteType="true">ST_MotorOutputs</Name>
-			<BitSize>96</BitSize>
+			<Name GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}" AutoDeleteType="true">Mat7d</Name>
+			<BitSize>3136</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>7</Elements>
+			</ArrayInfo>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>7</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{A0671BED-9207-4AD7-552A-01ED20F8D524}" AutoDeleteType="true">Mat6d</Name>
+			<BitSize>2304</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}" AutoDeleteType="true">Vec7d</Name>
+			<BitSize>448</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>7</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}" AutoDeleteType="true">ST_MasterDynaData</Name>
+			<BitSize>18048</BitSize>
 			<SubItem>
-				<Name>m_controlWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<Comment><![CDATA[ driver control word]]></Comment>
-				<BitSize>16</BitSize>
+				<Name>m_massMat</Name>
+				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ mass matrix in joint space]]></Comment>
+				<BitSize>6272</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_opMode</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
-				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
-				<BitSize>8</BitSize>
-				<BitOffs>16</BitOffs>
+				<Name>m_lambda</Name>
+				<Type GUID="{A0671BED-9207-4AD7-552A-01ED20F8D524}">Mat6d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ mass matrix in cartesian space]]></Comment>
+				<BitSize>4608</BitSize>
+				<BitOffs>6272</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdMotorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ target motor encoder]]></Comment>
+				<Name>m_dynaNullspace</Name>
+				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ dynamic nullspace]]></Comment>
+				<BitSize>6272</BitSize>
+				<BitOffs>10880</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_gravity</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ gravity]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>17152</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}" AutoDeleteType="true">ST_MotorInputs</Name>
+			<BitSize>160</BitSize>
+			<SubItem>
+				<Name>m_driverError</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
 				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_statusWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
 				<BitOffs>32</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdCurrent</Name>
+				<Name>m_motorEncoder</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current to IO]]></Comment>
+				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_linkEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_current</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>128</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -798,6 +672,132 @@
 			</SubItem>
 		</DataType>
 		<DataType>
+			<Name GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}" AutoDeleteType="true">ST_MasterJointData</Name>
+			<Comment><![CDATA[ Output from master arm control task 
+ Input to safety task and force controller task]]></Comment>
+			<BitSize>7168</BitSize>
+			<SubItem>
+				<Name>m_curMotorPos</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ joint position compute with motor encoder]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curLinkPos</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ joint position compute with link/abs encoder]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>896</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntPos</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ target joint position ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>1792</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curJntPos</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ current joint position ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>2688</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntVel</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ target joint velocity ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>3584</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curJntVel</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ current joint position ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>4480</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntTrq</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ command joint torque ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>5376</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curJntTrq</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ current joint torque ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>6272</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}" AutoDeleteType="true">ST_MotorOutputs</Name>
+			<BitSize>96</BitSize>
+			<SubItem>
+				<Name>m_controlWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[ driver control word]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_opMode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
+				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>16</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdMotorEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ target motor encoder]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdCurrent</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current to IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-00200000000C}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..11] OF BIT</Name>
 			<BitSize>12</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
@@ -855,41 +855,50 @@
 		<System>
 			<Settings MaxCpus="20">
 				<Cpu/>
-				<Cpu CpuId="1" RtLimit="90" BaseTime="2500"/>
+				<Cpu CpuId="1" RtLimit="90"/>
 				<Cpu CpuId="2" RtLimit="90"/>
 			</Settings>
 			<Tasks>
-				<Task Id="3" Priority="20" CycleTime="10000" AmsPort="350" Affinity="#x00000002" AdtTasks="true">
+				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000002" AdtTasks="true">
 					<Name>TaskArmControl</Name>
 				</Task>
-				<Task Id="4" Priority="1" CycleTime="10000" AmsPort="351" Affinity="#x00000004" AdtTasks="true">
+				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000004" AdtTasks="true">
 					<Name>TaskDynamic</Name>
 				</Task>
 			</Tasks>
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterArmControl" PrjFilePath="MasterArmControl\MasterArmControl.plcproj" TmcFilePath="MasterArmControl\MasterArmControl.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterArmControl\MasterArmControl.tmc" TmcHash="{6B7C673F-6238-8FF0-F83B-0A9DA9EC18B9}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterArmControl\MasterArmControl.tmc">
 					<Name>MasterArmControl Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
-						<Name>TaskDynamic Inputs</Name>
+						<Name>TaskArmControl Inputs</Name>
 						<Var>
-							<Name>RobotDynamics.m_masterJointsData</Name>
-							<Comment><![CDATA[ master robot arms joint data]]></Comment>
-							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
+							<Name>MasterArmControl.m_masterInputDataPool.m_UIData</Name>
+							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
+							<Type GUID="{B6C8C7C5-2E54-111D-7B78-DFD4024966D8}">ST_UIData</Type>
 						</Var>
-					</Vars>
-					<Vars VarGrpType="2" AreaNo="1">
-						<Name>TaskDynamic Outputs</Name>
 						<Var>
-							<Name>RobotDynamics.m_masterDynaData</Name>
-							<Comment><![CDATA[ dynamic output]]></Comment>
+							<Name>MasterArmControl.m_masterInputDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{B1D797D8-D45D-A1CD-A7C3-82AD0F1FF851}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>MasterArmControl.m_masterInputDataPool.m_cartStatus</Name>
+							<Comment><![CDATA[ cart information, import from other task]]></Comment>
+							<Type GUID="{B1D797D8-D45D-A1CD-A7C3-82AD0F1FF851}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>MasterArmControl.m_masterInputDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave robot information, import from other device]]></Comment>
+							<Type GUID="{20AEAC35-88F4-C7CA-1441-6674E7CAF38F}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
+							<Comment><![CDATA[ master dynamic data]]></Comment>
 							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
 						</Var>
-					</Vars>
-					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
-						<Name>TaskArmControl Inputs</Name>
 						<Var>
 							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_gripHallSensorValue</Name>
 							<Comment><![CDATA[ grip angle from hall sensor IO]]></Comment>
@@ -970,34 +979,19 @@
 							<Comment><![CDATA[ motor IO]]></Comment>
 							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
 						</Var>
-						<Var>
-							<Name>MasterArmControl.m_masterInputDataPool.m_UIData</Name>
-							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
-							<Type GUID="{B6C8C7C5-2E54-111D-7B78-DFD4024966D8}">ST_UIData</Type>
-						</Var>
-						<Var>
-							<Name>MasterArmControl.m_masterInputDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{B1D797D8-D45D-A1CD-A7C3-82AD0F1FF851}">ST_CartStatus</Type>
-						</Var>
-						<Var>
-							<Name>MasterArmControl.m_masterInputDataPool.m_cartStatus</Name>
-							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{B1D797D8-D45D-A1CD-A7C3-82AD0F1FF851}">ST_CartStatus</Type>
-						</Var>
-						<Var>
-							<Name>MasterArmControl.m_masterInputDataPool.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave robot information, import from other device]]></Comment>
-							<Type GUID="{20AEAC35-88F4-C7CA-1441-6674E7CAF38F}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
-							<Comment><![CDATA[ master dynamic data]]></Comment>
-							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
-						</Var>
 					</Vars>
-					<Vars VarGrpType="2" ContextId="1" AreaNo="17">
+					<Vars VarGrpType="2" AreaNo="1">
 						<Name>TaskArmControl Outputs</Name>
+						<Var>
+							<Name>MasterArmControl.m_masterStatus</Name>
+							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
+							<Type GUID="{5A96E024-33CA-51C7-C38E-62CCEEFE3DCF}">ST_MasterStatus</Type>
+						</Var>
+						<Var>
+							<Name>MasterArmControl.m_masterJointsData</Name>
+							<Comment><![CDATA[ master robot joint data]]></Comment>
+							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
+						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
@@ -1054,15 +1048,21 @@
 							<Name>MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorOutputs</Name>
 							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
 						</Var>
+					</Vars>
+					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
+						<Name>TaskDynamic Inputs</Name>
 						<Var>
-							<Name>MasterArmControl.m_masterStatus</Name>
-							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{5A96E024-33CA-51C7-C38E-62CCEEFE3DCF}">ST_MasterStatus</Type>
-						</Var>
-						<Var>
-							<Name>MasterArmControl.m_masterJointsData</Name>
-							<Comment><![CDATA[ master robot joint data]]></Comment>
+							<Name>RobotDynamics.m_masterJointsData</Name>
+							<Comment><![CDATA[ master robot arms joint data]]></Comment>
 							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2" ContextId="1" AreaNo="17">
+						<Name>TaskDynamic Outputs</Name>
+						<Var>
+							<Name>RobotDynamics.m_masterDynaData</Name>
+							<Comment><![CDATA[ dynamic output]]></Comment>
+							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
 						</Var>
 					</Vars>
 					<UnrestoredVarLinks ImportTime="2023-12-15T10:38:09">
@@ -1079,27 +1079,27 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
-							<Name>TaskDynamic</Name>
+							<Id NeedCalleeCall="true">0</Id>
+							<Name>TaskArmControl</Name>
 							<ManualConfig>
-								<OTCID>#x02010040</OTCID>
+								<OTCID>#x02010030</OTCID>
 							</ManualConfig>
 							<Priority>1</Priority>
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
-							<Name>TaskArmControl</Name>
+							<Id NeedCalleeCall="true">1</Id>
+							<Name>TaskDynamic</Name>
 							<ManualConfig>
-								<OTCID>#x02010030</OTCID>
+								<OTCID>#x02010040</OTCID>
 							</ManualConfig>
-							<Priority>20</Priority>
+							<Priority>2</Priority>
 							<CycleTime>1000000</CycleTime>
 						</Context>
 					</Contexts>
 					<TaskPouOids>
-						<TaskPouOid Prio="1" OTCID="#x08502002"/>
-						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+						<TaskPouOid Prio="1" OTCID="#x08502001"/>
+						<TaskPouOid Prio="2" OTCID="#x08502002"/>
 					</TaskPouOids>
 				</Instance>
 			</Project>
@@ -3629,9 +3629,9 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500820000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500840000403}" Id="#x02030020"/>
-		<MappingInfo Identifier="{08502002-2001-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030010"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500840000403}" Id="#x02030020"/>
+		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterArmControl^MasterArmControl Instance">
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1 (AX58200_MotorControl)">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
