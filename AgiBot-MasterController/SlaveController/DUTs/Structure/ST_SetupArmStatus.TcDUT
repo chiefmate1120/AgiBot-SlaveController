@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_SetupArmStatus" Id="{ec66e8f3-c0e7-419f-a13a-f4c74251ea99}">
+    <Declaration><![CDATA[TYPE ST_SetupArmStatus :
+STRUCT
+	// current pose of set arm distal end
+	m_curEndPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

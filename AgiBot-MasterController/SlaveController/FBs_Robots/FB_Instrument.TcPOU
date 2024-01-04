@@ -1,0 +1,776 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// ID
+	m_ID: INT;
+	
+	// series number
+	m_SeriesNum : ULINT;
+	
+	// instrument type
+	m_type : E_InstrumentType := InstruType_UNKNOWM;
+	
+	// instrument mounted
+	m_mounted: BOOL:=FALSE;
+	
+	// instrument ready for control
+	m_ready:BOOL := FALSE;
+	
+	// current and max usage counts
+	m_usageCounts :INT;
+	m_maxUsageCounts :INT;
+	
+	// kinematic parameters	
+	m_kinematicParameters:ST_InstruParameters; 
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{9d49480e-8469-42fe-9794-09bbda49b553}" />
+    <Method Name="gripperAngleForwardTransform_ID12" Id="{d3dda96d-7b55-4cf3-9ffe-c8cf53ace77d}">
+      <Declaration><![CDATA[METHOD gripperAngleForwardTransform_ID12 : BOOL
+VAR_INPUT
+	frontAngle:LREAL;
+END_VAR
+VAR_OUTPUT
+	endAngle:LREAL;
+	Succeed:BOOL;
+END_VAR
+VAR
+	minFrontAng :LREAL  := 16.6*2*g_deg2Rad;
+	maxFrontAng :LREAL := 49.18*2*g_deg2Rad;
+	AB :LREAL := 2.8;
+	BC:LREAL := 5.26;
+	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
+	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//**************已知：器械前端开合角，求解：末端开合角***************//
+
+//输入合法性判断，物理极限是[16.6*2，49.18*2]度
+frontAngle := LIMIT(minFrontAng, frontAngle, maxFrontAng);
+
+
+SIN_C:=AB*SIN(Angle_Initial_A)/BC;
+Angle_Initial_C:=ASIN(SIN_C);
+
+Angle_Inc_A:=frontAngle/2;
+Angle_A:=Angle_Initial_A+Angle_Inc_A;
+
+SIN_C:=AB*SIN(Angle_A)/BC;
+Angle_C:=ASIN(SIN_C);
+
+Angle_Inc_C:=Angle_C-Angle_Initial_C;
+endAngle:=Angle_Inc_C*2;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="gripperAngleInverseTransform_ID12" Id="{d41bf91a-0d5c-464e-b520-ee71cb3a1637}">
+      <Declaration><![CDATA[METHOD gripperAngleInverseTransform_ID12 : BOOL
+VAR_INPUT
+	endAngle:LREAL;
+END_VAR
+VAR_OUTPUT
+	frontAngle:LREAL;
+	Succeed:BOOL;
+END_VAR
+VAR
+	minEndAng :LREAL  := 0;
+	maxEndAng :LREAL := 38*g_deg2Rad;
+	AB :LREAL := 2.8;
+	BC:LREAL := 5.26;
+	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
+	
+	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//***************已知：器械末端开合角，求解：前端开合角********************//
+
+//输入合法性判断，物理极限是[0,30]度
+endAngle:= LIMIT(minEndAng, endAngle, maxEndAng);
+
+SIN_C:=AB*SIN(Angle_Initial_A)/BC;
+Angle_Initial_C:=ASIN(SIN_C);
+
+End_Angle_Single:=endAngle/2;
+Angle_Inc_C:=End_Angle_Single;
+Angle_C:=Angle_Initial_C+Angle_Inc_C;
+
+SIN_A:=BC*SIN(Angle_C)/AB;
+Angle_A:=ASIN(SIN_A);
+
+Angle_Inc_A:=Angle_A-Angle_Initial_A;
+frontAngle:=Angle_Inc_A*2;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ID" Id="{c06eee00-a4f0-44c4-888c-115bceb3581e}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY ID : INT]]></Declaration>
+      <Get Name="Get" Id="{0bb11b4e-b794-4cab-a7f8-f024cce72b1a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ID:=m_ID;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4f951bf2-7962-4d4a-8d62-1d6a553b8ebd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_ID:=ID;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="instruFK" Id="{097c05ed-881a-44a5-815d-27300cef479f}">
+      <Declaration><![CDATA[// convert motor joint position to DH joint position
+METHOD PUBLIC instruFK : BOOL
+VAR_INPUT
+	// motor joint position of instrument power box
+	i_jntPosL1 : LREAL;
+	i_jntPosL2 : LREAL;
+	i_jntPosL3 : LREAL;
+	i_jntPosL4 : LREAL;
+	i_jntPosL5 : LREAL;	
+END_VAR
+
+VAR_OUTPUT
+	// DH  joint positon
+	o_jntPosX :LREAL;
+	o_jntPosY :LREAL;
+	o_jntPosZ :LREAL;
+	
+	// gripper angle
+	o_gripAngle :LREAL;
+END_VAR
+
+VAR
+	gripAngle:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//**********************动力盒前向运动学，根据L1-L5计算空间转角********************************//
+o_jntPosX:=i_jntPosL4/m_kinematicParameters.kx;
+o_jntPosY:=i_jntPosL3/m_kinematicParameters.ky;
+gripAngle:=(i_jntPosL1+i_jntPosL2)/(m_kinematicParameters.open_direction*m_kinematicParameters.kz);
+o_jntPosZ:=(i_jntPosL1-i_jntPosL2-2*o_jntPosY*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.open_direction*m_kinematicParameters.kz);
+
+IF (12=m_ID) THEN//细齿无创抓钳
+	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> o_gripAngle);
+
+ELSIF (16 =m_ID) THEN//单级电钩
+	o_gripAngle:=0;
+	
+ELSE
+	o_gripAngle:=gripAngle;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="instruIK" Id="{9a18f93c-de08-4a8c-a2e3-32833c619719}">
+      <Declaration><![CDATA[METHOD instruIK : BOOL
+VAR_INPUT
+	// DH  joint positon
+	i_jntPosX :LREAL;
+	i_jntPosY :LREAL;
+	i_jntPosZ :LREAL;
+	
+	// gripper angle
+	i_gripAngle :LREAL;
+	
+	// joint current
+	i_jntCurrentL1 :LREAL;
+	i_jntCurrentL2 :LREAL;
+END_VAR
+VAR_OUTPUT
+	angle_slave_L1:lreal;
+	angle_slave_L2:lreal;
+	angle_slave_L3:lreal;
+	angle_slave_L4:lreal;
+	angle_slave_L5:lreal;
+END_VAR
+VAR
+	gripAngle:LREAL;
+	k1:INT;
+	rot_x:lreal;
+	rot_y:lreal;
+	rot_z:lreal;
+
+	kx,ky,kz,k13,k23:LREAL;
+	open_direction:INT;
+	
+	d,ra:LREAL;
+	angle_slave_L1_p1,angle_slave_L1_p2,angle_slave_L1_p3,angle_slave_L1_p4,angle_slave_L3_p1:LREAL;
+	angle_slave_L2_p1,angle_slave_L2_p2,angle_slave_L2_p3,angle_slave_L2_p4:LREAL;
+	
+	wusi_compensate_p1:BOOL;
+	wusi_len_to_angle_L1,wusi_len_to_angle_L2:LREAL;
+	
+	wusi_compensate_p2:BOOL;
+	wusi_compensate_p2_first:BOOL:=TRUE;
+	rz_first:LREAL;
+	case_selected:REAL;
+	
+	rz_target,rz_actual:LREAL;
+	return_direction_limit_positive,return_direction_limit_negative:LREAL;
+	angle_rz_before_offset:LREAL;
+	
+	L1_Current,L2_Current:LREAL;
+	L1_Target_Current,L2_Target_Current:LREAL;
+	L1_Current_Error,L2_Current_Error:LREAL;
+	L1_Velocity,L2_Velocity:LREAL;
+	L1_Pos_INC,L2_Pos_INC:LREAL;
+	
+	//L1_Pos_INC_last,L2_Pos_INC_last:LREAL;
+	L1_Pos_INC_sum,L2_Pos_INC_sum:LREAL;
+	Pos_INC_sum_max:LREAL:=0.3;
+	L3Offset:LREAL:=-3;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//*********************动力盒关节逆向运动学，根据空间关节计算L1-L5**************************//
+IF (12=m_ID) THEN//细齿无创抓钳
+	gripperAngleInverseTransform_ID12(endAngle:= i_gripAngle, frontAngle=> gripAngle);
+	
+ELSIF 16 = m_ID THEN//单级电钩\电铲
+	gripAngle:=0;
+	
+ELSE
+	gripAngle:=i_gripAngle;
+END_IF
+
+
+//*******************************基本逆向运动学计算***************************************//
+//angle_slave_L3:=rot_y*ky;
+angle_slave_L4:=rot_x*kx;
+angle_slave_L5:=0;
+d:=open_direction;
+
+//保证输入的开合角必须大于等于0
+IF (gripAngle>=-2) THEN
+	ra:=gripAngle;
+	//program_control.Gap_Compensation:=TRUE; //打开反向间隙补偿，保证姿态
+ELSE
+	ra:=-0.0001; //ra:=0;	
+	//program_control.Gap_Compensation:=FALSE; //关闭反向间隙补偿，保证夹持力
+END_IF
+
+angle_slave_L1_p1:=rot_y*k13*kz+d*rot_z*kz+d*ra*kz/2;
+angle_slave_L2_p1:=-rot_y*k23*kz-d*rot_z*kz+d*ra*kz/2;
+
+
+
+
+
+
+//******************************器械闭合，是否需要补偿丝的弹性**********************************//
+IF (gripAngle<-0.3) THEN
+	wusi_compensate_p1:=TRUE;
+ELSE
+	wusi_compensate_p1:=FALSE;
+END_IF
+
+//就目前来说，无法根据器械的夹持力，推算电机扭矩，然后根据电机扭矩计算丝的伸长，此处直接给出丝的伸长量对应的电机角度
+IF (wusi_compensate_p1=TRUE) THEN
+	wusi_len_to_angle_L1:=0.22; //0.2136
+	wusi_len_to_angle_L2:=0.22; //0.2136
+	
+	//理论数据(值0.2136)暂时有误，以下采用实验数据
+	angle_slave_L1_p2:=wusi_len_to_angle;
+	angle_slave_L2_p2:=wusi_len_to_angle;
+ELSE
+	angle_slave_L1_p2:=0;
+	angle_slave_L2_p2:=0;
+END_IF
+
+
+
+
+
+//********器械夹紧，并且做偏转运动，因为丝的弹性，造成器械偏转姿态不准确，就需要补偿丝的弹性******//
+k1:=m_ID;
+IF (wusi_compensate_p1=TRUE) THEN	
+	IF (wusi_compensate_p2_first=TRUE) THEN
+		wusi_compensate_p2_first:=FALSE;
+		rz_first:=rot_z;  //器械初次夹紧，记录此时的偏转角	
+	END_IF
+	
+ELSE
+	wusi_compensate_p2_first:=TRUE;
+	rz_first:=0;
+	surgical_instrument_move_direction_now[k1]:=0;
+	surgical_instrument_move_direction_last[k1]:=0;
+	surgical_Instrument_Pos_max[k1]:=0;
+	surgical_Instrument_Pos_min[k1]:=0;
+	
+	L1_target_pos_offset[k1]:=0;
+	L2_target_pos_offset[k1]:=0;
+	L1_actual_pos_offset[k1]:=0;
+	L2_actual_pos_offset[k1]:=0;
+	
+	L1_target_pos_offset_last[k1]:=0;
+	L2_target_pos_offset_last[k1]:=0;
+	case_selected:=0;	
+END_IF
+
+
+
+
+
+IF (wusi_compensate_p1=TRUE) THEN
+	rz_target:=rot_z;
+	return_direction_limit_positive:=surgical_instrument_return_direction_limit; 
+	return_direction_limit_negative:=-surgical_instrument_return_direction_limit;
+	
+	
+	//初始化器械偏转方向
+	IF (surgical_instrument_move_direction_now[k1]=0) THEN
+		IF (rz_target-rz_first)>return_direction_limit_positive THEN
+			surgical_instrument_move_direction_now[k1]:=1; //将器械偏转方向初始化为正方向
+			
+		ELSIF (rz_target-rz_first)<return_direction_limit_negative THEN
+			surgical_instrument_move_direction_now[k1]:=-1; //将器械偏转方向初始化为负方向
+			
+		ELSE
+			surgical_instrument_move_direction_now[k1]:=0; //器械偏转角还不够大，判定方向没有改变
+		END_IF
+	END_IF
+
+
+	//记录系统的极值，且更新运动方向
+	angle_rz_before_offset:=rot_z;
+	IF (.surgical_instrument_move_direction_last[k1]=0) THEN
+		//如果上一时刻还没有运动，且当前正向运动，更新系统最大位置
+		IF (surgical_instrument_move_direction_now[k1]=1) THEN
+			surgical_Instrument_Pos_max[k1]:=angle_rz_before_offset;
+			
+		//如果上一时刻还没有运动，且当前负向运动，更新系统最小位置
+		ELSIF (surgical_instrument_move_direction_now[k1]=-1) THEN
+			surgical_Instrument_Pos_min[k1]:=angle_rz_before_offset;
+			
+		ELSE
+			//如果上一时刻没有运动，当前也没有运动，不用更新系统位置
+		END_IF
+	END_IF
+	
+	
+	IF (surgical_instrument_move_direction_last[k1]=1) THEN
+		//如果上一次运动方向为正，且最新目标位置更大，则更新最大目标位置
+		IF (angle_rz_before_offset>surgical_Instrument_Pos_max[k1]) THEN
+			surgical_Instrument_Pos_max[k1]:=angle_rz_before_offset;
+			
+		//如果上一次运动方向为正，且最新位置的目标值反向到一定程度，则确定反向
+		ELSIF (angle_rz_before_offset-surgical_Instrument_Pos_max[k1])<return_direction_limit_negative THEN
+			surgical_instrument_move_direction_now[k1]:=-1;
+			surgical_Instrument_Pos_min[k1]:=angle_rz_before_offset;
+			
+		ELSE
+				//如果上一次运动方向为正，最新位置反向，但是没有到判断极限，则仍认为方向不变
+		END_IF
+	END_IF
+
+
+	IF (surgical_instrument_move_direction_last[k1]=-1) THEN
+		//如果上一次运动方向为负，且最小目标位置更小，则更新最小目标位置
+		IF (angle_rz_before_offset<surgical_Instrument_Pos_min[k1]) THEN
+			surgical_Instrument_Pos_min[k1]:=angle_rz_before_offset;
+			
+		//如果上一次运动方向为负，且最新位置的目标值反向到一定程度，则确定反向
+		ELSIF (angle_rz_before_offset-surgical_Instrument_Pos_min[k1])>return_direction_limit_positive THEN
+			surgical_instrument_move_direction_now[k1]:=1;
+			surgical_Instrument_Pos_max[k1]:=angle_rz_before_offset;
+			
+		ELSE
+				//如果上一次运动方向为负，最新位置反向，但是没有到判断极限，则仍认为方向不变
+		END_IF
+	END_IF
+	
+	
+	//器械夹紧，并且做偏转运动，因为丝的弹性，造成器械偏转姿态不准确，就需要补偿丝的弹性
+	IF (surgical_instrument_move_direction_last[k1]=surgical_instrument_move_direction_now[k1]) THEN
+		//如果两次的目标运动方向相同，则目标偏置和实际偏置都保持不变
+		L1_target_pos_offset[k1]:=L1_target_pos_offset_last[k1];
+		L2_target_pos_offset[k1]:=L2_target_pos_offset_last[k1];
+		L3_target_pos_offset[k1]:=L3_target_pos_offset_last[k1];
+		
+		L1_actual_pos_offset[k1]:=L1_actual_pos_offset_last[k1];
+		L2_actual_pos_offset[k1]:=L2_actual_pos_offset_last[k1];
+		L3_actual_pos_offset[k1]:=L3_actual_pos_offset_last[k1];
+		
+		case_selected:=5;
+		
+	ELSIF (surgical_instrument_move_direction_last[k1]=0) AND (surgical_instrument_move_direction_now[k1]=1) THEN
+		//如果上一次为零，现在为正方向  	  L1:目标位置添加负向补偿，实际位置添加正向补偿    L2:目标位置和实际位置不补偿
+		L1_target_pos_offset[k1]:=-surgical_instrument_offset[k1];
+		L1_actual_pos_offset[k1]:=surgical_instrument_offset[k1];
+		
+		L2_target_pos_offset[k1]:=0;
+		L2_actual_pos_offset[k1]:=0;
+		
+		
+		case_selected:=1;
+		
+	ELSIF (surgical_instrument_move_direction_last[k1]=0) AND (surgical_instrument_move_direction_now[k1]=-1) THEN
+		//如果上一次为零，现在为负方向  	  L1:目标位置和实际位置不补偿    L2:目标位置添加负向补偿，实际位置添加正向补偿
+		L1_target_pos_offset[k1]:=0;
+		L1_actual_pos_offset[k1]:=0;
+		
+		L2_target_pos_offset[k1]:=-surgical_instrument_offset[k1];
+		L2_actual_pos_offset[k1]:=surgical_instrument_offset[k1];
+		
+		case_selected:=2;
+		
+	ELSIF (surgical_instrument_move_direction_last[k1]=1) AND (surgical_instrument_move_direction_now[k1]=-1) THEN
+		//如果上一次为正方向，现在为负方向，L1:无需补偿    L2:目标位置添加负向补偿，实际位置添加正向补偿
+		L1_target_pos_offset[k1]:=0;
+		L1_actual_pos_offset[k1]:=0;
+		
+		L2_target_pos_offset[k1]:=-surgical_instrument_offset[k1];
+		L2_actual_pos_offset[k1]:=surgical_instrument_offset[k1];
+		
+		
+		case_selected:=3;
+		
+	ELSIF (surgical_instrument_move_direction_last[k1]=-1) AND (surgical_instrument_move_direction_now[k1]=1) THEN
+		//如果上一次为负方向，现在为正方向，L1:目标位置添加负向补偿，实际位置添加正向补偿    L2:无需补偿
+		L1_target_pos_offset[k1]:=-surgical_instrument_offset[k1];
+		L1_actual_pos_offset[k1]:=surgical_instrument_offset[k1];
+		
+		L2_target_pos_offset[k1]:=0;
+		L2_actual_pos_offset[k1]:=0;
+		
+		
+		case_selected:=4;
+	END_IF
+	
+	//参数赋值
+	L1_target_pos_offset_last[k1]:=L1_target_pos_offset[k1];
+	L2_target_pos_offset_last[k1]:=L2_target_pos_offset[k1];
+	L3_target_pos_offset_last[k1]:=L3_target_pos_offset[k1];
+
+	L1_actual_pos_offset_last[k1]:=L1_actual_pos_offset[k1];
+	L2_actual_pos_offset_last[k1]:=L2_actual_pos_offset[k1];
+	L3_actual_pos_offset_last[k1]:=L3_actual_pos_offset[k1];
+	
+	
+	//夹紧偏摆时造成的俯仰跳动补偿
+	L3_target_pos_offset[k1]:=((i_jntCurrentL1-i_jntCurrentL2)/250)*L3Offset*g_deg2Rad;
+	L3_actual_pos_offset[k1]:=-((i_jntCurrentL1-i_jntCurrentL2)/250)*L3Offset*g_deg2Rad;
+
+	
+	//补偿添加	
+	angle_slave_L1_p3:=L1_target_pos_offset[k1];
+	angle_slave_L2_p3:=L2_target_pos_offset[k1];
+	angle_slave_L3_p1:=L3_target_pos_offset[k1];
+	//更新数据
+	surgical_instrument_move_direction_last[k1]:=surgical_instrument_move_direction_now[k1];
+	
+ELSE
+	L1_actual_pos_offset[k1]:=0;
+	L2_actual_pos_offset[k1]:=0;
+	L3_actual_pos_offset[k1]:=0;
+	angle_slave_L1_p3:=0;
+	angle_slave_L2_p3:=0;
+	angle_slave_L3_p1:=0;
+END_IF
+
+
+
+
+
+//*****************第四部分，控制夹持力，根据电流，给定一个由偏差产生的速度********************//
+IF (wusi_compensate_p1=TRUE) AND (Robot_clamping_force_control[k1]=TRUE) THEN
+	L1_Current:=i_jntCurrentL1;
+	L2_Current:=i_jntCurrentL2;
+	
+	L1_Target_Current:=force_control_target_current;
+	L2_Target_Current:=force_control_target_current;
+	
+	L1_Current_Error:=L1_Target_Current-L1_Current;
+	L2_Current_Error:=L2_Target_Current-L2_Current;
+	
+	L1_Velocity:=force_control_factor_P*L1_Current_Error;
+	L2_Velocity:=force_control_factor_P*L2_Current_Error;
+	
+	L1_Pos_INC:=L1_Velocity*g_slaveArmCtrlCycleTime;
+	L2_Pos_INC:=L2_Velocity*g_slaveArmCtrlCycleTime;
+	
+	L1_Pos_INC_sum:=L1_Pos_INC+L1_Pos_INC_sum;
+	L2_Pos_INC_sum:=L2_Pos_INC+L2_Pos_INC_sum;
+	
+	IF (L1_Pos_INC_sum>Pos_INC_sum_max) THEN
+		L1_Pos_INC_sum:=Pos_INC_sum_max;
+	ELSIF (L1_Pos_INC_sum<-Pos_INC_sum_max) THEN
+		L1_Pos_INC_sum:=-Pos_INC_sum_max;
+	END_IF
+	
+	IF (L2_Pos_INC_sum>Pos_INC_sum_max) THEN
+		L2_Pos_INC_sum:=Pos_INC_sum_max;
+	ELSIF (L2_Pos_INC_sum<-Pos_INC_sum_max) THEN
+		L2_Pos_INC_sum:=-Pos_INC_sum_max;
+	END_IF	
+	
+	//angle_slave_L1_p4:=L1_Pos_INC_sum;
+	//angle_slave_L2_p4:=L2_Pos_INC_sum;
+	angle_slave_L1_p4:=0.3;
+	angle_slave_L2_p4:=0.3;
+	
+ELSE
+	angle_slave_L1_p4:=0;
+	angle_slave_L2_p4:=0;
+	L1_Pos_INC_sum:=0;
+	L2_Pos_INC_sum:=0;
+END_IF
+
+
+angle_slave_L1:=angle_slave_L1_p1;//+angle_slave_L1_p3;//+angle_slave_L1_p4;
+angle_slave_L2:=angle_slave_L2_p1;//+angle_slave_L2_p3;//+angle_slave_L2_p4;
+//angle_slave_L3:=angle_slave_L3_p1;
+angle_slave_L3:=rot_y*ky+angle_slave_L3_p1;
+//ngle_slave_L1:=angle_slave_L1_p1+angle_slave_L1_p2+angle_slave_L1_p3;//+angle_slave_L1_p4;
+//angle_slave_L2:=angle_slave_L2_p1+angle_slave_L2_p2+angle_slave_L2_p3;//+angle_slave_L2_p4;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="instruType" Id="{1d578389-ec82-4a2e-b1d7-f3580f23d7c7}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruType : E_InstrumentType]]></Declaration>
+      <Get Name="Get" Id="{a5b2b4b2-193e-41ff-89ce-83d1ac18d256}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruType:=m_type;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1bf399ad-49fe-458c-9109-f23fbc1af970}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_type:=instruType;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="kinematicParameters" Id="{e7ad17bd-82e9-477e-9e66-6a8feac51534}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY kinematicParameters : ST_InstruParameters]]></Declaration>
+      <Get Name="Get" Id="{d0447347-931d-4e2e-81b2-c8e4acc99fd6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[kinematicParameters:=m_kinematicParameters;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c40ca54e-4697-4374-bb62-3707f1e2c61c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_kinematicParameters:=kinematicParameters;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="maxUsageCounts" Id="{20a928a1-29bf-48b9-b434-d15d08479586}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY maxUsageCounts : INT]]></Declaration>
+      <Get Name="Get" Id="{811887bb-8be4-48d5-aa26-1400229b47ea}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[maxUsageCounts:=m_maxUsageCounts;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{daa3fa25-8fcf-4147-91d7-077efd133e7f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_maxUsageCounts:=usageCounts;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="mounted" Id="{9894d924-1e7a-445d-bd92-9d4ad475a2eb}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY mounted : BOOL]]></Declaration>
+      <Get Name="Get" Id="{593810e5-404d-4203-a25d-f1be7e5b4c89}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[mounted:=m_mounted;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{16a0aa80-1365-4c7e-9e7c-c10b54f41f18}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_mounted:= mounted;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="readParameters" Id="{fafb5a79-7caf-47d4-9d2f-b3dbd95048cf}">
+      <Declaration><![CDATA[METHOD readParameters : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO: read m_kinematic parameters from chip ]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ready" Id="{a9ab5bee-492e-4ceb-b31f-730e040b366c}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY ready : BOOL]]></Declaration>
+      <Get Name="Get" Id="{66b83ebc-d785-4318-8372-74766fee1563}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ready:=m_ready;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{6d6540b1-5c53-4503-850e-3b387b6fa824}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ready:=m_ready;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="SeriesNum" Id="{26d1170a-26c1-4316-8ae6-3da77c9791eb}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY SeriesNum : ULINT]]></Declaration>
+      <Get Name="Get" Id="{56027197-215f-4796-8e11-7f0f0df1a669}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SeriesNum:=m_SeriesNum;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{bc5860ca-7d17-48b5-ac17-0c6cd71f4cdf}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_SeriesNum:=SeriesNum;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="usageCounts" Id="{3c8b1bfe-601b-422e-91c9-8be113fd51b0}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY usageCounts : INT]]></Declaration>
+      <Get Name="Get" Id="{9c745e01-bc30-4d5e-858c-16e757019d2c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[usageCounts:=m_usageCounts;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c2cfd92a-e368-4833-bc4f-04edb2c1690b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_usageCounts:=usageCounts;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_Instrument">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.gripperAngleForwardTransform_ID12">
+      <LineId Id="6" Count="3" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="20" Count="12" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.gripperAngleInverseTransform_ID12">
+      <LineId Id="12" Count="3" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="24" Count="13" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.ID.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.ID.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.instruFK">
+      <LineId Id="72" Count="0" />
+      <LineId Id="86" Count="14" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.instruIK">
+      <LineId Id="6" Count="2" />
+      <LineId Id="20" Count="9" />
+      <LineId Id="34" Count="291" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.instruType.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.instruType.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.kinematicParameters.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.kinematicParameters.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.maxUsageCounts.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.maxUsageCounts.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.mounted.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.mounted.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.readParameters">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.ready.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.ready.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.SeriesNum.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.SeriesNum.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.usageCounts.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.usageCounts.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
