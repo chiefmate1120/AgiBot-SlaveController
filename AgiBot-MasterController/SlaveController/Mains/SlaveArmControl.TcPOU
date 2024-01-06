@@ -20,7 +20,7 @@ VAR
 	
 	// all data from other tasks and controller 
 	m_slaveInputDataPool : ST_SlaveInputDataPool;
-	
+
 	// code execute time measure
 	m_codeTime : Profiler;
 	

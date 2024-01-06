@@ -32,6 +32,12 @@ VAR_GLOBAL
 	
 	
 	Robot_Clamping_Force_Control:ARRAY[1..4] OF BOOL:=[1,1,1,1];//夹持力保持P控制器开关
+	
+	
+	
+	// Add by NiFeijian,  new method to mount panel and instrument, can be repalced later
+	// joint position of panel locked position
+	g_panelLockedPosition :Vec5d:=[0.0, 0.0, 0.0, 0.0, 0.0];
 
 END_VAR]]></Declaration>
   </GVL>

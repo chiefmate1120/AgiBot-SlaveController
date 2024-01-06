@@ -24,8 +24,8 @@ VAR_GLOBAL CONSTANT
 
 *)
 g_d1:LREAL:=0.8046229;
-g_L :LREAL:= 0.0;// need to be replace by real instrument parameters;
-g_a : LREAL :=0;// need to be replace by real instrument parameters;
+g_L :LREAL:= 0.3;// need to be replace by real instrument parameters;
+g_a : LREAL :=0.01;// need to be replace by real instrument parameters;
 g_b :LREAL :=0;// need to be replace by real instrument parameters;
 
 //alpha,a,d,theta	

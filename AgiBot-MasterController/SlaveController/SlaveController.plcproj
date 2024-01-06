@@ -109,7 +109,19 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_MatchedMasterArmIdx.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_InstrumentType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MasterArmState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedMasterArmIdx.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedSlaveArmIdx.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_SlaveArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_InstruStatus.TcDUT">
@@ -226,18 +238,6 @@
     <Compile Include="DUTs\Enum\E_DriverStatusWord.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_MatchedSlaveArmIdx.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_SlaveArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DUTs\Structure\ST_Frame.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -296,6 +296,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlMountScope.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_StateControllers\FB_StateCtrlGraCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_TrajectoryPlanning\FB_BasicDoubleS.TcPOU">

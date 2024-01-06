@@ -16,8 +16,9 @@
 	SlaveArmState_ScopeReady :=11,
 	SlaveArmState_EndoScope :=12,
 	SlaveArmState_Cart := 13,
+	SlaveArmState_GravityCali := 14,
 	
-	SlaveArmState_totalNum :=SlaveArmState_Cart
+	SlaveArmState_totalNum :=SlaveArmState_GravityCali
 );
 END_TYPE
 ]]></Declaration>

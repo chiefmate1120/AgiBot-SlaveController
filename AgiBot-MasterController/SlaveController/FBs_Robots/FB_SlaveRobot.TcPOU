@@ -36,6 +36,7 @@ VAR
 	m_scopeReady :ARRAY[1..g_sArmNum] OF FB_StateCtrlScopeReady;
 	m_armEndoscope :ARRAY[1..g_sArmNum] OF FB_StateCtrlEndoscope;
 	m_armCart :ARRAY[1..g_sArmNum] OF FB_StateCtrlCart;
+	m_armGraCali :ARRAY[1..g_sArmNum] OF FB_StateCtrlGraCali;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -145,6 +146,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_ScopeReady] := m_scopeReady[i];
 	m_armCtrlFactory[i,SlaveArmState_EndoScope] := m_armEndoscope[i];
 	m_armCtrlFactory[i,SlaveArmState_Cart] := m_armCart[i];
+	m_armCtrlFactory[i,SlaveArmState_GravityCali] := m_armGraCali[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -213,17 +215,25 @@ END_VAR]]></Declaration>
 		//self check
 		SlaveArmState_SelfCheck:
 			IF m_armCtrl[i].isFinished  THEN
-				m_nextSlaveArmState[i]:=MasterArmState_Standby;
+				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			END_IF
+		
+		//mount panel
+		SlaveArmState_MountPanel:
+			IF m_armCtrl[i]. isFinished THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
+				
+				// NOTICE: multiple cycles joints back to center during initialization
+				// 			need to reset joints encoder data again
+				m_slaveArms[i].initJntPos();
+			END_IF
+		
+		//panel ready
+		SlaveArmState_PanelReady:
 (*		
 		//standby
 		SlaveArmState_Standby:
 		
-		//mount panel
-		SlaveArmState_MountPanel:
-		
-		//panel ready
-		SlaveArmState_PanelReady:
 		
 		//mount instrument
 		SlaveArmState_Mountnstru:
@@ -310,7 +320,9 @@ END_FOR]]></ST>
       <LineId Id="58" Count="1" />
       <LineId Id="62" Count="9" />
       <LineId Id="73" Count="0" />
-      <LineId Id="108" Count="2" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="101" Count="0" />
@@ -350,7 +362,17 @@ END_FOR]]></ST>
       <LineId Id="41" Count="2" />
       <LineId Id="45" Count="1" />
       <LineId Id="44" Count="0" />
-      <LineId Id="86" Count="11" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="147" Count="1" />
+      <LineId Id="151" Count="1" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="149" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="86" Count="3" />
+      <LineId Id="95" Count="2" />
       <LineId Id="117" Count="20" />
       <LineId Id="116" Count="0" />
       <LineId Id="18" Count="0" />

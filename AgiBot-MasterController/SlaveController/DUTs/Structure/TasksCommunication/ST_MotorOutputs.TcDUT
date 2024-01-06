@@ -4,16 +4,16 @@
     <Declaration><![CDATA[TYPE ST_MotorOutputs :
 STRUCT
 	// driver control word
-	m_controlWord: UINT;
+	m_controlWord: UINT :=DriverCtrlWord_INIT;
 	
 	// motor control mode, 0 for position mode, 1 for torque mode
-	m_opMode : SINT;
+	m_opMode : SINT :=INT_TO_SINT(DriverOPMode_Pos);;
 	
 	// target motor encoder
-	m_cmdMotorEncoder :DINT;
+	m_cmdMotorEncoder :DINT := 0;
 	
 	// motor current to IO
-	m_cmdCurrent :DINT;
+	m_cmdCurrent :DINT := 0;
 	
 END_STRUCT
 END_TYPE

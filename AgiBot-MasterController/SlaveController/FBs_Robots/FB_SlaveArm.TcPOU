@@ -47,7 +47,7 @@ VAR
 	m_simCartPose : ST_Frame;
 	m_simJaco : Mat6d;
 	m_simJacoInv :Mat6d;
-	m_singularity:BOOL:=false;
+	m_isSingularity:BOOL:=false;
 	m_simGripAngle :LREAL;
 	
 	// joint position controller
@@ -457,6 +457,17 @@ FOR i:=1 TO g_sJntNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Property Name="isSingurality" Id="{da3c3ca8-d645-443c-af9d-86ff4ca01cff}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY isSingurality : bool]]></Declaration>
+      <Get Name="Get" Id="{69dc0611-36d4-4919-91ba-cfdefe53366b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[isSingurality:=m_isSingularity;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="jaco" Id="{2c2ce445-b511-4254-9c8e-e5667e1b6bdb}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jaco : Mat6d]]></Declaration>
       <Get Name="Get" Id="{27a6e900-c6e6-40c0-aa03-4dc0d1214554}">
@@ -587,8 +598,9 @@ END_VAR
 	
 	// simulated jacobian
 	calcJaco(m_simJntPos,m_simJaco);
-	m_singularity:=invMat6(m_simJaco, m_simJacoInv);
+	m_isSingularity:=NOT(invMat6(m_simJaco, m_simJacoInv));
 //END_IF
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -722,6 +734,9 @@ END_FOR
       <LineId Id="15" Count="3" />
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.isSingurality.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.jaco.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -779,6 +794,7 @@ END_FOR
       <LineId Id="14" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="19" Count="0" />
+      <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateStatus">
       <LineId Id="14" Count="0" />
