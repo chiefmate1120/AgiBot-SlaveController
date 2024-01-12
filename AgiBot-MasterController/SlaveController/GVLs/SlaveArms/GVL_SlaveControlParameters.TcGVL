@@ -4,38 +4,11 @@
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
-	// master arm joint position controller parameters
-	g_posKp :ARRAY[1..g_sJntNum] OF LREAL :=[2000.0, 2000.0, 18000.0, 35.0, 35.0, 35.0, 35.0, 0];
-	g_posKd :ARRAY[1..g_sJntNum] OF LREAL :=[200.0, 200.0, 200.0, 2.0, 2.0, 2.0, 2.0, 0];
-	g_posKi :ARRAY[1..g_sJntNum] OF LREAL :=[20000.0, 20000.0, 30000.0, 100.0, 100.0, 100.0, 100.0,0];
-	g_posKiLimit :ARRAY[1..g_sJntNum] OF LREAL :=[2500,2500,  250, 5(200)];// define in current
-	g_posCtrlLimit :ARRAY[1..g_sJntNum] OF LREAL :=[5600,5600,  500, 5(500)];// define in current
-	
-	// control tolerance
-	g_jntCtrlPosTol :LREAL :=0.2*g_deg2Rad;
-	g_cartCtrlPosTol :LREAL :=0.0002;
-	g_cartCtrlOriTol :LREAL :=0.2*g_deg2Rad;
-	
 	// filter cut-off frequency for velocity and torque
 	g_curJntVelLpfCutoffFreq :LREAL := 30;
 	g_cmdJntPosLpfCutoffFreq :LREAL := 30;
 	g_cmdJntTrqLpfCutoffFreq :LREAL := 300;
 	g_curJntTrqLpfCutoffFreq :LREAL := 300;
-	
-	// controller would keep command unchanged when error 
-	// between command and current value is less than this value
-	g_jntCtrlErrForCmdHold :LREAL :=2.0*g_deg2Rad;
-	
-	// joint is assumed to be static if velocity is less than this value
-	g_jntStaticVelThres :LREAL :=0.2*g_deg2Rad;
-	
-	// slave self-check motion parameters
-	g_selfCheckMotionNum :INT :=2;
-	g_selfCheckPosture:ARRAY [1..g_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[PI/4, -PI/4, -0.2, pi, pi, pi, pi, pi, 
-							 			  			0.0, 	-PI/2, 0, 	0, 0, 0, 0,0];
-	g_selfCheckMaxjntVel:Vec8d:=[0.2, 0.2, 0.1, 5(1.0)];
-	g_selfCheckMaxjntAcc:Vec8d:=[1.0, 1.0, 0.5, 5(2.0)];
-	g_selfCheckMaxjntJerk:Vec8d:=[2.0,2.0, 1.0, 5(4.0)];
 	
 END_VAR]]></Declaration>
   </GVL>

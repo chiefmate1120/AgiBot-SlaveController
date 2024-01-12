@@ -265,6 +265,9 @@
     <Compile Include="FBs_Robots\FB_SlaveJoint.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Robots\FB_SetupJoint.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlEndoscope.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -353,10 +356,6 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_SetupJointEncoderCaliData.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
     <Compile Include="GVLs\GVL_SystemParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -387,6 +386,22 @@
     </Compile>
     <Compile Include="FBs_StateControllers\I_SlaveArmCtrl.TcIO">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\SetupArms\GVL_SetupJointEncoderCaliData.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\SetupArms\GVL_SetupMotorParameters.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\SetupArms\GVL_SetupArmKinematic.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\SetupArms\GVL_SetupControlParameters.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\SlaveArms\GVLs_SlaveArmDynamics.TcGVL">
       <SubType>Code</SubType>
@@ -439,6 +454,7 @@
     <Folder Include="AgiMaths" />
     <Folder Include="FBs_StateControllers" />
     <Folder Include="FBs_Robots" />
+    <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

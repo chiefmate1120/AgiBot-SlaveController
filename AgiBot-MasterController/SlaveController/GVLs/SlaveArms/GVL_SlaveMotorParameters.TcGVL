@@ -10,7 +10,7 @@ VAR_GLOBAL CONSTANT
 	
 	// reduction ratio
 	g_motorReduction :ARRAY[1..g_sJntNum] OF LREAL :=[ 81,81,  (66.0/10)*2*pi/0.010, 5(388125.0/4693)];
-	g_absEncoderReduction :ARRAY[1..g_sJntNum] OF LREAL :=[2(1.0), 2*PI/0.64, 5(1.0)];
+	g_absEncoderReduction :ARRAY[1..g_sJntNum] OF LREAL :=[2(1.0), 0.64/(2*PI), 5(1.0)];
 	
 	// motor parameters
 	g_motorTrqConst :ARRAY[1..g_sJntNum] OF LREAL :=[ 0.16,0.16, 0.017,5(0.0193)];
