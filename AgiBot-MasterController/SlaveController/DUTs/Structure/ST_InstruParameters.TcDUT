@@ -4,6 +4,11 @@
     <Declaration><![CDATA[// instrumetn kinematic paramters
 TYPE ST_InstruParameters :
 STRUCT	
+		
+	m_rodLength:LREAL:=0.5392; //器械杆长
+	m_headLength:LREAL :=0.01;
+	m_fingerLenght:LREAL :=0;//器械头端长度 
+	
 	kx:lreal:=1;
 	ky:lreal:=1;
 	kz:lreal:=1;
@@ -11,14 +16,14 @@ STRUCT
 	x1:lreal:=0;
 	y1:lreal:=0;
 	z1:lreal:=0;	
-	a3:lreal:=0;
+	
 	
 	k13:LREAL:=0.775;
 	k23:LREAL:=0.775;
 	open_direction:INT:=-1;
 	
-	Head_Len:LREAL;//器械头端长度 
-	Len_Rod:LREAL:=0.5392; //器械杆长
+	
+	
 	Len_fixed_point:LREAL:=0.2;	//不动点距离安装面的长度
 	Len_mounting_surface:LREAL:=0.009; //器械安装面距离滑块的长度(图中的L3)
 	Len_Hight:lreal:=0; //器械杆的高度
@@ -28,6 +33,8 @@ STRUCT
 	open_angle_max:LREAL:=1.57;
 	rz_min:LREAL;
 	rz_max:LREAL;
+	
+
 END_STRUCT
 END_TYPE
 ]]></Declaration>

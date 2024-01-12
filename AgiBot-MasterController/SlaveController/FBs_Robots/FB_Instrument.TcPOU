@@ -8,19 +8,13 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// ID
-	m_ID: INT;
+	m_ID: INT:=0;
 	
 	// series number
-	m_SeriesNum : ULINT;
+	m_seriesNum : ULINT:=0;
 	
 	// instrument type
 	m_type : E_InstrumentType := InstruType_UNKNOWM;
-	
-	// instrument mounted
-	m_mounted: BOOL:=FALSE;
-	
-	// instrument ready for control
-	m_ready:BOOL := FALSE;
 	
 	// current and max usage counts
 	m_usageCounts :INT;
@@ -128,56 +122,52 @@ END_VAR
           <ST><![CDATA[ID:=m_ID;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{4f951bf2-7962-4d4a-8d62-1d6a553b8ebd}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_ID:=ID;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Method Name="instruFK" Id="{097c05ed-881a-44a5-815d-27300cef479f}">
       <Declaration><![CDATA[// convert motor joint position to DH joint position
 METHOD PUBLIC instruFK : BOOL
-VAR_INPUT
-	// motor joint position of instrument power box
-	i_jntPosL1 : LREAL;
-	i_jntPosL2 : LREAL;
-	i_jntPosL3 : LREAL;
-	i_jntPosL4 : LREAL;
-	i_jntPosL5 : LREAL;	
+VAR_IN_OUT CONSTANT
+	// motor joint position of slave arm
+	i_jntPos :Vec8d;
 END_VAR
 
-VAR_OUTPUT
-	// DH  joint positon
-	o_jntPosX :LREAL;
-	o_jntPosY :LREAL;
-	o_jntPosZ :LREAL;
-	
+VAR_IN_OUT
+	// instrument DH  joint positon
+	r_DHJntPos :Vec6d;
+
 	// gripper angle
-	o_gripAngle :LREAL;
+	r_gripAngle :LREAL;
 END_VAR
 
 VAR
+	jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5 :LREAL;
 	gripAngle:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//**********************动力盒前向运动学，根据L1-L5计算空间转角********************************//
-o_jntPosX:=i_jntPosL4/m_kinematicParameters.kx;
-o_jntPosY:=i_jntPosL3/m_kinematicParameters.ky;
-gripAngle:=(i_jntPosL1+i_jntPosL2)/(m_kinematicParameters.open_direction*m_kinematicParameters.kz);
-o_jntPosZ:=(i_jntPosL1-i_jntPosL2-2*o_jntPosY*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.open_direction*m_kinematicParameters.kz);
+        <ST><![CDATA[r_DHJntPos[1]:=i_jntPos[1];
+r_DHJntPos[2]:=i_jntPos[2];
+r_DHJntPos[3]:=i_jntPos[3];
 
+
+jntPosL1:=i_jntPos[4];
+jntPosL2:=i_jntPos[5];
+jntPosL3:=i_jntPos[6];
+jntPosL4:=i_jntPos[7];
+jntPosL5:=i_jntPos[8];
+r_DHJntPos[4]:=jntPosL4/m_kinematicParameters.kx;
+r_DHJntPos[5]:=jntPosL3/m_kinematicParameters.ky;
+r_DHJntPos[6]:=(jntPosL1-jntPosL2-2*r_DHJntPos[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.open_direction*m_kinematicParameters.kz);
+
+gripAngle:=(jntPosL1+jntPosL2)/(m_kinematicParameters.open_direction*m_kinematicParameters.kz);
 IF (12=m_ID) THEN//细齿无创抓钳
-	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> o_gripAngle);
+	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> r_gripAngle);
 
 ELSIF (16 =m_ID) THEN//单级电钩
-	o_gripAngle:=0;
+	r_gripAngle:=0;
 	
 ELSE
-	o_gripAngle:=gripAngle;
+	r_gripAngle:=gripAngle;
 END_IF
 
 ]]></ST>
@@ -561,33 +551,17 @@ END_VAR
           <ST><![CDATA[instruType:=m_type;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{1bf399ad-49fe-458c-9109-f23fbc1af970}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_type:=instruType;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="kinematicParameters" Id="{e7ad17bd-82e9-477e-9e66-6a8feac51534}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY kinematicParameters : ST_InstruParameters]]></Declaration>
+      <Declaration><![CDATA[PROPERTY kinematicParameters :REFERENCE TO ST_InstruParameters]]></Declaration>
       <Get Name="Get" Id="{d0447347-931d-4e2e-81b2-c8e4acc99fd6}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[kinematicParameters:=m_kinematicParameters;]]></ST>
+          <ST><![CDATA[kinematicParameters ref=m_kinematicParameters;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{c40ca54e-4697-4374-bb62-3707f1e2c61c}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_kinematicParameters:=kinematicParameters;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="maxUsageCounts" Id="{20a928a1-29bf-48b9-b434-d15d08479586}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY maxUsageCounts : INT]]></Declaration>
@@ -599,33 +573,6 @@ END_VAR
           <ST><![CDATA[maxUsageCounts:=m_maxUsageCounts;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{daa3fa25-8fcf-4147-91d7-077efd133e7f}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_maxUsageCounts:=usageCounts;]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
-    <Property Name="mounted" Id="{9894d924-1e7a-445d-bd92-9d4ad475a2eb}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY mounted : BOOL]]></Declaration>
-      <Get Name="Get" Id="{593810e5-404d-4203-a25d-f1be7e5b4c89}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[mounted:=m_mounted;]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{16a0aa80-1365-4c7e-9e7c-c10b54f41f18}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_mounted:= mounted;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Method Name="readParameters" Id="{fafb5a79-7caf-47d4-9d2f-b3dbd95048cf}">
       <Declaration><![CDATA[METHOD readParameters : BOOL
@@ -636,25 +583,17 @@ END_VAR
         <ST><![CDATA[// TODO: read m_kinematic parameters from chip ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="ready" Id="{a9ab5bee-492e-4ceb-b31f-730e040b366c}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY ready : BOOL]]></Declaration>
-      <Get Name="Get" Id="{66b83ebc-d785-4318-8372-74766fee1563}">
-        <Declaration><![CDATA[VAR
+    <Method Name="reset" Id="{90292eaa-1cc4-4b19-b4f6-6bcd7c03eb33}">
+      <Declaration><![CDATA[METHOD reset : BOOL
+VAR_INPUT
 END_VAR
 ]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[ready:=m_ready;]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{6d6540b1-5c53-4503-850e-3b387b6fa824}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[ready:=m_ready;]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
+      <Implementation>
+        <ST><![CDATA[m_ID := 0;
+m_seriesNum :=0;
+m_type :=InstruType_UNKNOWM;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="SeriesNum" Id="{26d1170a-26c1-4316-8ae6-3da77c9791eb}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY SeriesNum : ULINT]]></Declaration>
       <Get Name="Get" Id="{56027197-215f-4796-8e11-7f0f0df1a669}">
@@ -662,17 +601,9 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[SeriesNum:=m_SeriesNum;]]></ST>
+          <ST><![CDATA[SeriesNum:=m_seriesNum;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{bc5860ca-7d17-48b5-ac17-0c6cd71f4cdf}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_SeriesNum:=SeriesNum;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="usageCounts" Id="{3c8b1bfe-601b-422e-91c9-8be113fd51b0}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY usageCounts : INT]]></Declaration>
@@ -684,14 +615,6 @@ END_VAR
           <ST><![CDATA[usageCounts:=m_usageCounts;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{c2cfd92a-e368-4833-bc4f-04edb2c1690b}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_usageCounts:=usageCounts;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <LineIds Name="FB_Instrument">
       <LineId Id="9" Count="0" />
@@ -713,12 +636,15 @@ END_VAR
     <LineIds Name="FB_Instrument.ID.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.ID.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Instrument.instruFK">
-      <LineId Id="72" Count="0" />
-      <LineId Id="86" Count="14" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="134" Count="1" />
+      <LineId Id="132" Count="1" />
+      <LineId Id="126" Count="4" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="90" Count="10" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruIK">
@@ -730,46 +656,22 @@ END_VAR
     <LineIds Name="FB_Instrument.instruType.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.instruType.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Instrument.kinematicParameters.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.kinematicParameters.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.maxUsageCounts.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.maxUsageCounts.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.mounted.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.mounted.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.ready.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.ready.Set">
-      <LineId Id="2" Count="0" />
+    <LineIds Name="FB_Instrument.reset">
+      <LineId Id="5" Count="2" />
     </LineIds>
     <LineIds Name="FB_Instrument.SeriesNum.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.SeriesNum.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Instrument.usageCounts.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.usageCounts.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

@@ -17,6 +17,10 @@ VAR
 	m_joints :ARRAY[1..g_sJntNum] OF FB_SlaveJoint;
 	
 	// instrument
+	m_panelOnIO AT%I*	:SINT;
+	m_panelOnFlag :BOOL;
+	m_instruOnIO AT%I* :SINT;
+	m_instruOnFlag :BOOL;
 	m_instrument : FB_Instrument;
 	
 	// arm cartesian data, defined in each arm origin
@@ -27,13 +31,14 @@ VAR
 	m_curMotorPos :Vec8d;
 	m_curLinkPos :Vec8d;
 	m_curJntPos :Vec8d;
+	m_curDHJntPos :Vec6d;
+	m_curGripAngle :LREAL;
 	m_curJntVel :Vec8d;
 	m_curJntTrq :Vec8d;
-	m_jntCtrlTrq :Vec8d;
+	m_cmdJntTrq :Vec8d;
 	m_rawJntCurrent :Vec8d;
 	m_filtJntCurrent :Vec8d;
 	m_cmdJntCurrent : Vec8d;
-	m_instruDHJntPos :Vec3d;
 		
 	// arm dynamic data
 	m_jntGravity : Vec3d;
@@ -44,11 +49,12 @@ VAR
 	
 	// simulated status
 	m_simJntPos :Vec8d;
+	m_simDHJntPos :Vec6d;
+	m_simGripAngle :LREAL;
 	m_simCartPose : ST_Frame;
 	m_simJaco : Mat6d;
 	m_simJacoInv :Mat6d;
 	m_isSingularity:BOOL:=false;
-	m_simGripAngle :LREAL;
 	
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_sJntNum] OF FB_PID;
@@ -56,7 +62,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[		]]></ST>
     </Implementation>
     <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
     <Property Name="armIdx" Id="{1bcadfc3-0a4f-4bee-a1a7-b6d4d3a1eb58}" FolderPath="property\">
@@ -73,7 +79,7 @@ END_VAR
     <Method Name="calcJaco" Id="{1172e5e4-b7f2-4690-a821-6304414cea84}">
       <Declaration><![CDATA[METHOD PUBLIC calcJaco : BOOL
 VAR_IN_OUT CONSTANT
-	i_jntPos :ARRAY[1..g_sJntNum] OF LREAL;
+	i_DHJntPos :Vec6d;
 END_VAR
 VAR_IN_OUT
 	r_jaco :Mat6d;
@@ -82,47 +88,31 @@ VAR_INPUT
 END_VAR
 
 VAR
-	jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5 :LREAL;
 	d1, L, a, b :LREAL;
-	q1,q2, q3, q4, q5, q6 :LREAL;
+	q3:LREAL;
 
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
-	
-	instruParameters:ST_InstruParameters; 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Convert instrument motor position to DH joint position for kinematic calculation
-jntPosL1 := i_jntPos[4];
-jntPosL2 := i_jntPos[5];
-jntPosL3 := i_jntPos[6];
-jntPosL4 := i_jntPos[7];
-jntPosL5 := i_jntPos[8];
-m_instrument.instruFK(jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5,
-			o_jntPosX=>q4, o_jntPosY=>q5, o_jntPosZ=>q6,o_gripAngle=> );
+        <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
+L:=m_instrument.kinematicParameters.m_rodLength;
+a:=m_instrument.kinematicParameters.m_headLength;
+b:=m_instrument.kinematicParameters.m_fingerLenght;
 
-q1:=i_jntPos[1];  
-q2:=i_jntPos[2];  
-q3:=i_jntPos[3];
+q3:=i_DHJntPos[3];
+q3:=i_DHJntPos[3];
+c1:=COS(i_DHJntPos[1]);
+c2:=COS(i_DHJntPos[2]);
+c4:=COS(i_DHJntPos[4]);
+c5:=COS(i_DHJntPos[5]);
+c6:=COS(i_DHJntPos[6]);
 
-d1:=GVL_SlaveArmKinematic.g_d1;
-instruParameters:=m_instrument.kinematicParameters;
-L:=instruParameters.Len_Rod;
-a:=instruParameters.a3;
-b:=instruParameters.Head_Len;
-
-
-c1:=COS(q1);
-c2:=COS(q2);
-c4:=COS(q4);
-c5:=COS(q5);
-c6:=COS(q6);
-
-s1:=SIN(q1);
-s2:=SIN(q2);
-s4:=SIN(q4);
-s5:=SIN(q5);
-s6:=SIN(q6);
+s1:=SIN(i_DHJntPos[1]);
+s2:=SIN(i_DHJntPos[2]);
+s4:=SIN(i_DHJntPos[4]);
+s5:=SIN(i_DHJntPos[5]);
+s6:=SIN(i_DHJntPos[6]);
 
 // jacobian with DH joints
 r_jaco[1,1]:=b*(c6*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5) - s6*(c1*c4 + c2*s1*s4)) + a*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5) - L*s1*s2 + q3*s1*s2;
@@ -171,91 +161,109 @@ r_jaco[6,6]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="chencPanelAndInstru" Id="{613633aa-f5bc-4224-95e6-e974a90f8e6a}">
+      <Declaration><![CDATA[METHOD chencPanelAndInstru : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check panel and instrument
+m_panelOnFlag := panelDetect();
+m_instruOnFlag := instruDetect();
+IF FALSE = m_instruOnFlag THEN
+	m_instrument.reset();
+ELSIF InstruType_UNKNOWM = m_instrument.instruType THEN
+	m_instrument.readParameters();
+END_IF
+
+m_instruOnFlag := m_instruOnFlag AND (m_instrument.instruType <> InstruType_UNKNOWM);]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="cmdJntCurrent" Id="{cbd7aa84-e545-47b8-bdc5-960aa8409c91}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdJntCurrent : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY cmdJntCurrent : REFERENCE TO  Vec8d]]></Declaration>
       <Get Name="Get" Id="{12be56c2-8b79-47d6-b1f2-86b8e0a5f91a}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[cmdJntCurrent := m_cmdJntCurrent;]]></ST>
+          <ST><![CDATA[cmdJntCurrent ref= m_cmdJntCurrent;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curCartPose" Id="{d18be23c-99e5-435e-8688-90e0fb3be9ca}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curCartPose : ST_Frame]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curCartPose : REFERENCE TO ST_Frame]]></Declaration>
       <Get Name="Get" Id="{013b03f6-adb7-4855-b0fe-353f77f67094}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curCartPose :=m_curCartPose;]]></ST>
+          <ST><![CDATA[curCartPose ref=m_curCartPose;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curCartTwist" Id="{e4b7010c-887c-41fa-8766-1a9192e9d06a}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curCartTwist : Vec6d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curCartTwist : REFERENCE TO Vec6d]]></Declaration>
       <Get Name="Get" Id="{b7c89bf7-90fc-4841-be25-e467b1918b68}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curCartTwist :=m_curCartTwist;]]></ST>
+          <ST><![CDATA[curCartTwist ref=m_curCartTwist;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curJntPos" Id="{d72c054a-bae9-44cb-97ff-fe7c76c53cb8}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curJntPos : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curJntPos : REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{332d5297-fb56-44bd-a751-714464e0813c}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curJntPos:=m_curJntPos;]]></ST>
+          <ST><![CDATA[curJntPos ref=m_curJntPos;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curJntTrq" Id="{8c78ba58-302c-4844-9d36-e487700a0e19}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curJntTrq : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curJntTrq : REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{1767bffb-cddd-4133-ad6f-5125f86340af}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curJntTrq:=m_curJntTrq;]]></ST>
+          <ST><![CDATA[curJntTrq ref=m_curJntTrq;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curJntVel" Id="{904c68d5-30c9-4ed3-b3c5-6bcd345bcd5a}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curJntVel : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curJntVel :REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{0a508621-c577-4d50-8cc3-bd8133f79f72}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curJntVel:=m_curJntVel;]]></ST>
+          <ST><![CDATA[curJntVel ref=m_curJntVel;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curLinkPos" Id="{3725bf51-2c50-4574-b2a7-e2af9fd4da29}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curLinkPos : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curLinkPos :REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{cff7c92f-5276-4a58-b7ca-f6248868b409}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curLinkPos:=m_curLinkPos;]]></ST>
+          <ST><![CDATA[curLinkPos ref=m_curLinkPos;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="curMotorPos" Id="{ad9d9e24-10f4-4dc4-b0d2-86517dead53b}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY curMotorPos : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY curMotorPos : REFERENCE TO  Vec8d]]></Declaration>
       <Get Name="Get" Id="{bc557e46-3cdd-47ba-9e7f-cf7525f3969d}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[curMotorPos:=m_curMotorPos;]]></ST>
+          <ST><![CDATA[curMotorPos ref=m_curMotorPos;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -278,13 +286,13 @@ END_FOR]]></ST>
       </Implementation>
     </Method>
     <Property Name="filtJntCurrent" Id="{1f5e4c97-ef8c-417a-90ec-656c048c0e4f}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY filtJntCurrent : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY filtJntCurrent :REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{34ea0c3d-b0bc-4adb-bbb3-f4ab6640a7ff}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[filtJntCurrent := m_filtJntCurrent;]]></ST>
+          <ST><![CDATA[filtJntCurrent ref= m_filtJntCurrent;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -292,60 +300,40 @@ END_VAR
       <Declaration><![CDATA[// from active joint position to cartesian pose in arm origin
 METHOD PROTECTED forwardKinematic : BOOL
 VAR_IN_OUT CONSTANT
-	i_jntPos :ARRAY[1..g_sJntNum] OF LREAL;
+	i_DHJntPos :Vec6d;
 END_VAR
 VAR_IN_OUT
 	r_cartPose :ST_Frame;
 	r_gripAngle : LREAL;
 END_VAR
 VAR
-	jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5 :LREAL;
 	d1, L, a, b :LREAL;
-	q1,q2, q3, q4, q5, q6 :LREAL;
+	q3 :LREAL;
 
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
-	
-	instruParameters:ST_InstruParameters; 
 
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Convert instrument motor position to DH joint position for kinematic calculation
-jntPosL1 := i_jntPos[4];
-jntPosL2 := i_jntPos[5];
-jntPosL3 := i_jntPos[6];
-jntPosL4 := i_jntPos[7];
-jntPosL5 := i_jntPos[8];
-m_instrument.instruFK(jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5,
-			o_jntPosX=>q4, o_jntPosY=>q5, o_jntPosZ=>q6,o_gripAngle=> r_gripAngle);
-
-q1:=i_jntPos[1];  
-q2:=i_jntPos[2];  
-q3:=i_jntPos[3];
-m_instruDHJntPos[1]:=q4;
-m_instruDHJntPos[2]:=q5;
-m_instruDHJntPos[3]:=q6;
-
-
+        <ST><![CDATA[
 d1:=GVL_SlaveArmKinematic.g_d1;
-instruParameters:=m_instrument.kinematicParameters;
-L:=instruParameters.Len_Rod;
-a:=instruParameters.a3;
-b:=instruParameters.Head_Len;
+L:=m_instrument.kinematicParameters.m_rodLength;
+a:=m_instrument.kinematicParameters.m_headLength;
+b:=m_instrument.kinematicParameters.m_fingerLenght;
 
+q3:=i_DHJntPos[3];
+c1:=COS(i_DHJntPos[1]);
+c2:=COS(i_DHJntPos[2]);
+c4:=COS(i_DHJntPos[4]);
+c5:=COS(i_DHJntPos[5]);
+c6:=COS(i_DHJntPos[6]);
 
-c1:=COS(q1);
-c2:=COS(q2);
-c4:=COS(q4);
-c5:=COS(q5);
-c6:=COS(q6);
-
-s1:=SIN(q1);
-s2:=SIN(q2);
-s4:=SIN(q4);
-s5:=SIN(q5);
-s6:=SIN(q6);
+s1:=SIN(i_DHJntPos[1]);
+s2:=SIN(i_DHJntPos[2]);
+s4:=SIN(i_DHJntPos[4]);
+s5:=SIN(i_DHJntPos[5]);
+s6:=SIN(i_DHJntPos[6]);
 
 
 // cartesian pose frame
@@ -427,16 +415,35 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="instruStatus" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY instruStatus : ST_InstruStatus]]></Declaration>
+    <Method Name="instruDetect" Id="{5f3a6988-31d6-440d-837a-fcdd94d64d1d}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD instruDetect : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TODO]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="instrument" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instrument : REFERENCE TO FB_Instrument]]></Declaration>
       <Get Name="Get" Id="{3a5249de-ec45-4e88-a302-3df6650a3ff5}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[instruStatus.m_fingerAngle:=m_gripAngle;
-instruStatus.m_ready:=m_instrument.ready;
-instruStatus.m_type:=m_instrument.instruType;]]></ST>
+          <ST><![CDATA[instrument REF=m_instrument;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="instruOn" Id="{4486d0c9-79b0-4e6c-acfb-23ca16ba44f5}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruOn : bool]]></Declaration>
+      <Get Name="Get" Id="{daa69233-49df-439c-8476-605873205ebf}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruOn:=m_instruOnFlag;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -469,7 +476,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="jaco" Id="{2c2ce445-b511-4254-9c8e-e5667e1b6bdb}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY jaco : Mat6d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY jaco :REFERENCE TO Mat6d]]></Declaration>
       <Get Name="Get" Id="{27a6e900-c6e6-40c0-aa03-4dc0d1214554}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -480,7 +487,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="jntGravity" Id="{72dbb3a4-f37f-4edd-afb1-2190cd1f62fc}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY jntGravity : Vec3d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY jntGravity :REFERENCE TO Vec3d]]></Declaration>
       <Get Name="Get" Id="{5c8a2ae5-eaad-400d-b638-ec46a75b5ccb}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -491,7 +498,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="massMat" Id="{c4fbf6a1-1d71-4f80-9bfa-395c19261a6f}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY PUBLIC massMat : Mat3d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PUBLIC massMat :REFERENCE TO Mat3d]]></Declaration>
       <Get Name="Get" Id="{b8079ba8-3835-474b-9d8e-6afd86dc6a9b}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -501,8 +508,29 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="panelDetect" Id="{2a3a3fa1-2046-472e-b693-4c66bf1a37b0}">
+      <Declaration><![CDATA[// check if panel is on
+METHOD panelDetect : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="panelOn" Id="{38ffa1da-012d-4dbc-ad5b-314577ed285b}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY panelOn : bool]]></Declaration>
+      <Get Name="Get" Id="{b8c5f533-4196-44c4-9a48-01cc1ca3c250}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[panelOn :=m_panelOnFlag;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="rawJntCurrent" Id="{f1221838-7bcd-4d84-b9f8-7dc96a864978}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY rawJntCurrent : Vec8d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY rawJntCurrent :REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{23a8503d-4e33-47db-b530-039bdd0d530f}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -512,8 +540,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="readInstruInfo" Id="{67d65d43-e812-409d-9cd7-51d04d997421}">
+      <Declaration><![CDATA[METHOD readInstruInfo : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_instrument.readParameters();]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="simCartPose" Id="{6426ffc4-f74f-4984-ac32-a9f9d8b8c8ca}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY simCartPose : ST_Frame]]></Declaration>
+      <Declaration><![CDATA[PROPERTY simCartPose :REFERENCE TO ST_Frame]]></Declaration>
       <Get Name="Get" Id="{a61bb7de-a7ad-4b34-8063-e53c825d0db4}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -524,7 +561,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="simJaco" Id="{0fa24ffb-bfb3-496c-82de-08842f53e6e4}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY simJaco : mat6d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY simJaco :REFERENCE TO mat6d]]></Declaration>
       <Get Name="Get" Id="{35c7dda2-112e-4042-99cd-4eac5d67ff5e}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -545,7 +582,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_jntCtrlTrq:=i_armCtrlCmd.m_cmdJntTrq;
+        <ST><![CDATA[m_cmdJntTrq:=i_armCtrlCmd.m_cmdJntTrq;
 m_simJntPos:=i_armCtrlCmd.m_cmdJntPos;
 
 // update simulated master arm
@@ -558,17 +595,17 @@ enable(i_armCtrlCmd.m_jntEnableFlag);
 FOR i:=1 TO g_sJntNum DO 
 	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_PosTrq THEN
 		// position controller and gravity feedforward
-		m_jntCtrlTrq[i]:=m_jntPIDCtrl[i].run(i_armCtrlCmd.m_cmdJntPos[i],m_curJntPos[i],i_armCtrlCmd.m_cmdJntVel[i],m_curJntVel[i]);
-		m_jntCtrlTrq[i]:=m_jntCtrlTrq[i]+m_jntGravity[i];
-		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_jntCtrlTrq[i]);
+		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(i_armCtrlCmd.m_cmdJntPos[i],m_curJntPos[i],i_armCtrlCmd.m_cmdJntVel[i],m_curJntVel[i]);
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
-		m_jntCtrlTrq[i]:=m_jntCtrlTrq[i]+m_jntGravity[i];
-		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_jntCtrlTrq[i]);
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
 		m_jntPIDCtrl[i].reset();
-		m_jntCtrlTrq[i]:=0;
-		m_joints[i].updateCmds(DriverOPMode_Pos,i_armCtrlCmd.m_cmdJntPos[i],m_jntCtrlTrq[i]);
+		m_cmdJntTrq[i]:=0;
+		m_joints[i].updateCmds(DriverOPMode_Pos,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	END_IF
 	
 END_FOR]]></ST>
@@ -593,11 +630,14 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//IF m_instrument.ready THEN
+	// instrument kinematic
+	m_instrument.instruFK(m_simJntPos, m_simDHJntPos, m_simGripAngle);
+
 	// simulated cartesion pose 
-	forwardKinematic(m_simJntPos,m_simCartPose,m_simGripAngle);
+	forwardKinematic(m_simDHJntPos,m_simCartPose,m_simGripAngle);
 	
 	// simulated jacobian
-	calcJaco(m_simJntPos,m_simJaco);
+	calcJaco(m_simDHJntPos,m_simJaco);
 	m_isSingularity:=NOT(invMat6(m_simJaco, m_simJacoInv));
 //END_IF
 
@@ -618,6 +658,9 @@ FOR i:=1 TO g_sJntNum DO
 	m_joints[i].updateStatus();
 END_FOR
 
+// check panel and instrument
+chencPanelAndInstru();
+
 // get joint data
 FOR i:=1 TO g_sJntNum DO
 	m_curMotorPos[i]:=m_joints[i].motorPos;
@@ -630,13 +673,17 @@ FOR i:=1 TO g_sJntNum DO
 	m_cmdJntCurrent[i]:=m_joints[i].cmdCurrent;
 END_FOR 
 
-// only upate carteisn data when instrument is ready
+// only update carteisn data when instrument is ready
 //IF m_instrument.ready THEN
+	
+	// instrument kinematic
+	m_instrument.instruFK(m_curJntPos, m_curDHJntPos, m_curGripAngle);
+
 	// cartesion pose
-	forwardKinematic(m_curJntPos,m_curCartPose,m_gripAngle);
+	forwardKinematic(m_curDHJntPos,m_curCartPose,m_gripAngle);
 	
 	// jacobian
-	calcJaco(m_curJntPos,m_jaco);
+	calcJaco(m_curDHJntPos,m_jaco);
 	
 	// cartesian twist
 //END_IF
@@ -650,14 +697,24 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.calcJaco">
-      <LineId Id="235" Count="29" />
-      <LineId Id="154" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="338" Count="1" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="340" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="326" Count="11" />
       <LineId Id="265" Count="0" />
       <LineId Id="155" Count="0" />
       <LineId Id="266" Count="40" />
       <LineId Id="217" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.chencPanelAndInstru">
+      <LineId Id="6" Count="6" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdJntCurrent.Get">
       <LineId Id="2" Count="0" />
@@ -692,19 +749,11 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.forwardKinematic">
-      <LineId Id="84" Count="0" />
-      <LineId Id="142" Count="4" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="147" Count="1" />
-      <LineId Id="85" Count="2" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="200" Count="1" />
-      <LineId Id="199" Count="0" />
       <LineId Id="151" Count="0" />
       <LineId Id="91" Count="0" />
-      <LineId Id="177" Count="0" />
       <LineId Id="152" Count="3" />
-      <LineId Id="95" Count="2" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="96" Count="1" />
       <LineId Id="99" Count="2" />
       <LineId Id="173" Count="0" />
       <LineId Id="103" Count="1" />
@@ -725,9 +774,14 @@ END_FOR
       <LineId Id="7" Count="3" />
       <LineId Id="25" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.instruStatus.Get">
+    <LineIds Name="FB_SlaveArm.instruDetect">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instrument.Get">
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruOn.Get">
       <LineId Id="2" Count="0" />
-      <LineId Id="5" Count="1" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.isEnabled">
       <LineId Id="19" Count="0" />
@@ -746,8 +800,17 @@ END_FOR
     <LineIds Name="FB_SlaveArm.massMat.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.panelDetect">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.panelOn.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.rawJntCurrent.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.readInstruInfo">
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">
       <LineId Id="2" Count="0" />
@@ -789,6 +852,8 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateSimStatus">
       <LineId Id="18" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="28" Count="0" />
       <LineId Id="7" Count="3" />
       <LineId Id="5" Count="0" />
       <LineId Id="14" Count="0" />
@@ -798,7 +863,11 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateStatus">
       <LineId Id="14" Count="0" />
-      <LineId Id="26" Count="3" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="128" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="63" Count="1" />
@@ -809,6 +878,9 @@ END_FOR
       <LineId Id="85" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="86" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="110" Count="0" />
       <LineId Id="90" Count="6" />
       <LineId Id="88" Count="0" />
       <LineId Id="47" Count="0" />

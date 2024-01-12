@@ -7,8 +7,11 @@ VAR
 	// slave robot arms joint data
 	m_slaveJointsData AT %I* :ST_SlaveJointData;
 	
-	// setup arm statue
-	m_setupArmStatus AT %i* :ST_SetupArmStatus;
+	// setup joint5 position
+	m_setupJnt5Pos AT %I* :ARRAY[1..g_sArmNum] OF LREAL;
+	
+	// instrument info
+	m_instruInfo AT %I* :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
 	
 	// dynamic output
 	m_slaveDynaData AT %Q* : ST_SlaveDynaData;
@@ -41,7 +44,7 @@ END_IF
 
 // run gravity model
 FOR i:=1 TO g_sArmNum DO
-	m_gravityModel[i].run(m_slaveJointsData.m_curJntPos[i],m_setupArmStatus.m_curEndPose[i], m_slaveDynaData.m_gravity[i]);
+	m_slaveDynaData.m_gravity[i]:=m_gravityModel[i].run(m_setupJnt5Pos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
 END_FOR
 
 m_codeTime(START:=FALSE);

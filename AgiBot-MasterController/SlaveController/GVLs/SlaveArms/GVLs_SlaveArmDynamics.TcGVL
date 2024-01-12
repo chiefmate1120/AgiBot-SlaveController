@@ -2,8 +2,26 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVLs_SlaveArmDynamics" Id="{df4fb32e-58eb-444d-823e-cc22793fbc57}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
-{attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
+	
+(*graParam=[ mz2 - my5 - my1 + mz3 + mz4,...
+			   0.22413*m3 + 0.22413*m4 + 2.6425e-7*m5 + 0.88241*mx2 - 0.47047*my2 + 1.0*my4 + 1.0*mz5,...
+			   0.1195*m3 + 0.1195*m4 + 1.2491e-7*m5 + 0.47047*mx2 - mx4 - mx5 + 0.88241*my2,...
+			  0.04245*m2 + 0.04245*m3 + 2.2042e-6*m4 + 2.2042e-6*m5 + 1.0*mx1 - 0.13917*mx3 - 0.99027*my3,...
+			  m5]'
+*)
+				
+	// robot No.4
+	g_gravityParam :ARRAY[1..4,1..5] OF REAL := 
+	[-0.5414,    1.2050,    0.4391,    0.4801,    0.6717,
+	 -0.3477,    1.1457,    0.4601,    0.4529,    0.7010,
+	 -0.3373,    1.1255,    0.4497,    0.4801,    0.6666,
+	 -0.3639,    1.2385,    0.5290,    0.4801,    0.6862];
+	 
+	g_gravityTrocar :ARRAY[1..5] OF REAL :=[-0.0063,    0.0113,   -0.0026,   -0.0149,    0.0021];
+	g_gravityInstrument :ARRAY[1..5] OF REAL :=[-0.0082,   -0.0347,   -0.0132,   -0.0044,    0.3037];
+	g_gravityEndoscope :ARRAY[1..5] OF REAL :=[ -0.1037,   -0.0120,    0.0441,    0.0183,    1.0935];
+	
 (*	// link mass [m1, m2, m3, m4, m5, m6, m7, m8, m9]
 	g_linkMass :ARRAY[1..9] OF LREAL :=[2.676, 0.825, 0.547, 0.25, 0.195, 0.194, 0.05, 0.111, 0.09] ;
 	

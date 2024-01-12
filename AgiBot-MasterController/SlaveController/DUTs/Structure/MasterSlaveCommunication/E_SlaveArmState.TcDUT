@@ -9,7 +9,7 @@
 	SlaveArmState_Standby :=4,
 	SlaveArmState_MountPanel:=5,
 	SlaveArmState_PanelReady :=6,
-	SlaveArmState_Mountnstru :=7,
+	SlaveArmState_MountInstru :=7,
 	SlaveArmState_InstruReady :=8,
 	SlaveArmState_MasterSlave :=9,
 	SlaveArmState_MountScope :=10,

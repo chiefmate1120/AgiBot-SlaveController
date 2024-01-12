@@ -56,17 +56,15 @@ curJntPos := i_slaveArm.curJntPos;
 CASE m_mountStatus OF
 	// To lock joint with panel
 	0:
-		// check if all the joints buckled with panel
 		FOR i:=1 TO 5 DO
+			// check joint buckled with panel
 			IF ABS(m_cmdJntPos[i+3]-curJntPos[i+3])> m_maxTrackErr THEN 
 				m_jointMounted[i]:=TRUE;
+				m_targetMountPos[i]:=curJntPos[i+3];
 			END_IF
 			
-			// set command joint position to current if joint already mounted
-			IF m_jointMounted[i] THEN
-				m_targetMountPos[i]:=curJntPos[i+3];
 			// set command joint position step
-			ELSE
+			IF FALSE = m_jointMounted[i] THEN
 				m_targetMountPos[i]:=curJntPos[i+3]+m_mountStepPos;
 			END_IF
 		END_FOR
@@ -132,7 +130,13 @@ END_FOR
       <LineId Id="144" Count="0" />
       <LineId Id="155" Count="0" />
       <LineId Id="157" Count="0" />
-      <LineId Id="159" Count="12" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="163" Count="1" />
+      <LineId Id="210" Count="1" />
+      <LineId Id="170" Count="1" />
       <LineId Id="158" Count="0" />
       <LineId Id="172" Count="14" />
       <LineId Id="188" Count="2" />
@@ -147,7 +151,7 @@ END_FOR
       <LineId Id="69" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="75" Count="0" />
-      <LineId Id="70" Count="0" />
+      <LineId Id="87" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="71" Count="0" />
       <LineId Id="12" Count="0" />

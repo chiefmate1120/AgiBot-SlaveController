@@ -37,7 +37,10 @@ VAR_GLOBAL
 	
 	// Add by NiFeijian,  new method to mount panel and instrument, can be repalced later
 	// joint position of panel locked position
-	g_panelLockedPosition :Vec5d:=[0.0, 0.0, 0.0, 0.0, 0.0];
+	g_panelLockedPosition :Vec5d:=[0.0, 0.0, 0.0, 0.0, 0.0];	
+	
+	// motor position when instrument is at zero position
+	g_instruZeroPosition :Vec5d :=[0.0, 0.0, 0.0, 0.0, 0.0];// move to instrument chip and read online
 
 END_VAR]]></Declaration>
   </GVL>

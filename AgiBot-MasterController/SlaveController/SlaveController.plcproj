@@ -256,6 +256,9 @@
     <Compile Include="DUTs\Type\Vec7i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_SlaveGravity.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Robots\FB_Instrument.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -329,9 +332,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\addVec7.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_RobotDynamics\FB_SlaveGravity.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Filters\FB_LowPassFilter.TcPOU">
