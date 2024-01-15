@@ -8,19 +8,22 @@ VAR
 	m_slaveJointsData AT %I* :ST_SlaveJointData;
 	
 	// setup joint5 position
-	m_setupJnt5Pos AT %I* :ARRAY[1..g_sArmNum] OF LREAL;
+	m_setupJointData AT %I* :ST_SetupJointData;
 	
 	// instrument info
 	m_instruInfo AT %I* :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
 	
 	// dynamic output
 	m_slaveDynaData AT %Q* : ST_SlaveDynaData;
+	m_setupJnt3Gravity AT %Q* : LREAL;
+	m_setupJnt5Gravity AT %Q* : LREAL;
 	
 	// flag to init robot dynamic model
 	m_robotDynaInit :BOOL :=FALSE;
 	
 	// grivity model block
 	m_gravityModel :ARRAY[1..g_sArmNum] OF FB_SlaveGravity;
+	m_gravityModelFull :ARRAY[1..g_sArmNum] OF FB_SetupSlaveGravity;
 	
 
 	// code execute time measure
@@ -44,7 +47,9 @@ END_IF
 
 // run gravity model
 FOR i:=1 TO g_sArmNum DO
-	m_slaveDynaData.m_gravity[i]:=m_gravityModel[i].run(m_setupJnt5Pos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
+	m_slaveDynaData.m_gravity[i]:=m_gravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
+//	m_gravityModelFull[i].run(m_setupJointData.m_curJntPos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i],
+//				o_setupJ3Gravity=>m_setupJnt3Gravity, o_setupJ5Gravity=>m_setupJnt5Gravity, o_slaveGravity=>m_slaveDynaData.m_gravity);
 END_FOR
 
 m_codeTime(START:=FALSE);
@@ -59,6 +64,7 @@ m_codeTime(START:=FALSE);
       <LineId Id="5" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="28" Count="2" />
+      <LineId Id="193" Count="1" />
       <LineId Id="27" Count="0" />
       <LineId Id="54" Count="0" />
       <LineId Id="83" Count="0" />

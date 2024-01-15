@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SetupArmKinematic" Id="{51b5e92c-cdd9-424e-87d2-379444a190f7}">
+    <Declaration><![CDATA[// use slot attribute larger than 49990, which is the default one, if it depends on variable in other file
+{attribute 'global_init_slot' := '49991'} 
+{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT 
+
+(* 
+% paramters definiton:
+% d1: distance from joint1 to remote center
+% L: instrument length
+% a: distance from joint5 to joint 6 on tool
+% b: distantce form joint 6 to tcp on tool
+% DH definition:
+% index    alpha   a   theta   d
+% 1        90      0   q1      d1
+% 2        -90     0   q2      0
+% 3        -90     0   0       q3
+% 4        0       0   q4      -L
+% 5        90      0   q5      0
+% 6        90      a   q6      0
+% tcp      0       b   0       0
+
+
+g_d1:LREAL:=0.8046229;
+g_L :LREAL:= 0.3;// need to be replace by real instrument parameters;
+g_a : LREAL :=0.01;// need to be replace by real instrument parameters;
+g_b :LREAL :=0;// need to be replace by real instrument parameters;
+
+//alpha,a,d,theta	
+g_slaveArmDH:ARRAY[1..9,1..4] OF LREAL :=[PI/2,	0,		g_d1,	0,      
+											-pi/2,	0,		0,		0,
+											-PI/2,	0,		0,		0,
+									        0,		0,		-g_L,	0,       
+											pi/2,	0,		0,		0,
+								            pi/2,	g_a,	0,		0,
+							         		0,		g_b, 	0,		0];
+
+*)
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

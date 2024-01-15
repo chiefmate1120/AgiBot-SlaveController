@@ -133,6 +133,15 @@
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\ST_SetupArmCtrlCmds.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_SetupArmStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_SetupJointData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\TasksCommunication\ST_SlaveDynaData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -155,12 +164,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\TasksCommunication\ST_SafetyData.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\ST_SetupArmStatus.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\ST_SetupJointData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_SlaveArmCtrlCmds.TcDUT">
@@ -259,7 +262,13 @@
     <Compile Include="FBs_RobotDynamics\FB_SlaveGravity.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_setupSlaveGravity.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Robots\FB_Instrument.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Robots\FB_SetupArm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_SlaveJoint.TcPOU">
@@ -404,6 +413,10 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\SlaveArms\GVLs_SlaveArmDynamics.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\SlaveArms\GVLs_SetupSlaveArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

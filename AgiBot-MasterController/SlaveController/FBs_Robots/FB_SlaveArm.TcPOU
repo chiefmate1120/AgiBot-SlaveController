@@ -16,12 +16,14 @@ VAR
 	// joints
 	m_joints :ARRAY[1..g_sJntNum] OF FB_SlaveJoint;
 	
-	// instrument
+	// IO
 	m_panelOnIO AT%I*	:SINT;
 	m_panelOnFlag :BOOL;
 	m_instruOnIO AT%I* :SINT;
 	m_instruOnFlag :BOOL;
 	m_instrument : FB_Instrument;
+	m_adjustIO AT%I* :SINT;
+	m_adjustOnFlag :BOOL;
 	
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
@@ -41,7 +43,7 @@ VAR
 	m_cmdJntCurrent : Vec8d;
 		
 	// arm dynamic data
-	m_jntGravity : Vec3d;
+	m_jntGravity : Vec8d:=g_zeroVec8d;
 	m_jntMassMat : Mat3d;
 	
 	// arm jacobian and inverse
@@ -65,6 +67,27 @@ END_VAR
       <ST><![CDATA[		]]></ST>
     </Implementation>
     <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
+    <Method Name="adjustDetect" Id="{6d824dc1-93c7-4360-948f-170402bdf26f}">
+      <Declaration><![CDATA[// check if adjust button is pressed
+METHOD adjustDetect : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="adjustOn" Id="{afc98598-ed29-4176-9f45-d842c4ec164a}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY adjustOn : bool]]></Declaration>
+      <Get Name="Get" Id="{d84a6e3e-5b0e-406e-b7c3-ff6a74a84739}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[adjustOn := m_adjustOnFlag;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="armIdx" Id="{1bcadfc3-0a4f-4bee-a1a7-b6d4d3a1eb58}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY armIdx : int]]></Declaration>
       <Get Name="Get" Id="{198387ec-2e24-42e6-b0c2-2f769705d46f}">
@@ -161,13 +184,15 @@ r_jaco[6,6]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="chencPanelAndInstru" Id="{613633aa-f5bc-4224-95e6-e974a90f8e6a}">
-      <Declaration><![CDATA[METHOD chencPanelAndInstru : BOOL
+    <Method Name="checkIO" Id="{613633aa-f5bc-4224-95e6-e974a90f8e6a}">
+      <Declaration><![CDATA[METHOD checkIO : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// check panel and instrument
+        <ST><![CDATA[// check adjust button
+m_adjustOnFlag := adjustDetect();
+// check panel and instrument
 m_panelOnFlag := panelDetect();
 m_instruOnFlag := instruDetect();
 IF FALSE = m_instruOnFlag THEN
@@ -482,18 +507,18 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[jaco := m_jaco;]]></ST>
+          <ST><![CDATA[jaco ref= m_jaco;]]></ST>
         </Implementation>
       </Get>
     </Property>
     <Property Name="jntGravity" Id="{72dbb3a4-f37f-4edd-afb1-2190cd1f62fc}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY jntGravity :REFERENCE TO Vec3d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY jntGravity :REFERENCE TO Vec8d]]></Declaration>
       <Get Name="Get" Id="{5c8a2ae5-eaad-400d-b638-ec46a75b5ccb}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[jntGravity:=m_jntGravity;]]></ST>
+          <ST><![CDATA[jntGravity ref=m_jntGravity;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -504,7 +529,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[massMat :=m_jntMassMat;]]></ST>
+          <ST><![CDATA[massMat ref=m_jntMassMat;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -536,7 +561,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[rawJntCurrent:=m_rawJntCurrent;]]></ST>
+          <ST><![CDATA[rawJntCurrent ref=m_rawJntCurrent;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -619,7 +644,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_jntMassMat:=slaveDynaData.m_massMat[m_armIdx];
-m_jntGravity:=slaveDynaData.m_gravity[m_armIdx];
+m_jntGravity[1]:=slaveDynaData.m_gravity[m_armIdx][1];
+m_jntGravity[2]:=slaveDynaData.m_gravity[m_armIdx][2];
+m_jntGravity[3]:=slaveDynaData.m_gravity[m_armIdx][3];
 ]]></ST>
       </Implementation>
     </Method>
@@ -659,7 +686,7 @@ FOR i:=1 TO g_sJntNum DO
 END_FOR
 
 // check panel and instrument
-chencPanelAndInstru();
+checkIO();
 
 // get joint data
 FOR i:=1 TO g_sJntNum DO
@@ -693,6 +720,12 @@ END_FOR
     <LineIds Name="FB_SlaveArm">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.adjustDetect">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.adjustOn.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.armIdx.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -710,7 +743,8 @@ END_FOR
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.chencPanelAndInstru">
+    <LineIds Name="FB_SlaveArm.checkIO">
+      <LineId Id="21" Count="1" />
       <LineId Id="6" Count="6" />
       <LineId Id="5" Count="0" />
       <LineId Id="14" Count="0" />
@@ -848,6 +882,7 @@ END_FOR
     <LineIds Name="FB_SlaveArm.updateDyna">
       <LineId Id="5" Count="0" />
       <LineId Id="8" Count="0" />
+      <LineId Id="19" Count="1" />
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateSimStatus">
@@ -864,7 +899,7 @@ END_FOR
     <LineIds Name="FB_SlaveArm.updateStatus">
       <LineId Id="14" Count="0" />
       <LineId Id="26" Count="2" />
-      <LineId Id="104" Count="0" />
+      <LineId Id="135" Count="0" />
       <LineId Id="103" Count="0" />
       <LineId Id="120" Count="0" />
       <LineId Id="128" Count="0" />
