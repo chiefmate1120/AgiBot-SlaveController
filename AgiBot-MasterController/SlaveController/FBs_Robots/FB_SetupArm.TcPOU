@@ -268,7 +268,7 @@ END_VAR
     <Method Name="isEnabled" Id="{b985692a-f6f7-460a-be8e-c41aacfdf6d5}">
       <Declaration><![CDATA[METHOD PUBLIC isEnabled : BOOL
 VAR_IN_OUT CONSTANT
-	i_jntIdx :Vec8i;
+	i_jntIdx :Vec5i;
 END_VAR
 VAR
 	i :INT ;
@@ -322,6 +322,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[rawJntCurrent ref=m_rawJntCurrent;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="rcPos" Id="{3ac624a0-ed54-4971-a738-0ad5e73415ba}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY rcPos :REFERENCE to Vec3d]]></Declaration>
+      <Get Name="Get" Id="{e3e500a4-2327-4159-bdc5-53a60fab73a3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[rcPos REF= m_rcPos;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -478,6 +489,9 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.rawJntCurrent.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArm.rcPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.updateCmds">

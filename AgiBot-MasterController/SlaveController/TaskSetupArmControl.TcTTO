@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Task Name="TaskSetupArmControl" Id="{bdb1e815-a0e4-4acf-9c03-c159c81f50be}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>1000</CycleTime>
+    <Priority>3</Priority>
+    <PouCall>
+      <Name>SetupArmControl</Name>
+    </PouCall>
+    <TaskFBGuid>{9615b0a9-c8da-40b5-b2f0-75291d71db71}</TaskFBGuid>
+    <Fb_init>{be954f37-72fa-4a40-a402-f40d0d0acb4f}</Fb_init>
+    <Fb_exit>{e01d07f8-7098-4d5d-95fc-efeb8a41adb0}</Fb_exit>
+    <CycleUpdate>{3130d2c1-0855-4878-9eb8-6cafada6488b}</CycleUpdate>
+    <PostCycleUpdate>{45efcca3-8d6a-4a26-82e7-7a0e762c03a4}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

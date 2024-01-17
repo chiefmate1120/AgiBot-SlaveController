@@ -24,7 +24,7 @@ VAR_GLOBAL CONSTANT
 	
 	// controller would keep command unchanged when error 
 	// between command and current value is less than this value
-	g_jntCtrlErrForCmdHold :LREAL :=2.0*g_deg2Rad;
+	g_jntCtrlErrForCmdHold :LREAL :=1.0*g_deg2Rad;
 	
 	// joint is assumed to be static if velocity is less than this value
 	g_jntStaticVelThres :LREAL :=0.2*g_deg2Rad;

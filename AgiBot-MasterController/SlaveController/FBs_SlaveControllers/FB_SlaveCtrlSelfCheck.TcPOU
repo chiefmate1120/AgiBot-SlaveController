@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlSelfCheck" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheck EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_selfCheckTrajIdx: INT := 1;
+	m_slefCheckPlanner: ARRAY[1..GVL_SlaveControlParameters.g_selfCheckMotionNum] OF FB_TrajMoveJ;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{ffa3dbdd-63a1-4101-8d26-d1f3e6e5e2be}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_INPUT
+	motionScale :LREAL;
+	masterIdx :INT;
+END_VAR
+
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+	i_masterStatus :ST_MasterStatus;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntVel :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if planner is ready
+IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check if to transit to next segment
+curJntVel :=i_slaveArm.curJntVel;
+IF(m_timePeriod > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND vecNorm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
+	m_timePeriod:=0;
+END_IF
+
+// check if to terminated
+IF(m_selfCheckTrajIdx > GVL_SlaveControlParameters.g_selfCheckMotionNum) THEN
+	m_isFinished:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{c6523e12-84cb-49f8-843e-9a168bb4ce28}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i,j :INT;
+	startJntPos,endJntPos :Vec8d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_selfCheckTrajIdx :=1;
+
+// traj plan
+// fisrt segment
+startJntPos:=i_slaveArm.curJntPos;
+FOR j:=1 TO 7 DO 
+endJntPos[j]:=GVL_SlaveControlParameters.g_selfCheckPosture[1,j];
+END_FOR
+m_slefCheckPlanner[1].init(startJntPos,endJntPos,GVL_SlaveControlParameters.g_selfCheckMaxjntVel,
+					GVL_SlaveControlParameters.g_selfCheckMaxjntAcc,GVL_SlaveControlParameters.g_selfCheckMaxjntJerk);
+// other segments
+FOR i:=2 TO GVL_SlaveControlParameters.g_selfCheckMotionNum DO 
+	FOR j:=1 TO 7 DO 
+		startJntPos[j]:=GVL_SlaveControlParameters.g_selfCheckPosture[i-1,j];
+		endJntPos[j]:=GVL_SlaveControlParameters.g_selfCheckPosture[i,j];
+	END_FOR
+	m_slefCheckPlanner[i].init(startJntPos,endJntPos,GVL_SlaveControlParameters.g_selfCheckMaxjntVel,
+						GVL_SlaveControlParameters.g_selfCheckMaxjntAcc,GVL_SlaveControlParameters.g_selfCheckMaxjntJerk);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlSelfCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSelfCheck.calcCmdJntPos">
+      <LineId Id="41" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlSelfCheck.init">
+      <LineId Id="57" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="131" Count="2" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="126" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

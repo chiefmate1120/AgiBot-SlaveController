@@ -23,20 +23,22 @@ VAR
 	
 	// all arm controller instance 
 	m_armCtrlFactory :ARRAY[1..g_sArmNum,1..SlaveArmState_totalNum] OF I_SlaveArmCtrl;
-	m_armError :ARRAY[1..g_sArmNum] OF FB_StateCtrlError;
-	m_armInit :ARRAY[1..g_sArmNum] OF FB_StateCtrlInit;
-	m_armSelfCheck :ARRAY[1..g_sArmNum] OF FB_StateCtrlSelfCheck;
-	m_armStandBy :ARRAY[1..g_sArmNum] OF FB_StateCtrlStandBy;
-	m_mountPanel :ARRAY[1..g_sArmNum] OF FB_StateCtrlMountPanel;
-	m_panelReady :ARRAY[1..g_sArmNum] OF FB_StateCtrlPanelReady;
-	m_mountInstru :ARRAY[1..g_sArmNum] OF FB_StateCtrlMountInstru;
-	m_instruReady :ARRAY[1..g_sArmNum] OF FB_StateCtrlInstruReady;
-	m_armMasterSlave :ARRAY[1..g_sArmNum] OF FB_StateCtrlMasterSlave;
-	m_mountScope :ARRAY[1..g_sArmNum] OF FB_StateCtrlMountScope;
-	m_scopeReady :ARRAY[1..g_sArmNum] OF FB_StateCtrlScopeReady;
-	m_armEndoscope :ARRAY[1..g_sArmNum] OF FB_StateCtrlEndoscope;
-	m_armCart :ARRAY[1..g_sArmNum] OF FB_StateCtrlCart;
-	m_armGraCali :ARRAY[1..g_sArmNum] OF FB_StateCtrlGraCali;
+	m_armError :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlError;
+	m_armInit :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInit;
+	m_armSelfCheck :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlSelfCheck;
+	m_armStandBy :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlStandBy;
+	m_mountPanel :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMountPanel;
+	m_panelReady :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPanelReady;
+	m_mountInstru :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMountInstru;
+	m_instruReady :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruReady;
+	m_armMasterSlave :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMasterSlave;
+	m_mountScope :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlMountScope;
+	m_scopeReady :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlScopeReady;
+	m_armEndoscope :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlEndoscope;
+	m_armAdjust :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlAdjust;
+	m_armPackage :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPackage;
+	m_armCart :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlCart;
+	m_armGraCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlGraCali;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -147,6 +149,8 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_MountScope] := m_mountScope[i];
 	m_armCtrlFactory[i,SlaveArmState_ScopeReady] := m_scopeReady[i];
 	m_armCtrlFactory[i,SlaveArmState_EndoScope] := m_armEndoscope[i];
+	m_armCtrlFactory[i,SlaveArmState_Adjust] := m_armAdjust[i];
+	m_armCtrlFactory[i,SlaveArmState_Package] := m_armPackage[i];
 	m_armCtrlFactory[i,SlaveArmState_Cart] := m_armCart[i];
 	m_armCtrlFactory[i,SlaveArmState_GravityCali] := m_armGraCali[i];
 	
@@ -199,7 +203,7 @@ END_FOR
       <Declaration><![CDATA[// state machine check and transit 
 METHOD PROTECTED stateMachine : BOOL
 VAR_IN_OUT CONSTANT
-		i_masterInputDataPool:ST_SlaveInputDataPool;
+		i_slavesInputDataPool:ST_SlaveInputDataPool;
 END_VAR
 VAR
 	i:INT;
@@ -268,6 +272,9 @@ END_VAR]]></Declaration>
 		//endoscope control
 		SlaveArmState_EndoScope:
 		
+		//arm adjust
+		SlaveArmState_Adjust:
+		
 		//cart control
 		SlaveArmState_Cart:
 *)
@@ -334,7 +341,9 @@ END_FOR]]></ST>
       <LineId Id="58" Count="1" />
       <LineId Id="62" Count="9" />
       <LineId Id="73" Count="0" />
-      <LineId Id="108" Count="1" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="124" Count="1" />
+      <LineId Id="109" Count="0" />
       <LineId Id="117" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
@@ -396,7 +405,9 @@ END_FOR]]></ST>
       <LineId Id="86" Count="0" />
       <LineId Id="88" Count="1" />
       <LineId Id="95" Count="2" />
-      <LineId Id="117" Count="20" />
+      <LineId Id="117" Count="17" />
+      <LineId Id="183" Count="2" />
+      <LineId Id="135" Count="2" />
       <LineId Id="116" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="56" Count="3" />

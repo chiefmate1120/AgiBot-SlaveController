@@ -15,8 +15,10 @@
 	SlaveArmState_MountScope :=10,
 	SlaveArmState_ScopeReady :=11,
 	SlaveArmState_EndoScope :=12,
-	SlaveArmState_Cart := 13,
-	SlaveArmState_GravityCali := 14,
+	SlaveArmState_Adjust :=13,
+	SlaveArmState_Package :=14,
+	SlaveArmState_Cart := 15,
+	SlaveArmState_GravityCali := 16,
 	
 	SlaveArmState_totalNum :=SlaveArmState_GravityCali
 );

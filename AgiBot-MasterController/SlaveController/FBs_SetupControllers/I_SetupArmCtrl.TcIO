@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_SetupArmCtrl" Id="{0e04e899-2981-4253-9f2f-1f2795cae658}">
+    <Declaration><![CDATA[INTERFACE I_SetupArmCtrl
+]]></Declaration>
+    <Method Name="init" Id="{a8153803-248f-42c8-a000-ef952f74bd73}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="isFinished" Id="{1a9e234f-656d-402f-a31a-ab5a12b05b88}">
+      <Declaration><![CDATA[PROPERTY isFinished : bool]]></Declaration>
+      <Get Name="Get" Id="{cbe2efd4-a4c2-452e-b0a1-d8841c942191}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="reset" Id="{b7ebcb8c-1b3c-43d0-9066-87a87684f414}">
+      <Declaration><![CDATA[METHOD reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="run" Id="{49e7854d-8161-4379-96bc-1fddeeab27da}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>
