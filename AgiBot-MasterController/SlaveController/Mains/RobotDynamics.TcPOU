@@ -29,6 +29,7 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
+	// tmp variables
 	i: INT;
 	
 END_VAR
