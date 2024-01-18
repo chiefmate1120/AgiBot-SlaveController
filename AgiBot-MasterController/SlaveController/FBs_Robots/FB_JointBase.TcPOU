@@ -69,6 +69,11 @@ VAR
 	m_curTrqLpf : FB_LowPassFilter;
 	m_cmdTrqLpf :FB_LowPassFilter;
 	
+	// velocity is calculated every (m_velCalcCycles) control cycles
+	// TODO: insturment joint motor can not reach 4k now, so calculate their velocity with 1k frequency, need to remove later
+	m_velCalcCycles :INT :=1;
+	m_curVelCalCycles :INT :=1;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -334,9 +339,14 @@ m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
 
 // compute joint velocity
-m_curJntVel:= (m_curJntPos-m_lastJntPos)/m_cycleTime;
-m_curJntVel := m_jntVelLpf.run(m_curJntVel);
-m_lastJntPos :=m_curJntPos;
+m_curVelCalCycles := m_curVelCalCycles+1;
+IF m_curVelCalCycles > m_velCalcCycles THEN
+	m_curJntVel:= (m_curJntPos-m_lastJntPos)/m_cycleTime;
+	m_curJntVel := m_jntVelLpf.run(m_curJntVel);
+	m_lastJntPos :=m_curJntPos;	
+	m_curVelCalCycles:=1;
+END_IF
+
 
 // current and torque
 m_rawCurrent := m_motorInputs.m_current;
@@ -443,7 +453,11 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="16" Count="1" />
       <LineId Id="7" Count="0" />
       <LineId Id="6" Count="0" />
-      <LineId Id="9" Count="1" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="36" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="12" Count="0" />

@@ -407,7 +407,11 @@ m_gripAngle:=0;
 
 // joint init
 FOR i:=1 TO g_sJntNum DO
-	m_joints[i].init(m_armIdx, i);
+	IF i<4 THEN
+		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 1);
+	ELSE
+		m_joints[i].init(m_armIdx, i,g_slaveArmCtrlCycleTime, 4);
+	END_IF
 END_FOR
 
 // init joint encoder and position calculation
@@ -801,7 +805,11 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.init">
-      <LineId Id="159" Count="20" />
+      <LineId Id="159" Count="5" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="188" Count="2" />
+      <LineId Id="166" Count="13" />
       <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.initJntPos">

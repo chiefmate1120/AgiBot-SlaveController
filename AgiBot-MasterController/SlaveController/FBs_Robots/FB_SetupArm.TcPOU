@@ -230,7 +230,7 @@ m_armIdx:=i_armIdx;
 
 // joint init
 FOR i:=1 TO g_setupJntNum DO
-	m_joints[i].init(m_armIdx, i);
+	m_joints[i].init(m_armIdx, i,g_setupArmCtrlCycleTime);
 END_FOR
 
 // init joint encoder and position calculation

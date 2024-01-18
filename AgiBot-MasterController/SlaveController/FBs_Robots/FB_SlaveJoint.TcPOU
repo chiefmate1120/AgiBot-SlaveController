@@ -17,10 +17,15 @@ END_VAR
 VAR_INPUT
 	i_armIdx :INT;
 	i_jntIdx :INT;
+	i_controlCycleTime :LREAL;
+	// velocity is calculated every (m_velCalcCycles) control cycles
+	// TODO: insturment joint motor can not reach 4k now, so calculate their velocity with 1k frequency, need to remove later
+	i_velCalcCycles :INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cycleTime := g_slaveArmCtrlCycleTime;
+        <ST><![CDATA[m_cycleTime := i_controlCycleTime;
+m_velCalcCycles :=MAX(i_velCalcCycles,1);
 
 // hardware parameters
 m_motorEncoderRes :=GVL_SlaveMotorParameters.g_incEncoderRes[i_jntIdx];
@@ -67,7 +72,7 @@ m_cmdJntTrq :=0.0;
 m_cmdCurrent := 0.0;
 
 // filter init
-m_jntVelLpf.init(1, GVL_SlaveControlParameters.g_curJntVelLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_jntVelLpf.init(1, GVL_SlaveControlParameters.g_curJntVelLpfCutoffFreq, g_slaveArmCtrlFreq/m_velCalcCycles);
 m_cmdTrqLpf.init(1, GVL_SlaveControlParameters.g_cmdJntTrqLpfCutoffFreq, g_slaveArmCtrlFreq);
 m_curTrqLpf.init(1, GVL_SlaveControlParameters.g_curJntTrqLpfCutoffFreq, g_slaveArmCtrlFreq);
 
@@ -82,7 +87,9 @@ m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.init">
-      <LineId Id="155" Count="1" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="156" Count="0" />
       <LineId Id="89" Count="28" />
       <LineId Id="122" Count="6" />
       <LineId Id="130" Count="1" />
