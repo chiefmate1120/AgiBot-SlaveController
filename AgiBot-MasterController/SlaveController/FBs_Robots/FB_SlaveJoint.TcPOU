@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveJoint" Id="{13c09c14-ad6e-446d-ae84-5ae40081815a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -126,8 +126,8 @@ IF m_jntIdx <3 THEN
 	RETURN;
 END_IF
 
-m_opModeSDOWrite(sNetID:= GVL_SlaveMotorParameters.g_slaveArmNetID[m_armIdx],
-				nSlaveAddr := GVL_SlaveMotorParameters.g_slaveJointNetPort[m_armIdx,m_jntIdx],
+m_opModeSDOWrite(sNetID:= GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[m_armIdx],
+				nSlaveAddr := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[m_armIdx,m_jntIdx],
 				nSubIndex:=0,nIndex:=SDOSubIndex,pSrcBuf:=ADR(m_motorOutputs.m_opMode),cbBufLen:=SIZEOF(m_motorOutputs.m_opMode),bExecute:=TRUE);
 IF NOT m_opModeSDOWrite.bBusy THEN
 	m_opModeSDOWrite(bExecute:=FALSE);

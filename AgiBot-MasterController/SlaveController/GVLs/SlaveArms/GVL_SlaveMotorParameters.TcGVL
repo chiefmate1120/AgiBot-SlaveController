@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SlaveMotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
@@ -25,14 +25,6 @@ VAR_GLOBAL CONSTANT
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.2, 1.2, 0.2, 5(2*pi)];
-	
-	// joint SDO address
-	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.240.177.5.1','169.254.223.239.7.1','169.254.223.239.9.1','169.254.223.239.10.1'];
-	g_slaveJointNetPort:ARRAY[1..g_sArmNum,1..g_sJntNum] OF UINT :=[
-		1004,	1005,	1006,	2(1007),	3(1008),
-		1006,	1007,	1008,	2(1009),	3(1010),
-		1006,	1007,	1008,	2(1009),	3(1010),
-		1006,	1007,	1008,	2(1009),	3(1010)];
 		
 END_VAR
 ]]></Declaration>

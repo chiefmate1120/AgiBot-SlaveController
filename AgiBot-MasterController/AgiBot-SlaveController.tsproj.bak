@@ -1098,7 +1098,7 @@
 				<Cpu CpuId="3"/>
 			</Settings>
 			<Tasks>
-				<Task Id="3" Priority="1" CycleTime="5000" AmsPort="350" Affinity="#x00000001" AdtTasks="true">
+				<Task Id="3" Priority="1" CycleTime="2500" AmsPort="350" Affinity="#x00000001" AdtTasks="true">
 					<Name>TaskSlaveArmControl</Name>
 				</Task>
 				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000002" AdtTasks="true">
@@ -1918,7 +1918,7 @@
 								<OTCID>#x02010030</OTCID>
 							</ManualConfig>
 							<Priority>1</Priority>
-							<CycleTime>500000</CycleTime>
+							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
 							<Id NeedCalleeCall="true">1</Id>
@@ -2979,7 +2979,7 @@
 	</Project>
 	<Mappings>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500830000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="08000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
 			<OwnerB Name="TIID^Arm1 (EtherCAT)^SlaveJoint1">
