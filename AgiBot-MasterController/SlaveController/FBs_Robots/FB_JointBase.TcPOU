@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_JointBase" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR_INPUT
@@ -7,6 +7,10 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// arm and joint index
+	m_armIdx :INT;
+	m_jntIdx :INT;
+	
 	// motor IO
 	m_motorInputs AT%I*	:ST_MotorInputs;
 	m_motorOutputs AT%Q* :ST_MotorOutputs;
@@ -74,6 +78,8 @@ VAR
 	m_velCalcCycles :INT :=1;
 	m_curVelCalCycles :INT :=1;
 	
+	// SDO writer
+	m_opModeSDOWrite:FB_EcCoESdoWrite;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -317,7 +323,7 @@ END_VAR]]></Declaration>
 IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
 	m_cmdTrqLpf.reset();	
-	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
+//	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
 	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(i_cmdPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
 	filtCmdTrq:=m_cmdTrqLpf.run(i_cmdTrq);
@@ -341,7 +347,7 @@ m_curJntPos := m_curMotorPos;
 // compute joint velocity
 m_curVelCalCycles := m_curVelCalCycles+1;
 IF m_curVelCalCycles > m_velCalcCycles THEN
-	m_curJntVel:= (m_curJntPos-m_lastJntPos)/m_cycleTime;
+	m_curJntVel:= (m_curJntPos-m_lastJntPos)/(m_cycleTime*m_velCalcCycles);
 	m_curJntVel := m_jntVelLpf.run(m_curJntVel);
 	m_lastJntPos :=m_curJntPos;	
 	m_curVelCalCycles:=1;

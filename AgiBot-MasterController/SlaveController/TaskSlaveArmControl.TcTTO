@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <Task Name="TaskSlaveArmControl" Id="{e50b91df-afa8-41cc-8f39-f4e6b6ea4cff}">
     <!--CycleTime in micro seconds.-->
     <CycleTime>250</CycleTime>

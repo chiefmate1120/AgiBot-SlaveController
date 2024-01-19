@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveJoint" Id="{13c09c14-ad6e-446d-ae84-5ae40081815a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -24,7 +24,9 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cycleTime := i_controlCycleTime;
+        <ST><![CDATA[m_armIdx:=i_armIdx;
+m_jntIdx:=i_jntIdx;
+m_cycleTime := i_controlCycleTime;
 m_velCalcCycles :=MAX(i_velCalcCycles,1);
 
 // hardware parameters
@@ -35,11 +37,11 @@ m_linkEncoderReduction :=GVL_SlaveMotorParameters.g_absEncoderReduction[i_jntIdx
 m_trqConst :=GVL_SlaveMotorParameters.g_motorTrqConst[i_jntIdx];
 m_maxCurrent :=GVL_SlaveMotorParameters.g_motorMaxCurrent[i_jntIdx];
 m_motorDir :=GVL_SlaveMotorParameters.g_motorDir[i_jntIdx];								
-m_linkEncoderDir :=GVL_SlaveMotorParameters.g_asbEncoderDir[i_jntIdx];
 m_minJntPos	:=GVL_SlaveMotorParameters.g_minJntPos[i_jntIdx];
 m_maxJntPos	:=GVL_SlaveMotorParameters.g_maxJntPos[i_jntIdx];
 
 //link encoder calibartion data
+m_linkEncoderDir :=GVL_SlaveJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
 m_minLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_maxLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SlaveJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
@@ -83,14 +85,73 @@ m_motorOutputs.m_cmdCurrent:=0;
 m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="updateCmds" Id="{7d521106-f9be-4875-aa3c-95da24ffbb4d}">
+      <Declaration><![CDATA[METHOD PUBLIC updateCmds : BOOL
+VAR_INPUT
+	i_opMode : E_DriverOPMode;
+	i_cmdPos :LREAL;
+	i_cmdTrq :LREAL;
+END_VAR
+VAR
+	filtCmdTrq :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.updateCmds(i_opMode, i_cmdPos, i_cmdTrq);
+
+// write SDO data
+writeSDOData();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="writeSDOData" Id="{4c8048b7-1ef2-4f10-b4f9-05c2da6e4dfa}">
+      <Declaration><![CDATA[METHOD PROTECTED writeSDOData : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	SDOSubIndex :WORD;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//动力盒移动关节和器械旋转关节，共享一个控制字，由SDO写入
+IF (m_jntIdx=3) OR (m_jntIdx=8)  THEN
+	SDOSubIndex :=16#609B;
+//动力盒3、5号电机为一个驱动器，共享一个控制字，由SDO写入
+ELSIF (m_jntIdx=4) OR (m_jntIdx=6)  THEN
+	SDOSubIndex :=16#609C;
+//动力盒2、4号电机为一个驱动器，共享一个控制字，由SDO写入
+ELSIF (m_jntIdx=5) OR (m_jntIdx=7)  THEN
+	SDOSubIndex :=16#609D;
+END_IF
+
+IF m_jntIdx <3 THEN
+	RETURN;
+END_IF
+
+m_opModeSDOWrite(sNetID:= GVL_SlaveMotorParameters.g_slaveArmNetID[m_armIdx],
+				nSlaveAddr := GVL_SlaveMotorParameters.g_slaveJointNetPort[m_armIdx,m_jntIdx],
+				nSubIndex:=0,nIndex:=SDOSubIndex,pSrcBuf:=ADR(m_motorOutputs.m_opMode),cbBufLen:=SIZEOF(m_motorOutputs.m_opMode),bExecute:=TRUE);
+IF NOT m_opModeSDOWrite.bBusy THEN
+	m_opModeSDOWrite(bExecute:=FALSE);
+END_IF
+	
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SlaveJoint">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.init">
+      <LineId Id="187" Count="0" />
+      <LineId Id="186" Count="0" />
       <LineId Id="155" Count="0" />
       <LineId Id="166" Count="0" />
       <LineId Id="156" Count="0" />
-      <LineId Id="89" Count="28" />
+      <LineId Id="89" Count="7" />
+      <LineId Id="98" Count="3" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="102" Count="15" />
       <LineId Id="122" Count="6" />
       <LineId Id="130" Count="1" />
       <LineId Id="152" Count="1" />
@@ -99,6 +160,30 @@ m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       <LineId Id="148" Count="3" />
       <LineId Id="137" Count="5" />
       <LineId Id="39" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveJoint.updateCmds">
+      <LineId Id="53" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="62" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveJoint.writeSDOData">
+      <LineId Id="8" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="89" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="93" Count="2" />
+      <LineId Id="81" Count="4" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="65" Count="2" />
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

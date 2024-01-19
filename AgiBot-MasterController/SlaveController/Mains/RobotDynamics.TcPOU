@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -22,8 +22,7 @@ VAR
 	m_robotDynaInit :BOOL :=FALSE;
 	
 	// grivity model block
-	m_gravityModel :ARRAY[1..g_sArmNum] OF FB_SlaveGravity;
-	m_gravityModelFull :ARRAY[1..g_sArmNum] OF FB_SetupSlaveGravity;
+	m_slaveGravityModel :ARRAY[1..g_sArmNum] OF FB_SlaveGravity;
 	
 
 	// code execute time measure
@@ -40,7 +39,7 @@ END_VAR
 // robot dynamic model init
 IF m_robotDynaInit =FALSE THEN
 	FOR i:=1 TO g_sArmNum DO
-		m_gravityModel[i].Init(i);
+		m_slaveGravityModel[i].Init(i);
 	END_FOR
 
 	m_robotDynaInit:=TRUE;
@@ -48,9 +47,9 @@ END_IF
 
 // run gravity model
 FOR i:=1 TO g_sArmNum DO
-	m_slaveDynaData.m_gravity[i]:=m_gravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
-//	m_gravityModelFull[i].run(m_setupJointData.m_curJntPos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i],
-//				o_setupJ3Gravity=>m_setupJnt3Gravity, o_setupJ5Gravity=>m_setupJnt5Gravity, o_slaveGravity=>m_slaveDynaData.m_gravity);
+	m_setupJointData.m_curJntPos[i][5]:=pi/2;
+	m_slaveDynaData.m_gravity[i]:=m_slaveGravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
+
 END_FOR
 
 m_codeTime(START:=FALSE);
@@ -64,8 +63,10 @@ m_codeTime(START:=FALSE);
       <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="31" Count="0" />
-      <LineId Id="28" Count="2" />
-      <LineId Id="193" Count="1" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="194" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="54" Count="0" />
       <LineId Id="83" Count="0" />

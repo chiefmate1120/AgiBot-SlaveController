@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -16,15 +16,23 @@ VAR
 	// joints
 	m_joints :ARRAY[1..g_sJntNum] OF FB_SlaveJoint;
 	
-	// IO
-	m_panelOnIO AT%I*	:SINT;
-	m_panelOnFlag :BOOL;
-	m_instruOnIO AT%I* :SINT;
-	m_instruOnFlag :BOOL;
-	m_instrument : FB_Instrument;
-	m_adjustIO AT%I* :SINT;
+	// panel and insturment  install signal
+	m_panelInstrumentOnIO AT%I*	:UDINT;
+	m_panelOnCounts :INT :=0;
+	m_instruOnCounts :INT :=0;
+	m_panelInstruOnCountThres :INT :=50;
+	m_panelOnFlag :BOOL:=FALSE;
+	m_instruOnFlag :BOOL:=FALSE;
+	
+	// adjust signal
+	m_adjustIO AT%I* :UDINT;
+	m_adjustOnCounts :INT :=0;
+	m_adjustOnCountThres :INT :=50;
 	m_adjustOnFlag :BOOL;
 	
+	// instrument instance
+	m_instrument : FB_Instrument;
+
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
 	m_curCartTwist: Vec6d;
@@ -61,6 +69,9 @@ VAR
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_sJntNum] OF FB_PID;
 	
+	// code execute time measure
+	m_codeTime : Profiler;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -74,7 +85,14 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO]]></ST>
+        <ST><![CDATA[// TODO: need to be reviewed
+IF m_adjustIO = 8 or m_adjustIO = 40 THEN
+	m_adjustOnCounts :=MIN(m_adjustOnCounts +1,m_adjustOnCountThres);
+ELSE
+	m_adjustOnCounts :=0;
+END_IF
+
+adjustDetect := m_adjustOnCounts >= m_adjustOnCountThres;]]></ST>
       </Implementation>
     </Method>
     <Property Name="adjustOn" Id="{afc98598-ed29-4176-9f45-d842c4ec164a}" FolderPath="property\">
@@ -192,6 +210,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// check adjust button
 m_adjustOnFlag := adjustDetect();
+
 // check panel and instrument
 m_panelOnFlag := panelDetect();
 m_instruOnFlag := instruDetect();
@@ -424,9 +443,7 @@ FOR i:=1 TO g_sJntNum DO
 		GVL_slaveControlParameters.g_posKi[i], GVL_slaveControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
 		GVL_slaveControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
 END_FOR
-
-// compute current status
-updateStatus();]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="initJntPos" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
@@ -441,7 +458,10 @@ END_VAR]]></Declaration>
 FOR i:=1 TO g_sJntNum DO
 	m_joints[i].initJntPos();
 END_FOR
-]]></ST>
+
+
+// update arm status if joint position is re-init
+updateStatus();]]></ST>
       </Implementation>
     </Method>
     <Method Name="instruDetect" Id="{5f3a6988-31d6-440d-837a-fcdd94d64d1d}">
@@ -451,7 +471,14 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//TODO]]></ST>
+        <ST><![CDATA[// TODO: need to be reviewed
+IF m_panelInstrumentOnIO = 64  THEN
+	m_instruOnCounts := MIN( m_instruOnCounts +1,m_panelInstruOnCountThres);
+ELSE
+	m_instruOnCounts :=0;
+END_IF
+
+instruDetect := m_instruOnCounts >= m_panelInstruOnCountThres;]]></ST>
       </Implementation>
     </Method>
     <Property Name="instrument" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
@@ -544,7 +571,16 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO]]></ST>
+        <ST><![CDATA[// TODO: need to be reviewed
+IF m_panelInstrumentOnIO = 10 THEN
+	m_panelOnCounts := MIN( m_panelOnCounts +1,m_panelInstruOnCountThres);
+ELSIF m_panelInstrumentOnIO = 15 THEN
+	m_panelOnCounts :=0;
+END_IF
+
+panelDetect := m_panelOnCounts >= m_panelInstruOnCountThres;
+
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="panelOn" Id="{38ffa1da-012d-4dbc-ad5b-314577ed285b}" FolderPath="property\">
@@ -620,6 +656,7 @@ updateSimStatus();
 // enable/disable joints
 enable(i_armCtrlCmd.m_jntEnableFlag);
 
+	m_codeTime(START:=TRUE, RESET:=TRUE);
 // position/torque control
 FOR i:=1 TO g_sJntNum DO 
 	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_PosTrq THEN
@@ -637,7 +674,8 @@ FOR i:=1 TO g_sJntNum DO
 		m_joints[i].updateCmds(DriverOPMode_Pos,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	END_IF
 	
-END_FOR]]></ST>
+END_FOR
+	m_codeTime(START:=False);]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateDyna" Id="{02de28e3-c8a7-46cf-834a-5bf048b5e039}">
@@ -725,6 +763,7 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.adjustDetect">
+      <LineId Id="10" Count="6" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.adjustOn.Get">
@@ -749,6 +788,7 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.checkIO">
       <LineId Id="21" Count="1" />
+      <LineId Id="26" Count="0" />
       <LineId Id="6" Count="6" />
       <LineId Id="5" Count="0" />
       <LineId Id="14" Count="0" />
@@ -809,14 +849,16 @@ END_FOR
       <LineId Id="187" Count="0" />
       <LineId Id="165" Count="0" />
       <LineId Id="188" Count="2" />
-      <LineId Id="166" Count="13" />
+      <LineId Id="166" Count="11" />
       <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.initJntPos">
       <LineId Id="7" Count="3" />
+      <LineId Id="31" Count="2" />
       <LineId Id="25" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instruDetect">
+      <LineId Id="10" Count="6" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
@@ -844,6 +886,13 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.panelDetect">
       <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.panelOn.Get">
       <LineId Id="2" Count="0" />
@@ -868,6 +917,7 @@ END_FOR
       <LineId Id="52" Count="0" />
       <LineId Id="43" Count="0" />
       <LineId Id="42" Count="0" />
+      <LineId Id="85" Count="0" />
       <LineId Id="53" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="5" Count="0" />
@@ -886,6 +936,7 @@ END_FOR
       <LineId Id="64" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="9" Count="1" />
+      <LineId Id="86" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateDyna">
       <LineId Id="5" Count="0" />

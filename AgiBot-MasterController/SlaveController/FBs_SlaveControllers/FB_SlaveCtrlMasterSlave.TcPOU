@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -8,8 +8,6 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	
-
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -26,9 +24,9 @@ VAR_IN_OUT CONSTANT
 	i_slaveArm :FB_SlaveArm;
 	i_masterStatus :ST_MasterStatus;
 END_VAR
-var 
-
-END_VAR]]></Declaration>
+VAR 
+END_VAR
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[]]></ST>
       </Implementation>
@@ -46,8 +44,6 @@ VAR_IN_OUT CONSTANT
 	i_masterStatus :ST_MasterStatus;
 END_VAR
 VAR 
-	nullspaceMat :Mat7d;
-	ctrlTrq : Vec7d;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -65,11 +61,6 @@ END_VAR
 VAR_IN_OUT 
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
 END_VAR
-
-
-VAR
-	i:INT;
-END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
@@ -83,7 +74,7 @@ m_jntOPMode := g_slaveAllPosTrqMode;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="97" Count="0" />
+      <LineId Id="113" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
       <LineId Id="121" Count="0" />

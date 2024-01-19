@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_InstruParameters" Id="{c902676e-88fd-4523-9f32-42df361ddc7d}">
-    <Declaration><![CDATA[// instrumetn kinematic paramters
+    <Declaration><![CDATA[ // instrumetn kinematic paramters
 TYPE ST_InstruParameters :
 STRUCT	
 		

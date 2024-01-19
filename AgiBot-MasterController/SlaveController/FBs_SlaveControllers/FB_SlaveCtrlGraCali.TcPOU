@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlGraCali" Id="{9ec40fb0-5513-4ed9-babf-e07e71772a70}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Gravity Calibration
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlGraCali EXTENDS FB_SlaveArmCtrlBase
@@ -100,7 +100,8 @@ FOR i:=2 TO m_caliMotionSegs DO
 		endJntPos[j]:=m_graCaliTraj[i,j];
 	END_FOR
 	m_caliPlanner[i].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
-END_FOR]]></ST>
+END_FOR
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveCtrlGraCali">
@@ -129,6 +130,7 @@ END_FOR]]></ST>
       <LineId Id="131" Count="1" />
       <LineId Id="128" Count="0" />
       <LineId Id="126" Count="0" />
+      <LineId Id="152" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
