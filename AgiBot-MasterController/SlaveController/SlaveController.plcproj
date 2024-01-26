@@ -19,6 +19,9 @@
     <Released>false</Released>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AgiMaths\deg2rad.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\Frames\DHTrans.TcPOU">
       <SubType>Code</SubType>
     </Compile>

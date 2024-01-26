@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="deg2rad" Id="{85667c5a-688c-4f76-b165-bfdaa4c9f9b1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION deg2rad : lreal
+VAR_INPUT
+	angle_deg:lreal;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[deg2rad:=angle_deg*pi/180;
+]]></ST>
+    </Implementation>
+    <LineIds Name="deg2rad">
+      <LineId Id="10" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
