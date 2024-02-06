@@ -38,7 +38,7 @@ VAR
 		
 	// arm gravity
 	m_jntGravity : Vec5d:=g_zeroVec5d;
-
+	
 	
 END_VAR
 ]]></Declaration>
@@ -209,11 +209,129 @@ VAR_IN_OUT
 	r_rcPos :Vec3d;
 END_VAR
 VAR
-
+	a2,d4,d6:LREAL; //DH parameters
+	
+	Radius,Angle,R1,q:LREAL; //Disk structure parameters
+	x,y,z:LREAL;
+	basePosMatrix:ARRAY[1..4,1..4] OF LREAL;//transform from origin to C0
+	
+	T_50:ARRAY[1..4,1..4] OF LREAL; //transform from C0 to C5
+	F5:ARRAY[1..4,1..4] OF LREAL; //transform from origin to C5
+	q1,q2,q3,q4,q5:LREAL;	
+	c14,s14,c5,s5,s1,c1:LREAL;
+	
+	fixPointTransform:ARRAY[1..4,1..4] OF LREAL; //transform from C5 to fixed point
+	fixPointMatrix:ARRAY[1..4,1..4] OF LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//TODO]]></ST>
+        <ST><![CDATA[//TODO: move DH parameter to GVL 
+
+
+//****************input:five joint position of SetupArm********************//
+q1:=i_jntPos[1]; q2:=i_jntPos[2]; q3:=i_jntPos[3]; q4:=i_jntPos[4]; q5:=i_jntPos[5];
+
+
+
+
+//**********************DH parameters*************************//
+IF (m_armIdx=1) THEN
+	a2:=0.019; d4:=0.3545;
+	
+ELSIF (m_armIdx=2) THEN
+	a2:=0.136; d4:=0.3545;
+	
+ELSIF (m_armIdx=3) THEN	
+	a2:=0.136; d4:=0.5205;
+	
+ELSIF (m_armIdx=4) THEN	
+	a2:=0.1825; d4:=0.5205;
+END_IF
+d6:=0.6387229+0.1659;
+
+
+
+//********************transform form origin to C0***********************//
+Radius:=0.170; Angle:=60.0*g_deg2Rad;
+R1:=Radius;  q:=Angle;
+IF (m_armIdx=1) THEN
+	x:=-R1; y:=0; z:=0;
+	
+ELSIF (m_armIdx=2) THEN
+	x:=-R1*COS(q); y:=-R1*SIN(q); z:=0;
+	
+ELSIF (m_armIdx=3) THEN	
+	x:=R1*COS(q); y:=-R1*SIN(q); z:=0;
+	
+ELSIF (m_armIdx=4) THEN	
+	x:=R1; y:=0; z:=0;
+END_IF
+
+basePosMatrix[1,1]:=0;
+basePosMatrix[2,1]:=1;
+basePosMatrix[3,1]:=0;
+basePosMatrix[4,1]:=0;
+
+basePosMatrix[1,2]:=-1;
+basePosMatrix[2,2]:=0;
+basePosMatrix[3,2]:=0;
+basePosMatrix[4,2]:=0;
+
+basePosMatrix[1,3]:=0;
+basePosMatrix[2,3]:=0;
+basePosMatrix[3,3]:=1;
+basePosMatrix[4,3]:=0;
+
+basePosMatrix[1,4]:=x;
+basePosMatrix[2,4]:=y;
+basePosMatrix[3,4]:=z;
+basePosMatrix[4,4]:=1;
+
+
+
+
+//***************output1:C5 posture relative to origin(other than C0)*************//
+c14:=COS(q1+q4); s14:=SIN(q1+q4); 
+c5:=COS(q5); s5:=SIN(q5);
+c1:=COS(q1); s1:=SIN(q1);
+
+T_50[1,1]:=c14*c5; 
+T_50[2,1]:=s14*c5; 
+T_50[3,1]:=-s5; 
+T_50[4,1]:=0;
+
+T_50[1,2]:=-c14*s5;
+T_50[2,2]:=-s14*s5; 
+T_50[3,2]:=-c5; 
+T_50[4,2]:=0;
+
+T_50[1,3]:=-s14;
+T_50[2,3]:=c14;
+T_50[3,3]:=0;
+T_50[4,3]:=0;
+
+T_50[1,4]:=a2*c1 + q2*s1;
+T_50[2,4]:=a2*s1 - q2*c1;
+T_50[3,4]:=d4 + q3;
+T_50[4,4]:=1;
+
+matMultiply(basePosMatrix,T_50,F5);
+r_cartPose.m_pos[1]:=F5[1,4]; r_cartPose.m_pos[2]:=F5[2,4]; r_cartPose.m_pos[3]:=F5[3,4];
+
+r_cartPose.m_rot[1,1]:=F5[1,1];  r_cartPose.m_rot[1,2]:=F5[1,2];  r_cartPose.m_rot[1,3]:=F5[1,3];
+r_cartPose.m_rot[2,1]:=F5[2,1];  r_cartPose.m_rot[2,2]:=F5[2,2];  r_cartPose.m_rot[2,3]:=F5[2,3];
+r_cartPose.m_rot[3,1]:=F5[3,1];  r_cartPose.m_rot[3,2]:=F5[3,2];  r_cartPose.m_rot[3,3]:=F5[3,3];
+
+
+
+
+//********************output2:remote center position************************//
+fixPointTransform[1,1]:=1;  fixPointTransform[2,2]:=1;  fixPointTransform[3,3]:=1;  fixPointTransform[4,4]:=1;  
+fixPointTransform[2,4]:=-d6;  
+matMultiply(F5,fixPointTransform,fixPointMatrix);
+r_rcPos[1]:=fixPointMatrix[1,4];  r_rcPos[2]:=fixPointMatrix[2,4];  r_rcPos[3]:=fixPointMatrix[3,4];
+
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{38d8d9c7-7db7-4b7f-9fc0-1defdd94f779}">
@@ -459,11 +577,68 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.forwardKinematic">
-      <LineId Id="29" Count="0" />
+      <LineId Id="222" Count="1" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="184" Count="10" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="133" Count="2" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="168" Count="1" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="172" Count="1" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="140" Count="17" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="117" Count="2" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="74" Count="3" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="78" Count="3" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="44" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.init">
       <LineId Id="159" Count="1" />
-      <LineId Id="162" Count="8" />
+      <LineId Id="162" Count="2" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="166" Count="4" />
       <LineId Id="179" Count="0" />
       <LineId Id="80" Count="0" />
     </LineIds>

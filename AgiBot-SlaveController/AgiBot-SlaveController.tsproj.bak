@@ -1948,7 +1948,7 @@
 			</Project>
 		</Plc>
 		<Io>
-			<Device Id="4" DevType="111" DevFlags="#x0003" AmsPort="28676" AmsNetId="169.254.240.177.5.1" RemoteName="Arm1 (EtherCAT)" InfoImageId="4">
+			<Device Id="4" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28676" AmsNetId="169.254.240.177.5.1" RemoteName="Arm1 (EtherCAT)" InfoImageId="4">
 				<Name>Arm1 (EtherCAT)</Name>
 				<AddressInfo>
 					<Pnp>
@@ -2978,7 +2978,6 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500830000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
