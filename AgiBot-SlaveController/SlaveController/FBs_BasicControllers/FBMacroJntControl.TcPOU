@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FBMacroJntControl" Id="{c6765291-f864-4e5d-ade5-fd4917fa51c5}" SpecialFunc="None">
+    <Declaration><![CDATA[// Author: Feijian Ni
+// Date: 2023.11.22
+FUNCTION_BLOCK FBMacroJntControl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//TODO: move to GVLs 
+	// control paramters
+	m_macroJntKp:ARRAY[1..3] OF LREAL:=[1200,10,10];
+	m_macroJntKd:ARRAY[1..4] OF LREAL:=[100,1.0,1.0];
+	m_macroJntKi:ARRAY[1..4] OF LREAL:=[3000,0,0,0];
+	m_macroJntKiLimit:ARRAY[1..4] OF LREAL:=[3(1500.0)];
+	m_macroJnttrlLimit:ARRAY[1..4] OF LREAL:=[3(3500.0)];
+	m_jntTargetPosLpfCutoffFreq:LREAL:=10;
+	m_curJntVelLpfCutoffFreq:LREAL:=30;
+	
+	// filter for target joint position
+	m_cmdPosLpf:ARRAY[1..3] OF FBLowPassFilter;
+	
+	// filter for current joint velocity
+	m_curJntVelLpf:ARRAY[1..3] OF FBLowPassFilter;
+	
+	// max command joint velocity
+	m_maxJntVel:ARRAY[1..3] OF LREAL:=[1.5, 0.1, 0.1];
+	
+	// arm index for grip control
+	m_armIdx:INT;
+	
+	// final target macro joint position
+	m_targetJntPos:ARRAY[1..3] OF LREAL;
+	
+	// position tracking error
+	m_posErr:ARRAY[1..3] OF LREAL;
+	
+	// max position error for safety check
+	m_safetyPosErr:ARRAY[1..3] OF LREAL:=[5.0*pi/180,5.0*pi/180,0.01];
+	
+	// command macro joint position and veloicty for next cycle
+	m_cmdJntPos:ARRAY[1..3] OF LREAL;
+	m_cmdJntVel:ARRAY[1..3] OF LREAL;
+
+	// current  macro joint position and veloicty for next cycle
+	m_curJntPos:ARRAY[1..3] OF LREAL;
+	m_curJntVel:ARRAY[1..3] OF LREAL;
+	
+	// PID for joint position
+	m_jntPIDCtrl:ARRAY[1..3] OF FBPID;
+	m_cmdJntTrq:ARRAY[1..3] OF LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{4345252f-2ed8-4298-85dc-af57a29f3293}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_armIdx:INT;
+END_VAR
+
+VAR
+	i,j:INT;
+	currentRatioMotor2Jnt:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx:=i_armIdx;
+
+// get current instrument orientation
+m_curJntPos[1]:=Robot_Status.Robot_Current_DH_Joint_Position_M3[m_armIdx].q1;
+m_curJntPos[2]:=Robot_Status.Robot_Current_DH_Joint_Position_M3[m_armIdx].q2;
+m_curJntPos[3]:=Robot_Status.Robot_Current_DH_Joint_Position_M3[m_armIdx].q3;
+FOR i:=1 TO 3  DO 
+	m_targetJntPos[i]:=m_curJntPos[i];
+	m_cmdJntPos[i]:=m_curJntPos[i];
+	m_cmdJntVel[i]:=0;
+	m_curJntVel[i]:=0;
+END_FOR
+
+// init controller
+FOR i:=1 TO 3 DO
+	currentRatioMotor2Jnt:=GVL_system_parameters.arm_joint_transmition_efficiency[i-1+Gvl_IO.Joint6]*GVL_system_parameters.arm_joint_torque_constant[i-1+Gvl_IO.Joint6]
+							*GVL_system_parameters.transmission_ratio[m_armIdx, i-1+Gvl_IO.Joint6]/1000;
+	m_jntPIDCtrl[i].init(GVL_system_parameters.cycle_robot,m_macroJntKp[i],m_macroJntKd[i],m_macroJntKi[i],
+		m_macroJntKiLimit[i]* currentRatioMotor2Jnt,	m_macroJnttrlLimit[i]*currentRatioMotor2Jnt);
+END_FOR
+
+// init low pass filter
+FOR i:=1 TO 3 DO
+	m_cmdPosLpf[i].init(i_filterOrd:=1,i_cutoffFreq:=m_jntTargetPosLpfCutoffFreq,i_sampleFreq:=1000);
+	m_curJntVelLpf[i].init(i_filterOrd:=1,i_cutoffFreq:=m_curJntVelLpfCutoffFreq,i_sampleFreq:=1000);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{98a9d861-1b1a-4cb9-8f0b-c8a2c81f6c73}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	// target joint position in DH model 3
+	i_targetJntPos:ARRAY[1..3] OF LREAL;
+
+END_VAR
+
+VAR_OUTPUT
+	// motor control current
+	o_cmdMotorTrq:ARRAY[1..3] OF LREAL;
+END_VAR
+
+VAR
+	i: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// fitl target joint position
+FOR i:=1 TO 3 DO
+	m_targetJntPos[i]:=m_cmdPosLpf[i].run(i_targetJntPos[i]);
+END_FOR
+
+// get current joint position
+m_curJntPos[1]:=Robot_Status.Robot_Current_DH_Joint_Position_M3[m_armIdx].q1;
+m_curJntPos[2]:=Robot_Status.Robot_Current_DH_Joint_Position_M3[m_armIdx].q2;
+m_curJntPos[3]:=Robot_Status.Robot_Current_DH_Joint_Position_M3[m_armIdx].q3;
+
+// get current joint velocity
+m_curJntVel[1]:=m_curJntVelLpf[1].run(Robot_Status.Robot_Current_Joint_Velocity_V2[m_armIdx,6]);
+m_curJntVel[2]:=m_curJntVelLpf[2].run(Robot_Status.Robot_Current_Joint_Velocity_V2[m_armIdx,10]);
+m_curJntVel[3]:=m_curJntVelLpf[3].run(Robot_Status.Robot_Current_Joint_Velocity_V2[m_armIdx,11]);
+
+// interpolate command position
+FOR i:=1 TO 3 DO
+	m_cmdJntVel[i]:=LIMIT(-m_maxJntVel[i],(m_targetJntPos[i]-m_cmdJntPos[i])/GVL_system_parameters.cycle_robot, m_maxJntVel[i]);
+	m_cmdJntPos[i]:=m_cmdJntPos[i]+m_cmdJntVel[i]*GVL_system_parameters.cycle_robot;
+END_FOR  
+
+// joint position control torque control
+FOR i:=1 TO 3 DO
+	o_cmdMotorTrq[i]:=0;
+	m_posErr[i]:=m_cmdJntPos[i]-m_curJntPos[i];
+	m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i], m_cmdJntVel[i], m_curJntVel[i]);
+END_FOR
+
+// safety check
+FOR i:=1 TO 3 DO
+	IF ABS(m_posErr[i])>m_safetyPosErr[i] THEN
+		run := FALSE;
+		RETURN;
+	END_IF
+END_FOR
+
+// motor control current
+o_cmdMotorTrq[1]:=gvl_system_parameters.Joint_Motion_direction[m_armIdx,6]*(m_cmdJntTrq[1]+Robot_Status.Robot_Joint_Gravity[1].q6);
+o_cmdMotorTrq[2]:=gvl_system_parameters.Joint_Motion_direction[m_armIdx,10]*(m_cmdJntTrq[2]+Robot_Status.Robot_Joint_Gravity[1].q10);
+o_cmdMotorTrq[3]:=gvl_system_parameters.Joint_Motion_direction[m_armIdx,11]*(m_cmdJntTrq[3]+Robot_Status.Robot_Joint_Gravity[1].q11);
+run := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FBMacroJntControl">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FBMacroJntControl.init">
+      <LineId Id="13" Count="18" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+    </LineIds>
+    <LineIds Name="FBMacroJntControl.run">
+      <LineId Id="19" Count="0" />
+      <LineId Id="57" Count="2" />
+      <LineId Id="21" Count="6" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="29" Count="27" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <Task Name="TaskSlaveArmControl" Id="{e50b91df-afa8-41cc-8f39-f4e6b6ea4cff}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>250</CycleTime>
+    <Priority>1</Priority>
+    <PouCall>
+      <Name>SlaveArmControl</Name>
+    </PouCall>
+    <TaskFBGuid>{755ecddb-093d-4e5e-8220-f08b740490a4}</TaskFBGuid>
+    <Fb_init>{d215542e-0e38-49ed-b8f2-54eedd2217ca}</Fb_init>
+    <Fb_exit>{9e9eff68-98b3-4481-a505-6b84ce928437}</Fb_exit>
+    <CycleUpdate>{8f97f500-10bc-4f95-af0b-382f57d3cde2}</CycleUpdate>
+    <PostCycleUpdate>{8680683f-7ef3-49f5-b149-e456b414a7fb}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_InstruCtrlParams" Id="{f4067b3b-1600-41bf-bbfc-2a09113afeea}">
+    <Declaration><![CDATA[// TODO： Code review and refined
+VAR_GLOBAL
+	
+	//器械相关
+	Instrument_ID_ByUser:ARRAY[1..4] OF INT;	
+	Motor_ENC2_Home_Offset:ARRAY[1..4,12..15] OF LREAL;
+	Instrument_Read_ENC2_Offset:ARRAY[1..4,12..14] OF LREAL;
+	Instrument_Usage_Times_Limit:UINT:=20;
+	Joint_Position_Add_Home:ARRAY [1..4] OF LREAL;
+	Surgical_Instrument_Offset:ARRAY [1..4] OF LREAL;
+	Head_Len:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,	0.01950, 0.0096, 0.0109, 0.011,		0.01101, 0.02313, 0.0195, 0.0207, 0.0130, 0.01638, 0.01638, 13(1)	];
+	
+	
+	//***************************器械夹持力控制*******************************//
+	Force_Control_Factor_P:LREAL:=0.01;//夹持力控制P控制器
+	Wusi_Len_To_Angle:LREAL:=0.5;
+	Surgical_Instrument_Move_Direction_Now,Surgical_Instrument_Move_Direction_Last:ARRAY[1..4] OF LREAL;	
+	Surgical_Instrument_Return_Direction_Limit:LREAL:=2*PI/180;	
+	Surgical_Instrument_Pos_Max,Surgical_Instrument_Pos_Min:ARRAY[1..4] OF LREAL;	
+	L1_Target_Pos_Offset,L2_Target_Pos_Offset,L3_Target_Pos_Offset:ARRAY[1..4] OF LREAL;	
+	L1_Actual_Pos_Offset,L2_Actual_Pos_Offset,L3_Actual_Pos_Offset:ARRAY[1..4] OF LREAL;	
+
+	
+	
+	L1_Target_Pos_Offset_last,L2_Target_Pos_Offset_last,L3_Target_Pos_Offset_last:ARRAY[1..4] OF LREAL;	
+	L1_Actual_Pos_Offset_last,L2_Actual_Pos_Offset_last,L3_Actual_Pos_Offset_last:ARRAY[1..4] OF LREAL;	
+	Force_Control_Target_Current:LREAL:=150;
+	Instrument_Series_Record:ARRAY [1..100] OF ULINT;	
+	
+	
+	Robot_Clamping_Force_Control:ARRAY[1..4] OF BOOL:=[1,1,1,1];//夹持力保持P控制器开关
+	
+	
+	
+	// Add by NiFeijian,  new method to mount panel and instrument, can be repalced later
+	// joint position of panel locked position
+	g_panelLockedPosition :Vec5d:=[0.0, 0.0, 0.0, 0.0, 0.0];	
+	
+	// motor position when instrument is at zero position
+	g_instruZeroPosition :Vec5d :=[0.0, 0.0, 0.0, 0.0, 0.0];// move to instrument chip and read online
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

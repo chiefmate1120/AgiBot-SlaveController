@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_SlaveArmState" Id="{1989848d-a357-4300-a3bc-ded8b39d8e17}">
+    <Declaration><![CDATA[TYPE E_SlaveArmState :
+(
+	SlaveArmState_Error := 1,
+	SlaveArmState_Init :=2,
+	SlaveArmState_SelfCheck :=3,
+	SlaveArmState_Standby :=4,
+	SlaveArmState_MountPanel:=5,
+	SlaveArmState_PanelReady :=6,
+	SlaveArmState_MountInstru :=7,
+	SlaveArmState_InstruReady :=8,
+	SlaveArmState_MasterSlave :=9,
+	SlaveArmState_MountScope :=10,
+	SlaveArmState_ScopeReady :=11,
+	SlaveArmState_EndoScope :=12,
+	SlaveArmState_Adjust :=13,
+	SlaveArmState_Package :=14,
+	SlaveArmState_Cart := 15,
+	SlaveArmState_GravityCali := 16,
+	SlaveArmState_Test := 17,
+	
+	SlaveArmState_totalNum :=SlaveArmState_Test
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

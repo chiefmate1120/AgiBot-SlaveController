@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_setupSlaveGravity" Id="{5452bfb6-8061-49fa-846a-f3728f3e7824}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_setupSlaveGravity
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	o_Gravity:ARRAY[1..4,1..3] OF LREAL;
+END_VAR
+VAR
+	m_armIdx :INT ;
+
+	// current arm parameters
+	m_armParams :ARRAY[1..5] OF LREAL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="getRegMat" Id="{7045fe73-d3f1-4303-94f0-43372abb4236}">
+      <Declaration><![CDATA[METHOD getRegMat : BOOL
+VAR_INPUT
+	// joint position of setup joint, joint6-8
+	setupAng :LREAL;
+	q1: LREAL;
+	q2: LREAL;
+	q3: LREAL;
+END_VAR
+
+VAR
+	gx, gy :LREAL;
+	s0,c0,s1,c1,s2, c2,d3 :LREAL;
+END_VAR
+
+VAR_OUTPUT
+	o_regMat:ARRAY[1..4,1..7] OF LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[s0:= SIN(setUpAng);
+c0:= COS(setUpAng);
+s1:=SIN(q1);
+c1:=COS(q1);
+s2:=SIN(q2);
+c2:=COS(q2);
+d3:=q3;
+
+// setup joint
+o_regMat[1,1] :=c0;
+o_regMat[1,2] :=-(c2*s0*d3+c0*c1*s2*d3);
+o_regMat[1,3] :=  -c0*c1;
+o_regMat[1,4] := -s0;
+o_regMat[1,5] :=  -c0*s1;
+o_regMat[1,6] := - (c0*c1*s2+c2*s0);
+o_regMat[1,7] := s0*s2- c0*c1*c2 ;
+
+
+// joint1
+o_regMat[1,1] :=0;
+o_regMat[1,2] :=s0*s1*s2*d3;
+o_regMat[1,3] := s0*s1;
+o_regMat[1,4] := 0;
+o_regMat[1,5] := -s0*c1;
+o_regMat[1,6] := s0*s1*s2;
+o_regMat[1,7] := s0*c2*s1;
+
+// joint2 
+o_regMat[1,1] := 0;
+o_regMat[1,2] := - (9.8*c0*s2*d3+9.8*s0*c1*c2*d3);
+o_regMat[1,3] :=  0;
+o_regMat[1,4] := 0;
+o_regMat[1,5] :=  0;
+o_regMat[1,6] := - (c0*s2+s0*c1*c2);
+o_regMat[1,7] := s0*c1*s2- c0*c2  ;
+
+// joint3
+o_regMat[1,1] :=0;
+o_regMat[1,2] := c0*c2 - s0*c1*s2;
+o_regMat[1,3] :=  0;
+o_regMat[1,4] := 0;
+o_regMat[1,5] :=  0;
+o_regMat[1,6] := 0;
+o_regMat[1,7] := 0;	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{50ab6c0f-ea77-4dcf-ba79-983ca62b783b}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_armIdx :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx :=i_armIdx;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{6d0c1aa2-0848-447c-a248-94105516dfb5}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// setup joint angle
+	i_setupJntPos :Vec5d;
+	
+	// slave joint angle
+	i_slaveJntPos :Vec8d;
+	
+	// instrument
+	i_instruStatus :ST_InstruStatus;
+END_VAR
+VAR_OUTPUT
+	// setup joint3 gravity
+	o_setupJ3Gravity :LREAL;
+	
+	// setup joint5 gravity
+	o_setupJ5Gravity :LREAL;
+	
+	// slave joint1-3 gravity
+	o_slaveGravity : Vec3d;
+END_VAR
+VAR
+	setupPos, q1, q2, q3 :LREAL;
+	i,j:INT;
+	
+	gravityTrq :Vec4d;
+	// gravity regression matrix
+	regMat:ARRAY[1..4,1..7] OF LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[setupPos:=i_setupJntPos[5];
+q1 := i_slaveJntPos[1];
+q2 := i_slaveJntPos[2];
+q3 := i_slaveJntPos[3];
+
+
+// get regression matrx
+getRegMat(setupPos, q1, q2, q3, o_regMat=>regMat);
+
+// determine current arm parameters
+IF FALSE = i_instruStatus.m_ready THEN
+	// arm only
+	FOR i:=1 TO 7 DO
+		m_armParams[i]:=GVLs_SetupSlaveArmDynamics.g_gravityParam[m_armIdx,i];
+	END_FOR
+
+// endoscope
+ELSIF InstruType_endoscope = i_instruStatus.m_type THEN 
+	FOR i:=1 TO 7 DO
+		m_armParams[i]:=GVLs_SetupSlaveArmDynamics.g_gravityParam[m_armIdx,i]+GVLs_SetupSlaveArmDynamics.g_gravityEndoscope[i];
+	END_FOR
+
+// instrument
+ELSE
+	FOR i:=1 TO 7 DO
+		m_armParams[i]:=GVLs_SetupSlaveArmDynamics.g_gravityParam[m_armIdx,i]+GVLs_SetupSlaveArmDynamics.g_gravityInstrument[i];
+	END_FOR
+// TODO:Trocar
+END_IF
+
+// calculate gravity torque
+FOR i:=1 TO 4 DO
+	gravityTrq[i]:=0;
+	FOR j:=1 TO 7 DO
+		gravityTrq[i]:=gravityTrq[i]+regMat[i,j]*m_armParams[j];
+	END_FOR
+END_FOR
+
+o_setupJ5Gravity:=gravityTrq[1];
+o_slaveGravity[1]:=gravityTrq[2];
+o_slaveGravity[2]:=gravityTrq[3];
+o_slaveGravity[3]:=gravityTrq[4];
+
+// setup joint3 gravity fitting
+o_setupJ3Gravity := setupJnt3Gravity(i_setupJntPos[3]);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setupJnt3Gravity" Id="{14b87259-982c-438c-9682-4b69bb2110c7}">
+      <Declaration><![CDATA[METHOD setupJnt3Gravity : LREAL
+VAR_INPUT
+	i_jnt3Pos :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TDDO calculate gravity of setup joint3 by polynomial fitting
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_setupSlaveGravity">
+      <LineId Id="51" Count="0" />
+      <LineId Id="117" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_setupSlaveGravity.getRegMat">
+      <LineId Id="197" Count="1" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="153" Count="3" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="201" Count="3" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="209" Count="5" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="215" Count="5" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="221" Count="5" />
+      <LineId Id="176" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_setupSlaveGravity.init">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_setupSlaveGravity.run">
+      <LineId Id="89" Count="0" />
+      <LineId Id="20" Count="2" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="26" Count="4" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="67" Count="2" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="31" Count="11" />
+      <LineId Id="49" Count="7" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="103" Count="2" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_setupSlaveGravity.setupJnt3Gravity">
+      <LineId Id="5" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlMountInstru" Id="{db93de24-03af-45f5-8edb-e02a943fe1f8}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Mounting Instrument
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountInstru EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// mount status
+	m_mountStatus :INT := 0;
+	
+	// flag if joint is mounted
+	m_jointMounted :ARRAY[1..5] OF BOOL := [5(FALSE)];
+	
+	// instrument mount motion range
+	m_mountMotionAng :Vec5d :=[1.25*PI, PI/2, PI/2, PI/2, PI/2];
+	
+	// instrument mount direction
+	m_mountDir :Vec5i :=[1, 1, 1, 1, 1];
+	
+	// mount motion planning
+	m_jntOTG :ARRAY[1..5] OF FB_secOrdTrajFilter;
+	m_instruMountVel :LREAL := 30* g_deg2Rad;
+	m_instruMountAcc :LREAL := PI;
+	
+	// track error threshold which indicate motor is buckled with panel
+	m_maxTrackErr :LREAL := 5*g_deg2Rad;
+	
+	// command mount motion
+	m_targetMountPos :Vec5d;
+	
+	// instrument zero position
+	m_instruZeroPos :Vec5d;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{106b8ce6-26fa-4bca-bfc9-20f8cdf00f0e}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_INPUT
+	motionScale :LREAL;
+	masterIdx :INT;
+END_VAR
+
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+	i_masterStatus :ST_MasterStatus;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntVel :Vec8d;
+	curJntPos :Vec8d;
+	jntPosErr :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+curJntPos := i_slaveArm.curJntPos;
+
+CASE m_mountStatus OF
+	// To lock panel with instrument
+	0:
+		FOR i:=1 TO 5 DO
+			// check joint buckled with instrument
+			IF ABS(m_cmdJntPos[i+3]-curJntPos[i+3])> m_maxTrackErr THEN 
+				m_jointMounted[i]:=TRUE;
+				m_targetMountPos[i]:=curJntPos[i+3];
+			END_IF
+			
+			// set target joint position
+			IF FALSE = m_jointMounted[i] THEN
+				// check mount motion direction
+				IF ABS(m_cmdJntPos[i+3]-m_targetMountPos[i])< GVL_SlaveControlParameters.g_jntCtrlPosTol THEN
+					m_mountDir[i]:=-1*m_mountDir[i];
+				END_IF
+				m_targetMountPos[i]:=m_mountDir[i]*m_mountMotionAng[i];
+			END_IF
+		END_FOR
+		
+		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4] AND m_jointMounted[5]) THEN
+			m_mountStatus:=1;
+		END_IF
+	
+	// determine zero position
+	1:
+		m_targetMountPos:=g_instruZeroPosition;
+		m_mountStatus :=2;
+	
+	// move back to zero position
+	2:
+		vecSub(m_targetMountPos,curJntPos,jntPosErr);
+		IF vecNorm(jntPosErr)<GVL_SlaveControlParameters.g_jntCtrlPosTol THEN
+			m_isFinished:=TRUE;
+		END_IF
+END_CASE
+
+// traj plan
+FOR i:=1 TO 5 DO
+	m_jntOTG[i].run(m_targetMountPos[i],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{85ccbdcb-d27d-4162-a6ec-e8e93d30dbc6}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+// check if to hold the command joint position unchanged
+checkToHoldLastCmds(i_slaveArm,r_slaveArmCtrlCmd);
+
+// check instrument type to get mount joint index and zero position
+IF i_slaveArm.instrument.instruType <> InstruType_UNKNOWM THEN
+	m_jointMounted[5]:=TRUE;
+	m_instruZeroPos[1]:=0;// need to update based on instrument type
+	m_instruZeroPos[2]:=0;
+	m_instruZeroPos[3]:=0;
+	m_instruZeroPos[4]:=0;
+	m_instruZeroPos[5]:=0;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlMountInstru">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntPos">
+      <LineId Id="149" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="163" Count="1" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="216" Count="2" />
+      <LineId Id="169" Count="2" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="172" Count="6" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="182" Count="4" />
+      <LineId Id="188" Count="2" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="146" Count="2" />
+      <LineId Id="150" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountInstru.init">
+      <LineId Id="57" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="77" Count="2" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
