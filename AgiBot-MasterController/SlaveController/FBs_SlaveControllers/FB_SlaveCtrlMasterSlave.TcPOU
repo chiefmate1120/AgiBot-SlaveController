@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -8,7 +8,13 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+// ################ variables for single joint test ##################
+	m_initJntPos :Vec8d;
+	m_jntMotionFreq :Vec8d :=[0.1, 0.1, 0.1, 0, 0, 0, 0, 0];
+	m_jntMotionRange :Vec8d :=[pi/6, pi/4, 0.1, 0, 0, 0, 0];
+	testIdx :INT :=1;
 	
+//####################################################################
 
 END_VAR
 ]]></Declaration>
@@ -26,11 +32,33 @@ VAR_IN_OUT CONSTANT
 	i_slaveArm :FB_SlaveArm;
 	i_masterStatus :ST_MasterStatus;
 END_VAR
-var 
-
-END_VAR]]></Declaration>
+VAR 
+	i:INT :=0;
+	errThres :LREAL;
+END_VAR
+]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[// Just for joint controller test
+IF testIdx >0 THEN
+	m_cmdJntPos[testIdx]:=m_initJntPos[testIdx]+m_jntMotionRange[testIdx]* SIN(2*pi*m_jntMotionFreq[testIdx]*m_timePeriod);
+	m_cmdJntVel[testIdx]:=m_jntMotionRange[testIdx]*2*pi*m_jntMotionFreq[testIdx]*COS(2*pi*m_jntMotionFreq[testIdx]*m_timePeriod);
+END_IF
+
+
+
+FOR i:=1 TO 8 DO 
+	IF i=3 THEN
+		errThres := 0.01;
+	ELSE
+		errThres :=5*g_deg2rad;
+	END_IF
+	
+	IF ABS(m_cmdJntPos[i]-i_slaveArm.curJntPos[i])>errThres THEN
+		m_isFinished:=TRUE;
+	END_IF
+	
+END_FOR
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{590b7c96-65ed-47d5-8eb2-8a13ee8a5533}">
@@ -65,16 +93,13 @@ END_VAR
 VAR_IN_OUT 
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
 END_VAR
-
-
-VAR
-	i:INT;
-END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 
 m_jntOPMode := g_slaveAllPosTrqMode;
+
+m_initJntPos :=i_slaveArm.curJntPos;
 
 ]]></ST>
       </Implementation>
@@ -83,7 +108,21 @@ m_jntOPMode := g_slaveAllPosTrqMode;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="97" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="132" Count="1" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="124" Count="1" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="127" Count="1" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="113" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
       <LineId Id="121" Count="0" />
@@ -94,6 +133,8 @@ m_jntOPMode := g_slaveAllPosTrqMode;
       <LineId Id="13" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="19" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>

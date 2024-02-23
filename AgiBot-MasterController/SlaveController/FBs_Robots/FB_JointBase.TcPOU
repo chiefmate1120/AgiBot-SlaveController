@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_JointBase" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR_INPUT
@@ -7,6 +7,10 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// arm and joint index
+	m_armIdx :INT;
+	m_jntIdx :INT;
+	
 	// motor IO
 	m_motorInputs AT%I*	:ST_MotorInputs;
 	m_motorOutputs AT%Q* :ST_MotorOutputs;
@@ -51,6 +55,7 @@ VAR
 	// joint data
 	m_curMotorPos :LREAL;
 	m_curLinkPos :LREAL;
+	m_curLinkSingle :LREAL;
 	m_curJntPos	:LREAL;
 	m_curJntVel :LREAL;
 	m_curJntTrq :	LREAL;
@@ -74,6 +79,9 @@ VAR
 	m_velCalcCycles :INT :=1;
 	m_curVelCalCycles :INT :=1;
 	
+	// SDO writer
+	m_opModeSDOWrite:FB_EcCoESdoWrite;
+	m_MotorCurrentSDOWrite:FB_EcCoESdoWrite;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -246,6 +254,15 @@ incLinkPos := (newLinkEnc-m_caliLinkEncoder)*m_linkEnc2PosRatio;
 linkEnc2Pos := incLinkPos + m_linkEncCaliJntPos + 2*PI* m_linkEncCycles;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="linkEnc2Single" Id="{9d6c7755-b703-453f-b6ae-f54f820f6166}">
+      <Declaration><![CDATA[METHOD linkEnc2Single : LREAL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[linkEnc2Single := m_motorInputs.m_linkEncoder*m_linkEnc2PosRatio;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="linkPos" Id="{e503da77-c373-4ba2-b314-228646ff52c0}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY PUBLIC linkPos : LREAL]]></Declaration>
       <Get Name="Get" Id="{057e650e-064f-4e5d-ae71-67363977daff}">
@@ -254,6 +271,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[linkPos:=m_curLinkPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="linkSingle" Id="{92272d5e-cb45-4b54-bf42-a498f7cda63c}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY linkSingle : LREAL]]></Declaration>
+      <Get Name="Get" Id="{c70ae0db-e2bc-4bc1-b82f-20bdc6f0cbef}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[linkSingle :=m_curLinkSingle;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -317,7 +345,7 @@ END_VAR]]></Declaration>
 IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
 	m_cmdTrqLpf.reset();	
-	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
+//	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
 	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(i_cmdPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
 	filtCmdTrq:=m_cmdTrqLpf.run(i_cmdTrq);
@@ -335,13 +363,15 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// compute joint position
 m_curLinkPos:= linkEnc2Pos();
+m_curLinkSingle:= linkEnc2Single();
 m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
+
 
 // compute joint velocity
 m_curVelCalCycles := m_curVelCalCycles+1;
 IF m_curVelCalCycles > m_velCalcCycles THEN
-	m_curJntVel:= (m_curJntPos-m_lastJntPos)/m_cycleTime;
+	m_curJntVel:= (m_curJntPos-m_lastJntPos)/(m_cycleTime*m_velCalcCycles);
 	m_curJntVel := m_jntVelLpf.run(m_curJntVel);
 	m_lastJntPos :=m_curJntPos;	
 	m_curVelCalCycles:=1;
@@ -419,7 +449,13 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="36" Count="0" />
       <LineId Id="38" Count="0" />
     </LineIds>
+    <LineIds Name="FB_JointBase.linkEnc2Single">
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_JointBase.linkPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_JointBase.linkSingle.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.motorEnc2Pos">
@@ -450,7 +486,9 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
     <LineIds Name="FB_JointBase.updateStatus">
       <LineId Id="18" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="45" Count="0" />
       <LineId Id="16" Count="1" />
+      <LineId Id="44" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="33" Count="1" />

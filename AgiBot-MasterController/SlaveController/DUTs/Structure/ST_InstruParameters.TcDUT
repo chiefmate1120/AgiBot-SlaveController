@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_InstruParameters" Id="{c902676e-88fd-4523-9f32-42df361ddc7d}">
-    <Declaration><![CDATA[// instrumetn kinematic paramters
+    <Declaration><![CDATA[ // instrumetn kinematic paramters
 TYPE ST_InstruParameters :
 STRUCT	
 		
@@ -12,28 +12,16 @@ STRUCT
 	kx:lreal:=1;
 	ky:lreal:=1;
 	kz:lreal:=1;
-	
-	x1:lreal:=0;
-	y1:lreal:=0;
-	z1:lreal:=0;	
-	
-	
+
 	k13:LREAL:=0.775;
 	k23:LREAL:=0.775;
-	open_direction:INT:=-1;
-	
-	
-	
+	m_openAngleDir:INT:=-1;
+
 	Len_fixed_point:LREAL:=0.2;	//不动点距离安装面的长度
 	Len_mounting_surface:LREAL:=0.009; //器械安装面距离滑块的长度(图中的L3)
 	Len_Hight:lreal:=0; //器械杆的高度
 	slope_angle:LREAL:=0; //如果器械是摄像头，还需要考虑摄像头的斜面角度
-	
-	Open_Sngle_Min:LREAL:=0;
 	open_angle_max:LREAL:=1.57;
-	rz_min:LREAL;
-	rz_max:LREAL;
-	
 
 END_STRUCT
 END_TYPE

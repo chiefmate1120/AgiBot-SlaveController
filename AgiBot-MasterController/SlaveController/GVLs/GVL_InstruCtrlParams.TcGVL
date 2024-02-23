@@ -1,39 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_InstruCtrlParams" Id="{f4067b3b-1600-41bf-bbfc-2a09113afeea}">
     <Declaration><![CDATA[// TODO： Code review and refined
 VAR_GLOBAL
 	
 	//器械相关
-	Instrument_ID_ByUser:ARRAY[1..4] OF INT;	
-	Motor_ENC2_Home_Offset:ARRAY[1..4,12..15] OF LREAL;
-	Instrument_Read_ENC2_Offset:ARRAY[1..4,12..14] OF LREAL;
-	Instrument_Usage_Times_Limit:UINT:=20;
-	Joint_Position_Add_Home:ARRAY [1..4] OF LREAL;
-	Surgical_Instrument_Offset:ARRAY [1..4] OF LREAL;
-	Head_Len:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,	0.01950, 0.0096, 0.0109, 0.011,		0.01101, 0.02313, 0.0195, 0.0207, 0.0130, 0.01638, 0.01638, 13(1)	];
+	Head_Len_1:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,	0.01950, 0.0096, 0.0109, 0.011,		0.01101, 0.02313, 0.0195, 0.0207, 0.0130, 0.01638, 0.01638, 13(1)	];
 	
+	camera_slope_angle:LREAL:=30.0*g_deg2Rad;; //摄像头斜面角度
 	
-	//***************************器械夹持力控制*******************************//
-	Force_Control_Factor_P:LREAL:=0.01;//夹持力控制P控制器
-	Wusi_Len_To_Angle:LREAL:=0.5;
-	Surgical_Instrument_Move_Direction_Now,Surgical_Instrument_Move_Direction_Last:ARRAY[1..4] OF LREAL;	
-	Surgical_Instrument_Return_Direction_Limit:LREAL:=2*PI/180;	
-	Surgical_Instrument_Pos_Max,Surgical_Instrument_Pos_Min:ARRAY[1..4] OF LREAL;	
-	L1_Target_Pos_Offset,L2_Target_Pos_Offset,L3_Target_Pos_Offset:ARRAY[1..4] OF LREAL;	
-	L1_Actual_Pos_Offset,L2_Actual_Pos_Offset,L3_Actual_Pos_Offset:ARRAY[1..4] OF LREAL;	
+	a3:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,  0.0089,0.0089,0.010,0.010,		0.0089,0.01065,0.01065,0.01065,0.0089,		0.00935,0.00935,0,0,   4(0), 0.0089, 5(0)];
+	k13:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1, 0.77510204, 0.808510638, 0.62295082, 0.644067797,  0.729166667,  0.5, 0.62295082, 0.62295082,  0.729166667,   -0.734693878,	-0.734693878,    1,      1,   1,	4(1), 0.77510204, 5(1)];
+	k23:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1, 0.77510204, 0.808510638, 0.62295082, 0.644067797,  0.729166667,  0.5, 0.62295082, 0.62295082,  0.729166667,   -0.734693878,	-0.734693878,    1,      1,   1,	4(1), 0.77510204, 5(1)  ];
+	kx:ARRAY[1..30] OF LREAL:=[30(-1)];
+	ky:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,  0.931034483,    0.931034483,      0.931034483,    0.931034483,    0.947368421,    0.931034483,    0.931034483,     0.931034483,     0.931034483,   0.877192982,	0.877192982,    1,      1,   1,	4(1), 0.931034483, 5(1)   ];
+	kz:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,  0.844827586,    0.810344828,      1.051724138,    1.017241379,    0.842105263,    1.310344828,    1.051724138,     1.051724138,     0.827586207,   0.859649123,	0.859649123,    1,      1,   1,	4(1), 0.844827586, 5(1)  ];
+	openAngleDir:ARRAY[1..30] OF INT:=[30(-1)];
+	
+	rad_30:LREAL:=30.0*g_deg2Rad;  rad_60:LREAL:=60.0*g_deg2Rad;	 rad_38:LREAL:=38.0*g_deg2Rad;	rad_55:LREAL:=55.0*g_deg2Rad;	
+	rad_45:LREAL:=45.0*g_deg2Rad; rad_28:LREAL:=28.0*g_deg2Rad; rad_10:LREAL:=10.0*g_deg2Rad;rad_90:LREAL:=90.0*g_deg2Rad;
+	open_angle_max:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,  rad_45,  rad_30+rad_10,  rad_38+rad_10, rad_38+rad_10,	 rad_30+rad_10, rad_90, rad_45+rad_10, rad_45+rad_10,  rad_60,rad_30,     rad_30,1,1];
+	
+	tool_name:ARRAY[1..30] OF STRING:=['1','1','1','1','1','1',  'Cadiere Forceps','Large Needle Driver','Mega SutureCut Needle Driver','Large SutureCut Needle Driver',	'RoundTip Scissors','Prograsp',	'Maryland Bipolar Forceps','Fenestrated Bipolar Forceps', 'Monopolar Curved Scissors','Permanent Cautery Hook','Permanent Cautery Spatula','1','1','Camera'];
+	
+//	Head_Len:ARRAY[1..30] OF LREAL:=[1,1,1,1,1,1,	0.01950, 0.0096, 0.0109, 0.011,		0.01101, 0.02313, 0.0195, 0.0207, 0.0130, 0.01638, 0.01638, 13(1)	];
+	Head_Len:ARRAY[1..30] OF LREAL:=[0,0,0,0,0,0,	0, 0.0096, 0.0109,  0.0109,		0, 0, 0, 0, 0, 0, 0, 13(0)	];
+		
+	//*************************绝对定位精度测试使用*****************************//
+	len1:LREAL:=0.5438;  len3:LREAL:=0.009;	len_camera:LREAL:=0.49;//0.477;//0.3035;//0.51	
+	Len_Rod:ARRAY[1..30] OF LREAL:=[0,0,0,0,0,  0, len1,len1,len1,len1,	len1,len1,len1,len1,0.54375,	0.5432, 0.5432,0,0,len_camera,     4(0),0.551,5(0)]; //器械的杆长	，ID25号器械是主从延时测试用，长度为533+18
+	
+	Len_mounting_surface:ARRAY[1..30] OF LREAL:=[0,0,0,0,0,	0,len3,len3,len3,len3,	len3,len3,len3,len3,len3,	len3,len3,0,0,len3,    4(0),len3,5(0)]; //滑块和器械安装面的距离(图中的L3)
+	TroCar_Len:LREAL:=0.1;//穿刺器长度、此处使用的是短穿刺器
+	Zero_To_Bottom_J8:LREAL:=0.14;//8关节刻度线到最底部长度
 
-	
-	
-	L1_Target_Pos_Offset_last,L2_Target_Pos_Offset_last,L3_Target_Pos_Offset_last:ARRAY[1..4] OF LREAL;	
-	L1_Actual_Pos_Offset_last,L2_Actual_Pos_Offset_last,L3_Actual_Pos_Offset_last:ARRAY[1..4] OF LREAL;	
-	Force_Control_Target_Current:LREAL:=150;
-	Instrument_Series_Record:ARRAY [1..100] OF ULINT;	
-	
-	
-	Robot_Clamping_Force_Control:ARRAY[1..4] OF BOOL:=[1,1,1,1];//夹持力保持P控制器开关
-	
-	
 	
 	// Add by NiFeijian,  new method to mount panel and instrument, can be repalced later
 	// joint position of panel locked position
