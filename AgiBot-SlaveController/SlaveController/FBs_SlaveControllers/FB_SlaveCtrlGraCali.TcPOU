@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlGraCali" Id="{9ec40fb0-5513-4ed9-babf-e07e71772a70}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Gravity Calibration
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlGraCali EXTENDS FB_SlaveArmCtrlBase
@@ -30,15 +30,13 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{e8388ef5-ff5f-4bc0-805c-b4f37a5ed6ad}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 
-VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
-	i_masterStatus :ST_MasterStatus;
-END_VAR
 
 VAR 
 	i :INT;

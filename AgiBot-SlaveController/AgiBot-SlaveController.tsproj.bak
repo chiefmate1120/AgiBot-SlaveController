@@ -632,28 +632,6 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{CF079733-D1C1-42DF-E755-E249EFC90CF5}" AutoDeleteType="true">E_MatchedMasterArmIdx</Name>
-			<BitSize>16</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
-			<EnumInfo>
-				<Text><![CDATA[MatchedMasterArmIdx_NULL]]></Text>
-				<Enum>0</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[MatchedMasterArmIdx_Left]]></Text>
-				<Enum>1</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[MatchedMasterArmIdx_Right]]></Text>
-				<Enum>2</Enum>
-			</EnumInfo>
-			<Properties>
-				<Property>
-					<Name>generate_implicit_init_function</Name>
-				</Property>
-			</Properties>
-		</DataType>
-		<DataType>
 			<Name GUID="{7B95AD23-6D0A-B7D8-1092-6139AD4A83D2}" AutoDeleteType="true">E_InstrumentType</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
@@ -711,10 +689,10 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{4222FF3F-A953-4AD0-83EE-9B8676E8E831}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{553F80B5-2DEE-259F-9B9D-C70AF8CA64EA}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
-			<BitSize>9856</BitSize>
+			<BitSize>10624</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{4B802559-0C67-90FD-B037-356BCAE7C8ED}">E_SlaveArmState</Type>
@@ -745,17 +723,6 @@
 				</Default>
 			</SubItem>
 			<SubItem>
-				<Name>m_teleMasterArmIdx</Name>
-				<Type GUID="{CF079733-D1C1-42DF-E755-E249EFC90CF5}">E_MatchedMasterArmIdx</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ index(0 to 2) of master arm which is tele-linked to slave arm]]></Comment>
-				<BitSize>64</BitSize>
-				<BitOffs>64</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_instruStauts</Name>
 				<Type GUID="{47C47B8B-A262-DC2B-4554-97E1E3467F1C}">ST_InstruStatus</Type>
 				<ArrayInfo>
@@ -764,7 +731,24 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ instrument info]]></Comment>
 				<BitSize>512</BitSize>
-				<BitOffs>128</BitOffs>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_endoscopeMounted</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment><![CDATA[ flag if endoscope is mounted]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>576</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_endoscopePose</Name>
+				<Type GUID="{A41C2452-5720-3408-E222-D9CF54E07AAF}">ST_Frame</Type>
+				<Comment><![CDATA[ endoscope pose in cart coordinate]]></Comment>
+				<BitSize>768</BitSize>
+				<BitOffs>640</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdArmPose</Name>
@@ -773,9 +757,9 @@
 					<LBound>1</LBound>
 					<Elements>4</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ command arm pose in endoscope view]]></Comment>
+				<Comment><![CDATA[ command arm pose in cart view]]></Comment>
 				<BitSize>3072</BitSize>
-				<BitOffs>640</BitOffs>
+				<BitOffs>1408</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmPose</Name>
@@ -784,9 +768,9 @@
 					<LBound>1</LBound>
 					<Elements>4</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ current arm pose in endoscope view]]></Comment>
+				<Comment><![CDATA[ current arm pose in cart view]]></Comment>
 				<BitSize>3072</BitSize>
-				<BitOffs>3712</BitOffs>
+				<BitOffs>4480</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdArmTwist</Name>
@@ -795,9 +779,9 @@
 					<LBound>1</LBound>
 					<Elements>4</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in endoscope view]]></Comment>
+				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in cart view]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>6784</BitOffs>
+				<BitOffs>7552</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmTwist</Name>
@@ -806,9 +790,9 @@
 					<LBound>1</LBound>
 					<Elements>4</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in endoscope view]]></Comment>
+				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in cart view]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>8320</BitOffs>
+				<BitOffs>9088</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1111,7 +1095,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{0C28AB9A-8AF0-9635-F50D-F75B464B8015}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{A82D377F-2D0F-FCA8-40B0-0F385E93A796}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1337,7 +1321,7 @@
 							<Type GUID="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupArmStates</Name>
+							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
 							<Type GUID="{A8F5126F-AC95-ADAC-C9D1-B762439830DF}">ST_SetupStatus</Type>
 						</Var>
@@ -1480,7 +1464,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{4222FF3F-A953-4AD0-83EE-9B8676E8E831}">ST_SlaveStatus</Type>
+							<Type GUID="{553F80B5-2DEE-259F-9B9D-C70AF8CA64EA}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>

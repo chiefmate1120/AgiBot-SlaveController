@@ -231,9 +231,6 @@ END_VAR
 //****************input:five joint position of SetupArm********************//
 q1:=i_jntPos[1]; q2:=i_jntPos[2]; q3:=i_jntPos[3]; q4:=i_jntPos[4]; q5:=i_jntPos[5];
 
-
-
-
 //**********************DH parameters*************************//
 IF (m_armIdx=1) THEN
 	a2:=0.019; d4:=0.3545;
@@ -248,8 +245,6 @@ ELSIF (m_armIdx=4) THEN
 	a2:=0.1825; d4:=0.5205;
 END_IF
 d6:=0.6387229+0.1659;
-
-
 
 //********************transform form origin to C0***********************//
 Radius:=0.170; Angle:=60.0*g_deg2Rad;
@@ -287,9 +282,6 @@ basePosMatrix[2,4]:=y;
 basePosMatrix[3,4]:=z;
 basePosMatrix[4,4]:=1;
 
-
-
-
 //***************output1:C5 posture relative to origin(other than C0)*************//
 c14:=COS(q1+q4); s14:=SIN(q1+q4); 
 c5:=COS(q5); s5:=SIN(q5);
@@ -322,16 +314,11 @@ r_cartPose.m_rot[1,1]:=F5[1,1];  r_cartPose.m_rot[1,2]:=F5[1,2];  r_cartPose.m_r
 r_cartPose.m_rot[2,1]:=F5[2,1];  r_cartPose.m_rot[2,2]:=F5[2,2];  r_cartPose.m_rot[2,3]:=F5[2,3];
 r_cartPose.m_rot[3,1]:=F5[3,1];  r_cartPose.m_rot[3,2]:=F5[3,2];  r_cartPose.m_rot[3,3]:=F5[3,3];
 
-
-
-
 //********************output2:remote center position************************//
 fixPointTransform[1,1]:=1;  fixPointTransform[2,2]:=1;  fixPointTransform[3,3]:=1;  fixPointTransform[4,4]:=1;  
 fixPointTransform[2,4]:=-d6;  
 matMultiply(F5,fixPointTransform,fixPointMatrix);
-r_rcPos[1]:=fixPointMatrix[1,4];  r_rcPos[2]:=fixPointMatrix[2,4];  r_rcPos[3]:=fixPointMatrix[3,4];
-
-]]></ST>
+r_rcPos[1]:=fixPointMatrix[1,4];  r_rcPos[2]:=fixPointMatrix[2,4];  r_rcPos[3]:=fixPointMatrix[3,4];]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{38d8d9c7-7db7-4b7f-9fc0-1defdd94f779}">
@@ -580,16 +567,12 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="222" Count="1" />
       <LineId Id="45" Count="1" />
       <LineId Id="56" Count="0" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="181" Count="0" />
-      <LineId Id="183" Count="0" />
       <LineId Id="180" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="184" Count="10" />
       <LineId Id="182" Count="0" />
       <LineId Id="177" Count="0" />
-      <LineId Id="195" Count="0" />
-      <LineId Id="133" Count="2" />
+      <LineId Id="134" Count="1" />
       <LineId Id="178" Count="0" />
       <LineId Id="167" Count="0" />
       <LineId Id="161" Count="0" />
@@ -603,9 +586,7 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="164" Count="0" />
       <LineId Id="160" Count="0" />
       <LineId Id="140" Count="17" />
-      <LineId Id="136" Count="1" />
-      <LineId Id="139" Count="0" />
-      <LineId Id="121" Count="0" />
+      <LineId Id="136" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="47" Count="0" />
       <LineId Id="102" Count="0" />
@@ -625,14 +606,10 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="129" Count="0" />
       <LineId Id="64" Count="1" />
       <LineId Id="60" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="128" Count="0" />
       <LineId Id="126" Count="0" />
       <LineId Id="48" Count="1" />
       <LineId Id="52" Count="1" />
-      <LineId Id="50" Count="1" />
-      <LineId Id="44" Count="0" />
+      <LineId Id="50" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.init">
       <LineId Id="159" Count="1" />

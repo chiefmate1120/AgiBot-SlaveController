@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlTest" Id="{25b7ca7b-a3c0-4d1d-9db6-09421c0085dc}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlTest EXTENDS FB_SlaveArmCtrlBase
@@ -23,15 +23,13 @@ END_VAR
     </Implementation>
     <Method Name="calcCmdJntPos" Id="{010d1f8e-611a-45d6-a3e6-a98e946007a3}">
       <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 
-VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
-	i_masterStatus :ST_MasterStatus;
-END_VAR
 VAR 
 	i:INT :=0;
 	errThres :LREAL;
@@ -65,15 +63,13 @@ END_FOR
     <Method Name="calcCmdJntTrq" Id="{7ca43581-7589-4aef-a767-3681b3b7ea42}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntTrq : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 
-VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
-	i_masterStatus :ST_MasterStatus;
-END_VAR
 VAR 
 	nullspaceMat :Mat7d;
 	ctrlTrq : Vec7d;

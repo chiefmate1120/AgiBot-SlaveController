@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArmCtrlBase" Id="{dee0ec68-3abc-4720-b67c-0fb3fd57933b}" SpecialFunc="None">
     <Declaration><![CDATA[// Slave Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_SlaveArmCtrlBase IMPLEMENTS I_SlaveArmCtrl
@@ -13,6 +13,9 @@ VAR
 	
 	// controller execute time period
 	m_timePeriod :LREAL:=0;
+	
+	// flag to hold last commands
+	m_holdLastCmds :BOOL := FALSE;
 	
 	// arm control data
 	m_cmdJntPos : VEC8d;
@@ -31,14 +34,11 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{98ab3239-d030-4534-a55d-1eaac78d6af0}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
-END_VAR
-
 VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+	i_endoscopePose : ST_Frame;
 	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -48,14 +48,11 @@ END_VAR
     <Method Name="calcCmdJntTrq" Id="{31ee0fe6-80c4-42e7-bd18-5b745e895642}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntTrq : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
-END_VAR
-
 VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+	i_endoscopePose : ST_Frame;
 	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// set joint torque to zero in default
@@ -66,7 +63,6 @@ m_cmdJntTrq := g_zeroVec8d;]]></ST>
       <Declaration><![CDATA[METHOD checkToHoldLastCmds : BOOL
 VAR_IN_OUT CONSTANT
 	i_slaveArm :FB_SlaveArm;
-	i_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
 END_VAR
 VAR
 	j:INT;
@@ -75,18 +71,13 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-vecSub(i_slaveArmCtrlCmd.m_cmdJntPos, i_slaveArm.m_curJntPos,jntCtrlErr);
+vecSub(m_cmdJntPos, i_slaveArm.m_curJntPos,jntCtrlErr);
 maxJntErr:=0.0;
 FOR j:=1 TO g_sJntNum DO
 	maxJntErr:= MAX(maxJntErr, ABS(jntCtrlErr[j]));
 END_FOR
 
-IF maxJntErr<GVL_SlaveControlParameters.g_jntCtrlErrForCmdHold THEN
-	m_cmdJntPos:=i_slaveArmCtrlCmd.m_cmdJntPos;
-ELSE
-	m_cmdJntPos:=i_slaveArm.curJntPos;
-END_IF
-
+checkToHoldLastCmds := (maxJntErr<GVL_SlaveControlParameters.g_jntCtrlErrForCmdHold);
 ]]></ST>
       </Implementation>
     </Method>
@@ -108,7 +99,9 @@ m_jntEnableFlag[8]:=0; // L5 joint on instrument power box is unused currently
 m_jntOPMode:=g_slaveAllPosMode;
 m_cmdCartPose:=i_slaveArm.curCartPose;
 m_cmdCartTwist:=g_zeroVec6d;
-m_cmdJntPos:=i_slaveArm.curJntPos;
+IF FALSE = m_holdLastCmds THEN
+	m_cmdJntPos:=i_slaveArm.curJntPos;
+END_IF
 m_cmdJntVel:=g_zeroVec8d;
 m_cmdJntAcc:=g_zeroVec8d;
 m_cmdJntTrq:=g_zeroVec8d;
@@ -149,14 +142,11 @@ m_timePeriod:=0;
     <Method Name="run" Id="{4a86d5bc-6efe-47db-8e4e-968f76a73eb3}">
       <Declaration><![CDATA[{warning '添加方法实现'}
 METHOD run : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
-END_VAR
-
 VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+	i_endoscopePose : ST_Frame;
 	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 VAR_IN_OUT
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
@@ -175,10 +165,10 @@ IF FALSE = i_slaveArm.isEnabled(m_jntEnableFlag) THEN
 END_IF
 
 // calculate command joint position--Motion control
-calcCmdJntPos(motionScale, masterIdx, i_slaveArm,i_masterStatus);
+calcCmdJntPos(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
 
 // calculate command joint torque -- Force control
-calcCmdJntTrq(motionScale, masterIdx, i_slaveArm,i_masterStatus);
+calcCmdJntTrq(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
 
 // update commands to arm
 r_slaveArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
@@ -207,8 +197,7 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.checkToHoldLastCmds">
       <LineId Id="6" Count="6" />
-      <LineId Id="26" Count="3" />
-      <LineId Id="17" Count="1" />
+      <LineId Id="26" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.init">
@@ -217,7 +206,9 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="104" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="71" Count="1" />
+      <LineId Id="114" Count="0" />
       <LineId Id="23" Count="0" />
+      <LineId Id="115" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />

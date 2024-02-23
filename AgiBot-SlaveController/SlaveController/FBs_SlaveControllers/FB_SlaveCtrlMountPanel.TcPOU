@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMountPanel" Id="{823d9da4-dfa7-45fa-b541-870812882ed0}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Panel
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountPanel EXTENDS FB_SlaveArmCtrlBase
@@ -33,14 +33,11 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{19d93df1-8900-4356-b776-97d66cc8cc37}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
-END_VAR
-
 VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+	i_endoscopePose : ST_Frame;
 	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 
 VAR 

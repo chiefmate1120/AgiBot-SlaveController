@@ -3,7 +3,7 @@
   <POU Name="DHTrans" Id="{6f2f5444-d30f-44ea-b23b-d19608633eba}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION DHTrans : ST_Frame
 VAR_IN_OUT CONSTANT
-	// DH parameters: alpha, a, d, DH[4]
+	// DH parameters: alpha, a, d, theta
 	DH :Vec4d;
 END_VAR
 VAR

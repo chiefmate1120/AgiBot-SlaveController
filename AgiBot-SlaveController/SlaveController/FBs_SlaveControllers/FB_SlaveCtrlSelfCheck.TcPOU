@@ -19,14 +19,11 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{ffa3dbdd-63a1-4101-8d26-d1f3e6e5e2be}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
-END_VAR
-
 VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+	i_endoscopePose : ST_Frame;
 	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 
 VAR 

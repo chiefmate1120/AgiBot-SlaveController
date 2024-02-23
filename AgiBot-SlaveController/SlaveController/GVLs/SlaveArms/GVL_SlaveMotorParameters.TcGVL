@@ -14,7 +14,7 @@ VAR_GLOBAL CONSTANT
 	
 	// motor parameters
 	g_motorTrqConst :ARRAY[1..g_sJntNum] OF LREAL :=[ 0.16,0.16, 0.017,5(0.0193)];
-	g_motorMaxCurrent :ARRAY[1..g_sJntNum] OF LREAL :=[ 5600,5600,  500, 5(500)];//mA
+	g_motorMaxCurrent :ARRAY[1..g_sJntNum] OF LREAL :=[ 5600,5600,  500, 5(200)];//mA
 	
 	// motor encoder direction
 	g_motorDir :ARRAY[1..g_sJntNum] OF INT :=[-1, 1, -1, 1, 1, 1, 1, 1];
@@ -23,8 +23,12 @@ VAR_GLOBAL CONSTANT
 	g_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-pi,	-pi/2,	0.15, 	5(-99*pi)];	
 	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[pi,	1.196, 	0.58, 		5(99*pi)];
 	
+	// DH joint position limit
+	g_minDHJntPos : ARRAY[1..6] OF LREAL :=[-PI, -PI/2, 0.15, -11*PI/6, -PI/2 - 75*g_deg2Rad , -PI/2];
+	g_maxDHJntPos : ARRAY[1..6] OF LREAL :=[PI, 1.196, 0.55, 11*PI/6, -PI/2 + 75*g_deg2Rad, PI/2];
+	
 	// joint velocity limit
-	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.2, 1.2, 0.2, 5(2*pi)];
+	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[2.5, 2.5, 0.3, 5(2*pi)];
 		
 END_VAR
 ]]></Declaration>

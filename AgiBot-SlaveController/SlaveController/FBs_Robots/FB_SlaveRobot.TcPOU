@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -9,6 +9,15 @@ END_VAR
 VAR
 	// master-slave motion scale
 	m_motionScale :LREAL;
+	
+	// index(0 to 4) of slave arm which is tele-linked to master arm
+	m_teleSlaveArmIdx :ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx;
+	
+	// flag if endoscope is mounted
+	m_endoscopeMounted :BOOL := FALSE;
+	
+	// endoscope pose in cart coordinate
+	m_endoscopePose : ST_Frame;
 	
 	// slave arms, responsible for arm kinematic and control
 	m_slaveArms :ARRAY[1..g_sArmNum] OF FB_SlaveArm;
@@ -21,10 +30,6 @@ VAR
 	// flag if panel and instrument mounted
 	m_panelMountedFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
 	m_instrumentMountedFlag :Array[1..g_sArmNum] OF BOOL :=[4(FALSE)];
-	
-	
-	// index(1 to 4) of slave arm which is tele-linked to master arm
-	m_teleMasterArmIdx:ARRAY[1..g_sArmNum] OF E_MatchedMasterArmIdx:=[4(MatchedMasterArmIdx_NULL)];
 	
 	// all arm controller instance 
 	m_armCtrlFactory :ARRAY[1..g_sArmNum,1..SlaveArmState_totalNum] OF I_SlaveArmCtrl;
@@ -63,7 +68,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO: decide the matched master arm index for each slave arm]]></ST>
+        <ST><![CDATA[// TODO: decide the matched master arm index for each slave arm
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
@@ -83,7 +89,6 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[r_slaveStatus.m_armState:=m_slaveArmState;
-r_slaveStatus.m_teleMasterArmIdx := m_teleMasterArmIdx;
 
 // TODO: project cartesion data to monitor coordinate
 FOR i:=1 TO g_sArmNum DO
@@ -91,7 +96,7 @@ FOR i:=1 TO g_sArmNum DO
 	// instrument data
 	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.instruType;
 	r_slaveStatus.m_instruStauts[i].m_ready:=m_slaveArms[i].instruOn;
-	r_slaveStatus.m_instruStauts[i].m_fingerAngle:=m_slaveArms[i].gripAngle;
+	r_slaveStatus.m_instruStauts[i].m_fingerAngle:=m_slaveArms[i].curGripAngle;
 	
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
@@ -130,7 +135,6 @@ END_VAR
 	m_slaveArmState[i]:=SlaveArmState_Init;
 	m_lastSlaveArmState[i]:=SlaveArmState_Init;
 	m_nextSlaveArmState[i]:=SlaveArmState_Init;
-	m_teleMasterArmIdx[i]:=MatchedMasterArmIdx_NULL;
 	
 	// command init
 	m_armCtrlCmds[i].m_jntEnableFlag := g_zeroVec8i;
@@ -178,6 +182,16 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motionScale := i_slaveInputDataPool.m_masterStatus.m_motionScale;
+m_teleSlaveArmIdx := i_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx;
+
+// check if endoscope is mounted
+m_endoscopeMounted := FALSE;
+FOR i:=1 TO g_sArmNum DO 
+	IF m_slaveArms[i].instrument.instruType=InstruType_endoscope THEN
+		m_endoscopeMounted := TRUE;
+		m_endoscopePose := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], m_slaveArms[i].curCartPose);
+	END_IF
+END_FOR
 
 // state machine transition
 stateMachine(i_slaveInputDataPool);
@@ -195,8 +209,8 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 	
 	// run controller
-	m_armCtrl[i].run(m_motionScale, m_teleMasterArmIdx[i], m_SlaveArms[i],
-						i_slaveInputDataPool.m_MasterStatus,m_armCtrlCmds[i]);
+	m_armCtrl[i].run(m_endoscopePose, i_slaveInputDataPool.m_MasterStatus,
+					i_slaveInputDataPool.m_setupStatus, m_SlaveArms[i],m_armCtrlCmds[i]);
 
 	// update commands to drivers
 	m_slaveArms[i].updateCmds(m_armCtrlCmds[i]);
@@ -288,10 +302,7 @@ END_VAR]]></Declaration>
 			
 (*		
 
-		
-		
-		//mount instrument
-		SlaveArmState_Mountnstru:
+	
 		
 		//mount instrument
 		SlaveArmState_Mountnstru:
@@ -342,9 +353,10 @@ END_FOR]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveRobot.checkTeleMasterArmIdx">
       <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.getStatus">
-      <LineId Id="23" Count="1" />
+      <LineId Id="23" Count="0" />
       <LineId Id="96" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
@@ -372,7 +384,7 @@ END_FOR]]></ST>
     <LineIds Name="FB_SlaveRobot.Init">
       <LineId Id="5" Count="0" />
       <LineId Id="60" Count="0" />
-      <LineId Id="47" Count="4" />
+      <LineId Id="47" Count="3" />
       <LineId Id="80" Count="2" />
       <LineId Id="87" Count="5" />
       <LineId Id="94" Count="0" />
@@ -392,19 +404,27 @@ END_FOR]]></ST>
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.run">
-      <LineId Id="78" Count="1" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="130" Count="2" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="79" Count="0" />
       <LineId Id="19" Count="2" />
       <LineId Id="11" Count="0" />
       <LineId Id="88" Count="1" />
       <LineId Id="97" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="5" Count="0" />
-      <LineId Id="104" Count="0" />
+      <LineId Id="112" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="73" Count="2" />
       <LineId Id="71" Count="0" />
       <LineId Id="56" Count="1" />
-      <LineId Id="81" Count="0" />
+      <LineId Id="118" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="58" Count="0" />
       <LineId Id="55" Count="0" />
@@ -462,7 +482,6 @@ END_FOR]]></ST>
       <LineId Id="165" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="88" Count="1" />
-      <LineId Id="95" Count="2" />
       <LineId Id="117" Count="17" />
       <LineId Id="183" Count="1" />
       <LineId Id="135" Count="2" />

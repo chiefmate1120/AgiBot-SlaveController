@@ -22,6 +22,9 @@
     <Compile Include="AgiMaths\Frames\DHTrans.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\Frames\invFrame.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\Frames\rotX.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -116,9 +119,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MasterArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedMasterArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedSlaveArmIdx.TcDUT">
@@ -229,7 +229,7 @@
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FBGripControl.TcPOU">
+    <Compile Include="FBs_BasicControllers\FB_InstrumentControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FBMacroJntControl.TcPOU">

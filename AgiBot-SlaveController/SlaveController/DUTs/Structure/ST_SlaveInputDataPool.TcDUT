@@ -18,7 +18,7 @@ STRUCT
 	m_masterStatus AT %I*:ST_MasterStatus;
 	
 	// setup arms infromation;
-	m_setupArmStates AT %I* : ST_SetupStatus;
+	m_setupStatus AT %I* : ST_SetupStatus;
 	
 	// slave dynamic data
 	m_slaveDynaData AT %I* : ST_SlaveDynaData;

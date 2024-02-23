@@ -27,14 +27,13 @@ END_VAR
     </Method>
     <Method Name="run" Id="{cdc1ac69-5bc1-4174-b158-da097af4b3d6}">
       <Declaration><![CDATA[METHOD run : BOOL
-VAR_INPUT
-	motionScale :LREAL;
-	masterIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+	i_endoscopePose : ST_Frame;
 	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+	
 END_VAR
 VAR_IN_OUT
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;

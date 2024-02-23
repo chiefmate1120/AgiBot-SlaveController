@@ -30,20 +30,18 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
-// check if to hold the command joint position unchanged
-checkToHoldLastCmds(i_slaveArm,r_slaveArmCtrlCmd);
-]]></ST>
+//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveCtrlScopeReady">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlScopeReady.init">
-      <LineId Id="57" Count="1" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="73" Count="3" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
