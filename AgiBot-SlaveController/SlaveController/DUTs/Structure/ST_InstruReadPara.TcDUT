@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_InstruReadPara" Id="{24a5a89b-c2a6-4796-bae1-11e8082d9094}">
+    <Declaration><![CDATA[TYPE ST_InstruReadPara :
+STRUCT
+	
+	i_ReadInfoIntrus:BOOL;   	//Instrument Read Information Start single
+	i_ArmNetId:T_AmsNetId; 	//IP of operating arm
+	i_JointInstruAddr:UINT;		//Joint port number
+	i_LEDPortAddr:UINT;		//Arm LED Prot
+	i_CameraMonitor:BOOL;	//endoscope monitor   TRUE if there is an endoscope
+	
+	
+	// ID
+	m_InstruID: INT:=0;
+	
+	// series number
+	m_InstruseriesNum : ULINT:=0;
+	// instrument type
+	m_Instrutype : E_InstrumentType := InstruType_UNKNOWM;
+	
+	// current and max usage counts
+	m_InstruusageCounts :ULINT;
+	m_InstrumaxUsageCounts :ULINT:=20;
+	
+	//Instrument Zero augular offset
+	m_InstruPos:Mat45;
+	
+	//Instrument state
+	m_InstruReadSucceed:BOOL;
+	
+	//Instrument Clamp Error
+	m_Error:BOOL;
+	m_ErrorID:INT;//1器械类型错误、2器械使用次数超限、3两个内窥镜
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

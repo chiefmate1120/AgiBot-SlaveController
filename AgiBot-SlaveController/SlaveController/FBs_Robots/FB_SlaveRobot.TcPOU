@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -268,7 +268,7 @@ END_VAR]]></Declaration>
 				m_slaveArms[i].readInstruInfo();
 			END_IF
 			IF m_armCtrl[i].isFinished THEN
-				m_slaveArms[i].instrument.initInstruJntPos(m_slaveArms);
+				m_slaveArms[i].instrument.initInstruJntPos(m_slaveArms[i].curJntPos);
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
 			END_IF
 		
