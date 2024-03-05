@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -62,16 +62,6 @@ END_VAR
 
 ]]></ST>
     </Implementation>
-    <Method Name="checkTeleMasterArmIdx" Id="{09218ffd-5fe3-49d7-900b-14b283e8d9f2}">
-      <Declaration><![CDATA[METHOD checkTeleMasterArmIdx : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// TODO: decide the matched master arm index for each slave arm
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
       <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
 VAR_IN_OUT
@@ -94,7 +84,7 @@ END_VAR
 FOR i:=1 TO g_sArmNum DO
 	
 	// instrument data
-	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.instruType;
+	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.InstruReadPara.m_Instrutype;
 	r_slaveStatus.m_instruStauts[i].m_ready:=m_slaveArms[i].instruOn;
 	r_slaveStatus.m_instruStauts[i].m_fingerAngle:=m_slaveArms[i].curGripAngle;
 	
@@ -110,12 +100,12 @@ FOR i:=1 TO g_sArmNum DO
 	
 	// command info
 	// cartesion
-	r_slaveStatus.m_cmdArmPose[i]:=m_armCtrlCmds[i].m_cmdCartPose;
-	r_slaveStatus.m_cmdArmTwist[i]:=m_armCtrlCmds[i].m_cmdCartTwist;
+	r_slaveStatus.m_cmdArmPose[i]:=m_slaveArms[i].cmdCartPose;
+	r_slaveStatus.m_cmdArmTwist[i]:=m_slaveArms[i].cmdCartTwist;
 	// joint info
-	r_slaveJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
-	r_slaveJointsData.m_cmdJntVel[i]:=m_armCtrlCmds[i].m_cmdJntVel;
-	r_slaveJointsData.m_cmdJntTrq[i]:=m_armCtrlCmds[i].m_cmdJntTrq;
+	r_slaveJointsData.m_cmdJntPos[i]:=m_slaveArms[i].cmdJntPos;
+	r_slaveJointsData.m_cmdJntVel[i]:=m_slaveArms[i].cmdJntVel;
+	r_slaveJointsData.m_cmdJntTrq[i]:=m_slaveArms[i].cmdJntTrq;
 	
 END_FOR]]></ST>
       </Implementation>
@@ -187,7 +177,7 @@ m_teleSlaveArmIdx := i_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx;
 // check if endoscope is mounted
 m_endoscopeMounted := FALSE;
 FOR i:=1 TO g_sArmNum DO 
-	IF m_slaveArms[i].instrument.instruType=InstruType_endoscope THEN
+	IF m_slaveArms[i].instrument.InstruReadPara.m_Instrutype=InstruType_endoscope THEN
 		m_endoscopeMounted := TRUE;
 		m_endoscopePose := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], m_slaveArms[i].curCartPose);
 	END_IF
@@ -231,7 +221,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
-	// staues check
+	// statues check
 	IF m_slaveArms[i].panelOn = FALSE THEN
 		m_panelMountedFlag[i]:=FALSE;
 	END_IF
@@ -241,6 +231,8 @@ END_VAR]]></Declaration>
 	
 	// State machine transit 
 	CASE m_slaveArmState[i] OF
+		// error
+		SlaveArmState_Error:
 		// init
 		SlaveArmState_Init:
 			IF m_armCtrl[i].isFinished  THEN
@@ -256,8 +248,12 @@ END_VAR]]></Declaration>
 		//standby
 		SlaveArmState_Standby:
 			// to mount panel
-			IF m_slaveArms[i].panelOn AND m_panelMountedFlag[i]=FALSE THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_MountPanel;
+			IF m_slaveArms[i].panelOn THEN 
+				IF m_panelMountedFlag[i] THEN
+					m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
+				ELSE
+					m_nextSlaveArmState[i]:=SlaveArmState_MountPanel;
+				END_IF
 			// to adjust
 			ELSIF m_slaveArms[i].adjustOn THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
@@ -281,11 +277,45 @@ END_VAR]]></Declaration>
 			// to stand by
 			IF NOT(m_slaveArms[i].panelOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				
 			ELSIF m_slaveArms[i].instruOn THEN
-				m_slaveArms[i].readInstruInfo();
-				m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
+				IF m_instrumentMountedFlag[i] THEN 
+					m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
+				ELSE
+					//m_slaveArms[i].readInstruInfo();
+					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
+				END_IF
+				
+			ELSIF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 			
+		//instrumentOn and Start Mount Instrument
+		SlaveArmState_MountInstru:
+			IF NOT m_slaveArms[i].instruOn THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
+			ELSIF m_slaveArms[i].instruOn THEN
+				m_slaveArms[i].readInstruInfo();
+			END_IF
+			IF m_armCtrl[i].isFinished THEN
+				m_instrumentMountedFlag[i] :=TRUE;
+				// NOTICE: multiple cycles joints back to center during initialization
+				// 			need to reset joints encoder data again
+				m_slaveArms[i].initJntPos();
+				
+				m_slaveArms[i].instrument.initInstruJntPos(m_slaveArms[i].curJntPos);
+				m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
+			END_IF
+		
+		
+		SlaveArmState_InstruReady:
+			IF NOT m_slaveArms[i].instruOn THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
+
+			ELSIF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
+			END_IF
+		
 		//master slave control
 		SlaveArmState_MasterSlave:
 			// to standby
@@ -297,6 +327,13 @@ END_VAR]]></Declaration>
 		SlaveArmState_Adjust:
 			// to standby
 			IF NOT(m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+			END_IF
+			
+		//arm test
+		SlaveArmState_Test:
+			// to standby
+			IF  m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			END_IF
 			
@@ -322,12 +359,15 @@ END_VAR]]></Declaration>
 		//endoscope control
 		SlaveArmState_EndoScope:
 		
-		
-		
 		//cart control
 		SlaveArmState_Cart:
 *)
 	END_CASE
+	
+	// error check
+	IF TRUE = i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN
+		m_nextSlaveArmState[i]:=SlaveArmState_Error;
+	END_IF
 
 	// Controller transit
 	IF m_nextSlaveArmState[i]<> m_slaveArmState[i] THEN
@@ -350,10 +390,6 @@ END_FOR]]></ST>
       <LineId Id="60" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="33" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveRobot.checkTeleMasterArmIdx">
-      <LineId Id="5" Count="0" />
-      <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.getStatus">
       <LineId Id="23" Count="0" />
@@ -440,7 +476,7 @@ END_FOR]]></ST>
       <LineId Id="229" Count="0" />
       <LineId Id="232" Count="0" />
       <LineId Id="67" Count="0" />
-      <LineId Id="15" Count="0" />
+      <LineId Id="322" Count="2" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="19" Count="0" />
@@ -451,7 +487,12 @@ END_FOR]]></ST>
       <LineId Id="145" Count="0" />
       <LineId Id="166" Count="1" />
       <LineId Id="193" Count="0" />
-      <LineId Id="169" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="290" Count="0" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="292" Count="0" />
       <LineId Id="194" Count="2" />
       <LineId Id="171" Count="0" />
       <LineId Id="168" Count="0" />
@@ -465,28 +506,32 @@ END_FOR]]></ST>
       <LineId Id="153" Count="0" />
       <LineId Id="149" Count="1" />
       <LineId Id="146" Count="0" />
-      <LineId Id="206" Count="0" />
-      <LineId Id="208" Count="1" />
-      <LineId Id="173" Count="0" />
-      <LineId Id="175" Count="0" />
-      <LineId Id="174" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="223" Count="0" />
-      <LineId Id="217" Count="4" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="222" Count="0" />
-      <LineId Id="199" Count="0" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="201" Count="2" />
+      <LineId Id="240" Count="2" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="299" Count="1" />
+      <LineId Id="302" Count="2" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="244" Count="0" />
+      <LineId Id="246" Count="11" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="295" Count="1" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="258" Count="24" />
       <LineId Id="200" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="308" Count="4" />
+      <LineId Id="307" Count="0" />
       <LineId Id="165" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="88" Count="1" />
       <LineId Id="117" Count="17" />
-      <LineId Id="183" Count="1" />
-      <LineId Id="135" Count="2" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="136" Count="1" />
       <LineId Id="116" Count="0" />
       <LineId Id="18" Count="0" />
+      <LineId Id="325" Count="4" />
       <LineId Id="56" Count="3" />
       <LineId Id="61" Count="2" />
       <LineId Id="65" Count="0" />

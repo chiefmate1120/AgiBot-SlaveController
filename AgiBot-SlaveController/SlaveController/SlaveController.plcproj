@@ -37,6 +37,9 @@
     <Compile Include="AgiMaths\Frames\transform.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MatrixLib\angAxis2Rot.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\MatrixLib\cross.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -79,6 +82,9 @@
     <Compile Include="AgiMaths\MatrixLib\matSelfAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecSelfAdd.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\MatrixLib\matSelfSub.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -94,10 +100,10 @@
     <Compile Include="AgiMaths\MatrixLib\vecAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecNorm.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\norm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\normVec.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\normalize.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSelfMultiNum.TcPOU">
@@ -134,6 +140,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\ST_InstruReadPara.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_SetupArmCtrlCmds.TcDUT">
@@ -190,6 +199,9 @@
     <Compile Include="DUTs\Type\Mat43.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Mat45.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Mat4d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -221,6 +233,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec6i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Vec8b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
@@ -284,6 +299,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_SetupRobot.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_SetupControllers\FB_SetupCtrlMasterSlave.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlManualAdjust.TcPOU">
@@ -487,6 +505,9 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="Mains\SafetyCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mains\SetupArmControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -496,7 +517,19 @@
     <Compile Include="Mains\RobotDynamics.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_SetupArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_SlaveArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TaskDynamic.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskSafetyCheck.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskSetupArmControl.TcTTO">
@@ -527,6 +560,7 @@
     <Folder Include="FBs_Robots" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
+    <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />
   </ItemGroup>

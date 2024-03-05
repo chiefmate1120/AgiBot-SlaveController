@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -33,19 +33,25 @@ VAR
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
 	m_curCartTwist: Vec6d;
+	m_cmdCartTwist :Vec6d;
+	m_cmdCartPose:ST_Frame;
 	
 	// arm joint data
 	m_curMotorPos :Vec8d;
 	m_curLinkPos :Vec8d;
+	m_curLinkSingle :Vec8d;
 	m_curJntPos :Vec8d;
 	m_curDHJntPos :Vec6d;
 	m_curGripAngle :LREAL;
 	m_curJntVel :Vec8d;
+	m_curDHJntVel :Vec6d;
 	m_curJntTrq :Vec8d;
-	m_cmdJntTrq :Vec8d;
 	m_rawJntCurrent :Vec8d;
 	m_filtJntCurrent :Vec8d;
+	m_cmdJntTrq :Vec8d;
 	m_cmdJntCurrent : Vec8d;
+	m_cmdJntPos :Vec8d;
+	m_cmdJntVel :Vec8d;
 		
 	// arm dynamic data
 	m_jntGravity : Vec8d:=g_zeroVec8d;
@@ -65,6 +71,9 @@ VAR
 	
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_sJntNum] OF FB_PID;
+	
+	m_ReadLDP:R_TRIG;
+	ReadInfoIntrusStart:BOOL;
 	
 	// code execute time measure
 	m_codeTime : Profiler;
@@ -212,14 +221,39 @@ m_adjustOnFlag := adjustDetect();
 m_panelOnFlag := panelDetect();
 m_instruOnFlag := instruDetect();
 IF FALSE = m_instruOnFlag THEN
+	ReadInfoIntrusStart:=FALSE;
 	m_instrument.reset();
-ELSIF InstruType_UNKNOWM = m_instrument.instruType THEN
+ELSIF InstruType_UNKNOWM = m_instrument.InstruReadPara.m_Instrutype THEN
+	ReadInfoIntrusStart:=TRUE;
 	m_instrument.readParameters();
 END_IF
 
-m_instruOnFlag := m_instruOnFlag AND (m_instrument.instruType <> InstruType_UNKNOWM);]]></ST>
+m_ReadLDP(CLK:= ReadInfoIntrusStart, Q=>m_instrument.InstruReadPara.i_ReadInfoIntrus );
+//m_instruOnFlag := m_instruOnFlag AND (m_instrument.instruType <> InstruType_UNKNOWM);]]></ST>
       </Implementation>
     </Method>
+    <Property Name="cmdCartPose" Id="{72bf034f-e694-478b-8fc6-77f6ebb37ccd}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdCartPose : REFERENCE TO ST_Frame]]></Declaration>
+      <Get Name="Get" Id="{cf508e47-c40b-4af1-9748-e64ccbaeea52}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdCartPose REF= m_cmdCartPose;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="cmdCartTwist" Id="{db564f7b-db8f-4a3a-ba4b-526788bb30bd}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdCartTwist : REFERENCE to Vec6d]]></Declaration>
+      <Get Name="Get" Id="{8a565392-e659-4e2f-8d16-f053ffd74289}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdCartTwist REF= m_cmdCartTwist;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="cmdJntCurrent" Id="{cbd7aa84-e545-47b8-bdc5-960aa8409c91}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cmdJntCurrent : REFERENCE TO  Vec8d]]></Declaration>
       <Get Name="Get" Id="{12be56c2-8b79-47d6-b1f2-86b8e0a5f91a}">
@@ -228,6 +262,39 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[cmdJntCurrent ref= m_cmdJntCurrent;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="cmdJntPos" Id="{fe3eaf75-296c-46e0-a9c6-f78064c649e8}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntPos : REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{21440cc7-9bce-4ec3-adb3-863b046ec9da}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntPos REF= m_cmdJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="cmdJntTrq" Id="{a8b8f509-6313-4dea-add6-0d9f63644d17}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntTrq :REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{69ae4f04-ab57-4161-852a-de73ff986ad6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntTrq REF= m_cmdJntTrq;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="cmdJntVel" Id="{8b50ea35-c0ee-4521-ab63-6cd2fbfd419a}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntVel : REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{32d77105-7aae-4d69-88ee-4b488832fd1d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntVel REF= m_cmdJntVel;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -261,6 +328,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[curDHJntPos ref= m_curDHJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curDHJntVel" Id="{e70b9eba-b60c-47ce-ba40-0d867f7d1681}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curDHJntVel :REFERENCE TO Vec6d]]></Declaration>
+      <Get Name="Get" Id="{f89a1342-80b1-4a57-8483-5c3af208683c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curDHJntVel REF= m_curDHJntVel;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -479,13 +557,12 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO: need to be reviewed
-IF m_panelInstrumentOnIO = 64  THEN
+        <ST><![CDATA[//Instrument single   At installation--2#0*0*   not installation --2#1*1*  And Hall single --2#100 0000
+IF (m_panelInstrumentOnIO AND 16#4A) = 64  THEN
 	m_instruOnCounts := MIN( m_instruOnCounts +1,m_panelInstruOnCountThres);
-ELSE
+ELSIF (m_panelInstrumentOnIO AND 16#4A) = 10  THEN
 	m_instruOnCounts :=0;
 END_IF
-
 instruDetect := m_instruOnCounts >= m_panelInstruOnCountThres;]]></ST>
       </Implementation>
     </Method>
@@ -558,6 +635,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[jntGravity ref=m_jntGravity;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="linkSingle" Id="{23452807-9686-4e19-a62d-225c05ba29f3}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY linkSingle : REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{f3f0fe9c-39ae-4e13-ac6a-e473233979ba}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[linkSingle ref=m_curLinkSingle;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -670,16 +758,13 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO: need to be reviewed
-IF m_panelInstrumentOnIO = 10 THEN
+        <ST><![CDATA[//Panel single  At installation--2#0000   not installation --2#0101
+IF (m_panelInstrumentOnIO AND 16#05) = 0 THEN
 	m_panelOnCounts := MIN( m_panelOnCounts +1,m_panelInstruOnCountThres);
-ELSIF m_panelInstrumentOnIO = 15 THEN
+ELSIF (m_panelInstrumentOnIO AND 16#05) = 5  THEN
 	m_panelOnCounts :=0;
 END_IF
-
-panelDetect := m_panelOnCounts >= m_panelInstruOnCountThres;
-
-]]></ST>
+panelDetect := m_panelOnCounts >= m_panelInstruOnCountThres;]]></ST>
       </Implementation>
     </Method>
     <Property Name="panelOn" Id="{38ffa1da-012d-4dbc-ad5b-314577ed285b}" FolderPath="property\">
@@ -780,6 +865,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_cmdJntTrq:=i_armCtrlCmd.m_cmdJntTrq;
+m_cmdJntPos :=i_armCtrlCmd.m_cmdJntPos;
+m_cmdJntVel :=i_armCtrlCmd.m_cmdJntVel;
+m_cmdCartTwist := i_armCtrlCmd.m_cmdCartTwist;
+m_cmdCartPose :=i_armCtrlCmd.m_cmdCartPose;
 m_simJntPos:=i_armCtrlCmd.m_cmdJntPos;
 
 // update simulated master arm
@@ -793,17 +882,17 @@ m_codeTime(START:=TRUE, RESET:=TRUE);
 FOR i:=1 TO g_sJntNum DO 
 	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_PosTrq THEN
 		// position controller and gravity feedforward
-		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(i_armCtrlCmd.m_cmdJntPos[i],m_curJntPos[i],i_armCtrlCmd.m_cmdJntVel[i],m_curJntVel[i]);
+		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i],m_cmdJntVel[i],m_curJntVel[i]);
 		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
-		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
+		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
 		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
-		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
+		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
 		m_jntPIDCtrl[i].reset();
-		m_cmdJntTrq[i]:=0;
-		m_joints[i].updateCmds(DriverOPMode_Pos,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
+			m_cmdJntTrq[i]:=0;
+		m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	END_IF
 	
 END_FOR
@@ -866,6 +955,7 @@ checkIO();
 FOR i:=1 TO g_sJntNum DO
 	m_curMotorPos[i]:=m_joints[i].motorPos;
 	m_curLinkPos[i]:=m_joints[i].linkPos;
+	m_curLinkSingle[i]:=m_joints[i].linkSingle;
 	m_curJntPos[i]:=m_joints[i].jntPos;
 	m_curJntVel[i]:=m_joints[i].jntVel;
 	m_curJntTrq[i]:=m_joints[i].jntTrq;
@@ -886,7 +976,11 @@ END_FOR
 	// jacobian
 	calcJaco(m_curDHJntPos,m_jaco);
 	
+	// DH joint velocity
+	m_instrument.instruJntVelFK(m_curJntVel, m_curDHJntVel);
+	
 	// cartesian twist
+	matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
 //END_IF
 ]]></ST>
       </Implementation>
@@ -921,12 +1015,32 @@ END_FOR
     <LineIds Name="FB_SlaveArm.checkIO">
       <LineId Id="21" Count="1" />
       <LineId Id="26" Count="0" />
-      <LineId Id="6" Count="6" />
+      <LineId Id="6" Count="3" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="12" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="32" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.cmdCartTwist.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.cmdJntCurrent.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.cmdJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.cmdJntTrq.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.cmdJntVel.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.curCartPose.Get">
@@ -936,6 +1050,9 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.curDHJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.curDHJntVel.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.curGripAngle.Get">
@@ -995,7 +1112,7 @@ END_FOR
       <LineId Id="25" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instruDetect">
-      <LineId Id="10" Count="6" />
+      <LineId Id="21" Count="5" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
@@ -1018,6 +1135,9 @@ END_FOR
     <LineIds Name="FB_SlaveArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.linkSingle.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.massMat.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1037,13 +1157,7 @@ END_FOR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.panelDetect">
-      <LineId Id="5" Count="0" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="13" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="16" Count="0" />
+      <LineId Id="23" Count="5" />
       <LineId Id="15" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.panelOn.Get">
@@ -1072,6 +1186,7 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateCmds">
       <LineId Id="40" Count="0" />
+      <LineId Id="105" Count="3" />
       <LineId Id="73" Count="0" />
       <LineId Id="75" Count="1" />
       <LineId Id="74" Count="0" />
@@ -1086,14 +1201,14 @@ END_FOR
       <LineId Id="19" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="18" Count="0" />
-      <LineId Id="25" Count="0" />
+      <LineId Id="95" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="20" Count="0" />
-      <LineId Id="17" Count="0" />
+      <LineId Id="96" Count="0" />
       <LineId Id="64" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="9" Count="1" />
@@ -1126,6 +1241,7 @@ END_FOR
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="63" Count="1" />
+      <LineId Id="142" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="81" Count="3" />
@@ -1136,7 +1252,10 @@ END_FOR
       <LineId Id="107" Count="0" />
       <LineId Id="118" Count="1" />
       <LineId Id="110" Count="0" />
-      <LineId Id="90" Count="6" />
+      <LineId Id="90" Count="4" />
+      <LineId Id="149" Count="2" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="152" Count="0" />
       <LineId Id="88" Count="0" />
       <LineId Id="47" Count="0" />
     </LineIds>

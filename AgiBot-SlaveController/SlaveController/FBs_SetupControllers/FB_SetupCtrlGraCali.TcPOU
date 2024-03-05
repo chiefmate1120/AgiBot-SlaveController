@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlGraCali" Id="{918257b4-79e0-4cbe-9388-5407668bd820}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: setup arm gravity calibration
 // For trajectory synchronizaiton, the planner generate a trajecotry for setup joint3/5 and slave joint 1-3, but only former used here 
@@ -52,7 +52,7 @@ calcCmdJntPos :=m_caliPlanner[m_caliTrajIdx].evaluate(m_timePeriod, jntPos=> m_c
 
 // check if to transit to next segment
 curJntVel :=i_setupArm.curJntVel;
-IF(m_timePeriod > m_caliPlanner[m_caliTrajIdx].duration  AND vecNorm(curJntVel)<5*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+IF(m_timePeriod > m_caliPlanner[m_caliTrajIdx].duration  AND norm(curJntVel)<5*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
 	m_caliTrajIdx:=m_caliTrajIdx+1;
 	m_timePeriod:=0;
 END_IF

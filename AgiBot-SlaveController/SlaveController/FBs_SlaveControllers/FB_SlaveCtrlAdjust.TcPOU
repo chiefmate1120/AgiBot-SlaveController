@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlAdjust" Id="{065dc40e-4d51-49bc-8f28-94a80cbbd0fd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlAdjust EXTENDS FB_SlaveArmCtrlBase
@@ -57,7 +57,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+m_holdLastCmds := checkToHoldLastCmds(r_slaveArmCtrlCmd, i_slaveArm);
 
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
@@ -67,6 +67,11 @@ SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 m_jntOPMode[1]:=DriverOPMode_Trq;
 m_jntOPMode[2]:=DriverOPMode_Trq;
 m_jntOPMode[3]:=DriverOPMode_Trq;
+
+m_jntOPMode[4]:=DriverOPMode_Trq;
+m_jntOPMode[5]:=DriverOPMode_Trq;
+m_jntOPMode[6]:=DriverOPMode_Trq;
+m_jntOPMode[7]:=DriverOPMode_Trq;
 
 
 ]]></ST>
@@ -95,6 +100,9 @@ m_jntOPMode[3]:=DriverOPMode_Trq;
       <LineId Id="70" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="71" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="97" Count="2" />
       <LineId Id="68" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="12" Count="0" />

@@ -1,14 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="normVec" Id="{eb641c1c-60d0-4f1d-89d2-38d09d557bbf}" SpecialFunc="None">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="norm" Id="{0015b5c6-4029-411f-8387-131591190194}" SpecialFunc="None">
     <Declaration><![CDATA[// return the norm of a vector
-FUNCTION normVec : LREAL
-VAR_IN_OUT
+FUNCTION norm : LREAL
+VAR_IN_OUT CONSTANT
 	vec :ARRAY[*] OF LREAL;
 END_VAR
 VAR
 	m,i:DINT;
-	norm :LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -18,16 +17,15 @@ FOR i:=1 TO m DO
 	norm := norm + vec[i]*vec[i];
 END_FOR
 
-IF norm< g_smallNum THEN
-	RETURN;
-END_IF
+norm := SQRT(norm);
 
-FOR i:=1 TO m DO
-	vec[i] := vec[i]/norm;
-END_FOR]]></ST>
+]]></ST>
     </Implementation>
-    <LineIds Name="normVec">
-      <LineId Id="54" Count="11" />
+    <LineIds Name="norm">
+      <LineId Id="56" Count="4" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="61" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
   </POU>

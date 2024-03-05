@@ -48,7 +48,7 @@ ELSE
 END_IF
 
 // normalize
-normVec(axis);]]></ST>
+normalize(axis);]]></ST>
     </Implementation>
     <LineIds Name="rot2AngAxis">
       <LineId Id="63" Count="1" />

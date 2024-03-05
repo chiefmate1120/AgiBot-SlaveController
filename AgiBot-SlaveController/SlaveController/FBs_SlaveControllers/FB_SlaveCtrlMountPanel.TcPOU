@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMountPanel" Id="{823d9da4-dfa7-45fa-b541-870812882ed0}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Panel
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountPanel EXTENDS FB_SlaveArmCtrlBase
@@ -115,6 +115,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+m_jntOPMode[5] := DriverOPMode_PosTrq;
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
+m_jntOPMode[8] := DriverOPMode_PosTrq;
 
 m_mountStatus:=0;
 FOR i:=1 TO 5 DO
@@ -159,7 +164,11 @@ END_FOR
       <LineId Id="150" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountPanel.init">
-      <LineId Id="57" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="102" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="75" Count="0" />

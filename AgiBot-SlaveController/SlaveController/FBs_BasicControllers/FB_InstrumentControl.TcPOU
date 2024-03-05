@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_InstrumentControl" Id="{133d07e3-99c5-4338-ad65-0a5f3241047e}" SpecialFunc="None">
     <Declaration><![CDATA[// instrument joints control
 FUNCTION_BLOCK FB_InstrumentControl
@@ -9,18 +9,18 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// instrument PID control paramters(PID output is mA)
-	m_instruKp:ARRAY[1..5] OF LREAL:=[4(0.7),0.0];
-	m_instruKd:ARRAY[1..5] OF LREAL:=[4(0.04), 0];
+	m_instruKp:ARRAY[1..5] OF LREAL:=[4(1),0.0];
+	m_instruKd:ARRAY[1..5] OF LREAL:=[4(0.05), 0];
 	m_instruKi:ARRAY[1..5] OF LREAL:=[4(2.0),0];
 	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
 	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(200.0)];
 	
 	// yaw PID control (when fingers grasp with force, output is mA)
-	m_yawKp:LREAL:=1;
-	m_yawKd:LREAL:=0.06;
-	m_yawKi:LREAL:=2.0;
+	m_yawKp:LREAL:=2;
+	m_yawKd:LREAL:=0.1;
+	m_yawKi:LREAL:=3.0;
 	m_yawKiLimit:LREAL:=100.0;
-	m_yawCtrlLimit:LREAL:=250.0;
+	m_yawCtrlLimit:LREAL:=200.0;
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
@@ -28,11 +28,8 @@ VAR
 	
 	// max gripper finger control force/current(mA)
 	m_maxGripCtrlForce:LREAL;
-	m_maxGripCtrlCurrent:LREAL:=250.0;
+	m_maxGripCtrlCurrent:LREAL:=220.0;
 	
-	// command motor joint position
-	m_cmdJntPos: Vec8d;
-
 	// PID for instrument joint position
 	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
 
@@ -104,6 +101,9 @@ VAR_IN_OUT CONSTANT
 	// instrument joint command position
 	i_cmdInstruJntPos :Vec5d;
 	
+	// instrument joint command velocity
+	i_cmdInstruJntVel :Vec5d;
+	
 	// command yaw position
 	i_cmdYawPos : LREAL;
 	
@@ -124,41 +124,41 @@ END_VAR
 
 VAR
 	i: INT;
-	currentRatioMotor2Jnt:LREAL;
-	maxJntTrq:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel ,  100)	;
 
 // compute target joint velocity
-FOR i:=1 TO 5 DO
+(*FOR i:=1 TO 5 DO
 	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
 	m_instruCmdJntVel[i]:=(m_instruCmdJntPos[i]-m_instruLastCmdJntPos[i])/g_slaveArmCtrlCycleTime;
-	m_instruLastCmdJntPos[i]:=m_cmdJntPos[i];
-END_FOR
+	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
+END_FOR*)
 
 // joint position control
 FOR i:=1 TO 4 DO	
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
+	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
 	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
 	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
 END_FOR
 
 
-m_instruCurYawVel :=(i_slaveArm.curJntVel[5]-i_slaveArm.curJntVel[4])/2.0;
+m_instruCurYawVel :=i_slaveArm.curDHJntVel[6];
 m_yawAngErr:=g_rad2Deg*(i_cmdYawPos-i_slaveArm.curDHJntPos[6]);
 
 // motion/force share control for yaw control while grip finger closed
 IF m_graspForceLevel >0  THEN
 	// compute yaw control torque
 	m_instruYawCtrlTrq:=m_instruYawCtrl.run(i_cmdYawPos,i_slaveArm.curDHJntPos[6],i_cmdYawVel, m_instruCurYawVel);
-	
+
 	// add feed forward grasp force
-	m_instruJntCtrlTrq[1]:= m_maxGripForce*m_graspForceLevel/100.0 - m_instruYawCtrlTrq;
-	m_instruJntCtrlTrq[2]:= m_maxGripForce*m_graspForceLevel/100.0 + m_instruYawCtrlTrq;
-	m_instruJntCtrlTrq[1]:=LIMIT(-maxJntTrq,m_instruJntCtrlTrq[1], maxJntTrq);
-	m_instruJntCtrlTrq[2]:=LIMIT(-maxJntTrq,m_instruJntCtrlTrq[2], maxJntTrq);
+	m_instruJntCtrlTrq[1]:= m_maxGripForce*m_graspForceLevel/100.0 + m_instruYawCtrlTrq;
+	m_instruJntCtrlTrq[2]:= m_maxGripForce*m_graspForceLevel/100.0 - m_instruYawCtrlTrq;
+	m_instruJntCtrlTrq[1]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[1], m_maxGripCtrlForce);
+	m_instruJntCtrlTrq[2]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[2], m_maxGripCtrlForce);
 END_IF
 
 o_cmdJntTrq := m_instruJntCtrlTrq;
@@ -185,6 +185,7 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
       <LineId Id="188" Count="0" />
       <LineId Id="91" Count="0" />
       <LineId Id="46" Count="1" />
+      <LineId Id="223" Count="1" />
       <LineId Id="178" Count="0" />
       <LineId Id="49" Count="0" />
       <LineId Id="52" Count="2" />

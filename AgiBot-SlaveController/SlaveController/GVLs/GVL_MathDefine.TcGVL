@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_MathDefine" Id="{7eb77e09-e6c3-483f-ae23-6f0bf731cf6b}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
-	g_smallNum :LREAL := 1E-6;
+	g_smallNum :LREAL := 1E-9;
 	g_smallAng :LREAL := 0.01*PI/180;
 	g_largeNum: LREAL :=1E16;
 	g_deg2Rad :LREAL := pi/180.0;
@@ -47,6 +47,7 @@
 	g_onesVec8d: Vec8d:=[8(1.0)];
 	g_zeroVec8i: Vec8i:=[8(0)];
 	g_onesVec8i: Vec8i:=[8(1)];
+	g_initCurVec8d :Vec8d:=[8(250)];
 	
 	g_setupAllPosMode:Vec5i:=[5(DriverOPMode_Pos)];
 	g_setupAllTrqMode:Vec5i:=[5(DriverOPMode_Trq)];

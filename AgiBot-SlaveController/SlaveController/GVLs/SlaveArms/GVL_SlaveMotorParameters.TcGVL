@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SlaveMotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
@@ -20,15 +20,15 @@ VAR_GLOBAL CONSTANT
 	g_motorDir :ARRAY[1..g_sJntNum] OF INT :=[-1, 1, -1, 1, 1, 1, 1, 1];
 																 
 	// joint position limit
-	g_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-pi,	-pi/2,	0.15, 	5(-99*pi)];	
-	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[pi,	1.196, 	0.58, 		5(99*pi)];
+	g_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-2.7,	-1.23-pi/2,	0.25, 	5(-99*pi)];	
+	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[2.7,	1.13-pi/2, 	0.53, 		5(99*pi)];
 	
 	// DH joint position limit
-	g_minDHJntPos : ARRAY[1..6] OF LREAL :=[-PI, -PI/2, 0.15, -11*PI/6, -PI/2 - 75*g_deg2Rad , -PI/2];
-	g_maxDHJntPos : ARRAY[1..6] OF LREAL :=[PI, 1.196, 0.55, 11*PI/6, -PI/2 + 75*g_deg2Rad, PI/2];
+	g_minDHJntPos : ARRAY[1..6] OF LREAL :=[-2.7,	-1.23-pi/2,	0.25, -11*PI/6, -PI/2 - 75*g_deg2Rad , -PI/2];
+	g_maxDHJntPos : ARRAY[1..6] OF LREAL :=[2.7,	1.13-pi/2, 	0.53, 11*PI/6, -PI/2 + 75*g_deg2Rad, PI/2];
 	
 	// joint velocity limit
-	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[2.5, 2.5, 0.3, 5(2*pi)];
+	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.6, 1.6, 0.3, 5(2*pi)];
 		
 END_VAR
 ]]></Declaration>

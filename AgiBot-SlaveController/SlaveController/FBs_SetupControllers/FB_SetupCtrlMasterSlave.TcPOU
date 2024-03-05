@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupCtrlMasterSlave" Id="{5c90b003-cbb0-4300-8cbb-c2de7aca85f9}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Setup Arm Init
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlMasterSlave EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_initState :INT :=0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SetupCtrlMasterSlave">
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

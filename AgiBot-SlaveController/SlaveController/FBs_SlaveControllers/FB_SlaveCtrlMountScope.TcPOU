@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMountScope" Id="{6d193be5-4a80-4dd6-a6a8-788f7e960ba3}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Endoscope
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountScope EXTENDS FB_SlaveArmCtrlBase
@@ -25,7 +25,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+m_holdLastCmds := checkToHoldLastCmds(r_slaveArmCtrlCmd, i_slaveArm);
 
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>

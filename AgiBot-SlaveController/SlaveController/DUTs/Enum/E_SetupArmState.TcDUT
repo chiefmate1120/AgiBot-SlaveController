@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="E_SetupArmState" Id="{0172908e-d54c-4c57-a0c6-815b8ea15da5}">
     <Declaration><![CDATA[TYPE E_SetupArmState :
 (
@@ -9,9 +9,10 @@
 	SetupArmState_Hold :=4,
 	SetupArmState_ManulAdjust :=5,
 	SetupArmState_AutoAdjust :=6,
-	SetupArmState_Package :=7,
-	SetupArmState_Cart := 8,
-	SetupArmState_GravityCali := 9,
+	SetupArmState_MasterSlave :=7,
+	SetupArmState_Package :=8,
+	SetupArmState_Cart := 9,
+	SetupArmState_GravityCali := 10,
 	
 	SetupArmState_totalNum :=SetupArmState_GravityCali
 );

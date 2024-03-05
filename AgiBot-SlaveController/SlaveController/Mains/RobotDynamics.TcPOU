@@ -49,8 +49,9 @@ END_IF
 FOR i:=1 TO g_sArmNum DO
 	m_setupJointData.m_curJntPos[i][5]:=pi/2;
 	m_slaveDynaData.m_gravity[i]:=m_slaveGravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
-
 END_FOR
+m_setupJnt3Gravity:=0;
+m_setupJnt5Gravity:=0;
 
 m_codeTime(START:=FALSE);
 ]]></ST>
@@ -66,9 +67,9 @@ m_codeTime(START:=FALSE);
       <LineId Id="28" Count="1" />
       <LineId Id="228" Count="0" />
       <LineId Id="30" Count="0" />
-      <LineId Id="194" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="54" Count="0" />
+      <LineId Id="260" Count="1" />
       <LineId Id="83" Count="0" />
       <LineId Id="110" Count="0" />
     </LineIds>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_setupTrajMoveJ" Id="{cdb6861e-55e5-4dab-9c53-16ea47583316}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_setupTrajMoveJ EXTENDS FB_TrajBase
 VAR_OUTPUT
@@ -62,7 +62,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_startPos:=i_startJntPos;
 m_targetPos:=i_targetJntPos;
 vecSub(i_targetJntPos, i_startJntPos, m_moveDir);
-m_moveDistance := vecNorm(m_moveDir);
+m_moveDistance := norm(m_moveDir);
 
 IF(m_moveDistance<g_smallNum) THEN
 	vecMultiNum(g_onesVec7d,1/5, m_moveDir);;

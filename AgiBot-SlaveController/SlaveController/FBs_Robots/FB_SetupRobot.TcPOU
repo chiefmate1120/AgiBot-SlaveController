@@ -23,6 +23,7 @@ VAR
 	m_armHold :ARRAY[1..g_sArmNum] OF FB_SetupCtrlHold;
 	m_armManualAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlManualAdjust;
 	m_armAutoAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlAutoAdjust;
+	m_armMasterSlave :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMasterSlave;
 	m_armPackage :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPackage;
 	m_armCart :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCart;
 	m_armGraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlGraCali;
@@ -111,6 +112,7 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_Hold] := m_armHold[i];
 	m_armCtrlFactory[i,SetupArmState_ManulAdjust] := m_armManualAdjust[i];
 	m_armCtrlFactory[i,SetupArmState_AutoAdjust] := m_armAutoAdjust[i];
+	m_armCtrlFactory[i,SetupArmState_MasterSlave] := m_armMasterSlave[i];
 	m_armCtrlFactory[i,SetupArmState_Package] := m_armPackage[i];
 	m_armCtrlFactory[i,SetupArmState_Cart] := m_armCart[i];
 	m_armCtrlFactory[i,SetupArmState_GravityCali] := m_armGraCali[i];
@@ -254,6 +256,7 @@ END_FOR]]></ST>
       <LineId Id="94" Count="0" />
       <LineId Id="58" Count="1" />
       <LineId Id="62" Count="5" />
+      <LineId Id="124" Count="0" />
       <LineId Id="108" Count="1" />
       <LineId Id="117" Count="0" />
       <LineId Id="110" Count="0" />

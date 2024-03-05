@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlSelfCheck" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheck EXTENDS FB_SlaveArmCtrlBase
@@ -42,7 +42,7 @@ calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod, jn
 
 // check if to transit to next segment
 curJntVel :=i_slaveArm.curJntVel;
-IF(m_timePeriod > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND vecNorm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+IF(m_timePeriod > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
 	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
 	m_timePeriod:=0;
 END_IF
