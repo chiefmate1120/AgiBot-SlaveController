@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -79,6 +79,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[r_slaveStatus.m_armState:=m_slaveArmState;
+r_slaveStatus.m_endoscopeMounted :=m_endoscopeMounted;
+r_slaveStatus.m_endoscopePose :=m_endoscopePose;
 
 // TODO: project cartesion data to monitor coordinate
 FOR i:=1 TO g_sArmNum DO
@@ -393,6 +395,7 @@ END_FOR]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveRobot.getStatus">
       <LineId Id="23" Count="0" />
+      <LineId Id="129" Count="1" />
       <LineId Id="96" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />

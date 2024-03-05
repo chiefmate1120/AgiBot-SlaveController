@@ -18,10 +18,10 @@ STRUCT
 	// endoscope pose in cart coordinate
 	m_endoscopePose : ST_Frame;
 	
-	// command arm pose in cart view
+	// command arm pose in cart coordinate
 	m_cmdArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	
-	// current arm pose in cart view
+	// current arm pose in cart coordinate
 	m_curArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	
 	// command arm twist[linear velocity; angular veloicty] in cart view

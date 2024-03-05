@@ -595,6 +595,15 @@
       <SubType>Content</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <PinnedGlobalDataType Include="MSCommu_Frame" />
+    <PinnedGlobalDataType Include="MSCommu_InstruStatus" />
+    <PinnedGlobalDataType Include="MSCommu_MasterStatus" />
+    <PinnedGlobalDataType Include="MSCommu_Mat3d" />
+    <PinnedGlobalDataType Include="MSCommu_SlaveStatus" />
+    <PinnedGlobalDataType Include="MSCommu_Vec3d" />
+    <PinnedGlobalDataType Include="MSCommu_Vec6d" />
+  </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>

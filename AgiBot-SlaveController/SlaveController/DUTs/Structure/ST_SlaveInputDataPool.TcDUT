@@ -14,8 +14,8 @@ STRUCT
 	// cart information, import from other task
 	m_cartStatus AT %I*:ST_CartStatus;
 	
-	// master robot information, import from other device
-	m_masterStatus AT %I*:ST_MasterStatus;
+	// master robot status, copy from MSCommu_MasterStatus
+	m_masterStatus :ST_MasterStatus;
 	
 	// setup arms infromation;
 	m_setupStatus AT %I* : ST_SetupStatus;
