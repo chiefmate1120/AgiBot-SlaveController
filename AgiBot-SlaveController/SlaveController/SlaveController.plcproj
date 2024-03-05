@@ -118,22 +118,19 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Enum\E_MatchedSlaveArmIdx.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Enum\E_SetupArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_InstrumentType.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MasterArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedSlaveArmIdx.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_SlaveArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_InstruStatus.TcDUT">
+    <Compile Include="DUTs\Enum\E_SlaveArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_MasterStatus.TcDUT">
@@ -143,6 +140,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_InstruReadPara.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_SetupArmCtrlCmds.TcDUT">
