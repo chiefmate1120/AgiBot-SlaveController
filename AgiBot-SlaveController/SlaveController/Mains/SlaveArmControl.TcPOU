@@ -62,7 +62,8 @@ slaveOutputDataCast(m_slaveStatus, m_slaveRobotData);
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
     <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
-      <Declaration><![CDATA[METHOD masterInputDataCast : BOOL
+      <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
+METHOD masterInputDataCast : BOOL
 VAR_IN_OUT
 	masterInputData:MSCommu_MasterStatus;
 	masterStatus :ST_MasterStatus;
@@ -90,7 +91,8 @@ END_FOR
       </Implementation>
     </Method>
     <Method Name="slaveOutputDataCast" Id="{110717ec-abfc-4dc8-a3ed-d3c3fbcf321b}">
-      <Declaration><![CDATA[METHOD slaveOutputDataCast : BOOL
+      <Declaration><![CDATA[// convert from local ST_SlaveStatus for control to MSCommu_SlaveStatus for master-slave communication
+METHOD slaveOutputDataCast : BOOL
 VAR_IN_OUT 
 	slaveStatus :ST_SlaveStatus;
 	slaveOutputData : MSCommu_SlaveStatus;
