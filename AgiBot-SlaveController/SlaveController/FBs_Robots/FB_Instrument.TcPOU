@@ -326,8 +326,9 @@ r_DHJntVel[3]:=i_jntVel[3];
 
 r_DHJntVel[4]:=-i_jntVel[7]/m_kinematicParameters.kx;
 r_DHJntVel[5]:=i_jntVel[6]/m_kinematicParameters.ky;
-r_DHJntVel[6]:=(r_DHJntVel[4]-r_DHJntVel[5]-2*r_DHJntVel[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
-]]></ST>
+r_DHJntVel[6]:=(i_jntVel[4]-i_jntVel[5]-2*r_DHJntVel[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
+r_DHJntVel[5]:=-r_DHJntVel[5];
+r_DHJntVel[6]:=-r_DHJntVel[6];]]></ST>
       </Implementation>
     </Method>
     <Property Name="InstruReadPara" Id="{093a4217-bb32-41a8-a667-4570e97851b1}" FolderPath="property\">
@@ -657,6 +658,7 @@ END_FOR
       <LineId Id="134" Count="1" />
       <LineId Id="200" Count="3" />
       <LineId Id="159" Count="0" />
+      <LineId Id="220" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruReadPara.Get">
       <LineId Id="2" Count="0" />

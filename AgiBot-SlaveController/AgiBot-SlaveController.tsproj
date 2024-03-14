@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -1248,9 +1248,39 @@
 				<Elements>2</Elements>
 			</ArrayInfo>
 		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-00200000000C}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..11] OF BIT</Name>
+			<BitSize>12</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>12</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-002000000001}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..0] OF BIT</Name>
+			<BitSize>1</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>1</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-00200000000A}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..9] OF BIT</Name>
+			<BitSize>10</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>10</Elements>
+			</ArrayInfo>
+		</DataType>
 	</DataTypes>
 	<ImageDatas>
 		<ImageData Id="1000">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
+		<ImageData Id="1001">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1002">424de6000000000000007600000028000000100000000e000000010004000000000070000000120b0000120b0000100000001000000000000000000080000080000000808000800000008000800080800000c0c0c000808080000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00dddddd88888888dddddddd77777778dddddddd77888778dddddddd77888778dddddddd77888778dddddddd77777778dddddddd77888778dd9b9b9b77888778ddb9b9b977888778dd9b9b9b77777778ddb9b9b9777a7778dd9b9b9b777a7778ddb9b9b9777a7778dd9b9b9b77777778dd</ImageData>
+		<ImageData Id="1003">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff</ImageData>
 	</ImageDatas>
 	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
@@ -1277,14 +1307,14 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{C76023C4-5586-173D-1DD4-52C0E18391C0}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
 						<Name>TaskSlaveArmControl Inputs</Name>
 						<Var>
 							<Name>SlaveArmControl.m_masterRobotData</Name>
-							<Comment><![CDATA[ master robot data, import from master controller box]]></Comment>
+							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
 							<Type GUID="{C3DB667D-ACBF-4CBD-A758-DEBF50A1D7A2}">MSCommu_MasterStatus</Type>
 						</Var>
 						<Var>
@@ -1517,7 +1547,7 @@
 						<Name>TaskSlaveArmControl Outputs</Name>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobotData</Name>
-							<Comment><![CDATA[ slave robot data, transfered to master controller box]]></Comment>
+							<Comment><![CDATA[ slave robot data, ouput to master controller box]]></Comment>
 							<Type GUID="{517F3A1C-E2DA-4F0E-A99C-45AEB3CB303E}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
@@ -2119,7 +2149,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
+							<Id NeedCalleeCall="true">0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2128,7 +2158,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
+							<Id NeedCalleeCall="true">1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2137,7 +2167,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>2</Id>
+							<Id NeedCalleeCall="true">2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2146,7 +2176,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>3</Id>
+							<Id NeedCalleeCall="true">3</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -3197,15 +3227,169 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
+			<Device Id="4" DevType="111" DevFlags="#x0003" AmsPort="28676" AmsNetId="169.254.240.177.5.1" RemoteName="Device 4 (EtherCAT)" InfoImageId="3">
+				<Name>Device 4 (EtherCAT)</Name>
+				<AddressInfo>
+					<Pnp>
+						<DeviceDesc>? (TwinCAT-Intel PCI Ethernet Adapter (Gigabit</DeviceDesc>
+						<DeviceName>\DEVICE\{6BA4F181-6266-4FC6-84AD-C30A74622F32}</DeviceName>
+						<DeviceData>68eda4570b40</DeviceData>
+					</Pnp>
+				</AddressInfo>
+				<Image Id="2" AddrType="9" ImageType="3">
+					<Name>Image</Name>
+				</Image>
+				<Box Id="1" BoxType="9099">
+					<Name>Term 1 (EK1100)</Name>
+					<ImageId>1001</ImageId>
+					<EtherCAT SlaveType="1" PdiType="#x0d00" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x044c2c52" RevisionNo="#x00120000" PortPhys="305" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EK1100 EtherCAT Coupler (2A E-Bus)" Desc="EK1100" PortABoxInfo="#x00ffffff"/>
+					<Box Id="2" BoxType="9099" BoxFlags="#x00000020">
+						<Name>Term 2 (EL6695)</Name>
+						<ImageId>1002</ImageId>
+						<EtherCAT SlaveType="3" AdsServerAddress="a9fef0b10503ea03" PdiType="#x0008" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="63" EoeType="1" FoeType="1" VendorId="#x00000002" ProductCode="#x1a273052" RevisionNo="#x00060000" InfoDataAddr="true" InfoDataNetId="true" TimeoutMailbox2="2000" GenerateOwnNetId="true" CheckRevisionNoType="3" PortPhys="51" DcTimeLoopControlOnly="true" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6695 EtherCAT Bridge terminal (Primary)" Desc="EL6695" PortABoxInfo="#x01000001">
+							<SyncMan>0010000426000100010000008000da050004001026010000</SyncMan>
+							<SyncMan>0016000422000100020000008000da050004001622010000</SyncMan>
+							<SyncMan>001c30056400010003000000000000000000001c64010000</SyncMan>
+							<SyncMan>008e62022000010004000000000000000200008e20010000</SyncMan>
+							<Fmmu>0000000000000000001c00020100000001000000000000000000000000000000</Fmmu>
+							<Fmmu>0000000000000000008e00010100000002000000000000000000000000000000</Fmmu>
+							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+							<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
+							<BootStrapData>0010140200141402</BootStrapData>
+							<DcMode>4672656552756e0000000000000000004672656552756e00000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+							<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000020030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+							<Pdo Name="SYNC Inputs" Index="#x1a01" Flags="#x0010" SyncMan="3">
+								<Entry>
+									<Type GUID="{18071995-0000-0000-0000-00200000000C}">ARRAY [0..11] OF BIT</Type>
+								</Entry>
+								<Entry Name="TxPDO-Toggle" Index="#x1801" Sub="#x09">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="TxPDO-State" Index="#x1801" Sub="#x07">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry>
+									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
+								</Entry>
+								<Entry Name="External device not connected" Index="#x10f4" Sub="#x10">
+									<Type>BIT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="SYNC Inputs" Index="#x1a02" Flags="#x0010">
+								<Entry Name="Sync Mode" Index="#x10f4" Sub="#x01">
+									<Type>BIT2</Type>
+								</Entry>
+								<Entry>
+									<Type GUID="{18071995-0000-0000-0000-00200000000A}">ARRAY [0..9] OF BIT</Type>
+								</Entry>
+								<Entry Name="TxPDO-Toggle" Index="#x1802" Sub="#x09">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="TxPDO-State" Index="#x1802" Sub="#x07">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="Time stamp update toggle" Index="#x10f4" Sub="#x0f">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="External device not connected" Index="#x10f4" Sub="#x10">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="Internal time stamp" Index="#x10f4" Sub="#x11">
+									<Type>ULINT</Type>
+								</Entry>
+								<Entry Name="External time stamp" Index="#x10f4" Sub="#x12">
+									<Type>ULINT</Type>
+								</Entry>
+								<Entry Name="Reserved" Index="#x10f4" Sub="#x13">
+									<Type>UDINT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="SYNC Inputs" Index="#x1a03" Flags="#x0010">
+								<Entry Name="Sync Mode" Index="#x10f4" Sub="#x01">
+									<Type>BIT2</Type>
+								</Entry>
+								<Entry>
+									<Type GUID="{18071995-0000-0000-0000-00200000000A}">ARRAY [0..9] OF BIT</Type>
+								</Entry>
+								<Entry Name="TxPDO-Toggle" Index="#x1803" Sub="#x09">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="TxPDO-State" Index="#x1803" Sub="#x07">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="Time stamp update toggle" Index="#x10f4" Sub="#x0f">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="External device not connected" Index="#x10f4" Sub="#x10">
+									<Type>BIT</Type>
+								</Entry>
+								<Entry Name="Internal time stamp" Index="#x10f4" Sub="#x11">
+									<Type>UDINT</Type>
+								</Entry>
+								<Entry Name="External time stamp" Index="#x10f4" Sub="#x12">
+									<Type>UDINT</Type>
+								</Entry>
+								<Entry Name="Reserved" Index="#x10f4" Sub="#x13">
+									<Type>UDINT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="Active TxPDOs-Map" Index="#x1a04" Flags="#x0000">
+								<Entry Name="u16Count" Index="#xf640" Sub="#x01">
+									<Type>UINT</Type>
+								</Entry>
+								<Entry Name="PDO 1-8" Index="#xf630" Sub="#x01">
+									<Type>UINT</Type>
+								</Entry>
+								<Entry Name="PDO 9-16" Index="#xf630" Sub="#x02">
+									<Type>UINT</Type>
+								</Entry>
+								<Entry Name="PDO 17-24" Index="#xf630" Sub="#x03">
+									<Type>UINT</Type>
+								</Entry>
+								<Entry Name="PDO 25-32" Index="#xf630" Sub="#x04">
+									<Type>UINT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="FOE Info" Index="#x1a05" Flags="#x0020">
+								<Entry Name="Bytes to Read" Index="#xf650" Sub="#x01">
+									<Type>UINT</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="IO Inputs" Index="#x1a08" Flags="#x0020" SyncMan="3">
+								<Entry Name="MasterRobotData" Index="#x6000" Sub="#x01">
+									<Type GUID="{C3DB667D-ACBF-4CBD-A758-DEBF50A1D7A2}">MSCommu_MasterStatus</Type>
+								</Entry>
+							</Pdo>
+							<Pdo Name="IO Outputs" Index="#x1608" InOut="1" Flags="#x0020" SyncMan="2">
+								<Entry Name="SlaveRobotData" Index="#x7000" Sub="#x01">
+									<Type GUID="{517F3A1C-E2DA-4F0E-A99C-45AEB3CB303E}">MSCommu_SlaveStatus</Type>
+								</Entry>
+							</Pdo>
+							<CoeProfile ProfileNo="5001"/>
+						</EtherCAT>
+					</Box>
+					<Box Id="3" BoxType="9099">
+						<Name>Term 3 (EL9011)</Name>
+						<ImageId>1003</ImageId>
+						<EtherCAT CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x23333050" InfoDataState="false" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL9011 End Terminal" Desc="EL9011" PortABoxInfo="#x01000002"/>
+					</Box>
+				</Box>
+				<EtherCAT EnableVirtualSwitch="true" MaxSwitchPorts="2" MaxSwitchFrames="120"/>
+			</Device>
 		</Io>
 	</Project>
 	<Mappings>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500850000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030050" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x02030080" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
+			<OwnerB Name="TIID^Device 4 (EtherCAT)^Term 1 (EK1100)^Term 2 (EL6695)">
+				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_masterRobotData" VarB="IO Inputs^MasterRobotData"/>
+				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobotData" VarB="IO Outputs^SlaveRobotData"/>
+			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1 (EtherCAT)^SlaveJoint1">
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>

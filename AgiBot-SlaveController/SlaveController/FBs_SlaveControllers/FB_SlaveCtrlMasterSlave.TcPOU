@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -40,6 +40,7 @@ VAR
 	
 	// command twist filter
 	m_cmdTwistLpf:ARRAY[1..6] OF FB_LowPassFilter;
+	m_cmdDHVelLpf:ARRAY[1..6] OF FB_LowPassFilter;
 
 	// master pose/velocity in monitor coordinate
 	m_masterPose :ST_Frame;
@@ -135,7 +136,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// update test master pose
-IF m_startMSTest = TRUE THEN
+(*IF m_startMSTest = TRUE THEN
 	testMoveVel := m_testMasterMoveRange * pi * m_testMasterMoveFreq * COS(2*pi * m_testMasterMoveFreq * m_timePeriod -pi/2);
 	testMoveDis :=testMoveVel * g_slaveArmCtrlCycleTime;
 	vecMultiNum(m_testMasterMoveDir, testMoveDis, testMasterDeltaPos);
@@ -161,7 +162,7 @@ m_masterTwist[2]:=m_testMasterVel[2];
 m_masterTwist[3]:=m_testMasterVel[3];
 m_masterTwist[4]:=m_testMasterWVel[1];
 m_masterTwist[5]:=m_testMasterWVel[2];
-m_masterTwist[6]:=m_testMasterWVel[3];
+m_masterTwist[6]:=m_testMasterWVel[3];*)
 
 
 m_codeTime(START:=TRUE, RESET:=TRUE);
@@ -305,8 +306,10 @@ END_FOR
 
 // integrate command DH joint position
 FOR i:=1 TO 3 DO
-	m_cmdDHJointVel[i]:=armDHJntVel[i];
-	m_cmdDHJointVel[i+3]:=wristDHJntVel[i];
+//	m_cmdDHJointVel[i]:=armDHJntVel[i];
+//	m_cmdDHJointVel[i+3]:=wristDHJntVel[i];
+	m_cmdDHJointVel[i]:= m_cmdDHVelLpf[i].run(armDHJntVel[i]);
+	m_cmdDHJointVel[i+3]:= m_cmdDHVelLpf[i+3].run(wristDHJntVel[i]);
 END_FOR
 vecMultiNum(m_cmdDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
 slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
@@ -386,6 +389,7 @@ m_firstIn :=TRUE;
 // init filter
 FOR i:=1 TO 6 DO
 	m_cmdTwistLpf[i].init(1, m_cmdTwistLpfCutoffFreq, g_slaveArmCtrlFreq);
+	m_cmdDHVelLpf[i].init(1, m_cmdTwistLpfCutoffFreq, g_slaveArmCtrlFreq);
 END_FOR
 
 // init controller
@@ -468,7 +472,7 @@ m_testMasterPose.m_rot:=g_eye3d;
       <LineId Id="456" Count="0" />
       <LineId Id="458" Count="0" />
       <LineId Id="457" Count="0" />
-      <LineId Id="464" Count="0" />
+      <LineId Id="639" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="189" Count="0" />
       <LineId Id="199" Count="0" />
@@ -483,7 +487,7 @@ m_testMasterPose.m_rot:=g_eye3d;
       <LineId Id="363" Count="1" />
       <LineId Id="205" Count="0" />
       <LineId Id="204" Count="0" />
-      <LineId Id="212" Count="0" />
+      <LineId Id="640" Count="0" />
       <LineId Id="211" Count="0" />
       <LineId Id="224" Count="0" />
       <LineId Id="213" Count="0" />
@@ -521,6 +525,7 @@ m_testMasterPose.m_rot:=g_eye3d;
       <LineId Id="297" Count="0" />
       <LineId Id="301" Count="0" />
       <LineId Id="368" Count="2" />
+      <LineId Id="644" Count="1" />
       <LineId Id="367" Count="0" />
       <LineId Id="214" Count="0" />
       <LineId Id="379" Count="0" />
@@ -556,7 +561,9 @@ m_testMasterPose.m_rot:=g_eye3d;
       <LineId Id="77" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="70" Count="0" />
-      <LineId Id="74" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="75" Count="0" />
       <LineId Id="79" Count="0" />
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
