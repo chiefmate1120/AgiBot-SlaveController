@@ -16,8 +16,8 @@ VAR
 	
 	// mount motion planning
 	m_jntOTG :ARRAY[1..5] OF FB_secOrdTrajFilter;
-	m_panelMountVel :LREAL := 90* g_deg2Rad;
-	m_panelMountAcc :LREAL := PI;
+	m_panelMountVel :LREAL := 2*pi;
+	m_panelMountAcc :LREAL := 4*pi;
 	
 	// joint current threshold which indicate motor is buckled with panel
 	m_maxJntCurrent :INT := 100;
@@ -58,6 +58,7 @@ CASE m_mountStatus OF
 			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent THEN 
 				m_jointMounted[i]:=TRUE;
 				m_targetMountPos[i]:=curJntPos[i+3];
+				m_jntOTG[i].init(m_targetMountPos[i], 0,m_panelMountVel, m_panelMountAcc, g_slaveArmCtrlCycleTime);
 			END_IF
 			
 			// set command joint position step
@@ -86,7 +87,7 @@ CASE m_mountStatus OF
 	2:
 		m_isFinished:=TRUE;
 		FOR i:=1 TO 5 DO
-			IF ABS(m_targetMountPos[i]-curJntPos[i+3])>GVL_SlaveControlParameters.g_jntCtrlPosTol THEN
+			IF ABS(m_targetMountPos[i]-curJntPos[i+3])>GVL_SlaveControlParameters.g_jntCtrlAngTolHigh THEN
 				m_isFinished:=FALSE;
 				EXIT;
 			END_IF
@@ -142,6 +143,7 @@ END_FOR
       <LineId Id="208" Count="0" />
       <LineId Id="161" Count="1" />
       <LineId Id="209" Count="0" />
+      <LineId Id="261" Count="0" />
       <LineId Id="163" Count="1" />
       <LineId Id="210" Count="1" />
       <LineId Id="170" Count="1" />

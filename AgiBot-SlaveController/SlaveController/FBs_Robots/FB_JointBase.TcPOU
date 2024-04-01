@@ -58,6 +58,7 @@ VAR
 	m_curLinkSingle :LREAL;
 	m_curJntPos	:LREAL;
 	m_curJntVel :LREAL;
+	m_rawJntVel :LREAL;
 	m_curJntTrq :	LREAL;
 	m_rawCurrent : LREAL;
 	m_filtCurrent : LREAL;
@@ -346,7 +347,8 @@ IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
 	m_cmdTrqLpf.reset();	
 //	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos); // May cause position jump, Do this in safety check. 
-	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(i_cmdPos);
+	m_cmdJntPos :=i_cmdPos;
+	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(m_cmdJntPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
 	filtCmdTrq:=m_cmdTrqLpf.run(i_cmdTrq);
 	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(LIMIT(-m_maxCurrent, filtCmdTrq*m_trq2CurrentRatio,m_maxCurrent));
@@ -371,8 +373,8 @@ m_curLinkSingle := m_curLinkPos - 2*PI* m_linkEncCycles;
 // compute joint velocity
 m_curVelCalCycles := m_curVelCalCycles+1;
 IF m_curVelCalCycles > m_velCalcCycles THEN
-	m_curJntVel:= (m_curJntPos-m_lastJntPos)/(m_cycleTime*m_velCalcCycles);
-	m_curJntVel := m_jntVelLpf.run(m_curJntVel);
+	m_rawJntVel:= (m_curJntPos-m_lastJntPos)/(m_cycleTime*m_velCalcCycles);
+	m_curJntVel := m_jntVelLpf.run(m_rawJntVel);
 	m_lastJntPos :=m_curJntPos;	
 	m_curVelCalCycles:=1;
 END_IF
@@ -478,6 +480,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="62" Count="0" />
       <LineId Id="49" Count="0" />
       <LineId Id="42" Count="0" />
+      <LineId Id="71" Count="0" />
       <LineId Id="32" Count="1" />
       <LineId Id="50" Count="0" />
       <LineId Id="34" Count="1" />

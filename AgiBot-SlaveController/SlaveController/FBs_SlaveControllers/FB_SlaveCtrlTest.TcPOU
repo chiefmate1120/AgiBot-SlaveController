@@ -9,6 +9,8 @@ VAR_OUTPUT
 END_VAR
 VAR
 // ################ variables for single DH  joint test ##################
+	m_enableFrictionComp :BOOL :=false;
+	m_freqTestFlag :BOOL:=FALSE;
 	m_initJntPos :Vec6d;
 	m_cmdDHJntPos :Vec6d;
 	m_cmdDHJntVel :Vec6d;
@@ -18,6 +20,9 @@ VAR
 	m_gripperAngle : LREAL :=0;
 	m_gripForceLevel :LREAL :=0;
 	m_lastCmdJntPos :Vec8d ;
+	
+	m_stepTestFlag :BOOL :=FALSE;
+	m_jntStep : LREAL := 5*g_deg2Rad;
 	
 	// instrument controller
 	m_instruController : FB_InstrumentControl;
@@ -53,16 +58,27 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// Just for joint controller test
 IF m_testJntIdx >=1 AND m_testJntIdx <=7 THEN
-	m_cmdDHJntPos[m_testJntIdx]:=m_initJntPos[m_testJntIdx]+m_jntMotionRange[m_testJntIdx]/2
+	IF m_freqTestFlag THEN 
+		m_cmdDHJntPos[m_testJntIdx]:=m_initJntPos[m_testJntIdx]+m_jntMotionRange[m_testJntIdx]/2
 										+0.5*m_jntMotionRange[m_testJntIdx]*SIN(2*pi*m_jntMotionFreq[m_testJntIdx]*m_timePeriod-pi/2);
-	m_cmdDHJntVel[m_testJntIdx]:=0.5*m_jntMotionRange[m_testJntIdx]*2*pi*m_jntMotionFreq[m_testJntIdx]*COS(2*pi*m_jntMotionFreq[m_testJntIdx]*m_timePeriod-pi/2);
+		m_cmdDHJntVel[m_testJntIdx]:=0.5*m_jntMotionRange[m_testJntIdx]*2*pi*m_jntMotionFreq[m_testJntIdx]*COS(2*pi*m_jntMotionFreq[m_testJntIdx]*m_timePeriod-pi/2);
+	ELSIF m_stepTestFlag THEN
+		m_cmdDHJntPos[m_testJntIdx]:=m_initJntPos[m_testJntIdx]+m_jntStep;
+	ELSE
+		m_timePeriod:=0;
+	END_IF
+	
 END_IF
 
 // calculate target motor joint position from DH joint position
 i_slaveArm.instrument.instruIK(m_cmdDHJntPos,m_gripperAngle, o_jntPos=>m_cmdJntPos);
 
-vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
-vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+IF m_freqTestFlag THEN 
+	vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+	vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+ELSE
+	m_cmdJntVel:=g_zeroVec8d;
+END_IF
 m_lastCmdJntPos:=m_cmdJntPos;
 
 FOR i:=1 TO 3 DO 
@@ -115,6 +131,11 @@ m_instruController.run(m_instruCmdJntPos,m_instruCmdJntVel, m_cmdDHJntPos[6], m_
 FOR i:=1 TO 5 DO
 	m_cmdJntTrq[i+3]:=m_instruCmdJntTrq[i];
 END_FOR
+
+// add friction
+IF m_enableFrictionComp THEN
+	enableFrictionCompensation(i_slaveArm);
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -157,11 +178,18 @@ m_instruController.init(i_slaveArm);
     <LineIds Name="FB_SlaveCtrlTest.calcCmdJntPos">
       <LineId Id="114" Count="0" />
       <LineId Id="132" Count="0" />
-      <LineId Id="137" Count="2" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="203" Count="1" />
+      <LineId Id="208" Count="2" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="139" Count="0" />
       <LineId Id="134" Count="0" />
       <LineId Id="161" Count="1" />
       <LineId Id="164" Count="0" />
+      <LineId Id="211" Count="0" />
       <LineId Id="186" Count="2" />
+      <LineId Id="212" Count="2" />
       <LineId Id="131" Count="0" />
       <LineId Id="117" Count="0" />
       <LineId Id="111" Count="0" />
@@ -182,7 +210,10 @@ m_instruController.init(i_slaveArm);
       <LineId Id="135" Count="3" />
       <LineId Id="161" Count="0" />
       <LineId Id="139" Count="5" />
+      <LineId Id="176" Count="0" />
       <LineId Id="13" Count="0" />
+      <LineId Id="178" Count="2" />
+      <LineId Id="177" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlTest.init">
       <LineId Id="13" Count="0" />

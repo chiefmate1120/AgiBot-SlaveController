@@ -1,18 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <DUT Name="ST_InstruParameters" Id="{c902676e-88fd-4523-9f32-42df361ddc7d}">
+  <DUT Name="ST_InstruKinematicParam" Id="{c902676e-88fd-4523-9f32-42df361ddc7d}">
     <Declaration><![CDATA[ // instrumetn kinematic paramters
-TYPE ST_InstruParameters :
+TYPE ST_InstruKinematicParam :
 STRUCT	
-		
-	m_rodLength:LREAL:=0.5392; //器械杆长
-	m_headLength:LREAL :=0.01;
-	m_fingerLenght:LREAL :=0;//器械头端长度 
 	
+	// instrument geometric parameters
+	// NOTE: need update based on instrument types
+	m_rodLength:LREAL:=0.5392;
+	m_headLength:LREAL :=0.01;
+	m_fingerLenght:LREAL :=0;
+	m_maxGripAngle :LREAL := 60.0 * g_deg2Rad;
+	m_minGripAngle :LREAL := -5 * g_deg2Rad; // make sure fingers are fully closed
+	
+	// instrument kinematic parameters for joint/DH space transformation
 	kx:lreal:=1;
 	ky:lreal:=1;
-	kz:lreal:=1;
-
+	kz:LREAL:=1;
 	k13:LREAL:=0.775;
 	k23:LREAL:=0.775;
 	m_openAngleDir:INT:=-1;

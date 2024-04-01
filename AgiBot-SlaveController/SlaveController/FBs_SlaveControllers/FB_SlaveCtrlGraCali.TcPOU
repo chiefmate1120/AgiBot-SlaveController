@@ -11,11 +11,11 @@ VAR
 // cali trajectory
 	m_caliMotionSegs :INT :=3;
 	m_graCaliTraj:ARRAY [1..3, 1..g_sJntNum] OF LREAL:=
-		[-pi/6, -PI/2+pi/6, 0.4, 	0, 0, 0, 0,0,
-		 pi/6, 	-PI/2-pi/4, 0.2, 	0, 0, 0, 0,0,
-		 -pi/6, -PI/2+pi/6, 0.4, 	0, 0, 0, 0,0];
+		[-pi/6, -PI/2+pi/6, 0.5, 	5(-pi/3),
+		 pi/6, 	-PI/2-pi/4, 0.3, 	5(0),
+		 -pi/6, -PI/2+pi/6, 0.5, 	5(-pi/3)];
 		 
-	m_caliMaxjntVel:Vec8d:=[8(0.02)];
+	m_caliMaxjntVel:Vec8d:=[2(2.5*g_deg2Rad), 0.01, 5(2.5*g_deg2Rad)];
 	m_caliMaxjntAcc:Vec8d:=[8(0.5)];
 	m_caliMaxjntJerk:Vec8d:=[8(2.0)];
 	
@@ -76,26 +76,38 @@ END_VAR
 
 VAR
 	i,j :INT;
-	startJntPos,endJntPos :Vec8d;
+	initJntPos,startJntPos,endJntPos :Vec8d;
+
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 m_caliTrajIdx :=1;
+m_jntOPMode := g_slaveAllPosTrqMode;
 
 // traj plan
 // fisrt segment
-startJntPos:=i_slaveArm.curJntPos;
+initJntPos:=i_slaveArm.curJntPos;
+startJntPos:=initJntPos;
+endJntPos:=startJntPos;
 FOR j:=1 TO g_sJntNum DO 
-endJntPos[j]:=m_graCaliTraj[1,j];
+	IF j>3 THEN
+		endJntPos[j]:=initJntPos[j]+ m_graCaliTraj[1,j];
+	ELSE
+		endJntPos[j]:=m_graCaliTraj[1,j];
+	END_IF
 END_FOR
 m_caliPlanner[1].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
 
 // other segments
 FOR i:=2 TO m_caliMotionSegs DO 
+	startJntPos := endJntPos;
 	FOR j:=1 TO g_sJntNum DO 
-		startJntPos[j]:=m_graCaliTraj[i-1,j];
-		endJntPos[j]:=m_graCaliTraj[i,j];
+		IF j>3 THEN
+			endJntPos[j]:=initJntPos[j]+ m_graCaliTraj[i,j];
+		ELSE
+			endJntPos[j]:=m_graCaliTraj[i,j];
+		END_IF
 	END_FOR
 	m_caliPlanner[i].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
 END_FOR
@@ -113,19 +125,27 @@ END_FOR
       <LineId Id="57" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="121" Count="0" />
+      <LineId Id="192" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="138" Count="0" />
+      <LineId Id="179" Count="0" />
       <LineId Id="82" Count="0" />
+      <LineId Id="165" Count="0" />
       <LineId Id="98" Count="0" />
-      <LineId Id="86" Count="0" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="183" Count="1" />
+      <LineId Id="182" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="74" Count="0" />
       <LineId Id="125" Count="0" />
       <LineId Id="139" Count="0" />
       <LineId Id="127" Count="0" />
+      <LineId Id="189" Count="0" />
       <LineId Id="135" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="131" Count="1" />
+      <LineId Id="185" Count="1" />
+      <LineId Id="190" Count="1" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="132" Count="0" />
       <LineId Id="128" Count="0" />
       <LineId Id="126" Count="0" />
       <LineId Id="152" Count="0" />

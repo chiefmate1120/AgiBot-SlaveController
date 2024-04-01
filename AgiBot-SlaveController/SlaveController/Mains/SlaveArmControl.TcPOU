@@ -57,15 +57,17 @@ m_slaveRobot.run(m_slaveInputDataPool);
 m_slaveRobot.getStatus(m_slaveStatus,m_slaveJointsData);
 
 // slave output data cast
-slaveOutputDataCast(m_slaveStatus, m_slaveRobotData);
+slaveOutputDataCast(m_slaveInputDataPool.m_setupStatus, m_slaveStatus, m_slaveRobotData);
 
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
     <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
       <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
 METHOD masterInputDataCast : BOOL
-VAR_IN_OUT
+VAR_IN_OUT CONSTANT
 	masterInputData:MSCommu_MasterStatus;
+END_VAR
+VAR_IN_OUT
 	masterStatus :ST_MasterStatus;
 END_VAR
 
@@ -80,11 +82,8 @@ FOR i:=1 TO g_mArmNum DO
 	masterStatus.m_armState[i] := masterInputData.m_armState[i];
 	masterStatus.m_teleSlaveArmIdx[i] :=masterInputData.m_teleSlaveArmIdx[i];
 	masterStatus.m_gripAngle[i] := masterInputData.m_gripAngle[i];
-	masterStatus.m_cmdArmPose[i].m_pos := masterInputData.m_cmdArmPose[i].m_pos;
-	masterStatus.m_cmdArmPose[i].m_rot := masterInputData.m_cmdArmPose[i].m_rot;
 	masterStatus.m_curArmPose[i].m_pos := masterInputData.m_curArmPose[i].m_pos;
 	masterStatus.m_curArmPose[i].m_rot := masterInputData.m_curArmPose[i].m_rot;
-	masterStatus.m_cmdArmTwist[i] := masterInputData.m_cmdArmTwist[i];
 	masterStatus.m_curArmTwist[i] :=masterInputData.m_curArmTwist[i];
 END_FOR
 ]]></ST>
@@ -93,12 +92,17 @@ END_FOR
     <Method Name="slaveOutputDataCast" Id="{110717ec-abfc-4dc8-a3ed-d3c3fbcf321b}">
       <Declaration><![CDATA[// convert from local ST_SlaveStatus for control to MSCommu_SlaveStatus for master-slave communication
 METHOD slaveOutputDataCast : BOOL
-VAR_IN_OUT 
+VAR_IN_OUT CONSTANT
+	setupStatus :ST_SetupStatus;
 	slaveStatus :ST_SlaveStatus;
+END_VAR
+VAR_IN_OUT 
 	slaveOutputData : MSCommu_SlaveStatus;
 END_VAR
 
 VAR
+	slavePoseInCart, slavePoseInScope:ST_Frame;
+	tmpFrame :ST_Frame;
 	i :INT;
 END_VAR
 ]]></Declaration>
@@ -111,12 +115,13 @@ FOR i:= 1 TO g_sArmNum DO
 	slaveOutputData.m_instruStauts[i].m_fingerAngle := slaveStatus.m_instruStauts[i].m_fingerAngle;
 	slaveOutputData.m_instruStauts[i].m_ready := slaveStatus.m_instruStauts[i].m_ready;
 	slaveOutputData.m_instruStauts[i].m_type := slaveStatus.m_instruStauts[i].m_type;
-	slaveOutputData.m_cmdArmPose[i].m_pos :=slaveStatus.m_cmdArmPose[i].m_pos;
-	slaveOutputData.m_cmdArmPose[i].m_rot :=slaveStatus.m_cmdArmPose[i].m_rot;
-	slaveOutputData.m_curArmPose[i].m_pos :=slaveStatus.m_curArmPose[i].m_pos;
-	slaveOutputData.m_curArmPose[i].m_rot :=slaveStatus.m_curArmPose[i].m_rot;
-	slaveOutputData.m_cmdArmTwist[i] :=slaveStatus.m_cmdArmTwist[i];
-	slaveOutputData.m_curArmTwist[i] :=slaveStatus.m_curArmTwist[i];
+
+	slavePoseInCart := transform(setupStatus.m_curEndPose[i], slaveStatus.m_curArmPose[i]);
+	tmpFrame :=invFrame(slaveStatus.m_endoscopePose);
+	slavePoseInScope := transform(tmpFrame, slavePoseInCart);
+	slaveOutputData.m_curArmPose[i].m_pos :=slavePoseInScope.m_pos;
+	slaveOutputData.m_curArmPose[i].m_rot :=slavePoseInScope.m_rot;
+	slaveOutputData.m_masterSlavePoseError[i] :=slaveStatus.m_masterSlavePoseError[i];
 END_FOR
 
 
@@ -154,11 +159,9 @@ END_FOR
       <LineId Id="5" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
-      <LineId Id="26" Count="3" />
-      <LineId Id="32" Count="0" />
+      <LineId Id="26" Count="2" />
       <LineId Id="30" Count="0" />
       <LineId Id="33" Count="0" />
-      <LineId Id="31" Count="0" />
       <LineId Id="24" Count="1" />
       <LineId Id="17" Count="0" />
     </LineIds>
@@ -169,12 +172,14 @@ END_FOR
       <LineId Id="23" Count="0" />
       <LineId Id="26" Count="1" />
       <LineId Id="36" Count="1" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="38" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="90" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="39" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="24" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="25" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="10" Count="0" />
