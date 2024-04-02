@@ -30,7 +30,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-m_holdLastCmds := checkToHoldLastCmds(r_slaveArmCtrlCmd, i_slaveArm);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>

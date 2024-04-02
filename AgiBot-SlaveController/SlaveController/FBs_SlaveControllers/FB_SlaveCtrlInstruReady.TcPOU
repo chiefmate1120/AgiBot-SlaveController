@@ -30,8 +30,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// check if to hold the command joint position unchanged
-m_holdLastCmds := checkToHoldLastCmds(r_slaveArmCtrlCmd, i_slaveArm);
+        <ST><![CDATA[// DO NOT hold last command
+//m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
@@ -41,7 +41,8 @@ SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruReady.init">
-      <LineId Id="73" Count="3" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="76" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

@@ -41,7 +41,12 @@ VAR_GLOBAL
 	
 	// motor position when instrument is at zero position
 	g_instruZeroPosition :Vec5d :=[0.0, 0.0, 0.0, 0.0, 0.0];// move to instrument chip and read online
-
+	
+	// master gripper angle limit
+	g_maxMasterGripAngle :LREAL := 30*g_deg2Rad;
+	g_minMasterGripAngle : LREAL :=0.0;
+	g_masterGripForceStartAng :LREAL :=5*g_deg2Rad;
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

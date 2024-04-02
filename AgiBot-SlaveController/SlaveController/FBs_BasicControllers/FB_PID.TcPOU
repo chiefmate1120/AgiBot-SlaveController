@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_PID" Id="{13af37a5-afde-4218-b603-df919a6bc51a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_PID
 VAR_INPUT
@@ -89,6 +89,20 @@ run:=LIMIT(-m_ctrlLimit, m_outPut, m_ctrlLimit);
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="setPIDParam" Id="{bfbb4755-7aaa-4852-9e4b-090df6c39c54}">
+      <Declaration><![CDATA[METHOD setPIDParam : BOOL
+VAR_INPUT
+	i_kp:LREAL;
+	i_kd:LREAL;
+	i_ki:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_kp:=i_kp;
+m_kd :=i_kd;
+m_ki :=i_ki;]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_PID">
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -104,6 +118,10 @@ run:=LIMIT(-m_ctrlLimit, m_outPut, m_ctrlLimit);
     </LineIds>
     <LineIds Name="FB_PID.run">
       <LineId Id="18" Count="10" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PID.setPIDParam">
+      <LineId Id="9" Count="1" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

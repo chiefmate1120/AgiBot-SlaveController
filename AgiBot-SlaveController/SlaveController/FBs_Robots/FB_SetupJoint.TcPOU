@@ -61,6 +61,7 @@ m_linkEnc2PosRatio := 2*PI*m_linkEncoderDir/(m_linkEncoderReduction*m_linkEncode
 m_motorEnc2PosRatio := 2*PI * m_motorDir/(m_motorReduction * m_motorEncoderRes);
 
 // motor data init
+m_rawJntVel :=0;
 m_curJntVel:=0;
 m_curJntTrq :=0;
 m_rawCurrent :=0;
@@ -92,6 +93,7 @@ m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       <LineId Id="163" Count="0" />
       <LineId Id="102" Count="15" />
       <LineId Id="122" Count="6" />
+      <LineId Id="178" Count="0" />
       <LineId Id="130" Count="1" />
       <LineId Id="152" Count="1" />
       <LineId Id="133" Count="1" />

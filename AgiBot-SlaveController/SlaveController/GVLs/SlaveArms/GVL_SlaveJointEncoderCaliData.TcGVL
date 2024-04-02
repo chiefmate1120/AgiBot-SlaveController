@@ -25,7 +25,7 @@ VAR_GLOBAL CONSTANT
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[16466480, 129040, 6484900, 15117400, 15351700, 7871600, 7155200, 6961900,
+		[16466480, 129040, 6484900, 15117400, 15351700, 6940240, 7155200, 6961900,
 		 0, 0, 0, 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0, 0, 0, 0];

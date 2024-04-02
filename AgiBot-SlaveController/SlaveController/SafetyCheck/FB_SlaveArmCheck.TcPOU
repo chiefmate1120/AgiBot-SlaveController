@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArmCheck" Id="{7fa43d5a-568e-4b76-ad81-6c5cf7c4ee74}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArmCheck
 VAR_INPUT
@@ -113,7 +113,7 @@ END_VAR
 // joint error check
 //NOTE: only check the first three joints.
 FOR i:=1 TO 3 DO 
-	jntCtrlErrCheck[i]:= ABS(o_jntCtrlErr[i]) > g_maxJntCtrlErr;
+	jntCtrlErrCheck[i]:= ABS(o_jntCtrlErr[i]) > g_slaveMaxJntCtrlErr[i];
 END_FOR
 	]]></ST>
       </Implementation>
@@ -137,7 +137,7 @@ END_VAR
 
 // joint error check
 FOR i:=1 TO g_sJntNum DO 
-	jntEncErrCheck[i]:= ABS(o_jntEncErr[i]) > g_maxJntEncErr;
+	jntEncErrCheck[i]:= ABS(o_jntEncErr[i]) > g_slaveMaxJntCtrlErr[i];
 END_FOR
 
 // NOTE: power box joints are easy to trigger encoder error during instrument mount, so this part is diabled now

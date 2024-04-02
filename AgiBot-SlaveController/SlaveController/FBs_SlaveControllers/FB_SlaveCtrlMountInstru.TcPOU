@@ -16,39 +16,30 @@ VAR
 	m_jointMounted :ARRAY[1..5] OF BOOL := [5(FALSE)];
 	
 	// instrument mount motion range
-	m_mountMotionAng :Vec5d :=[2*PI, 2*PI, 2*PI, 2*PI, 2*PI];
+	m_mountMotionAng :Vec5d :=[5(pi)];
 	
 	// instrument mount direction
 	m_mountDir :Vec5i :=[1, 1, 1, 1, 1];
 	
 	// mount motion planning
 	m_jntOTG :ARRAY[1..5] OF FB_secOrdTrajFilter;
-	m_instruMountVel :LREAL := 2*PI;//30* g_deg2Rad;
-	m_instruMountAcc :LREAL := 2*PI;
-	
-	// track error threshold which indicate motor is buckled with panel
-	m_maxTrackErr :LREAL := 5*g_deg2Rad;
-	
-	//powerbox motor stop vel
-	m_stopVel :LREAL := 1*g_deg2Rad;
+	m_instruMountVel :LREAL := 4*PI;
+	m_instruMountAcc :LREAL := 8*PI;
 	
 	//Joint 4 rotation angle
 	rotAngleJ4 :LREAL := 323*g_deg2Rad;
 	
 	// joint current threshold which indicate panel is buckled with instrument
-	m_maxJntCurrent :INT := 150;
+	m_maxJntCurrent :Vec5d := [150, 150, 150, 180, 180];
 	
 	// command mount motion
 	m_targetMountPos :Vec8d;
 	
 	// instrument zero position
 	m_instruZeroDeviation :Vec5d;
-	m_PowerboxZeroPos :Vec5d:=[g_2pi,g_2pi, 0,  0, 0];
-	m_instruZeroDeviationJ4:LREAL;
 	
-	//instrument clamping Error
-	m_Error:BOOL;
-	m_ErrorID:DINT;
+	// joint position error
+	m_jntPosErr :Vec5d;
 
 END_VAR
 ]]></Declaration>
@@ -66,92 +57,13 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR 
-	i :INT;
-	curJntVel :Vec8d;
-	curJntPos :Vec8d;
-	jntPosErr :Vec8d;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
-
-CASE m_mountStatus OF
-	// To lock panel with instrument
-	0:
-		FOR i:=1 TO 5 DO
-			// check joint buckled with instrument
-			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent THEN 
-				m_jointMounted[i]:=TRUE;
-				m_targetMountPos[i+3]:=curJntPos[i+3];
-			END_IF
-			
-			// set target joint position
-			IF FALSE = m_jointMounted[i] THEN
-				m_targetMountPos[i+3]:=curJntPos[i+3]-m_mountMotionAng[i];
-			END_IF
-		END_FOR
-		
-		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4] AND m_jointMounted[5])  THEN
-			IF i_slaveArm.instrument.InstruReadPara.m_InstruReadSucceed THEN//Check whether the data is read successfully
-				m_mountStatus:=1;
-			ELSE
-				m_Error:=TRUE;
-				m_ErrorID:=1;
-			END_IF
-		END_IF
-	
-	1:// The calculation deviates from the instrument zero position
-		(*IF m_instruZeroDeviationJ4>PI THEN //J4
-			m_instruZeroDeviation[1,4]:=m_instruZeroDeviationJ4;
-		ELSE
-			m_instruZeroDeviation[1,4]:=-m_instruZeroDeviationJ4;
-		END_IF*)
-		m_instruZeroDeviation[4]:=-rotAngleJ4;
-		
-		FOR i:=1 TO 3 DO//J1-3
-			m_instruZeroDeviation[i] := m_PowerboxZeroPos[i] + i_slaveArm.linkSingle[i+3] + i_slaveArm.instrument.InstruReadPara.m_InstruPos[i];
-		END_FOR
-		m_mountStatus :=2;
-	
-	
-	2:// move back to zero position
-	FOR i:=1 TO 3 DO//J1-3
-			IF m_instruZeroDeviation[i]>pi THEN
-				m_instruZeroDeviation[i] := m_instruZeroDeviation[i] - 2*PI;
-			ELSIF m_instruZeroDeviation[i]<-pi THEN
-				m_instruZeroDeviation[i] := m_instruZeroDeviation[i] + 2*PI;
-			END_IF
-		END_FOR
-		// set target joint position
-		FOR i:=1 TO 4 DO
-			m_targetMountPos[i+3]:=curJntPos[i+3] - m_instruZeroDeviation[i];
-		END_FOR
-		m_mountStatus :=3;
-		
-		
-	3:
-		m_isFinished:=TRUE;
-		FOR i:=1 TO 5 DO
-			IF ABS(m_targetMountPos[i+3]-curJntPos[i+3])>0.05 THEN
-				m_isFinished:=FALSE;
-				EXIT;
-			END_IF
-		END_FOR
-			
-	4:
-		vecSub(m_targetMountPos,curJntPos,jntPosErr);
-		IF norm(jntPosErr)<5*GVL_SlaveControlParameters.g_jntCtrlPosTol THEN
-			m_isFinished:=TRUE;
-		END_IF
-		
-END_CASE
-
-// traj plan
-FOR i:=1 TO 5 DO
-	m_jntOTG[i].run(m_targetMountPos[i+3],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
-END_FOR
-
-
-]]></ST>
+        <ST><![CDATA[IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND InstruType_endoscope = i_slaveArm.instrument.onChipData.m_Instrutype THEN
+	mountEndoscope(i_slaveArm);
+ELSE
+	mountInstrument(i_slaveArm);
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{85ccbdcb-d27d-4162-a6ec-e8e93d30dbc6}">
@@ -168,7 +80,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-m_holdLastCmds := checkToHoldLastCmds(r_slaveArmCtrlCmd, i_slaveArm);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 m_jntOPMode[4] := DriverOPMode_PosTrq;
@@ -184,18 +96,106 @@ FOR i:=1 TO 5 DO
 END_FOR
 
 m_mountStatus:=0;
-// check instrument type to get mount joint index and zero position
-IF i_slaveArm.instrument.InstruReadPara.m_Instrutype <> InstruType_UNKNOWM THEN
-	m_jointMounted[5]:=TRUE;
-END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mountEndoscope" Id="{924322f0-f77b-4627-9090-85580b93061c}">
+      <Declaration><![CDATA[METHOD mountEndoscope : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntPos :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="mountInstrument" Id="{cbdcc411-d3ae-4c70-8c1a-fbdc24e77583}">
+      <Declaration><![CDATA[METHOD mountInstrument : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntPos :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
+
+CASE m_mountStatus OF
+	// To lock panel with instrument
+	0:
+		//buckle panel with instrument
+		FOR i:=1 TO 4 DO
+			// check if buckled 
+			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent[i] THEN 
+				m_jointMounted[i]:=TRUE;
+				m_targetMountPos[i+3]:=curJntPos[i+3];
+				m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			END_IF
+			
+			// set target joint position
+			IF FALSE = m_jointMounted[i] THEN
+				m_targetMountPos[i+3]:=curJntPos[i+3]+m_mountMotionAng[i];
+			END_IF
+		END_FOR
+		
+		
+		// check transition condition
+		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4])  THEN
+			IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN//Check whether the data is read successfully
+				m_mountStatus:=1;
+			END_IF
+		END_IF
+	
+	1:// calculation deviates from the instrument zero position
+		m_instruZeroDeviation[4]:=rotAngleJ4;
+		
+		FOR i:=1 TO 3 DO
+			m_instruZeroDeviation[i] :=  i_slaveArm.linkSingle[i+3] - i_slaveArm.instrument.onChipData.m_InstruPos[i];
+		END_FOR
+		m_mountStatus :=2;
+	
+	
+	2:// move back to zero position
+		FOR i:=1 TO 3 DO//J1-3
+			IF m_instruZeroDeviation[i]>pi THEN
+				m_instruZeroDeviation[i] := m_instruZeroDeviation[i] - 2*PI;
+			ELSIF m_instruZeroDeviation[i]<-pi THEN
+				m_instruZeroDeviation[i] := m_instruZeroDeviation[i] + 2*PI;
+			END_IF
+		END_FOR
+		// set target joint position
+		FOR i:=1 TO 4 DO
+			m_targetMountPos[i+3]:=curJntPos[i+3] - m_instruZeroDeviation[i];
+		END_FOR
+		m_mountStatus :=3;
+		
+		
+	3:
+		m_isFinished:=TRUE;
+		FOR i:=1 TO 4 DO 
+			m_jntPosErr[i]:=m_targetMountPos[i+3]-curJntPos[i+3];
+			IF ABS(m_jntPosErr[i]) >GVL_SlaveControlParameters.g_jntCtrlAngTolHigh OR 
+					ABS( i_slaveArm.linkSingle[i+3] - i_slaveArm.instrument.onChipData.m_InstruPos[i]) >5*g_deg2rad THEN
+				m_isFinished := FALSE;
+				EXIT;
+			END_IF
+		END_FOR
+		
+END_CASE
+
+// traj plan
+FOR i:=1 TO 4 DO
+	m_jntOTG[i].run(m_targetMountPos[i+3],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
+END_FOR
 
 
-//Update the IP and port number of the operating arm
-i_slaveArm.instrument.InstruReadPara.i_ArmNetId:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[1];
-i_slaveArm.instrument.InstruReadPara.i_JointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[1,4];
-
-m_Error:=FALSE;
-m_ErrorID:=0;
 ]]></ST>
       </Implementation>
     </Method>
@@ -203,54 +203,10 @@ m_ErrorID:=0;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntPos">
-      <LineId Id="120" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="144" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="236" Count="0" />
-      <LineId Id="240" Count="1" />
-      <LineId Id="255" Count="2" />
-      <LineId Id="239" Count="0" />
-      <LineId Id="245" Count="0" />
-      <LineId Id="248" Count="1" />
-      <LineId Id="254" Count="0" />
-      <LineId Id="247" Count="0" />
-      <LineId Id="246" Count="0" />
-      <LineId Id="172" Count="1" />
-      <LineId Id="279" Count="0" />
-      <LineId Id="314" Count="0" />
-      <LineId Id="282" Count="2" />
-      <LineId Id="281" Count="0" />
-      <LineId Id="175" Count="1" />
-      <LineId Id="355" Count="0" />
-      <LineId Id="409" Count="3" />
-      <LineId Id="362" Count="0" />
-      <LineId Id="413" Count="0" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="285" Count="2" />
-      <LineId Id="182" Count="3" />
-      <LineId Id="436" Count="0" />
-      <LineId Id="438" Count="4" />
-      <LineId Id="379" Count="1" />
-      <LineId Id="310" Count="0" />
-      <LineId Id="312" Count="1" />
-      <LineId Id="311" Count="0" />
-      <LineId Id="383" Count="1" />
-      <LineId Id="382" Count="0" />
-      <LineId Id="415" Count="5" />
-      <LineId Id="414" Count="0" />
-      <LineId Id="421" Count="0" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="387" Count="2" />
-      <LineId Id="386" Count="0" />
-      <LineId Id="365" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="146" Count="2" />
-      <LineId Id="260" Count="0" />
-      <LineId Id="259" Count="0" />
       <LineId Id="150" Count="0" />
+      <LineId Id="477" Count="0" />
+      <LineId Id="479" Count="1" />
+      <LineId Id="478" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.init">
       <LineId Id="123" Count="0" />
@@ -263,15 +219,18 @@ m_ErrorID:=0;
       <LineId Id="95" Count="3" />
       <LineId Id="93" Count="1" />
       <LineId Id="68" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="71" Count="1" />
-      <LineId Id="88" Count="1" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="90" Count="1" />
-      <LineId Id="110" Count="1" />
       <LineId Id="109" Count="0" />
       <LineId Id="92" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountInstru.mountEndoscope">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
+      <LineId Id="6" Count="24" />
+      <LineId Id="34" Count="29" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="64" Count="14" />
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

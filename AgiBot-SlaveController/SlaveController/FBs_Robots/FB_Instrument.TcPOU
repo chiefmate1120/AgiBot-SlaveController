@@ -8,13 +8,48 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR
-	//The state and parameters read by the instrument
-	m_InstruReadPara:ST_InstruReadPara;
+	//IP of operating arm
+	m_armNetId:T_AmsNetId; 	
 	
-	m_kinematicParameters:ST_InstruParameters; 
+	//Joint port number
+	m_jointInstruAddr:UINT;	
+
+	//Arm LED Prot	
+	m_LEDPortAddr:UINT;		
 	
-	JntPosOffset:Vec8d;
+	//The state and parameters readed from the instrument
+	m_onChipData:ST_InstruOnChipData;
+	
+	// instrument kinematic parameters
+	m_kinematicParameters:ST_InstruKinematicParam; 
+	
+	// joint position when instrument is at ZERO posture
+	m_jntPosOffset:Vec8d;
+	
+	// joint single link position when instrument at zero posture
+	// TODO: move parameters below to instrument chip
+	m_zeroPosNeedleGripper :Vec5d :=[-4.5, -4.5, 2.0, -0.8 , 0];
+	
+	// variables used to read instrument information
+	m_Step:INT;
+	m_Value:UDINT;
+	m_ReadDelay:TON;
+	m_DealyTime:TIME:=T#0.5S;
+	m_IDReadResult:UDINT;
+	m_IDResult:ULINT;
+	m_SeriesReadResult:UDINT;
+	m_PosReadResult:UDINT;
+	m_PosL1,m_PosL2,m_PosL3:UDINT;
+	m_signL1,m_signL2,m_signL3:UDINT;
+	m_UsageReadResult:ULINT;
+	m_InstruUsageToLED:ULINT;
+	m_InstruSeriesRecord:ARRAY [1..100] OF ULINT;
+	m_HaveRecord:BOOL;
+	m_SdoWrite:FB_EcCoESdoWrite;
+	m_SdoRead:FB_EcCoESdoRead;
+	
 END_VAR
+
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
@@ -34,9 +69,22 @@ VAR_OUTPUT
 	// slave instrument grip force	
 	o_instruGripForceLevel :LREAL;
 END_VAR
-]]></Declaration>
+
+VAR
+	gripLevel :REAL;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[// finger closed and force applied
+IF i_masterGripAng < g_masterGripForceStartAng THEN
+	o_instruGripAngle := m_kinematicParameters.m_minGripAngle;
+	// NOTE: force is applied from 50%，as minimum gripper angle already apply some sort of force
+	o_instruGripForceLevel := 50+50*(g_masterGripForceStartAng - i_masterGripAng)/(g_masterGripForceStartAng - g_minMasterGripAngle);
+// finger open
+ELSE
+	o_instruGripAngle := (g_maxMasterGripAngle - i_masterGripAng)/(g_maxMasterGripAngle - g_masterGripForceStartAng);
+	o_instruGripAngle :=m_kinematicParameters.m_maxGripAngle - o_instruGripAngle * (m_kinematicParameters.m_maxGripAngle - m_kinematicParameters.m_minGripAngle);
+	o_instruGripForceLevel:=0;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="gripperAngleForwardTransform_ID12" Id="{d3dda96d-7b55-4cf3-9ffe-c8cf53ace77d}">
@@ -122,6 +170,18 @@ frontAngle:=Angle_Inc_A*2;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="init" Id="{b6799ae1-8e52-4442-8aea-44a9f33a3afc}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	armIdx :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Update the IP and port number of the operating arm
+m_armNetId:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
+m_jointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="initInstruJntPos" Id="{9abce61f-f34d-42ca-a401-a8190ac28e6c}">
       <Declaration><![CDATA[METHOD initInstruJntPos : BOOL
 VAR_INPUT
@@ -134,7 +194,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 FOR i := 4 TO 8 BY 1 DO
-	JntPosOffset[i]:=0-m_curJntPos[i];
+	m_jntPosOffset[i]:=m_curJntPos[i];
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -165,11 +225,11 @@ r_DHJntPos[2]:=i_jntPos[2];
 r_DHJntPos[3]:=i_jntPos[3];
 
 // convert motor joint position to instrument joint position
-jntPosL1:=(i_jntPos[4]+JntPosOffset[4]);
-jntPosL2:=(i_jntPos[5]+JntPosOffset[5]);
-jntPosL3:=(i_jntPos[6]+JntPosOffset[6]);
-jntPosL4:=-(i_jntPos[7]+JntPosOffset[7]);
-jntPosL5:=-(i_jntPos[8]+JntPosOffset[8]);
+jntPosL1:=(i_jntPos[4]-m_jntPosOffset[4]);
+jntPosL2:=(i_jntPos[5]-m_jntPosOffset[5]);
+jntPosL3:=(i_jntPos[6]-m_jntPosOffset[6]);
+jntPosL4:=-(i_jntPos[7]-m_jntPosOffset[7]);
+jntPosL5:=-(i_jntPos[8]-m_jntPosOffset[8]);
 
 // instrument FK in local coordinate
 r_DHJntPos[4]:=jntPosL4/m_kinematicParameters.kx;
@@ -177,10 +237,10 @@ r_DHJntPos[5]:=jntPosL3/m_kinematicParameters.ky;
 r_DHJntPos[6]:=(jntPosL1-jntPosL2-2*r_DHJntPos[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
 
 gripAngle:=(jntPosL1+jntPosL2)/(m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
-IF (12=InstruReadPara.m_InstruID) THEN//细齿无创抓钳
+IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
 	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> r_gripAngle);
 
-ELSIF (16 =InstruReadPara.m_InstruID) THEN//单级电钩
+ELSIF (16 =onChipData.m_InstruID) THEN//单级电钩
 	r_gripAngle:=0;
 	
 ELSE
@@ -271,10 +331,10 @@ kz:=m_kinematicParameters.kz;
 d:=m_kinematicParameters.m_openAngleDir;
 
 //*********************动力盒关节逆向运动学，根据空间关节计算L1-L5**************************//
-IF (12=InstruReadPara.m_InstruID) THEN//细齿无创抓钳
+IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
 	gripperAngleInverseTransform_ID12(endAngle:= i_gripAngle, frontAngle=> gripAngle);
 	
-ELSIF 16 = InstruReadPara.m_InstruID THEN//单级电钩\电铲
+ELSIF 16 = onChipData.m_InstruID THEN//单级电钩\电铲
 	gripAngle:=0;
 	
 ELSE
@@ -291,11 +351,11 @@ m_gripAnglePbox[5]:=-rot_y*k23*kz-d*rot_z*kz+d*ra*kz/2;
 o_jntPos[1] := i_DHJntPos[1];
 o_jntPos[2] := i_DHJntPos[2];
 o_jntPos[3] := i_DHJntPos[3];
-o_jntPos[4] := m_gripAnglePbox[4] - JntPosOffset[4];
-o_jntPos[5] := m_gripAnglePbox[5] - JntPosOffset[5];
-o_jntPos[6] := m_gripAnglePbox[6] - JntPosOffset[6];
-o_jntPos[7] := -m_gripAnglePbox[7] - JntPosOffset[7];
-o_jntPos[8] := -m_gripAnglePbox[8] - JntPosOffset[8];
+o_jntPos[4] := m_gripAnglePbox[4] + m_jntPosOffset[4];
+o_jntPos[5] := m_gripAnglePbox[5] + m_jntPosOffset[5];
+o_jntPos[6] := m_gripAnglePbox[6] + m_jntPosOffset[6];
+o_jntPos[7] := -m_gripAnglePbox[7] + m_jntPosOffset[7];
+o_jntPos[8] := -m_gripAnglePbox[8] + m_jntPosOffset[8];
 
 
 ]]></ST>
@@ -331,17 +391,6 @@ r_DHJntVel[5]:=-r_DHJntVel[5];
 r_DHJntVel[6]:=-r_DHJntVel[6];]]></ST>
       </Implementation>
     </Method>
-    <Property Name="InstruReadPara" Id="{093a4217-bb32-41a8-a667-4570e97851b1}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY InstruReadPara : REFERENCE TO ST_InstruReadPara]]></Declaration>
-      <Get Name="Get" Id="{f9328823-d656-4b2e-b51e-d2d3d6c6297d}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[InstruReadPara ref=m_InstruReadPara;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
     <Method Name="InstruSreiesFind" Id="{f880300d-e9dd-456f-88b6-72b1cc8bd3d5}">
       <Declaration><![CDATA[METHOD InstruSreiesFind : BOOL
 VAR_INPUT
@@ -367,7 +416,7 @@ END_FOR
       </Implementation>
     </Method>
     <Property Name="kinematicParameters" Id="{e7ad17bd-82e9-477e-9e66-6a8feac51534}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY kinematicParameters :REFERENCE TO ST_InstruParameters]]></Declaration>
+      <Declaration><![CDATA[PROPERTY kinematicParameters :REFERENCE TO ST_InstruKinematicParam]]></Declaration>
       <Get Name="Get" Id="{d0447347-931d-4e2e-81b2-c8e4acc99fd6}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -377,38 +426,32 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="onChipData" Id="{093a4217-bb32-41a8-a667-4570e97851b1}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY onChipData : REFERENCE TO ST_InstruOnChipData]]></Declaration>
+      <Get Name="Get" Id="{f9328823-d656-4b2e-b51e-d2d3d6c6297d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[onChipData ref=m_onChipData;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="readParameters" Id="{fafb5a79-7caf-47d4-9d2f-b3dbd95048cf}">
       <Declaration><![CDATA[METHOD readParameters : BOOL
-
-VAR_STAT
-	m_Step:INT;
-	m_Value:UDINT;
-	m_ReadDelay:TON;
-	m_DealyTime:TIME:=T#0.5S;
-	m_IDReadResult:UDINT;
-	m_IDResult:ULINT;
-	m_SeriesReadResult:UDINT;
-	m_PosReadResult:UDINT;
-	m_PosL1,m_PosL2,m_PosL3:UDINT;
-	m_signL1,m_signL2,m_signL3:UDINT;
-	m_UsageReadResult:ULINT;
-	m_InstruUsageToLED:ULINT;
-	
-	m_InstruSeriesRecord:ARRAY [1..100] OF ULINT;
-	m_HaveRecord:BOOL;
-
-	m_SdoWrite:FB_EcCoESdoWrite;
-	m_SdoRead:FB_EcCoESdoRead;
-END_VAR]]></Declaration>
+VAR_INPUT
+	startFlag :BOOL;
+END_VAR
+]]></Declaration>
       <Implementation>
         <ST><![CDATA[// TODO: read m_kinematic parameters from chip 
 //Take the rising edge of the read signal
 m_ReadDelay(IN:= m_Step=10, PT:= m_DealyTime, Q=> , ET=> );//计时器
-IF InstruReadPara.i_ReadInfoIntrus THEN
+IF startFlag THEN
 	m_Step:=0;
-	m_InstruReadPara.m_InstruReadSucceed:=FALSE;
-	m_InstruReadPara.m_Error:=FALSE;
-	m_InstruReadPara.m_ErrorID:=0;
+	m_onChipData.m_InstruReadSucceed:=FALSE;
+	m_onChipData.m_Error:=FALSE;
+	m_onChipData.m_ErrorID:=0;
 END_IF
 
 
@@ -416,7 +459,7 @@ CASE m_Step OF
 	
 	0://向6093发送0x8000  0000---发送读取信号
 		m_Value:=16#80000000; 
-		m_SdoWrite(sNetId:= m_InstruReadPara.i_ArmNetId, nSlaveAddr:= m_InstruReadPara.i_JointInstruAddr, nSubIndex:= 0, nIndex:= 16#6093, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, );
+		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr, nSubIndex:= 0, nIndex:= 16#6093, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
 			m_Step:=10;
@@ -430,7 +473,7 @@ CASE m_Step OF
 
 		
 	20://从6093地址中拿值
-		m_SdoRead(sNetId:= m_InstruReadPara.i_ArmNetId, nSlaveAddr:= m_InstruReadPara.i_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6093, pDstBuf:= ADR(m_IDReadResult), cbBufLen:= SIZEOF(m_IDReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
+		m_SdoRead(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6093, pDstBuf:= ADR(m_IDReadResult), cbBufLen:= SIZEOF(m_IDReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
 		IF NOT m_SdoRead.bBusy THEN
 			m_SdoRead(bExecute:=FALSE);
 			m_Step:=30;
@@ -443,7 +486,7 @@ CASE m_Step OF
 		
 		
 	40://读取6095、器械序列号
-		m_SdoRead(sNetId:= m_InstruReadPara.i_ArmNetId, nSlaveAddr:= m_InstruReadPara.i_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6095, pDstBuf:= ADR(m_SeriesReadResult), cbBufLen:= SIZEOF(m_SeriesReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
+		m_SdoRead(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6095, pDstBuf:= ADR(m_SeriesReadResult), cbBufLen:= SIZEOF(m_SeriesReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
 		IF NOT m_SdoRead.bBusy THEN
 			m_SdoRead(bExecute:=FALSE);
 			m_Step:=50;
@@ -451,13 +494,13 @@ CASE m_Step OF
 	
 		
 	50://处理序列号，低30位
-		m_InstruReadPara.m_InstruseriesNum:=SHL(m_IDResult,31)+(16#7FFFFFFF AND m_SeriesReadResult);
-		m_InstruReadPara.m_InstruID:=LREAL_TO_INT(FLOOR(lr_in:= m_InstruReadPara.m_InstruseriesNum/EXPT(10,9))); //取十进制前三位为器械ID
+		m_onChipData.m_InstruseriesNum:=SHL(m_IDResult,31)+(16#7FFFFFFF AND m_SeriesReadResult);
+		m_onChipData.m_InstruID:=LREAL_TO_INT(FLOOR(lr_in:= m_onChipData.m_InstruseriesNum/EXPT(10,9))); //取十进制前三位为器械ID
 		m_Step:=60;
 		
 		
 	60://读取6096---器械零点位置
-		m_SdoRead(sNetId:= m_InstruReadPara.i_ArmNetId, nSlaveAddr:= m_InstruReadPara.i_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6096, pDstBuf:= ADR(m_PosReadResult), cbBufLen:= SIZEOF(m_PosReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
+		m_SdoRead(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6096, pDstBuf:= ADR(m_PosReadResult), cbBufLen:= SIZEOF(m_PosReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
 		IF NOT m_SdoRead.bBusy THEN
 			m_SdoRead(bExecute:=FALSE);
 			m_Step:=70;
@@ -473,28 +516,29 @@ CASE m_Step OF
 		m_signL3:=SHR((16#20000000 AND m_PosReadResult),20);
 		
 		IF m_signL1=512 THEN
-			m_InstruReadPara.m_InstruPos[1]:=-UDINT_TO_LREAL(m_PosL1)/50;
+			m_onChipData.m_InstruPos[1]:=-UDINT_TO_LREAL(m_PosL1)/50;
 		ELSE
-			m_InstruReadPara.m_InstruPos[1]:=UDINT_TO_LREAL(m_PosL1)/50;
+			m_onChipData.m_InstruPos[1]:=UDINT_TO_LREAL(m_PosL1)/50;
 		END_IF
 		
 		IF m_signL2=512 THEN
-			m_InstruReadPara.m_InstruPos[2]:=-UDINT_TO_LREAL(m_PosL2)/50;
+			m_onChipData.m_InstruPos[2]:=-UDINT_TO_LREAL(m_PosL2)/50;
 		ELSE
-			m_InstruReadPara.m_InstruPos[2]:=UDINT_TO_LREAL(m_PosL2)/50;
+			m_onChipData.m_InstruPos[2]:=UDINT_TO_LREAL(m_PosL2)/50;
 		END_IF
 		
 		IF m_signL3=512 THEN
-			m_InstruReadPara.m_InstruPos[3]:=-UDINT_TO_LREAL(m_PosL3)/50;
+			m_onChipData.m_InstruPos[3]:=-UDINT_TO_LREAL(m_PosL3)/50;
 		ELSE
-			m_InstruReadPara.m_InstruPos[3]:=UDINT_TO_LREAL(m_PosL3)/50;
+			m_onChipData.m_InstruPos[3]:=UDINT_TO_LREAL(m_PosL3)/50;
 		END_IF
+		
 		m_Step:=80;
 	
 		
 		
 	80://读取器械使用次数 6094
-		m_SdoRead(sNetId:= m_InstruReadPara.i_ArmNetId, nSlaveAddr:= m_InstruReadPara.i_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6094, pDstBuf:= ADR(m_UsageReadResult), cbBufLen:= SIZEOF(m_UsageReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
+		m_SdoRead(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6094, pDstBuf:= ADR(m_UsageReadResult), cbBufLen:= SIZEOF(m_UsageReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
 		IF NOT m_SdoRead.bBusy THEN
 			m_SdoRead(bExecute:=FALSE);
 			m_Step:=90;
@@ -502,22 +546,22 @@ CASE m_Step OF
 		
 		
 	90://处理器械使用次数读取结果
-		m_InstruReadPara.m_InstruusageCounts:=m_UsageReadResult;
+		m_onChipData.m_InstruusageCounts:=m_UsageReadResult;
 		m_InstruUsageToLED:=LIMIT(0,m_UsageReadResult,99);
 		m_Step:=110;
 		
 		
 	100://将器械使用次数写入LED
 		m_Value:=ULINT_TO_UDINT(16#FFFF AND m_InstruUsageToLED) ;
-		m_SdoWrite(sNetId:= m_InstruReadPara.i_ArmNetId, nSlaveAddr:= m_InstruReadPara.i_LEDPortAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_LEDPortAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
 			m_Step:=110;
 		END_IF
 		
 	110://处理当器械使用次数达到上限后、在同一场手术中还能使用
-		IF m_InstruReadPara.m_InstruusageCounts=m_InstruReadPara.m_InstrumaxUsageCounts THEN
-			m_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_InstruReadPara.m_InstruusageCounts, i_ArrayData:= m_InstruSeriesRecord);
+		IF m_onChipData.m_InstruusageCounts=m_onChipData.m_InstrumaxUsageCounts THEN
+			m_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_onChipData.m_InstruusageCounts, i_ArrayData:= m_InstruSeriesRecord);
 			m_Step:=120;
 		ELSE
 			m_Step:=120;
@@ -526,42 +570,46 @@ CASE m_Step OF
 		
 		
 	120://结果诊断
-		IF m_InstruReadPara.m_InstruID<1 THEN
-			m_InstruReadPara.m_Error:=TRUE;
-			m_InstruReadPara.m_ErrorID:=1;
-		ELSIF m_InstruReadPara.m_InstruusageCounts>m_InstruReadPara.m_InstrumaxUsageCounts AND m_InstruReadPara.m_InstruID<>20 THEN
-			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_InstruReadPara.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
+		IF m_onChipData.m_InstruID<1 THEN
+			m_onChipData.m_Error:=TRUE;
+			m_onChipData.m_ErrorID:=1;
+		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
+			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
 			IF m_HaveRecord THEN
-				m_InstruReadPara.m_Instrutype:=2;
-				m_InstruReadPara.m_InstruReadSucceed:=TRUE;
+				m_onChipData.m_Instrutype:=2;
+				m_onChipData.m_InstruReadSucceed:=TRUE;
 				m_Step:=130;
 			ELSE
-				m_InstruReadPara.m_Error:=TRUE;
-				m_InstruReadPara.m_ErrorID:=2;
+				m_onChipData.m_Error:=TRUE;
+				m_onChipData.m_ErrorID:=2;
 			END_IF
-			
-		ELSIF m_InstruReadPara.i_CameraMonitor=TRUE AND m_InstruReadPara.m_InstruID=20 THEN
-			m_InstruReadPara.m_Error:=TRUE;
-			m_InstruReadPara.m_ErrorID:=3;
 		ELSE
-			m_InstruReadPara.m_Instrutype:=2;
-			m_InstruReadPara.m_InstruReadSucceed:=TRUE;
+			m_onChipData.m_Instrutype:=2;
+			m_onChipData.m_InstruReadSucceed:=TRUE;
 			m_Step:=130;
 		END_IF
 	
 		
 		
 	130://控制参数赋值、现在先用原有的  后续改为从芯片中读取
-		m_kinematicParameters.k13:=k13[m_InstruReadPara.m_InstruID];
-		m_kinematicParameters.k23:=k23[m_InstruReadPara.m_InstruID];
-		m_kinematicParameters.kx:=kx[m_InstruReadPara.m_InstruID];
-		m_kinematicParameters.ky:=ky[m_InstruReadPara.m_InstruID];
-		m_kinematicParameters.kz:=kz[m_InstruReadPara.m_InstruID];
+		m_kinematicParameters.k13:=k13[m_onChipData.m_InstruID];
+		m_kinematicParameters.k23:=k23[m_onChipData.m_InstruID];
+		m_kinematicParameters.kx:=kx[m_onChipData.m_InstruID];
+		m_kinematicParameters.ky:=ky[m_onChipData.m_InstruID];
+		m_kinematicParameters.kz:=kz[m_onChipData.m_InstruID];
 		m_Step:=-1;
 	
-	
-	
 END_CASE
+
+//NOTE: zero posture data is defined as single link position, need to update to chip later
+IF m_onChipData.m_Instrutype = InstruType_NeedleGripper THEN
+	m_onChipData.m_InstruPos := m_zeroPosNeedleGripper;
+END_IF
+
+// update instrument kinematic parameters based on readed info
+IF InstruType_NeedleGripper =  m_onChipData.m_Instrutype THEN
+	m_kinematicParameters.m_fingerLenght := 0.01;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -573,15 +621,15 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_InstruReadPara.m_InstruID := 0;
-m_InstruReadPara.m_InstruseriesNum :=0;
-m_InstruReadPara.m_Instrutype :=InstruType_UNKNOWM;
-m_InstruReadPara.m_Error:=FALSE;
-m_InstruReadPara.m_ErrorID:=0;
-m_InstruReadPara.m_InstruReadSucceed:=FALSE;
+        <ST><![CDATA[m_onChipData.m_InstruID := 0;
+m_onChipData.m_InstruseriesNum :=0;
+m_onChipData.m_Instrutype :=InstruType_UNKNOWM;
+m_onChipData.m_Error:=FALSE;
+m_onChipData.m_ErrorID:=0;
+m_onChipData.m_InstruReadSucceed:=FALSE;
 
 FOR i:= 4 TO 8 BY 1 DO
-	JntPosOffset[i]:=0;
+	m_jntPosOffset[i]:=0;
 END_FOR
 ]]></ST>
       </Implementation>
@@ -590,7 +638,14 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.gripAngleMap">
+      <LineId Id="22" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="26" Count="3" />
+      <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.gripperAngleForwardTransform_ID12">
       <LineId Id="6" Count="3" />
@@ -604,6 +659,10 @@ END_FOR
       <LineId Id="12" Count="3" />
       <LineId Id="54" Count="0" />
       <LineId Id="24" Count="13" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.init">
+      <LineId Id="7" Count="1" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.initInstruJntPos">
@@ -660,14 +719,14 @@ END_FOR
       <LineId Id="159" Count="0" />
       <LineId Id="220" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.InstruReadPara.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Instrument.InstruSreiesFind">
       <LineId Id="34" Count="8" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.kinematicParameters.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.onChipData.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
@@ -716,7 +775,8 @@ END_FOR
       <LineId Id="97" Count="0" />
       <LineId Id="131" Count="0" />
       <LineId Id="98" Count="0" />
-      <LineId Id="107" Count="23" />
+      <LineId Id="107" Count="22" />
+      <LineId Id="360" Count="1" />
       <LineId Id="104" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="141" Count="1" />
@@ -750,9 +810,6 @@ END_FOR
       <LineId Id="281" Count="0" />
       <LineId Id="184" Count="2" />
       <LineId Id="183" Count="0" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="188" Count="0" />
-      <LineId Id="190" Count="1" />
       <LineId Id="189" Count="0" />
       <LineId Id="248" Count="0" />
       <LineId Id="195" Count="0" />
@@ -764,8 +821,14 @@ END_FOR
       <LineId Id="171" Count="0" />
       <LineId Id="283" Count="3" />
       <LineId Id="308" Count="0" />
-      <LineId Id="276" Count="2" />
+      <LineId Id="276" Count="0" />
       <LineId Id="28" Count="0" />
+      <LineId Id="362" Count="3" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="330" Count="0" />
+      <LineId Id="333" Count="1" />
+      <LineId Id="332" Count="0" />
       <LineId Id="196" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">

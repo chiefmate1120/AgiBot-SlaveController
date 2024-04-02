@@ -72,8 +72,8 @@ VAR
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_sJntNum] OF FB_PID;
 	
+	// rising edge generator for instrument information reading
 	m_ReadLDP:R_TRIG;
-	ReadInfoIntrusStart:BOOL;
 	
 	// code execute time measure
 	m_codeTime : Profiler;
@@ -212,6 +212,10 @@ r_jaco[6,6]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
       <Declaration><![CDATA[METHOD checkIO : BOOL
 VAR_INPUT
 END_VAR
+
+VAR
+	startFlag :BOOL;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check adjust button
@@ -220,16 +224,14 @@ m_adjustOnFlag := adjustDetect();
 // check panel and instrument
 m_panelOnFlag := panelDetect();
 m_instruOnFlag := instruDetect();
-IF FALSE = m_instruOnFlag THEN
-	ReadInfoIntrusStart:=FALSE;
-	m_instrument.reset();
-ELSIF InstruType_UNKNOWM = m_instrument.InstruReadPara.m_Instrutype THEN
-	ReadInfoIntrusStart:=TRUE;
-	m_instrument.readParameters();
-END_IF
 
-m_ReadLDP(CLK:= ReadInfoIntrusStart, Q=>m_instrument.InstruReadPara.i_ReadInfoIntrus );
-//m_instruOnFlag := m_instruOnFlag AND (m_instrument.instruType <> InstruType_UNKNOWM);]]></ST>
+//read instrument information
+IF FALSE = m_instruOnFlag THEN
+	m_instrument.reset();
+END_IF
+m_ReadLDP(CLK:= m_instruOnFlag, Q=>startFlag );
+m_instrument.readParameters(startFlag);
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="cmdCartPose" Id="{72bf034f-e694-478b-8fc6-77f6ebb37ccd}" FolderPath="property\">
@@ -452,6 +454,7 @@ VAR
 
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
+	DHRot :Mat3d;
 
 END_VAR
 ]]></Declaration>
@@ -481,17 +484,21 @@ r_cartPose.m_pos[1]:=a*(c5*(s1*s4 + c1*c2*c4) - c1*s2*s5) + b*(c6*(c5*(s1*s4 + c
 r_cartPose.m_pos[2]:=a*(c2*s5 + c4*c5*s2) - d1 - L*c2 + q3*c2 + b*(c6*(c2*s5 + c4*c5*s2) + s2*s4*s6);
 r_cartPose.m_pos[3]:=L*s1*s2 - a*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5) - b*(c6*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5) - s6*(c1*c4 + c2*s1*s4)) - q3*s1*s2;
 
-r_cartPose.m_rot[1,1]:= c6*(c5*(s1*s4 + c1*c2*c4) - c1*s2*s5) - s6*(c4*s1 - c1*c2*s4);
-r_cartPose.m_rot[2,1]:=c6*(c2*s5 + c4*c5*s2) + s2*s4*s6;
-r_cartPose.m_rot[3,1]:=s6*(c1*c4 + c2*s1*s4) - c6*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5);
+DHRot[1,1]:= c6*(c5*(s1*s4 + c1*c2*c4) - c1*s2*s5) - s6*(c4*s1 - c1*c2*s4);
+DHRot[2,1]:=c6*(c2*s5 + c4*c5*s2) + s2*s4*s6;
+DHRot[3,1]:=s6*(c1*c4 + c2*s1*s4) - c6*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5);
 
-r_cartPose.m_rot[1,2]:=- s6*(c5*(s1*s4 + c1*c2*c4) - c1*s2*s5) - c6*(c4*s1 - c1*c2*s4);
-r_cartPose.m_rot[2,2]:=c6*s2*s4 - s6*(c2*s5 + c4*c5*s2);
-r_cartPose.m_rot[3,2]:=s6*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5) + c6*(c1*c4 + c2*s1*s4);
+DHRot[1,2]:=- s6*(c5*(s1*s4 + c1*c2*c4) - c1*s2*s5) - c6*(c4*s1 - c1*c2*s4);
+DHRot[2,2]:=c6*s2*s4 - s6*(c2*s5 + c4*c5*s2);
+DHRot[3,2]:=s6*(c5*(c1*s4 - c2*c4*s1) + s1*s2*s5) + c6*(c1*c4 + c2*s1*s4);
 
-r_cartPose.m_rot[1,3]:= s5*(s1*s4 + c1*c2*c4) + c1*c5*s2;
-r_cartPose.m_rot[2,3]:= c4*s2*s5 - c2*c5;
-r_cartPose.m_rot[3,3]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
+DHRot[1,3]:= s5*(s1*s4 + c1*c2*c4) + c1*c5*s2;
+DHRot[2,3]:= c4*s2*s5 - c2*c5;
+DHRot[3,3]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
+
+// convert to tcp rotation
+matMultiply(DHRot, GVL_SlaveArmKinematic.g_tcpRotation, r_cartPOSE.m_rot);
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -529,6 +536,10 @@ FOR i:=1 TO g_sJntNum DO
 		GVL_slaveControlParameters.g_posKi[i], GVL_slaveControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
 		GVL_slaveControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
 END_FOR
+
+// instrument init
+m_instrument.init(i_armIdx);
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -789,15 +800,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="readInstruInfo" Id="{67d65d43-e812-409d-9cd7-51d04d997421}">
-      <Declaration><![CDATA[METHOD readInstruInfo : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[m_instrument.readParameters();]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="simCartPose" Id="{6426ffc4-f74f-4984-ac32-a9f9d8b8c8ca}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY simCartPose :REFERENCE TO ST_Frame]]></Declaration>
       <Get Name="Get" Id="{a61bb7de-a7ad-4b34-8063-e53c825d0db4}">
@@ -869,7 +871,7 @@ m_cmdJntPos :=i_armCtrlCmd.m_cmdJntPos;
 m_cmdJntVel :=i_armCtrlCmd.m_cmdJntVel;
 m_cmdCartTwist := i_armCtrlCmd.m_cmdCartTwist;
 m_cmdCartPose :=i_armCtrlCmd.m_cmdCartPose;
-m_simJntPos:=i_armCtrlCmd.m_cmdJntPos;
+m_simJntPos:=i_armCtrlCmd.m_simJntPos;
 
 // update simulated master arm
 updateSimStatus();
@@ -1015,15 +1017,14 @@ END_FOR
     <LineIds Name="FB_SlaveArm.checkIO">
       <LineId Id="21" Count="1" />
       <LineId Id="26" Count="0" />
-      <LineId Id="6" Count="3" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="10" Count="1" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="13" Count="0" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="45" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
       <LineId Id="2" Count="0" />
@@ -1094,6 +1095,10 @@ END_FOR
       <LineId Id="111" Count="2" />
       <LineId Id="157" Count="13" />
       <LineId Id="156" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="243" Count="0" />
+      <LineId Id="241" Count="0" />
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.init">
@@ -1104,6 +1109,10 @@ END_FOR
       <LineId Id="165" Count="0" />
       <LineId Id="188" Count="2" />
       <LineId Id="166" Count="11" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="206" Count="0" />
       <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.initJntPos">
@@ -1165,9 +1174,6 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.rawJntCurrent.Get">
       <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveArm.readInstruInfo">
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">
       <LineId Id="2" Count="0" />

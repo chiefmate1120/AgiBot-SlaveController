@@ -139,7 +139,7 @@
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\ST_InstruReadPara.TcDUT">
+    <Compile Include="DUTs\Structure\ST_InstruOnChipData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
@@ -187,7 +187,7 @@
     <Compile Include="DUTs\Structure\ST_SlaveInputDataPool.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\ST_InstruParameters.TcDUT">
+    <Compile Include="DUTs\Structure\ST_InstruKinematicParam.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Mat34.TcDUT">
@@ -347,9 +347,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlPanelReady.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlMountScope.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlGraCali.TcPOU">

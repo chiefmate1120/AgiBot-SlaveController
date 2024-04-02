@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SlaveArmKinematic" Id="{fa1bdebf-5188-4d48-a57d-03bec0a3a2f4}">
     <Declaration><![CDATA[// use slot attribute larger than 49990, which is the default one, if it depends on variable in other file
 {attribute 'global_init_slot' := '49991'} 
@@ -20,7 +20,7 @@ VAR_GLOBAL CONSTANT
 % 4        0       0   q4      -L
 % 5        90      0   q5      0
 % 6        90      a   q6      0
-% tcp      0       b   0       0
+% 7      0       b   0       0
 
 *)
 g_d1:LREAL:=0.8046229;
@@ -38,6 +38,10 @@ g_slaveArmDH:ARRAY[1..9,1..4] OF LREAL :=[PI/2,	0,		g_d1,	0,
 							         		0,		g_b, 	0,		0];
 
 
+// rotation from joint7 to tcp
+g_tcpRotation :Mat3d :=[0.0,	0.0,	1.0,
+					    1.0,	0.0,	0.0,
+					    0.0,	1.0,	0.0];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

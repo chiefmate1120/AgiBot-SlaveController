@@ -18,7 +18,11 @@ VAR
 	m_holdLastCmds :BOOL := FALSE;
 	
 	// arm control data
-	m_cmdJntPos : VEC8d;
+	// NOTE: simulated joint position is usd for kinematic controller 
+	//		while command joint position is used for real robot controller
+	// 		They are identical for the most time, but in some cases, simulated position is filted to get command one 
+	m_simJntPos :Vec8d; 
+	m_cmdJntPos : VEC8d; 
 	m_cmdJntVel : VEC8d;
 	m_cmdJntAcc : VEC8d;
 	m_cmdJntTrq : VEC8d;
@@ -83,7 +87,6 @@ m_cmdJntTrq := g_zeroVec8d;]]></ST>
     <Method Name="checkToHoldLastCmds" Id="{90f04ad1-6a41-4802-98b4-abd6341aeded}">
       <Declaration><![CDATA[METHOD checkToHoldLastCmds : BOOL
 VAR_IN_OUT CONSTANT
-	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
 	i_slaveArm :FB_SlaveArm;
 END_VAR
 VAR
@@ -93,13 +96,33 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-vecSub(r_slaveArmCtrlCmd.m_cmdJntPos, i_slaveArm.m_curJntPos,jntCtrlErr);
+vecSub(i_slaveArm.m_cmdJntPos, i_slaveArm.m_curJntPos,jntCtrlErr);
 maxJntErr:=0.0;
 FOR j:=1 TO g_sJntNum DO
 	maxJntErr:= MAX(maxJntErr, ABS(jntCtrlErr[j]));
 END_FOR
 
 checkToHoldLastCmds := (maxJntErr<GVL_SlaveControlParameters.g_jntCtrlErrForCmdHold);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="enableFrictionCompensation" Id="{10dd90f8-3406-4e7f-993e-818d061aef86}">
+      <Declaration><![CDATA[// call this function to add friction compensation to m_cmdJntTrq
+METHOD enableFrictionCompensation : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	frictionScale :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// add joint friction compensation
+FOR i:=1 TO g_sJntNum DO
+	frictionScale :=LIMIT(-1.0, i_slaveArm.curJntVel[i]/g_fullFrictionVel,1.0);
+	m_cmdJntTrq[i]:=m_cmdJntTrq[i]+frictionScale * g_frictionCompScale * g_slaveJntFriction[i_slaveArm.armIdx, i];
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -126,6 +149,7 @@ IF FALSE = m_holdLastCmds THEN
 ELSE
 	m_cmdJntPos:=r_slaveArmCtrlCmd.m_cmdJntPos;
 END_IF
+m_simJntPos := m_cmdJntPos;
 m_cmdJntVel:=g_zeroVec8d;
 m_cmdJntAcc:=g_zeroVec8d;
 m_cmdJntTrq:=g_zeroVec8d;
@@ -198,6 +222,7 @@ calcCmdJntTrq(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
 r_slaveArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
 r_slaveArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
 r_slaveArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
+r_slaveArmCtrlCmd.m_simJntPos:=m_simJntPos;
 r_slaveArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
 r_slaveArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
 r_slaveArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
@@ -227,6 +252,10 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="26" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArmCtrlBase.enableFrictionCompensation">
+      <LineId Id="7" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.init">
       <LineId Id="49" Count="0" />
       <LineId Id="61" Count="0" />
@@ -237,6 +266,7 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="23" Count="0" />
       <LineId Id="125" Count="1" />
       <LineId Id="115" Count="0" />
+      <LineId Id="136" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />
@@ -265,6 +295,7 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="18" Count="0" />
       <LineId Id="109" Count="0" />
       <LineId Id="91" Count="1" />
+      <LineId Id="155" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="62" Count="0" />

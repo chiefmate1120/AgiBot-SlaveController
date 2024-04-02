@@ -21,6 +21,19 @@ VAR_GLOBAL CONSTANT
 	g_gravityInstrument :ARRAY[1..5] OF REAL :=[-0.0082,   -0.0347,   -0.0132,   -0.0044,    0.3037];
 	g_gravityEndoscope :ARRAY[1..5] OF REAL :=[ -0.1037,   -0.0120,    0.0441,    0.0183,    1.0935];
 	
+	// joint friction(with instrument mounted)
+	g_slaveJntFriction :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF LREAL :=
+			[0.0, 0.0, 0.0,  0.03, 0.03, 0.03, 0.03, 0,
+			 0.0, 0.0, 0.0,  0.03, 0.03, 0.03, 0.03, 0,
+		     0.0, 0.0, 0.0,  0.03, 0.03, 0.03, 0.03, 0,
+             0.0, 0.0, 0.0,  0.03, 0.03, 0.03, 0.03, 0	 ];
+	
+	// joint velocity threshold for full friction compensation
+	g_fullFrictionVel :LREAL :=2.0*g_deg2Rad;
+	
+	// friciton compensation scael
+	g_frictionCompScale :LREAL := 0.8;
+	
 
 END_VAR]]></Declaration>
   </GVL>
