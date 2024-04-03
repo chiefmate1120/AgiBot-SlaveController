@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="E_SlaveArmState" Id="{1989848d-a357-4300-a3bc-ded8b39d8e17}">
     <Declaration><![CDATA[TYPE E_SlaveArmState :
 (
@@ -19,8 +19,10 @@
 	SlaveArmState_Cart := 14,
 	SlaveArmState_GravityCali := 15,
 	SlaveArmState_Test := 16,
+	SlaveArmState_InstruRetract :=17,
+	SlaveArmState_InstruInvasion :=18,
 	
-	SlaveArmState_totalNum :=SlaveArmState_Test
+	SlaveArmState_totalNum :=SlaveArmState_InstruInvasion
 );
 END_TYPE
 ]]></Declaration>

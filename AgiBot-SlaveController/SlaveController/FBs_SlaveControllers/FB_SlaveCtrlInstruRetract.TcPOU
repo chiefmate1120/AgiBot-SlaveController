@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlInstruRetract" Id="{596332da-68eb-4244-8a80-7e3d57b3bb9f}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruRetract EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_retractPlanner:FB_BasicDoubleS;;
+	
+	m_retractVel: LREAL:= 0.05;
+	m_retractAcc: LREAL:= 0.1;
+	m_retractJerk: LREAL:= 1;
+	
+	m_retractLimitBuffer:LREAL := 0.03;
+	m_retractPos :LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{7b11d094-8bfe-4cb8-971c-9702c727740e}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntVel :Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if planner is ready
+IF m_retractPlanner.isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	m_timePeriod:=0;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_retractPlanner.evaluate(m_timePeriod, q=> m_cmdJntPos[3], q_dot=>m_cmdJntVel[3], q_dot=> m_cmdJntAcc[3]);
+
+IF m_timePeriod > m_retractPlanner.duration AND  ABS(i_slaveArm.curJntPos[3] - m_retractPos) < g_cartCtrlPosTolHign THEN
+	m_isFinished:=TRUE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{7aae2cb5-3dc8-47a4-84c8-fce1eb91d921}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	q:ARRAY[1..2] OF LREAL;
+	v:ARRAY[1..2] OF LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+// planning for joint3 motion
+m_retractPos :=GVL_SlaveMotorParameters.g_maxJntPos[3]-m_retractLimitBuffer;
+q[1]:=i_slaveArm.curJntPos[3];
+q[2]:= m_retractPos;
+v[1]:=0;
+v[2]:=0;
+m_retractPlanner.init(q,v, m_retractVel, m_retractAcc, m_retractJerk);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlInstruRetract">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruRetract.calcCmdJntPos">
+      <LineId Id="41" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="124" Count="1" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruRetract.init">
+      <LineId Id="152" Count="3" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="171" Count="4" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -17,9 +17,11 @@ VAR
 	m_panelInstrumentOnIO AT%I*	:UDINT;
 	m_panelOnCounts :INT :=0;
 	m_instruOnCounts :INT :=0;
+	m_trocarOnCounts :INT :=0;
 	m_panelInstruOnCountThres :INT :=50;
 	m_panelOnFlag :BOOL:=FALSE;
 	m_instruOnFlag :BOOL:=FALSE;
+	m_trocarOnFlag :BOOL :=FALSE;
 	
 	// adjust signal
 	m_adjustIO AT%I* :UDINT;
@@ -29,6 +31,9 @@ VAR
 	
 	// instrument instance
 	m_instrument : FB_Instrument;
+	
+	// instrument invasion depth before it's unmounted
+	m_instruInvasionDepth :LREAL;
 
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
@@ -91,8 +96,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// TODO: need to be reviewed
-IF m_adjustIO = 8 or m_adjustIO = 40 THEN
+        <ST><![CDATA[// adjust io is 3th bit 
+IF 1=(m_adjustIO AND 10#8) THEN
 	m_adjustOnCounts :=MIN(m_adjustOnCounts +1,m_adjustOnCountThres);
 ELSE
 	m_adjustOnCounts :=0;
@@ -146,7 +151,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
-b:=m_instrument.kinematicParameters.m_fingerLenght;
+b:=m_instrument.kinematicParameters.m_fingerLength;
 
 q3:=i_DHJntPos[3];
 c1:=COS(i_DHJntPos[1]);
@@ -221,9 +226,16 @@ END_VAR
         <ST><![CDATA[// check adjust button
 m_adjustOnFlag := adjustDetect();
 
+// check trocar
+m_trocarOnFlag := trocarDetect();
+
 // check panel and instrument
 m_panelOnFlag := panelDetect();
 m_instruOnFlag := instruDetect();
+
+// hanlde trocar and instrument signal as a whole
+m_instruOnFlag := m_instruOnFlag AND m_trocarOnFlag;
+
 
 //read instrument information
 IF FALSE = m_instruOnFlag THEN
@@ -463,7 +475,7 @@ END_VAR
 d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
-b:=m_instrument.kinematicParameters.m_fingerLenght;
+b:=m_instrument.kinematicParameters.m_fingerLength;
 
 q3:=i_DHJntPos[3];
 c1:=COS(i_DHJntPos[1]);
@@ -696,7 +708,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
-b:=m_instrument.kinematicParameters.m_fingerLenght;
+b:=m_instrument.kinematicParameters.m_fingerLength;
 
 q3:=i_DHJntPos[3];
 IF q3 - L > m_Jnt3PosThres THEN
@@ -800,6 +812,16 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="recordInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
+      <Declaration><![CDATA[METHOD recordInstruDepth : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.kinematicParameters.m_rodLength-m_instrument.kinematicParameters.m_headLength
+						- m_instrument.kinematicParameters.m_fingerLength;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="simCartPose" Id="{6426ffc4-f74f-4984-ac32-a9f9d8b8c8ca}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY simCartPose :REFERENCE TO ST_Frame]]></Declaration>
       <Get Name="Get" Id="{a61bb7de-a7ad-4b34-8063-e53c825d0db4}">
@@ -855,6 +877,23 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="trocarDetect" Id="{ec156bee-edd5-4fa5-8f89-b5b833689976}">
+      <Declaration><![CDATA[// check is trocar is mounted
+METHOD trocarDetect : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// trocar io is 5th bit 
+IF 1=(m_adjustIO AND 10#32) THEN
+	m_trocarOnCounts :=MIN(m_trocarOnCounts +1,m_panelInstruOnCountThres);
+ELSE
+	m_trocarOnCounts :=0;
+END_IF
+
+trocarDetect := m_trocarOnCounts >= m_adjustOnCountThres;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -991,7 +1030,8 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.adjustDetect">
-      <LineId Id="10" Count="6" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="11" Count="5" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.adjustOn.Get">
@@ -1016,8 +1056,14 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.checkIO">
       <LineId Id="21" Count="1" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="56" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="6" Count="2" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="55" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="41" Count="0" />
@@ -1175,6 +1221,9 @@ END_FOR
     <LineIds Name="FB_SlaveArm.rawJntCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.recordInstruDepth">
+      <LineId Id="5" Count="1" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1189,6 +1238,10 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.simJacoInv.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.trocarDetect">
+      <LineId Id="18" Count="6" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateCmds">
       <LineId Id="40" Count="0" />
