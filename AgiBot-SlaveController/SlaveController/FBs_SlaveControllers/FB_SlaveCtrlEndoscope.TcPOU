@@ -52,6 +52,9 @@ FOR i:=1 TO g_sJntNum DO
 	m_cmdJntPosLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 END_FOR
 
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -70,6 +73,8 @@ END_FOR
       <LineId Id="76" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="74" Count="1" />
+      <LineId Id="149" Count="1" />
+      <LineId Id="148" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>

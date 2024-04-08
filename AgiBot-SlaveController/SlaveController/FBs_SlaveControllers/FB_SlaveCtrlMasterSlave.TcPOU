@@ -82,6 +82,16 @@ VAR
 	m_slaveTrackTwist :Vec6d;
 	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
 	
+	// last master gripper angle
+	m_lastMasterGripAngle :LREAL;
+	
+	// master gripper angle velocity
+	m_masterGripAngleVel :LREAL;
+	m_masterGripAngleVelLpf :FB_LowPassFilter;
+	
+	// flag to start gripper control
+	m_gripperCtrlFlag :BOOL;
+	
 	// code execute time measure
 	m_codeTime : Profiler;
 	
@@ -195,6 +205,7 @@ IF TRUE = m_firstIn THEN
 	m_slaveOriginPose := m_slavePoseInScope;
 	matTranspose(m_masterOriginPose.m_rot, tmpMat3d);
 	matMultiply(tmpMat3d, m_slavePoseInScope.m_rot,m_MSOriDeviation);
+	m_lastMasterGripAngle := m_masterGripAngle;
 END_IF
 
 // compute master twist in slave arm coordinate
@@ -315,8 +326,11 @@ vecMultiNum(m_simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
 slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
 vecAdd(slaveSimDHJntPos, DHJntCmdDeltaPos, m_simDHJntPos);
 
+// gripper angle/force control
+gripperControl(i_slaveArm);
+
 // calculate target motor joint position/velocity from DH joint position
-i_slaveArm.instrument.gripAngleMap(m_masterGripAngle,o_instruGripAngle=>m_slaveCmdGripAngle, o_instruGripForceLevel=>m_slaveCmdGripForceLevel);
+//i_slaveArm.instrument.gripAngleMap(m_masterGripAngle,o_instruGripAngle=>m_slaveCmdGripAngle, o_instruGripForceLevel=>m_slaveCmdGripForceLevel);
 i_slaveArm.instrument.instruIK(m_simDHJntPos,m_slaveCmdGripAngle, o_jntPos=>m_simJntPos);
 
 // filt command joint position
@@ -406,6 +420,36 @@ IF m_reachWristJntLimit THEN
 END_IF]]></ST>
       </Implementation>
     </Method>
+    <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
+      <Declaration><![CDATA[METHOD gripperControl : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	matchedSlaveGripAngle:LREAL;
+	matchedSlaveGripForce:LREAL;
+	masterGripVelThres :LREAL := 5.0 *g_deg2Rad;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute master grip veloicty
+m_masterGripAngleVel:= (m_masterGripAngle - m_lastMasterGripAngle)/g_slaveArmCtrlCycleTime;
+m_masterGripAngleVel := m_masterGripAngleVelLpf.run(m_masterGripAngleVel);
+m_lastMasterGripAngle :=m_masterGripAngle;
+
+// compute matched slave grip angle and force
+i_slaveArm.instrument.gripAngleMap(m_masterGripAngle,o_instruGripAngle=>matchedSlaveGripAngle, o_instruGripForceLevel=>matchedSlaveGripForce);
+
+IF m_gripperCtrlFlag THEN
+	m_slaveCmdGripAngle := matchedSlaveGripAngle;
+	m_slaveCmdGripForceLevel := matchedSlaveGripForce;
+	RETURN;
+ELSE
+	m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{1bea1de4-0538-46fc-be44-e671d6da03c3}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
@@ -431,6 +475,10 @@ m_jntOPMode[6] := DriverOPMode_Trq;
 m_jntOPMode[7] := DriverOPMode_Trq;
 m_jntOPMode[8] := DriverOPMode_Trq;
 m_firstIn :=TRUE;
+m_gripperCtrlFlag :=false;
+
+// init gripper angle
+m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
 
 // init filter
 FOR i:=1 TO g_sJntNum DO
@@ -438,6 +486,7 @@ FOR i:=1 TO g_sJntNum DO
 END_FOR
 m_cmdYawAngLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 m_cmdYawVelLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_masterGripAngleVelLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 
 // init controller
 m_instruController.init(i_slaveArm);
@@ -446,6 +495,8 @@ m_instruController.init(i_slaveArm);
 m_testMasterPose.m_pos:=g_zeroVec3d;
 m_testMasterPose.m_rot:=g_eye3d;
 
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -505,6 +556,7 @@ END_VAR
       <LineId Id="154" Count="0" />
       <LineId Id="314" Count="0" />
       <LineId Id="158" Count="1" />
+      <LineId Id="944" Count="0" />
       <LineId Id="153" Count="0" />
       <LineId Id="321" Count="9" />
       <LineId Id="163" Count="0" />
@@ -588,7 +640,9 @@ END_VAR
       <LineId Id="214" Count="0" />
       <LineId Id="379" Count="0" />
       <LineId Id="300" Count="0" />
+      <LineId Id="945" Count="0" />
       <LineId Id="313" Count="0" />
+      <LineId Id="946" Count="1" />
       <LineId Id="309" Count="0" />
       <LineId Id="373" Count="0" />
       <LineId Id="307" Count="0" />
@@ -633,6 +687,19 @@ END_VAR
       <LineId Id="52" Count="1" />
       <LineId Id="28" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
+      <LineId Id="25" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="5" Count="1" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.init">
       <LineId Id="13" Count="0" />
       <LineId Id="137" Count="0" />
@@ -641,17 +708,23 @@ END_VAR
       <LineId Id="91" Count="2" />
       <LineId Id="96" Count="3" />
       <LineId Id="67" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="0" />
       <LineId Id="77" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="74" Count="1" />
       <LineId Id="138" Count="1" />
+      <LineId Id="153" Count="0" />
       <LineId Id="79" Count="0" />
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="101" Count="1" />
       <LineId Id="100" Count="0" />
       <LineId Id="103" Count="0" />
+      <LineId Id="151" Count="1" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>

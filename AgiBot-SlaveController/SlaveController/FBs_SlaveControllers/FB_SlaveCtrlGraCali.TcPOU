@@ -111,6 +111,9 @@ FOR i:=2 TO m_caliMotionSegs DO
 	END_FOR
 	m_caliPlanner[i].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
 END_FOR
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -148,6 +151,8 @@ END_FOR
       <LineId Id="132" Count="0" />
       <LineId Id="128" Count="0" />
       <LineId Id="126" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="206" Count="0" />
       <LineId Id="152" Count="0" />
     </LineIds>
   </POU>

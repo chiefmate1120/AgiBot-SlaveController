@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -287,10 +287,12 @@ FOR i:=1 TO g_sArmNum DO
 	END_FOR
 END_FOR
 
-// disable instrument invasion if arm enter some specific state
+// check if to enable instrument invasion 
 FOR i:=1 TO g_sArmNum DO
 	IF SlaveArmState_Adjust = m_slaveArmState[i] OR SlaveArmState_Cart = m_slaveArmState[i] THEN
 		m_instruInvasionEnableFlag[i]:=FALSE;
+	ELSIF SlaveArmState_InstruRetract = m_slaveArmState[i] THEN
+		m_instruInvasionEnableFlag[i]:=TRUE;
 	END_IF
 END_FOR  
 
@@ -501,8 +503,12 @@ FOR i:=1 TO g_sArmNum DO
 		
 		// instrument invasion
 		SlaveArmState_InstruInvasion:
+			// to instrument retract
+			IF NOT m_slaveArms[i].instruOn THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
+				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
-			IF (m_slaveArms[i].adjustOn) THEN
+			elsIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to instrument ready
 			ELSIF m_armCtrl[i].isFinished THEN
@@ -649,7 +655,9 @@ END_FOR]]></ST>
       <LineId Id="537" Count="0" />
       <LineId Id="536" Count="0" />
       <LineId Id="538" Count="0" />
-      <LineId Id="540" Count="2" />
+      <LineId Id="540" Count="1" />
+      <LineId Id="566" Count="1" />
+      <LineId Id="542" Count="0" />
       <LineId Id="539" Count="0" />
       <LineId Id="348" Count="0" />
       <LineId Id="345" Count="0" />
@@ -768,6 +776,8 @@ END_FOR]]></ST>
       <LineId Id="513" Count="5" />
       <LineId Id="509" Count="0" />
       <LineId Id="519" Count="2" />
+      <LineId Id="576" Count="2" />
+      <LineId Id="575" Count="0" />
       <LineId Id="523" Count="4" />
       <LineId Id="546" Count="5" />
       <LineId Id="528" Count="0" />

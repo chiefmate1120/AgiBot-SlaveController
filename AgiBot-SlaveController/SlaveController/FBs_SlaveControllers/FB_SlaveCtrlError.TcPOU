@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlError" Id="{78b2e60d-537e-446e-8b3b-6db63d5ab02c}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Error Hold
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlError EXTENDS FB_SlaveArmCtrlBase
@@ -34,6 +34,9 @@ END_VAR
 
 // disable all joints
  m_jntEnableFlag :=g_zeroVec8i;
+ 
+ // update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -45,6 +48,7 @@ END_VAR
       <LineId Id="60" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="59" Count="0" />
+      <LineId Id="82" Count="2" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

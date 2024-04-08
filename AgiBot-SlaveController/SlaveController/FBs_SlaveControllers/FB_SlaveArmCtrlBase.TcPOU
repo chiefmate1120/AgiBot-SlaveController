@@ -30,6 +30,7 @@ VAR
 	m_jntEnableFlag :Vec8i;
 	m_cmdCartPose : ST_Frame;
 	m_cmdCartTwist : Vec6d;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -106,6 +107,23 @@ checkToHoldLastCmds := (maxJntErr<GVL_SlaveControlParameters.g_jntCtrlErrForCmdH
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="copyCmds" Id="{5ed9a333-2aec-433d-86b7-210e62264fbb}">
+      <Declaration><![CDATA[METHOD copyCmds : BOOL
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_slaveArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
+r_slaveArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
+r_slaveArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
+r_slaveArmCtrlCmd.m_simJntPos:=m_simJntPos;
+r_slaveArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
+r_slaveArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
+r_slaveArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
+r_slaveArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
+r_slaveArmCtrlCmd.m_jntOPMode:=m_jntOPMode;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="enableFrictionCompensation" Id="{10dd90f8-3406-4e7f-993e-818d061aef86}">
       <Declaration><![CDATA[// call this function to add friction compensation to m_cmdJntTrq
 METHOD enableFrictionCompensation : BOOL
@@ -155,14 +173,7 @@ m_cmdJntAcc:=g_zeroVec8d;
 m_cmdJntTrq:=g_zeroVec8d;
 
 // update commands to arm
-r_slaveArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
-r_slaveArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
-r_slaveArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
-r_slaveArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
-r_slaveArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
-r_slaveArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
-r_slaveArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
-r_slaveArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
+copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -209,7 +220,7 @@ END_IF
 
 // check if arm enabled
 IF FALSE = i_slaveArm.isEnabled(m_jntEnableFlag) THEN
-//	RETURN;
+	RETURN;
 END_IF
 
 // calculate command joint position--Motion control
@@ -219,15 +230,7 @@ calcCmdJntPos(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
 calcCmdJntTrq(i_endoscopePose, i_masterStatus, i_setupStatus, i_slaveArm);
 
 // update commands to arm
-r_slaveArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
-r_slaveArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
-r_slaveArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
-r_slaveArmCtrlCmd.m_simJntPos:=m_simJntPos;
-r_slaveArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
-r_slaveArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
-r_slaveArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
-r_slaveArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
-r_slaveArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
+copyCmds(r_slaveArmCtrlCmd);
 
 // update time period
 m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
@@ -252,6 +255,10 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="26" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArmCtrlBase.copyCmds">
+      <LineId Id="15" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.enableFrictionCompensation">
       <LineId Id="7" Count="4" />
       <LineId Id="5" Count="0" />
@@ -271,7 +278,8 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="84" Count="0" />
-      <LineId Id="86" Count="8" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="94" Count="0" />
       <LineId Id="83" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.isFinished.Get">
@@ -293,13 +301,7 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="11" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="18" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="91" Count="1" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="26" Count="1" />
+      <LineId Id="27" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="84" Count="1" />
       <LineId Id="10" Count="0" />

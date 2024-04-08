@@ -168,6 +168,9 @@ m_gripperAngle := i_slaveArm.curGripAngle;
 // init instrument controller
 m_instruController.init(i_slaveArm);
 
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
 
 ]]></ST>
       </Implementation>
@@ -225,6 +228,8 @@ m_instruController.init(i_slaveArm);
       <LineId Id="84" Count="1" />
       <LineId Id="93" Count="0" />
       <LineId Id="81" Count="2" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="109" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />

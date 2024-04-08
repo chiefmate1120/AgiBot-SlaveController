@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -13,21 +13,20 @@ VAR
 	// joints
 	m_joints :ARRAY[1..g_sJntNum] OF FB_SlaveJoint;
 	
-	// panel and insturment  install signal
+	//  panel and insturment detect
 	m_panelInstrumentOnIO AT%I*	:UDINT;
-	m_panelOnCounts :INT :=0;
-	m_instruOnCounts :INT :=0;
-	m_trocarOnCounts :INT :=0;
-	m_panelInstruOnCountThres :INT :=50;
+	m_panelDetect :FB_PanelDetect;
+	m_instruDetect :FB_InstrumentDetect;
 	m_panelOnFlag :BOOL:=FALSE;
 	m_instruOnFlag :BOOL:=FALSE;
-	m_trocarOnFlag :BOOL :=FALSE;
+
 	
-	// adjust signal
+	// trocar and  adjust detect
 	m_adjustIO AT%I* :UDINT;
-	m_adjustOnCounts :INT :=0;
-	m_adjustOnCountThres :INT :=50;
+	m_adjustDetect :FB_AdjustDetect;
+	m_trocarDetect : FB_TrocarDetect;
 	m_adjustOnFlag :BOOL;
+	m_trocarOnFlag :BOOL :=FALSE;
 	
 	// instrument instance
 	m_instrument : FB_Instrument;
@@ -82,30 +81,13 @@ VAR
 	
 	// code execute time measure
 	m_codeTime : Profiler;
-	
+
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[		]]></ST>
     </Implementation>
     <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
-    <Method Name="adjustDetect" Id="{6d824dc1-93c7-4360-948f-170402bdf26f}">
-      <Declaration><![CDATA[// check if adjust button is pressed
-METHOD adjustDetect : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// adjust io is 3th bit 
-IF 1=(m_adjustIO AND 10#8) THEN
-	m_adjustOnCounts :=MIN(m_adjustOnCounts +1,m_adjustOnCountThres);
-ELSE
-	m_adjustOnCounts :=0;
-END_IF
-
-adjustDetect := m_adjustOnCounts >= m_adjustOnCountThres;]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="adjustOn" Id="{afc98598-ed29-4176-9f45-d842c4ec164a}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY adjustOn : bool]]></Declaration>
       <Get Name="Get" Id="{d84a6e3e-5b0e-406e-b7c3-ff6a74a84739}">
@@ -224,18 +206,17 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check adjust button
-m_adjustOnFlag := adjustDetect();
+m_adjustOnFlag := m_adjustDetect.run(m_adjustIO);
 
 // check trocar
-m_trocarOnFlag := trocarDetect();
+m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
 
 // check panel and instrument
-m_panelOnFlag := panelDetect();
-m_instruOnFlag := instruDetect();
+m_panelOnFlag := m_panelDetect.run(m_panelInstrumentOnIO);
+m_instruOnFlag := m_instruDetect.run(m_panelInstrumentOnIO);
 
-// hanlde trocar and instrument signal as a whole
+// handle trocar and instrument signal as a whole
 m_instruOnFlag := m_instruOnFlag AND m_trocarOnFlag;
-
 
 //read instrument information
 IF FALSE = m_instruOnFlag THEN
@@ -573,22 +554,6 @@ END_FOR
 updateStatus();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="instruDetect" Id="{5f3a6988-31d6-440d-837a-fcdd94d64d1d}">
-      <Declaration><![CDATA[// check if instrument is on
-METHOD instruDetect : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Instrument single   At installation--2#0*0*   not installation --2#1*1*  And Hall single --2#100 0000
-IF (m_panelInstrumentOnIO AND 16#4A) = 64  THEN
-	m_instruOnCounts := MIN( m_instruOnCounts +1,m_panelInstruOnCountThres);
-ELSIF (m_panelInstrumentOnIO AND 16#4A) = 10  THEN
-	m_instruOnCounts :=0;
-END_IF
-instruDetect := m_instruOnCounts >= m_panelInstruOnCountThres;]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="instrument" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY instrument : REFERENCE TO FB_Instrument]]></Declaration>
       <Get Name="Get" Id="{3a5249de-ec45-4e88-a302-3df6650a3ff5}">
@@ -774,22 +739,6 @@ r_jaco[6,6]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="panelDetect" Id="{2a3a3fa1-2046-472e-b693-4c66bf1a37b0}">
-      <Declaration><![CDATA[// check if panel is on
-METHOD panelDetect : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Panel single  At installation--2#0000   not installation --2#0101
-IF (m_panelInstrumentOnIO AND 16#05) = 0 THEN
-	m_panelOnCounts := MIN( m_panelOnCounts +1,m_panelInstruOnCountThres);
-ELSIF (m_panelInstrumentOnIO AND 16#05) = 5  THEN
-	m_panelOnCounts :=0;
-END_IF
-panelDetect := m_panelOnCounts >= m_panelInstruOnCountThres;]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="panelOn" Id="{38ffa1da-012d-4dbc-ad5b-314577ed285b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY panelOn : bool]]></Declaration>
       <Get Name="Get" Id="{b8c5f533-4196-44c4-9a48-01cc1ca3c250}">
@@ -877,23 +826,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="trocarDetect" Id="{ec156bee-edd5-4fa5-8f89-b5b833689976}">
-      <Declaration><![CDATA[// check is trocar is mounted
-METHOD trocarDetect : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// trocar io is 5th bit 
-IF 1=(m_adjustIO AND 10#32) THEN
-	m_trocarOnCounts :=MIN(m_trocarOnCounts +1,m_panelInstruOnCountThres);
-ELSE
-	m_trocarOnCounts :=0;
-END_IF
-
-trocarDetect := m_trocarOnCounts >= m_adjustOnCountThres;]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -989,7 +921,7 @@ FOR i:=1 TO g_sJntNum DO
 	m_joints[i].updateStatus();
 END_FOR
 
-// check panel and instrument
+// check IO informantion
 checkIO();
 
 // get joint data
@@ -1029,11 +961,6 @@ END_FOR
     <LineIds Name="FB_SlaveArm">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.adjustDetect">
-      <LineId Id="21" Count="0" />
-      <LineId Id="11" Count="5" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SlaveArm.adjustOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1063,7 +990,6 @@ END_FOR
       <LineId Id="62" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="60" Count="0" />
-      <LineId Id="55" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="41" Count="0" />
@@ -1166,10 +1092,6 @@ END_FOR
       <LineId Id="31" Count="2" />
       <LineId Id="25" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.instruDetect">
-      <LineId Id="21" Count="5" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
       <LineId Id="6" Count="0" />
     </LineIds>
@@ -1211,10 +1133,6 @@ END_FOR
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.panelDetect">
-      <LineId Id="23" Count="5" />
-      <LineId Id="15" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SlaveArm.panelOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1238,10 +1156,6 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.simJacoInv.Get">
       <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveArm.trocarDetect">
-      <LineId Id="18" Count="6" />
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateCmds">
       <LineId Id="40" Count="0" />
