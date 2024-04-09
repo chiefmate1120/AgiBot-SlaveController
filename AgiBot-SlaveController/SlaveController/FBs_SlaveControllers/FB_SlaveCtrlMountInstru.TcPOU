@@ -97,6 +97,9 @@ END_FOR
 
 m_mountStatus:=0;
 
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -219,6 +222,8 @@ END_FOR
       <LineId Id="95" Count="3" />
       <LineId Id="93" Count="1" />
       <LineId Id="68" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="161" Count="0" />
       <LineId Id="109" Count="0" />
       <LineId Id="92" Count="0" />
     </LineIds>

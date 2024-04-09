@@ -11,21 +11,21 @@ VAR_GLOBAL
 													
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[0, 0, 0, 0, 0,
+		[0, 0, 0, 0, 6711624,
 		 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[0, 0, 0, 0, 0,
+		[0, 0, 0, 0, 1333062,
 		 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[0, 0, 0, 0, 0,
+		[0, 0, 0, 0, 5698610,
 		 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0];

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlInstruInvasion" Id="{ea7b020b-d76c-4bb7-93d3-7a449a773602}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruInvasion EXTENDS FB_SlaveArmCtrlBase
@@ -27,7 +27,8 @@ VAR
 	curInstruDepth:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// compute current instrument depth
+        <ST><![CDATA[m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
+// compute current instrument depth
 curInstruDepth := i_slaveArm.curJntPos[3]-i_slaveArm.instrument.kinematicParameters.m_rodLength-i_slaveArm.instrument.kinematicParameters.m_headLength
 						- i_slaveArm.instrument.kinematicParameters.m_fingerLength;
 
@@ -57,6 +58,9 @@ SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 m_jntOPMode := g_slaveAllPosMode;
 m_jntOPMode[3]:=DriverOPMode_Trq;
 
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
 
 ]]></ST>
       </Implementation>
@@ -65,6 +69,7 @@ m_jntOPMode[3]:=DriverOPMode_Trq;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruInvasion.calcCmdJntPos">
+      <LineId Id="152" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="137" Count="1" />
       <LineId Id="140" Count="0" />
@@ -82,6 +87,8 @@ m_jntOPMode[3]:=DriverOPMode_Trq;
       <LineId Id="70" Count="0" />
       <LineId Id="108" Count="0" />
       <LineId Id="72" Count="0" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="117" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="12" Count="0" />
