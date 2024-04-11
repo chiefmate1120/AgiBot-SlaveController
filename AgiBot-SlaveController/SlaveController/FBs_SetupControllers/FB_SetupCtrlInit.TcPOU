@@ -15,6 +15,22 @@ END_VAR
       <ST><![CDATA[
 ]]></ST>
     </Implementation>
+    <Method Name="calcCmdJntPos" Id="{1e0a883f-c826-468a-9931-3e424876db21}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+	curJntVel :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_isFinished := m_timePeriod > 1.0;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{dbcec065-8704-4c57-a097-e13d35679382}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
@@ -37,6 +53,9 @@ END_VAR
     <LineIds Name="FB_SetupCtrlInit">
       <LineId Id="18" Count="0" />
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlInit.calcCmdJntPos">
+      <LineId Id="98" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlInit.init">
       <LineId Id="11" Count="1" />

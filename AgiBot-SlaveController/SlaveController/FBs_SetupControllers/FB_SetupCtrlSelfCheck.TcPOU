@@ -28,7 +28,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
-]]></ST>
+
+// TODO: add selfcheck laster if needed, currently finish directly
+m_isFinished := true;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupCtrlSelfCheck">
@@ -36,7 +38,9 @@ END_VAR
     </LineIds>
     <LineIds Name="FB_SetupCtrlSelfCheck.init">
       <LineId Id="57" Count="0" />
+      <LineId Id="136" Count="0" />
       <LineId Id="126" Count="0" />
+      <LineId Id="137" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

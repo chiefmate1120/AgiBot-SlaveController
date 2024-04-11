@@ -11,13 +11,14 @@ VAR
 	m_armIdx: INT;
 	
 	// joints
-	m_joints :ARRAY[1..g_sJntNum] OF FB_SetupJoint;
+	m_joints :ARRAY[1..g_setupJntNum] OF FB_SetupJoint;
 	
-	// IO
-	m_manualAdjustIO AT%I* :SINT;
+	// adjust detect
+	m_adjustIO AT%I* :UDINT;
 	m_manualAdjustOnFlag :BOOL;
-	m_autoAdjustIO AT%I* :SINT;
-	m_autoAdjustDir :INT; // -1, 0, 1;
+	m_jnt3AutoAdjustDir :INT; // -1, 0, 1;
+	m_manualAdjustDetect : FB_setupAdjustDetect;
+	m_autoAdjustDetect : FB_setupJnt3AdjustDetect;
 	
 	// arm cartesian data, defined in cart origin
 	m_curCartPose	:ST_Frame;
@@ -57,16 +58,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="autoAdjustDetect" Id="{c29550df-f892-45fc-bbea-033ea4e5f553}">
-      <Declaration><![CDATA[// check auto adjust direction
-METHOD autoAdjustDetect : INT
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// TODO]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="autoAdjustDir" Id="{23463ad9-6b6b-4d71-8ec1-f29d801d18b3}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY autoAdjustDir : INT]]></Declaration>
       <Get Name="Get" Id="{11440852-0ab4-4acb-adbb-a37bb7e50412}">
@@ -74,7 +65,7 @@ END_VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[autoAdjustDir := m_autoAdjustDir;]]></ST>
+          <ST><![CDATA[autoAdjustDir := m_jnt3AutoAdjustDir;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -85,8 +76,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check manual and auto adjust button
-m_manualAdjustOnFlag := manualAdjustDetect();
-m_autoAdjustDir :=autoAdjustDetect();
+m_manualAdjustOnFlag := m_manualAdjustDetect.run(m_adjustIO);
+m_jnt3AutoAdjustDir := m_autoAdjustDetect.run(m_adjustIO);
 ]]></ST>
       </Implementation>
     </Method>
@@ -338,36 +329,13 @@ FOR i:=1 TO g_setupJntNum DO
 	m_joints[i].init(m_armIdx, i,g_setupArmCtrlCycleTime);
 END_FOR
 
-// init joint encoder and position calculation
-initJntPos();
-
-// compute current status
-updateStatus();]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="initJntPos" Id="{2bf4e0ee-bb53-42fa-bd4c-c904be993a60}">
-      <Declaration><![CDATA[METHOD initJntPos : BOOL
-VAR_INPUT
-END_VAR
-VAR
-	i:INT ;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// joint init
+// joint init
 FOR i:=1 TO g_setupJntNum DO
 	m_joints[i].initJntPos();
 END_FOR
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="instruDetect" Id="{58539efd-9cff-4819-9fe7-abe4f086c3a6}">
-      <Declaration><![CDATA[// check if instrument is on
-METHOD instruDetect : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//TODO]]></ST>
+
+// update arm status if joint position is re-init
+updateStatus();]]></ST>
       </Implementation>
     </Method>
     <Method Name="isEnabled" Id="{b985692a-f6f7-460a-be8e-c41aacfdf6d5}">
@@ -398,16 +366,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="manualAdjustDetect" Id="{9847d63f-214a-40a2-9f90-70dc67a85549}">
-      <Declaration><![CDATA[// check if adjust button is pressed
-METHOD manualAdjustDetect : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// TODO]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="manualAdjustOn" Id="{06fd6985-ca41-4e66-8b96-f30c8a6d0e2c}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY manualAdjustOn : bool]]></Declaration>
       <Get Name="Get" Id="{6b9e44f9-af7c-4368-b8c0-d50cceeb95b2}">
@@ -524,9 +482,6 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
     <LineIds Name="FB_SetupArm.armIdx.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SetupArm.autoAdjustDetect">
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SetupArm.autoAdjustDir.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -615,16 +570,9 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="159" Count="1" />
       <LineId Id="162" Count="2" />
       <LineId Id="186" Count="0" />
-      <LineId Id="166" Count="4" />
-      <LineId Id="179" Count="0" />
+      <LineId Id="166" Count="1" />
+      <LineId Id="193" Count="5" />
       <LineId Id="80" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SetupArm.initJntPos">
-      <LineId Id="7" Count="3" />
-      <LineId Id="25" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SetupArm.instruDetect">
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.isEnabled">
       <LineId Id="19" Count="0" />
@@ -633,9 +581,6 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
     </LineIds>
     <LineIds Name="FB_SetupArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SetupArm.manualAdjustDetect">
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.manualAdjustOn.Get">
       <LineId Id="2" Count="0" />

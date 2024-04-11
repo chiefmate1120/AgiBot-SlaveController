@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SetupMotorParameters" Id="{590429ce-7b59-494f-8e91-c9a6977c774b}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
@@ -20,8 +20,8 @@ VAR_GLOBAL CONSTANT
 	g_motorDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, 1, -1, 1];
 																												 
 	// joint position limit
-	g_minJntPos: ARRAY[1..g_setupJntNum] OF LREAL:=[-1,	-1,	-1, -1, -1];	
-	g_maxJntPos: ARRAY[1..g_setupJntNum] OF LREAL:=[1, 1, 1, 1, 1];	
+	g_minJntPos: ARRAY[1..g_setupJntNum] OF LREAL:=[1,1,0.00,-1.2351,-1.7473];	
+	g_maxJntPos: ARRAY[1..g_setupJntNum] OF LREAL:=[1,1,0.200,4.5579,1.7284];	
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..g_setupJntNum] OF LREAL :=[0.1, 0.1, 0.1, 0.1, 0.1];

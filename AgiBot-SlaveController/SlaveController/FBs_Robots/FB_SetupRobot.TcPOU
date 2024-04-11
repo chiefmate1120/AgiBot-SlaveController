@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -23,10 +23,10 @@ VAR
 	m_armHold :ARRAY[1..g_sArmNum] OF FB_SetupCtrlHold;
 	m_armManualAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlManualAdjust;
 	m_armAutoAdjust :ARRAY[1..g_sArmNum] OF FB_SetupCtrlAutoAdjust;
-	m_armMasterSlave :ARRAY[1..g_sArmNum] OF FB_SetupCtrlMasterSlave;
 	m_armPackage :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPackage;
 	m_armCart :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCart;
-	m_armGraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlGraCali;
+	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
+	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
 	
 	
 	// arm controller interface
@@ -110,12 +110,12 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_Init] := m_armInit[i];
 	m_armCtrlFactory[i,SetupArmState_SelfCheck] := m_armSelfCheck[i];
 	m_armCtrlFactory[i,SetupArmState_Hold] := m_armHold[i];
-	m_armCtrlFactory[i,SetupArmState_ManulAdjust] := m_armManualAdjust[i];
+	m_armCtrlFactory[i,SetupArmState_ManualAdjust] := m_armManualAdjust[i];
 	m_armCtrlFactory[i,SetupArmState_AutoAdjust] := m_armAutoAdjust[i];
-	m_armCtrlFactory[i,SetupArmState_MasterSlave] := m_armMasterSlave[i];
 	m_armCtrlFactory[i,SetupArmState_Package] := m_armPackage[i];
 	m_armCtrlFactory[i,SetupArmState_Cart] := m_armCart[i];
-	m_armCtrlFactory[i,SetupArmState_GravityCali] := m_armGraCali[i];
+	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
+	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -138,7 +138,7 @@ stateMachine(i_setupInputDataPool);
 
 FOR i:=1 TO g_sArmNum DO
 	// update dynamic data
-	m_setupArms[i].updateDyna(i_setupInputDataPool.m_setupJnt3Gravity, i_setupInputDataPool.m_setupJnt5Gravity);
+	m_setupArms[i].updateDyna(i_setupInputDataPool.m_setupJnt3Gravity[i], i_setupInputDataPool.m_setupJnt5Gravity[i]);
 								
 	// update slave arm kinematics
 	m_setupArms[i].updateStatus();
@@ -186,23 +186,41 @@ END_VAR]]></Declaration>
 		
 		//hold
 		SetupArmState_Hold:
+			// to manual adjust
 			IF m_setupArms[i].manualAdjustOn THEN
-				m_nextSetupArmState[i]:=SetupArmState_ManulAdjust;
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			// to auto adjust
 			ELSIF m_setupArms[i].autoAdjustDir<>0 THEN
 				m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
 			END_IF
 			
-(*		
+		
+		// manual adjust
+		SetupArmState_ManualAdjust:
+			// to hold
+			IF NOT(m_setupArms[i].manualAdjustOn) THEN
+				m_nextSetupArmState[i] := SetupArmState_Hold;
+			END_IF
+			
+		// auto adjust
+		SetupArmState_AutoAdjust:
+			// to hold
+			IF m_setupArms[i].autoAdjustDir = 0 THEN
+				m_nextSetupArmState[i] := SetupArmState_Hold;
+			END_IF
+			
 		//package
 		SetupArmState_Package:
 		
 		//cart
 		SetupArmState_Cart:
 		
-		//gravity calibration
-		SetupArmState_GravityCali:
+		//joint 5 gravity calibration
+		SetupArmState_jnt5GravityCali:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF 
 		
-*)
 	END_CASE
 	
 	// Controller transit
@@ -256,9 +274,9 @@ END_FOR]]></ST>
       <LineId Id="94" Count="0" />
       <LineId Id="58" Count="1" />
       <LineId Id="62" Count="5" />
-      <LineId Id="124" Count="0" />
       <LineId Id="108" Count="1" />
       <LineId Id="117" Count="0" />
+      <LineId Id="131" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -299,14 +317,23 @@ END_FOR]]></ST>
       <LineId Id="44" Count="0" />
       <LineId Id="145" Count="0" />
       <LineId Id="166" Count="1" />
+      <LineId Id="211" Count="0" />
       <LineId Id="169" Count="1" />
+      <LineId Id="212" Count="0" />
       <LineId Id="192" Count="1" />
       <LineId Id="171" Count="0" />
       <LineId Id="165" Count="0" />
       <LineId Id="86" Count="0" />
+      <LineId Id="213" Count="7" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="222" Count="2" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="226" Count="0" />
       <LineId Id="96" Count="1" />
-      <LineId Id="117" Count="6" />
-      <LineId Id="116" Count="0" />
+      <LineId Id="117" Count="5" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="123" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="56" Count="3" />
       <LineId Id="61" Count="2" />

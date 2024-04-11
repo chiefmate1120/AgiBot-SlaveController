@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -85,7 +85,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[		]]></ST>
+      <ST><![CDATA[	]]></ST>
     </Implementation>
     <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
     <Property Name="adjustOn" Id="{afc98598-ed29-4176-9f45-d842c4ec164a}" FolderPath="property\">
@@ -548,7 +548,6 @@ END_VAR]]></Declaration>
 FOR i:=1 TO g_sJntNum DO
 	m_joints[i].initJntPos();
 END_FOR
-
 
 // update arm status if joint position is re-init
 updateStatus();]]></ST>
@@ -1089,7 +1088,7 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.initJntPos">
       <LineId Id="7" Count="3" />
-      <LineId Id="31" Count="2" />
+      <LineId Id="32" Count="1" />
       <LineId Id="25" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">

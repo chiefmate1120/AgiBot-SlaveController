@@ -4,9 +4,6 @@
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveGravity
 VAR_INPUT
 END_VAR
-VAR_OUTPUT
-	o_Gravity:ARRAY[1..4,1..3] OF LREAL;
-END_VAR
 VAR
 	m_armIdx :INT ;
 
@@ -30,8 +27,7 @@ VAR_INPUT
 END_VAR
 
 VAR
-	gx, gy :LREAL;
-	s1,c1,s2, c2,d3 :LREAL;
+	s0,c0, s1,c1,s2, c2,d3 :LREAL;
 END_VAR
 
 VAR_OUTPUT
@@ -39,9 +35,8 @@ VAR_OUTPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[gx:= 9.8*SIN(-setUpAng);
-gy:= -9.8*COS(-setUpAng);
-
+        <ST><![CDATA[s0:=SIN(setupAng);
+c0:=COS(setupAng);
 s1:=SIN(q1);
 c1:=COS(q1);
 s2:=SIN(q2);
@@ -49,25 +44,25 @@ c2:=COS(q2);
 d3:=q3;
 
 // joint1
-o_regMat[1,1] :=c1*gx;
-o_regMat[1,2] := -s1*s2*gx;
-o_regMat[1,3] := -c2*s1*gx;
-o_regMat[1,4] := -s1*gx;
-o_regMat[1,5] := -s1*s2*d3*gx;
+o_regMat[1,1] :=s0*s1*s2*d3;
+o_regMat[1,2] :=  s0*s1;
+o_regMat[1,3] := -s0*c1;
+o_regMat[1,4] := s0*s1*s2;
+o_regMat[1,5] := s0*c2*s1 ;
 
 // joint2 
-o_regMat[2,1] := 0;
-o_regMat[2,2] := c1*c2*gx+s2*gy;
-o_regMat[2,3] := c2*gy-c1*s2*gx;
-o_regMat[2,4] := 0;
-o_regMat[2,5] := c1*c2*d3*gx+s2*d3*gy;
+o_regMat[2,1] :=  - (c0*s2*d3+s0*c1*c2*d3);
+o_regMat[2,2] := 0;
+o_regMat[2,3] := 0;
+o_regMat[2,4] :=  - (c0*s2+s0*c1*c2);
+o_regMat[2,5] := s0*c1*s2- c0*c2;
 
 // joint3
-o_regMat[3,1] :=0;
+o_regMat[3,1] :=c0*c2 - s0*c1*s2;
 o_regMat[3,2] :=0;
 o_regMat[3,3] :=0;
 o_regMat[3,4] :=0;
-o_regMat[3,5] :=c1*s2*gx-c2*gy; 	]]></ST>
+o_regMat[3,5] :=0; 	]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{2b2519b4-62df-402e-826b-1eb3711ca5da}">
@@ -144,9 +139,7 @@ END_FOR
       <LineId Id="117" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveGravity.getRegMat">
-      <LineId Id="18" Count="0" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="81" Count="0" />
+      <LineId Id="197" Count="1" />
       <LineId Id="83" Count="0" />
       <LineId Id="153" Count="3" />
       <LineId Id="152" Count="0" />

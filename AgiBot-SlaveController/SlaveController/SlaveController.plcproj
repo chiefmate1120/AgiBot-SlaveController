@@ -244,6 +244,12 @@
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_setupAdjustDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_setupJnt3AdjustDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Auxiliary\FB_TrocarDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -295,7 +301,7 @@
     <Compile Include="FBs_RobotDynamics\FB_SlaveGravity.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_RobotDynamics\FB_setupSlaveGravity.TcPOU">
+    <Compile Include="FBs_RobotDynamics\FB_SetupGravity.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_Instrument.TcPOU">
@@ -313,7 +319,7 @@
     <Compile Include="FBs_Robots\FB_SetupRobot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_SetupControllers\FB_SetupCtrlMasterSlave.TcPOU">
+    <Compile Include="FBs_SetupControllers\FB_SetupCtrlJnt5GraCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlManualAdjust.TcPOU">
@@ -382,7 +388,7 @@
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlError.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_SetupControllers\FB_SetupCtrlGraCali.TcPOU">
+    <Compile Include="FBs_SetupControllers\FB_SetupCtrlJnt3GraCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlInit.TcPOU">
@@ -480,6 +486,10 @@
     <Compile Include="FBs_SlaveControllers\I_SlaveArmCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GVLs\SetupArms\GVLs_SetupArmDynamics.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\SetupArms\GVL_SetupJointEncoderCaliData.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -497,10 +507,6 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\SlaveArms\GVLs_SlaveArmDynamics.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
-    <Compile Include="GVLs\SlaveArms\GVLs_SetupSlaveArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
