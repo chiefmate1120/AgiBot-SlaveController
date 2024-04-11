@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -291,7 +291,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{9238331F-BB80-B9C1-8B92-A90018F962A9}" AutoDeleteType="true">E_SetupArmState</Name>
+			<Name GUID="{BEEC3632-6B40-1B7A-3064-8FA9DC91093E}" AutoDeleteType="true">E_SetupArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -319,28 +319,24 @@
 				<Enum>6</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_MasterSlave]]></Text>
+				<Text><![CDATA[SetupArmState_Package]]></Text>
 				<Enum>7</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_Package]]></Text>
+				<Text><![CDATA[SetupArmState_Cart]]></Text>
 				<Enum>8</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_Cart]]></Text>
+				<Text><![CDATA[SetupArmState_jnt3GravityCali]]></Text>
 				<Enum>9</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_jnt3GravityCali]]></Text>
+				<Text><![CDATA[SetupArmState_jnt5GravityCali]]></Text>
 				<Enum>10</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SetupArmState_jnt5GravityCali]]></Text>
-				<Enum>11</Enum>
-			</EnumInfo>
-			<EnumInfo>
 				<Text><![CDATA[SetupArmState_totalNum]]></Text>
-				<Enum>11</Enum>
+				<Enum>10</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -439,11 +435,11 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{3C17CE63-F72B-D8C8-FF02-B4FFADE287F8}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<Name GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}" AutoDeleteType="true">ST_SetupStatus</Name>
 			<BitSize>3904</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{9238331F-BB80-B9C1-8B92-A90018F962A9}">E_SetupArmState</Type>
+				<Type GUID="{BEEC3632-6B40-1B7A-3064-8FA9DC91093E}">E_SetupArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1307,7 +1303,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{7A8890BB-9235-8460-DF63-68D7D63B0AC5}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1535,7 +1531,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{3C17CE63-F72B-D8C8-FF02-B4FFADE287F8}">ST_SetupStatus</Type>
+							<Type GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
@@ -1960,7 +1956,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{3C17CE63-F72B-D8C8-FF02-B4FFADE287F8}">ST_SetupStatus</Type>
+							<Type GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
@@ -1983,7 +1979,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{3C17CE63-F72B-D8C8-FF02-B4FFADE287F8}">ST_SetupStatus</Type>
+							<Type GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
@@ -2023,9 +2019,16 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-04-11T09:47:39">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SetupArmControl.m_setupStatus" TypeA="ST_SetupStatus" InOutA="1" GuidA="{3C17CE63-F72B-D8C8-FF02-B4FFADE287F8}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" RestoreInfo="TypeChanged" IdA="4559"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id NeedCalleeCall="true">0</Id>
+							<Id>0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2034,7 +2037,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">1</Id>
+							<Id>1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2043,7 +2046,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">2</Id>
+							<Id>2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2052,7 +2055,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">3</Id>
+							<Id>3</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -3357,7 +3360,6 @@
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity[1]" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt5Gravity[1]"/>
