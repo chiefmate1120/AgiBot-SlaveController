@@ -2019,13 +2019,6 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2024-04-11T09:47:39">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SetupArmControl.m_setupStatus" TypeA="ST_SetupStatus" InOutA="1" GuidA="{3C17CE63-F72B-D8C8-FF02-B4FFADE287F8}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" RestoreInfo="TypeChanged" IdA="4559"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id>0</Id>
@@ -3360,10 +3353,12 @@
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt5Gravity[1]" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt5Gravity[1]"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_safetyData" VarB="TaskSafetyCheck Outputs^SafetyCheck.m_safetyCheckData"/>
+				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_setupStatus" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_slaveDynaData"/>
 			</OwnerB>
 		</OwnerA>
