@@ -42,7 +42,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// set joint torque to zero in default
-m_cmdJntTrq := g_zeroVec8d;]]></ST>
+m_cmdJntTrq := g_zeroVec8d;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{0b0d07b9-f0c8-4405-b76e-2338c9ecb922}">
@@ -75,7 +76,6 @@ m_jntOPMode[7]:=DriverOPMode_Trq;
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -90,6 +90,7 @@ copyCmds(r_slaveArmCtrlCmd);
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntTrq">
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.init">
       <LineId Id="83" Count="0" />
@@ -107,7 +108,6 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="97" Count="2" />
       <LineId Id="108" Count="1" />
       <LineId Id="68" Count="0" />
-      <LineId Id="67" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

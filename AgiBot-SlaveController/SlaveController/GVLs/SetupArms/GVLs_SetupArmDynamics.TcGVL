@@ -14,12 +14,26 @@ VAR_GLOBAL CONSTANT
 %            1.1711*m3 + 1.1711*m4 + 0.00000122416*m5 + 4.61063*mx2 - 9.8*mx4 - 9.8*mx5 + 8.64766*my2]';
 *)
 				
-	// robot No.4
+	// gravity parameters
 	g_setupGravityParam :ARRAY[1..4,1..2] OF REAL := 
-	[0.0196,    63.4752,
-	 0.0196,    63.4752,
-	 0.0196,    63.4752,
-	 0.0196,    63.4752];
+	[0.0196,    52.0918,
+	 0.0196,    52.0918,
+	 0.0196,    52.0918,
+	 0.0196,    52.0918];
+	 
+	// joint gravity offset
+	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
+	[0, 0, 0, 0,  -2,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0];
+	 
+	// joint friction
+	g_setupJntFriction :ARRAY[1..4,1..5] OF REAL := 
+	[0, 0, 0, 0,  19.5587,
+	 0, 0, 0, 0,  19.5587,
+	 0, 0, 0, 0,  19.5587,
+	 0, 0, 0, 0,  19.5587];
 
 END_VAR]]></Declaration>
   </GVL>

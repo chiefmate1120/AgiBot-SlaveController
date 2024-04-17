@@ -479,6 +479,7 @@ m_gripperCtrlFlag :=false;
 
 // init gripper angle
 m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
+m_slaveCmdGripForceLevel:=0;
 
 // init filter
 FOR i:=1 TO g_sJntNum DO
@@ -712,6 +713,7 @@ END_VAR
       <LineId Id="158" Count="0" />
       <LineId Id="154" Count="0" />
       <LineId Id="156" Count="0" />
+      <LineId Id="170" Count="0" />
       <LineId Id="77" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="70" Count="0" />

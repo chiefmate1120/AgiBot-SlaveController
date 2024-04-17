@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupArm" Id="{5c9438f2-768b-4fff-9bfc-3693d995bd67}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupArm
 VAR_INPUT
@@ -32,14 +32,18 @@ VAR
 	m_curJntPos :Vec5d;
 	m_curJntVel :Vec5d;
 	m_curJntTrq :Vec5d;
-	m_cmdJntTrq :Vec5d;
 	m_rawJntCurrent :Vec5d;
 	m_filtJntCurrent :Vec5d;
 	m_cmdJntCurrent : Vec5d;
+	m_cmdJntPos :Vec5d;
+	m_cmdJntVel :Vec5d;
+	m_cmdJntTrq :Vec5d;
 		
 	// arm gravity
 	m_jntGravity : Vec5d:=g_zeroVec5d;
 	
+	// joint position controller
+	m_jntPIDCtrl :ARRAY[1..g_setupJntNum] OF FB_PID;
 	
 END_VAR
 ]]></Declaration>
@@ -319,6 +323,7 @@ VAR_INPUT
 END_VAR
 VAR 
 	i :INT ;
+	currentRatioMotor2Jnt:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// arm statues init
@@ -335,7 +340,15 @@ FOR i:=1 TO g_setupJntNum DO
 END_FOR
 
 // update arm status if joint position is re-init
-updateStatus();]]></ST>
+updateStatus();
+
+// joint controller init
+FOR i:=1 TO g_setupJntNum DO 
+	currentRatioMotor2Jnt:=GVL_SetupMotorParameters.g_motorTrqConst[i]*GVL_SetupMotorParameters.g_motorReduction[i]/1000;
+	m_jntPIDCtrl[i].init(g_setupArmCtrlCycleTime,GVL_SetupControlParameters.g_posKp[i],GVL_SetupControlParameters.g_posKd[i],
+		GVL_SetupControlParameters.g_posKi[i], GVL_SetupControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
+		GVL_SetupControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="isEnabled" Id="{b985692a-f6f7-460a-be8e-c41aacfdf6d5}">
@@ -411,17 +424,26 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_cmdJntTrq:=i_armCtrlCmd.m_cmdJntTrq;
+m_cmdJntPos :=i_armCtrlCmd.m_cmdJntPos;
+m_cmdJntVel :=i_armCtrlCmd.m_cmdJntVel;
 
 // enable/disable joints
 enable(i_armCtrlCmd.m_jntEnableFlag);
 
 // position/torque control
 FOR i:=1 TO g_setupJntNum DO 
-	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
-		// gravity feedforward
+	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_PosTrq THEN
+		// position controller and gravity feedforward
+		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i],0,m_curJntVel[i]);
 		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
+	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
+		// gravity feedforward
+		m_jntPIDCtrl[i].reset();
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i]+GVLs_SetupArmDynamics.g_setupJntGravityOffset[m_armIdx, i];
 		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
+		m_jntPIDCtrl[i].reset();
 		m_cmdJntTrq[i]:=0;
 		m_joints[i].updateCmds(DriverOPMode_Pos,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	END_IF
@@ -573,6 +595,8 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="166" Count="1" />
       <LineId Id="193" Count="5" />
       <LineId Id="80" Count="0" />
+      <LineId Id="206" Count="6" />
+      <LineId Id="205" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.isEnabled">
       <LineId Id="19" Count="0" />
@@ -592,22 +616,12 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.updateCmds">
-      <LineId Id="40" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="9" Count="1" />
+      <LineId Id="73" Count="15" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="89" Count="2" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="92" Count="3" />
+      <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.updateDyna">
       <LineId Id="8" Count="0" />

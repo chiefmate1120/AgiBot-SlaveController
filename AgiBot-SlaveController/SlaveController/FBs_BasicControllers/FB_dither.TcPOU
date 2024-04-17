@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_dither" Id="{6027c9a2-000c-4507-99b9-8b28cc54778d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_dither
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// dithering signal type
+	// 1: square
+	m_type:INT := 1;
+	
+	// dithering amplitude
+	m_amplitude:LREAL;
+	
+	// dithering frequency
+	m_frequency :LREAL;
+	
+	// time step
+	m_timeStep :LREAL;
+	
+	// time period
+	m_timePeriod:LREAL:=0.0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{92c8e503-440f-47d0-8384-9bcdedaa4795}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_type:INT;
+	i_timeStep:LREAL;
+	i_amp:LREAL;
+	i_freq:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_type:=i_type;
+m_timeStep:=i_timeStep;
+m_amplitude:=i_amp;
+m_frequency:= i_freq;
+m_timePeriod:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{99dad32a-86c0-4782-9867-6705f013c06b}">
+      <Declaration><![CDATA[METHOD run : LREAL
+VAR_INPUT
+END_VAR
+VAR
+	tmpVar :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_timePeriod := m_timePeriod+ m_timeStep;
+run:=0;
+
+CASE m_type OF
+	// sin
+	1:
+		run := m_amplitude*SIN(2*pi*m_frequency * m_timePeriod);
+	// square
+	2:
+		tmpVar := SIN(2*pi*m_frequency * m_timePeriod);
+		run:= sign(tmpVar) * m_amplitude;
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_dither">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_dither.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_dither.run">
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="20" Count="3" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

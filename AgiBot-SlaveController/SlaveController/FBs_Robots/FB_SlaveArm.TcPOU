@@ -859,6 +859,7 @@ FOR i:=1 TO g_sJntNum DO
 		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
+		m_jntPIDCtrl[i].reset();
 		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
 		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
@@ -1176,6 +1177,7 @@ END_FOR
       <LineId Id="95" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="23" Count="0" />
+      <LineId Id="117" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="21" Count="0" />

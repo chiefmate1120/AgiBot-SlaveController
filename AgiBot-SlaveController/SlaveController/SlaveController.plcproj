@@ -262,6 +262,9 @@
     <Compile Include="FBs_Auxiliary\FB_AdjustDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_BasicControllers\FB_dither.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_BasicControllers\FB_InstrumentControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>

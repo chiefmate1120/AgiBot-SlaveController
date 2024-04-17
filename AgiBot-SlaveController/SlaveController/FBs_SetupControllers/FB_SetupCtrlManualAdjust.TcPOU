@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -8,11 +8,34 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// friction compensation scale
+	m_frictionScale :LREAL :=0.5;
+	
+	// velocity threshold for friction compensation 
+	m_frictionCompVelThres :LREAL:=1.0*g_deg2Rad;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="calcCmdJntTrq" Id="{c618bd90-4444-4b54-b7cd-0646bf55f729}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec5d;
+
+// add friction compensation
+IF ABS(i_setupArm.curJntVel[5])> m_frictionCompVelThres THEN
+	m_cmdJntTrq[5]:= m_frictionScale * sign(i_setupArm.curJntVel[5])*GVLs_SetupArmDynamics.g_setupJntFriction[i_setupArm.armIdx, 5];
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{f9e2fdef-c3dd-4598-8bef-00a8d9aa9850}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
@@ -28,15 +51,29 @@ END_VAR
 m_jntEnableFlag[5]:=1;
 m_jntOPMode[5]:=DriverOPMode_Trq;
 
+// init dithering control
+m_ditherCtrl.init(i_type:=m_ditherType, i_timeStep:=g_setupArmCtrlCycleTime, i_amp:= m_ditherScale*GVLs_SetupArmDynamics.g_setupJntFriction[i_setupArm.armIdx, 5],i_freq:=m_ditherFreq);
+
 ]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupCtrlManualAdjust">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SetupCtrlManualAdjust.calcCmdJntTrq">
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="2" />
+      <LineId Id="36" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.init">
       <LineId Id="57" Count="0" />
       <LineId Id="67" Count="1" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="79" Count="0" />
       <LineId Id="58" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>

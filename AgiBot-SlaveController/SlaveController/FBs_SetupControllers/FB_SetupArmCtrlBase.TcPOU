@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupArmCtrlBase" Id="{0b31894e-90eb-4625-a1b2-b64eb3714a74}" SpecialFunc="None">
     <Declaration><![CDATA[// Setup Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_SetupArmCtrlBase IMPLEMENTS I_SetupArmCtrl
@@ -137,7 +137,7 @@ r_setupArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
 r_setupArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
 
 // update time period
-m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
+m_timePeriod := m_timePeriod+g_setupArmCtrlCycleTime;
 ]]></ST>
       </Implementation>
     </Method>
