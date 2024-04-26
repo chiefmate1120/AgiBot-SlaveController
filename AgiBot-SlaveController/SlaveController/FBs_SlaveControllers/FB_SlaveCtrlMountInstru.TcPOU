@@ -1,16 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMountInstru" Id="{db93de24-03af-45f5-8edb-e02a943fe1f8}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Instrument
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountInstru EXTENDS FB_SlaveArmCtrlBase
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
 VAR
 	// mount status
-	m_mountStatus :INT := 0;
-	m_J4mountStatus :INT := 0;
+	m_instruMountStatus :INT := 0;
+	m_scopeMountStatus :INT := 0;
 	
 	// flag if joint is mounted
 	m_jointMounted :ARRAY[1..5] OF BOOL := [5(FALSE)];
@@ -26,8 +22,8 @@ VAR
 	m_instruMountVel :LREAL := 4*PI;
 	m_instruMountAcc :LREAL := 8*PI;
 	
-	//Joint 4 rotation angle
-	rotAngleJ4 :LREAL := 323*g_deg2Rad;
+	//Joint 4 half-range angle of instrument
+	m_instruJnt4HalfRangeAng :LREAL := 323*g_deg2Rad;
 	
 	// joint current threshold which indicate panel is buckled with instrument
 	m_maxJntCurrent :Vec5d := [150, 150, 150, 180, 180];
@@ -40,7 +36,11 @@ VAR
 	
 	// joint position error
 	m_jntPosErr :Vec5d;
-
+	
+	// endoscope motion angle to original position
+	m_scopeJnt4CenterMotionAng :LREAL :=175*g_deg2Rad;
+	m_scopeJnt5CenterMotionAng :LREAL :=150*g_deg2Rad;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -95,7 +95,8 @@ FOR i:=1 TO 5 DO
 	m_jointMounted[i]:=FALSE;
 END_FOR
 
-m_mountStatus:=0;
+m_instruMountStatus:=0;
+m_scopeMountStatus:=0;
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -114,7 +115,63 @@ VAR
 	curJntPos :Vec8d;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
+
+CASE m_scopeMountStatus OF
+	//fix scope lock joint(joint 7)
+	0:
+		// other joints stay still
+		FOR i:=1 TO 3 DO
+			m_jointMounted[i] := TRUE;
+			m_targetMountPos[i+3]:=curJntPos[i+3];
+			m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+		END_FOR
+	
+		// check if buckled
+		m_jointMounted[4]:=FALSE; 
+		m_jointMounted[5]:=FALSE; 
+		IF ABS(i_slaveArm.filtJntCurrent[7])> m_maxJntCurrent[4] THEN 
+			m_jointMounted[4]:=TRUE;
+			m_targetMountPos[7]:=curJntPos[7];
+			m_jntOTG[4].init(m_targetMountPos[7], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			m_scopeMountStatus:=1;
+		ELSE
+			m_targetMountPos[7]:=curJntPos[7]+m_mountMotionAng[4];
+		END_IF
+
+	1: // buckle scope rotate joint (joint 8)
+		m_jointMounted[5]:=FALSE; 
+		IF ABS(i_slaveArm.filtJntCurrent[8])> m_maxJntCurrent[5] THEN 
+			m_jointMounted[5]:=TRUE;
+			m_targetMountPos[8]:=curJntPos[8];
+			m_jntOTG[5].init(m_targetMountPos[8], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			m_scopeMountStatus:=2;
+		ELSE
+			m_targetMountPos[8]:=curJntPos[8]+m_mountMotionAng[5];
+		END_IF
+	
+
+	2:// move back to zero position
+		m_targetMountPos[7]:= curJntPos[7]-m_scopeJnt4CenterMotionAng;
+		m_targetMountPos[8]:= curJntPos[8]-m_scopeJnt5CenterMotionAng;
+		m_scopeMountStatus :=3;
+		
+		
+	3:
+		IF ABS(m_targetMountPos[7]-curJntPos[7]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh AND 
+				ABS(m_targetMountPos[8]-curJntPos[8]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh THEN
+			m_isFinished := TRUE;
+		END_IF
+		
+END_CASE
+
+// traj plan
+FOR i:=1 TO 5 DO
+	m_jntOTG[i].run(m_targetMountPos[i+3],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
+END_FOR
+
+
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="mountInstrument" Id="{cbdcc411-d3ae-4c70-8c1a-fbdc24e77583}">
@@ -130,7 +187,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
 
-CASE m_mountStatus OF
+CASE m_instruMountStatus OF
 	// To lock panel with instrument
 	0:
 		//buckle panel with instrument
@@ -152,17 +209,17 @@ CASE m_mountStatus OF
 		// check transition condition
 		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4])  THEN
 			IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN//Check whether the data is read successfully
-				m_mountStatus:=1;
+				m_instruMountStatus:=1;
 			END_IF
 		END_IF
 	
 	1:// calculation deviates from the instrument zero position
-		m_instruZeroDeviation[4]:=rotAngleJ4;
+		m_instruZeroDeviation[4]:=m_instruJnt4HalfRangeAng;
 		
 		FOR i:=1 TO 3 DO
 			m_instruZeroDeviation[i] :=  i_slaveArm.linkSingle[i+3] - i_slaveArm.instrument.onChipData.m_InstruPos[i];
 		END_FOR
-		m_mountStatus :=2;
+		m_instruMountStatus :=2;
 	
 	
 	2:// move back to zero position
@@ -177,7 +234,7 @@ CASE m_mountStatus OF
 		FOR i:=1 TO 4 DO
 			m_targetMountPos[i+3]:=curJntPos[i+3] - m_instruZeroDeviation[i];
 		END_FOR
-		m_mountStatus :=3;
+		m_instruMountStatus :=3;
 		
 		
 	3:
@@ -212,29 +269,19 @@ END_FOR
       <LineId Id="478" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.init">
-      <LineId Id="123" Count="0" />
-      <LineId Id="122" Count="0" />
-      <LineId Id="124" Count="0" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="136" Count="3" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="95" Count="3" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="162" Count="1" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="109" Count="0" />
+      <LineId Id="174" Count="21" />
       <LineId Id="92" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountEndoscope">
+      <LineId Id="14" Count="36" />
+      <LineId Id="62" Count="5" />
+      <LineId Id="71" Count="2" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="77" Count="8" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
-      <LineId Id="6" Count="24" />
-      <LineId Id="34" Count="29" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="64" Count="14" />
+      <LineId Id="96" Count="70" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

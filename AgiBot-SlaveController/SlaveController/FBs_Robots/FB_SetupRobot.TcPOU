@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -172,6 +172,12 @@ END_VAR]]></Declaration>
         <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
 	// State machine transit 
 	CASE m_setupArmState[i] OF
+		// error
+		SetupArmState_Error:
+			IF FALSE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i]  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF
+			
 		// init
 		SetupArmState_Init:
 			IF m_armCtrl[i].isFinished  THEN
@@ -222,6 +228,11 @@ END_VAR]]></Declaration>
 			END_IF 
 		
 	END_CASE
+	
+	// error check
+	IF TRUE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
+		m_nextSetupArmState[i]:=SetupArmState_Error;
+	END_IF
 	
 	// Controller transit
 	IF m_nextSetupArmState[i]<> m_setupArmState[i] THEN
@@ -308,6 +319,9 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="15" Count="0" />
+      <LineId Id="247" Count="3" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="251" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="19" Count="0" />
@@ -335,6 +349,9 @@ END_FOR]]></ST>
       <LineId Id="201" Count="0" />
       <LineId Id="123" Count="0" />
       <LineId Id="18" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="236" Count="2" />
+      <LineId Id="235" Count="0" />
       <LineId Id="56" Count="3" />
       <LineId Id="61" Count="2" />
       <LineId Id="65" Count="0" />

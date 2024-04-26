@@ -1,41 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SetupJointEncoderCaliData" Id="{a5e1148c-b030-4494-87c0-eb852ce07b8b}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
 		// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 5000;
+	g_linkEncLimitBuffer : DINT := 100000;
 
 	// absolute encoder direction
-	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[1, 1, -1, -1, -1];
+	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, -1, 1, -1];
 													
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[0, 0, 0, 0, 6711624,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0];
+		[10820860, 64919092, 57409031, 1851032, 1117696,
+		 15040796, 19250150, 52220472, 1865736, 5370968,
+		 15165364, 61524935, 56328180, 10224882, 1019944,
+		 12364020, 63250814, 55221937, 14440620, 5319980];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[0, 0, 0, 0, 1333062,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0];
+		[6102024, 63534315, 56635702, 394750, 9155824,
+		 10329032, 17795974, 51417699, 303438, 13416490,
+		 10495464, 60071845, 55514393, 8671968, 9053316,
+		 7627212, 61793781, 54433447, 12871432, 13365450];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[0, 0, 0, 0, 5698610,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0];
+		[8479084, 63534315, 57409031, 9224498, 13527366,
+		 12606456, 17795974, 52220472, 9143734, 994974,
+		 12863028, 60071845, 56328180, 774190, 13414374,
+		 10068792, 61793781, 56328180, 5068940, 951234];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
-		[0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0];
+		[0, 0, 0, 1, 1,
+		 0, 0, 0, 1, 1,
+		 0, 0, 0, 1, 1,
+		 0, 0, 0, 1, 1];
 	
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
@@ -45,8 +45,11 @@ VAR_GLOBAL
 		 0, 0, 0, 0, 0];
 		 
 	// joint position at link encoder calibrated point
-	g_linkEncCaliJntPos :ARRAY[1..g_setupJntNum] OF LREAL :=
-		[0.0, 0.0, 0.0, 0.0, 0.0];
+	g_linkEncCaliJntPos :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF LREAL :=
+		[-140*g_deg2Rad, 0.779, 0.0, 90.0*g_deg2Rad, 0.0,
+		 -115*g_deg2Rad, 0.607, 0.0, 90.0*g_deg2Rad, 0.0,
+		 -65*g_deg2Rad, 0.607, 0.0, 90.0*g_deg2Rad, 0.0,
+ 		 -40*g_deg2Rad, 0.779, 0.0, 90.0*g_deg2Rad, 0.0];
 	
 
 END_VAR]]></Declaration>

@@ -7,13 +7,195 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// final arm error flag
+	m_armErrFlag :ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
+	
+	// last state machine
+	m_lastArmState:ARRAY[1..g_sArmNum] OF E_SetupArmState:=[g_sArmNum(SetupArmState_Init)];
+	
+	// original position of remote center point when fisrt enter hold state
+	m_dsrRcpPos :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	// rcp error flag
+	m_rcpPosErrFlag :ARRAY[1..g_sArmNum] OF BOOL;
+	
+	// joint control error flag
+	m_jntCtrlErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	
+	// joint encoder error flag
+	m_jntEncErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	
+	// joint velocity error flag
+	m_jntVelErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	
+	// rcp position error
+	m_rcpPosErr :ARRAY[1..g_sArmNum] OF Vec3d;
+
+	// joint position control error
+	m_jntCtrlErr:ARRAY[1..g_sArmNum]  OF Vec5d;
+	
+	// motor and joint encoder error
+	m_jntEncErr:ARRAY[1..g_sArmNum]  OF Vec5d;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="check" Id="{2c2db747-eadc-432f-8869-05ad8bbc1acb}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupStatus : ST_SetupStatus;
+	i_setupJointData :ST_SetupJointData;
+END_VAR
+VAR_OUTPUT
+	o_errorFlag :ARRAY[1..g_sArmNum] OF BOOL ;
+END_VAR
+
+VAR
+	i ,j:INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate error
+FOR i:=1 TO g_sArmNum DO 
+	// stop check if arm is already in error state
+	IF TRUE = m_armErrFlag[i] THEN 
+		CONTINUE;
+	END_IF
+	
+	// update rcp
+	IF i_setupStatus.m_armState[i] = SetupArmState_Hold AND m_lastArmState[i] <> SetupArmState_Hold THEN
+		m_dsrRcpPos[i] := i_setupStatus.m_rcPos[i];
+	END_IF
+	m_lastArmState[i] := i_setupStatus.m_armState[i];
+	
+	
+	// only check rcp in HOLD state (for master-slave control)
+	m_rcpPosErrFlag[i]:=FALSE;
+	IF  SetupArmState_Hold = i_setupStatus.m_armState[i] THEN 
+		m_rcpPosErrFlag[i]:=rcpErrCheck(m_dsrRcpPos[i],  i_setupStatus.m_rcPos[i],o_posErr=>m_rcpPosErr[i]);
+	END_IF
+	
+	// joint control error
+	m_jntCtrlErrFlag[i]:=jntCtrlErrCheck(i_setupJointData.m_cmdJntPos[i], i_setupJointData.m_curJntPos[i],
+										o_jntCtrlErr=>m_jntCtrlErr[i]);
+	
+	// encoder error
+	m_jntEncErrFlag[i]:=jntEncErrCheck(i_setupJointData.m_curMotorPos[i], i_setupJointData.m_curLinkPos[i],
+										o_jntEncErr=>m_jntEncErr[i]);
+										
+	// final arm error status check
+	IF  TRUE = m_rcpPosErrFlag[i] THEN
+		m_armErrFlag[i]:=TRUE;
+		CONTINUE;
+	END_IF
+	
+	FOR j:=1 TO g_setupJntNum DO 
+		IF TRUE = m_jntCtrlErrFlag[i][j] OR TRUE = m_jntEncErrFlag[i][j] OR TRUE = m_jntVelErrFlag[i][j] THEN
+			m_armErrFlag[i]:=TRUE;
+			EXIT;
+		END_IF
+	END_FOR
+	
+END_FOR
+
+o_errorFlag:=m_armErrFlag;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntCtrlErrCheck" Id="{f6fb8ca3-8b0c-48d0-a2c9-a609f09c24db}">
+      <Declaration><![CDATA[METHOD jntCtrlErrCheck : Vec5b
+VAR_INput
+	i_cmdJntPos : Vec5d;
+	i_curJntPos : Vec5d;
+END_VAR
+VAR_OUTPUT
+	o_jntCtrlErr :Vec5d;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_cmdJntPos,i_curJntPos,  o_jntCtrlErr);
+
+// joint error check
+FOR i:=1 TO g_setupJntNum DO 
+	jntCtrlErrCheck[i]:= ABS(o_jntCtrlErr[i]) > g_setupMaxJntCtrlErr[i];
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntEncErrCheck" Id="{6da94a09-09aa-4f72-8d8e-c6be158d127a}">
+      <Declaration><![CDATA[METHOD jntEncErrCheck : Vec5b
+VAR_INput
+	i_motorJntPos : Vec5d;
+	i_linkJntPos : Vec5d;
+END_VAR
+VAR_OUTPUT
+	o_jntEncErr :Vec5d;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  o_jntEncErr);
+
+// joint error check
+FOR i:=1 TO g_setupJntNum DO 
+	jntEncErrCheck[i]:= ABS(o_jntEncErr[i]) > g_setupMaxJntCtrlErr[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="rcpErrCheck" Id="{ee28dada-ba2b-4f9e-8a63-19fb6ed167a8}">
+      <Declaration><![CDATA[METHOD rcpErrCheck : BOOL
+VAR_INPUT
+	i_cmdPos : Vec3d;
+	i_curPos : Vec3d;
+END_VAR
+VAR_OUTPUT
+	o_posErr :Vec3d;
+END_VAR
+
+VAR
+	matT,rotErr:Mat3d;
+	errAngle :LREAL;
+	errAxis :Vec3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_cmdPos, i_curPos,o_posErr);
+rcpErrCheck:= (norm(o_posErr)>g_rcpDeviationThres);]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SetupArmCheck">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.check">
+      <LineId Id="152" Count="17" />
+      <LineId Id="171" Count="24" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.jntCtrlErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.jntEncErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.rcpErrCheck">
+      <LineId Id="8" Count="0" />
+      <LineId Id="26" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

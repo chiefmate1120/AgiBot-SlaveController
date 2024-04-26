@@ -61,7 +61,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_timePeriod:=0;
-m_jntEnableFlag :=g_zeroVec5i;// setup arm joint is off by default
+m_jntEnableFlag :=g_zeroVec5i;// setup arm joint is diabled by default
 m_jntOPMode:=g_setupAllPosMode;
 m_cmdJntPos:=i_setupArm.curJntPos;
 m_cmdJntVel:=g_zeroVec5d;

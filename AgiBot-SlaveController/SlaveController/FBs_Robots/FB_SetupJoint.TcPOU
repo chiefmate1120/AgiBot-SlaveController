@@ -41,7 +41,7 @@ m_linkEncoderDir :=GVL_SetupJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];
 m_minLinkEncoder :=GVL_SetupJointEncoderCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_maxLinkEncoder :=GVL_SetupJointEncoderCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*GVL_SlaveJointEncoderCaliData.g_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=GVL_SetupJointEncoderCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
-m_linkEncCaliJntPos :=GVL_SetupJointEncoderCaliData.g_linkEncCaliJntPos[i_jntIdx];
+m_linkEncCaliJntPos :=GVL_SetupJointEncoderCaliData.g_linkEncCaliJntPos[i_armIdx,i_jntIdx];
 m_linkEncZeroCross :=GVL_SetupJointEncoderCaliData.g_linkEncZeroCross[i_armIdx, i_jntIdx];
 m_multiCycles :=GVL_SetupJointEncoderCaliData.g_multipleCyclesJoint[i_armIdx,i_jntIdx];
 
@@ -82,6 +82,40 @@ m_motorOutputs.m_cmdCurrent:=0;
 m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="updateStatus" Id="{34ceea2f-2bdd-4fbf-8a53-a09fb1bc6775}">
+      <Declaration><![CDATA[METHOD PUBLIC updateStatus : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute joint position
+m_curLinkPos:= linkEnc2Pos();
+m_curMotorPos:=motorEnc2Pos();
+m_curLinkSingle := m_curLinkPos - 2*PI* m_linkEncCycles;
+
+// setup joint1/2 have no motor, use link position
+IF m_jntIdx < 3 THEN
+	m_curJntPos := m_curLinkPos;
+ELSE
+	m_curJntPos := m_curMotorPos;
+END_IF
+
+// compute joint velocity
+m_curVelCalCycles := m_curVelCalCycles+1;
+IF m_curVelCalCycles > m_velCalcCycles THEN
+	m_rawJntVel:= (m_curJntPos-m_lastJntPos)/(m_cycleTime*m_velCalcCycles);
+	m_curJntVel := m_jntVelLpf.run(m_rawJntVel);
+	m_lastJntPos :=m_curJntPos;	
+	m_curVelCalCycles:=1;
+END_IF
+
+
+// current and torque
+m_rawCurrent := m_motorInputs.m_current;
+m_filtCurrent := m_curTrqLpf.run(m_rawCurrent);
+m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SetupJoint">
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -101,6 +135,30 @@ m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       <LineId Id="148" Count="3" />
       <LineId Id="137" Count="5" />
       <LineId Id="39" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupJoint.updateStatus">
+      <LineId Id="18" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="11" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
