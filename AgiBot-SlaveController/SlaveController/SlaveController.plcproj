@@ -226,6 +226,9 @@
     <Compile Include="DUTs\Type\Vec4i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec5b.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec5d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -242,6 +245,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_IOToggleCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_setupAdjustDetect.TcPOU">
@@ -308,6 +317,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_Instrument.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Robots\FB_SlaveCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_SetupArm.TcPOU">
@@ -529,6 +541,9 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="Mains\CartControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -548,6 +563,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\FB_SlaveArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskCartControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskDynamic.TcTTO">

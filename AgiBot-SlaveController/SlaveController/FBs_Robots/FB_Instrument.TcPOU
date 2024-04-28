@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -25,6 +25,12 @@ VAR
 	
 	// joint position when instrument is at ZERO posture
 	m_jntPosOffset:Vec8d;
+	
+	// reduction from motor joint to endoscope rotate joint
+	m_endoscopeRotateReduction :LREAL := 2/3;
+	
+	// flag if endoscope is 30deg
+	m_endoscope30Deg :BOOL:=true;
 	
 	// joint single link position when instrument at zero posture
 	// TODO: move parameters below to instrument chip
@@ -55,6 +61,25 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="property" Id="{9d49480e-8469-42fe-9794-09bbda49b553}" />
+    <Property Name="endoscope30Deg" Id="{4bce8a98-2eb7-4bb1-9eae-0e7d18b990ab}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY endoscope30Deg : bool]]></Declaration>
+      <Get Name="Get" Id="{abceb35e-0bca-4bf2-b494-bd59bc26f3c4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[endoscope30Deg := m_endoscope30Deg;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{0322fa43-406c-4982-b018-d60301dbd76c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_endoscope30Deg := endoscope30Deg;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Method Name="gripAngleMap" Id="{b8d7e03a-0cbe-42c6-a7e6-6b03109deb8f}">
       <Declaration><![CDATA[METHOD gripAngleMap : BOOL
 VAR_INPUT
@@ -224,6 +249,19 @@ END_VAR
 r_DHJntPos[2]:=i_jntPos[2];
 r_DHJntPos[3]:=i_jntPos[3];
 
+// ################## endoscope ############################
+IF m_onChipData.m_Instrutype = InstruType_endoscope THEN
+	r_DHJntPos[4]:=-m_endoscopeRotateReduction*(i_jntPos[8]-m_jntPosOffset[8]);
+	IF m_endoscope30Deg THEN
+		r_DHJntPos[5]:=-pi/2+30*g_deg2Rad;
+	ELSE
+		r_DHJntPos[5]:=-pi/2;
+	END_IF
+	r_DHJntPos[6]:=0;
+	RETURN;
+END_IF
+
+//#################### instrument forward kinematic ############
 // convert motor joint position to instrument joint position
 jntPosL1:=(i_jntPos[4]-m_jntPosOffset[4]);
 jntPosL2:=(i_jntPos[5]-m_jntPosOffset[5]);
@@ -236,7 +274,14 @@ r_DHJntPos[4]:=jntPosL4/m_kinematicParameters.kx;
 r_DHJntPos[5]:=jntPosL3/m_kinematicParameters.ky;
 r_DHJntPos[6]:=(jntPosL1-jntPosL2-2*r_DHJntPos[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
 
+// convert instrument rotation to arm DH joint position
+r_DHJntPos[5]:=-r_DHJntPos[5]-pi/2;
+r_DHJntPos[6]:=-r_DHJntPos[6];
+
+// grip angle
 gripAngle:=(jntPosL1+jntPosL2)/(m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
+
+//################### gripper angle handle #################
 IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
 	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> r_gripAngle);
 
@@ -247,9 +292,7 @@ ELSE
 	r_gripAngle:=gripAngle;
 END_IF
 
-// convert instrument rotation to arm DH joint position
-r_DHJntPos[5]:=-r_DHJntPos[5]-pi/2;
-r_DHJntPos[6]:=-r_DHJntPos[6];]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="InstruIDRecord" Id="{f3567262-d84c-4741-97fb-36ae0b451ee9}">
@@ -317,7 +360,33 @@ VAR
 	L3Offset:LREAL:=-3;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// convert arm DH joint position to  instrument rotation
+        <ST><![CDATA[o_jntPos[1] := i_DHJntPos[1];
+o_jntPos[2] := i_DHJntPos[2];
+o_jntPos[3] := i_DHJntPos[3];
+
+// ################## endoscope ############################
+IF m_onChipData.m_Instrutype = InstruType_endoscope THEN
+	o_jntPos[8] := -i_DHJntPos[4]/m_endoscopeRotateReduction + m_jntPosOffset[8];
+	o_jntPos[4]:=0;
+	o_jntPos[6]:=0;
+	o_jntPos[6]:=0;
+	o_jntPos[7]:=0;
+	RETURN;
+END_IF
+
+//################### gripper angle handle #################
+IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
+	gripperAngleInverseTransform_ID12(endAngle:= i_gripAngle, frontAngle=> gripAngle);
+	
+ELSIF 16 = onChipData.m_InstruID THEN//单级电钩\电铲
+	gripAngle:=0;
+	
+ELSE
+	gripAngle:=i_gripAngle;
+END_IF
+
+// ################# instrument inverse kinematic ##############
+// convert arm DH joint position to  instrument rotation
 rot_x:=i_DHJntPos[4];
 rot_y:=-i_DHJntPos[5]-pi/2;
 rot_z:=-i_DHJntPos[6];
@@ -330,17 +399,6 @@ ky:=m_kinematicParameters.ky;
 kz:=m_kinematicParameters.kz;
 d:=m_kinematicParameters.m_openAngleDir;
 
-//*********************动力盒关节逆向运动学，根据空间关节计算L1-L5**************************//
-IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
-	gripperAngleInverseTransform_ID12(endAngle:= i_gripAngle, frontAngle=> gripAngle);
-	
-ELSIF 16 = onChipData.m_InstruID THEN//单级电钩\电铲
-	gripAngle:=0;
-	
-ELSE
-	gripAngle:=i_gripAngle;
-END_IF
-
 m_gripAnglePbox[7]:=rot_x*kx;
 m_gripAnglePbox[6]:=rot_y*ky;
 ra:=gripAngle;
@@ -348,9 +406,6 @@ m_gripAnglePbox[4]:=rot_y*k13*kz+d*rot_z*kz+d*ra*kz/2;
 m_gripAnglePbox[5]:=-rot_y*k23*kz-d*rot_z*kz+d*ra*kz/2;
 
 // convert instrument joint position to motor joint position
-o_jntPos[1] := i_DHJntPos[1];
-o_jntPos[2] := i_DHJntPos[2];
-o_jntPos[3] := i_DHJntPos[3];
 o_jntPos[4] := m_gripAnglePbox[4] + m_jntPosOffset[4];
 o_jntPos[5] := m_gripAnglePbox[5] + m_jntPosOffset[5];
 o_jntPos[6] := m_gripAnglePbox[6] + m_jntPosOffset[6];
@@ -442,7 +497,10 @@ END_VAR
 VAR_INPUT
 	startFlag :BOOL;
 END_VAR
-]]></Declaration>
+
+VAR
+	paramIdx :INT;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// TODO: read m_kinematic parameters from chip 
 //Take the rising edge of the read signal
@@ -570,10 +628,11 @@ CASE m_Step OF
 		
 		
 	120://结果诊断
+	// TODO : endoscope can not be readed
 		IF m_onChipData.m_InstruID<1 THEN
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=1;
-		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
+(*		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
 			IF m_HaveRecord THEN
 				m_onChipData.m_Instrutype:=2;
@@ -582,21 +641,24 @@ CASE m_Step OF
 			ELSE
 				m_onChipData.m_Error:=TRUE;
 				m_onChipData.m_ErrorID:=2;
-			END_IF
+			END_IF*)
 		ELSE
-			m_onChipData.m_Instrutype:=2;
+			IF m_onChipData.m_InstruID = 20 OR m_onChipData.m_InstruID = 9665 THEN
+				m_onChipData.m_Instrutype :=  InstruType_endoscope;
+			ELSE
+				m_onChipData.m_Instrutype :=  InstruType_NeedleGripper;
+			END_IF
 			m_onChipData.m_InstruReadSucceed:=TRUE;
 			m_Step:=130;
 		END_IF
 	
-		
-		
 	130://控制参数赋值、现在先用原有的  后续改为从芯片中读取
-		m_kinematicParameters.k13:=k13[m_onChipData.m_InstruID];
-		m_kinematicParameters.k23:=k23[m_onChipData.m_InstruID];
-		m_kinematicParameters.kx:=kx[m_onChipData.m_InstruID];
-		m_kinematicParameters.ky:=ky[m_onChipData.m_InstruID];
-		m_kinematicParameters.kz:=kz[m_onChipData.m_InstruID];
+		paramIdx :=LIMIT(1, m_onChipData.m_InstruID, 30);
+		m_kinematicParameters.k13:=k13[paramIdx];
+		m_kinematicParameters.k23:=k23[paramIdx];
+		m_kinematicParameters.kx:=kx[paramIdx];
+		m_kinematicParameters.ky:=ky[paramIdx];
+		m_kinematicParameters.kz:=kz[paramIdx];
 		m_Step:=-1;
 	
 END_CASE
@@ -637,6 +699,12 @@ END_FOR
     <LineIds Name="FB_Instrument">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Instrument.endoscope30Deg.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.endoscope30Deg.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Instrument.gripAngleMap">
       <LineId Id="22" Count="0" />
       <LineId Id="5" Count="0" />
@@ -673,24 +741,50 @@ END_FOR
     <LineIds Name="FB_Instrument.instruFK">
       <LineId Id="131" Count="0" />
       <LineId Id="134" Count="1" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="196" Count="1" />
+      <LineId Id="199" Count="1" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="201" Count="0" />
       <LineId Id="132" Count="1" />
       <LineId Id="126" Count="4" />
       <LineId Id="160" Count="0" />
       <LineId Id="156" Count="0" />
       <LineId Id="86" Count="1" />
       <LineId Id="89" Count="0" />
+      <LineId Id="181" Count="2" />
       <LineId Id="136" Count="0" />
-      <LineId Id="90" Count="9" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="159" Count="0" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="91" Count="8" />
+      <LineId Id="158" Count="1" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruIDRecord">
       <LineId Id="12" Count="16" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruIK">
+      <LineId Id="528" Count="1" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="532" Count="2" />
+      <LineId Id="543" Count="0" />
+      <LineId Id="541" Count="0" />
+      <LineId Id="544" Count="2" />
+      <LineId Id="542" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="547" Count="0" />
+      <LineId Id="530" Count="0" />
+      <LineId Id="549" Count="9" />
+      <LineId Id="548" Count="0" />
       <LineId Id="480" Count="0" />
       <LineId Id="395" Count="2" />
       <LineId Id="481" Count="0" />
@@ -699,16 +793,14 @@ END_FOR
       <LineId Id="391" Count="0" />
       <LineId Id="388" Count="0" />
       <LineId Id="392" Count="2" />
-      <LineId Id="7" Count="1" />
-      <LineId Id="20" Count="8" />
-      <LineId Id="482" Count="0" />
+      <LineId Id="7" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="385" Count="0" />
       <LineId Id="50" Count="1" />
       <LineId Id="56" Count="0" />
       <LineId Id="483" Count="0" />
-      <LineId Id="489" Count="7" />
+      <LineId Id="492" Count="4" />
       <LineId Id="324" Count="1" />
       <LineId Id="5" Count="0" />
     </LineIds>
@@ -801,6 +893,7 @@ END_FOR
       <LineId Id="273" Count="1" />
       <LineId Id="153" Count="0" />
       <LineId Id="170" Count="0" />
+      <LineId Id="387" Count="0" />
       <LineId Id="172" Count="0" />
       <LineId Id="174" Count="0" />
       <LineId Id="176" Count="1" />
@@ -811,13 +904,15 @@ END_FOR
       <LineId Id="184" Count="2" />
       <LineId Id="183" Count="0" />
       <LineId Id="189" Count="0" />
-      <LineId Id="248" Count="0" />
+      <LineId Id="371" Count="1" />
+      <LineId Id="374" Count="1" />
+      <LineId Id="373" Count="0" />
       <LineId Id="195" Count="0" />
       <LineId Id="282" Count="0" />
       <LineId Id="175" Count="0" />
       <LineId Id="173" Count="0" />
-      <LineId Id="279" Count="1" />
       <LineId Id="275" Count="0" />
+      <LineId Id="379" Count="0" />
       <LineId Id="171" Count="0" />
       <LineId Id="283" Count="3" />
       <LineId Id="308" Count="0" />

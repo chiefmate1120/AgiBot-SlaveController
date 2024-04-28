@@ -40,7 +40,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// safety check
-IF ABS(i_setupArm.curJntVel[5]) > 0.25 THEN
+IF ABS(i_setupArm.curJntVel[5]) > 10*g_deg2Rad THEN
 	m_isFinished:=TRUE;
 	RETURN;
 END_IF

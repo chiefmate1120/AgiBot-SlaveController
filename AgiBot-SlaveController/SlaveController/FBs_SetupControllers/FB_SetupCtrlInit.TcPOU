@@ -28,7 +28,7 @@ VAR
 	curJntVel :Vec5d;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_isFinished := m_timePeriod > 1.0;]]></ST>
+        <ST><![CDATA[]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{dbcec065-8704-4c57-a097-e13d35679382}">

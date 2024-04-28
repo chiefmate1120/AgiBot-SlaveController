@@ -7,7 +7,7 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// cartesian pose error flag
+	// final arm error flag
 	m_armErrFlag :ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
 	
 	// cartesian pose error flag

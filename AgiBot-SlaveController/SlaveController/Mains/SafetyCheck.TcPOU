@@ -37,7 +37,8 @@ IF FALSE = m_initFlag  THEN
 	m_initFlag:=TRUE;
 END_IF
 
-m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheckData.m_slaveErrFlag);]]></ST>
+m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheckData.m_slaveErrFlag);
+m_setupArmCheck.check(m_setupStatus,m_setupJointsData, o_errorFlag=>m_safetyCheckData.m_setupErrFlag);]]></ST>
     </Implementation>
     <LineIds Name="SafetyCheck">
       <LineId Id="25" Count="0" />
@@ -48,6 +49,7 @@ m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheck
       <LineId Id="36" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="66" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

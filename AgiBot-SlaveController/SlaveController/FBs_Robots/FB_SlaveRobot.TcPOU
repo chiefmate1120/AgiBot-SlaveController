@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -219,13 +219,6 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 END_FOR
 
-//####test code ############
-m_endoscopePose.m_rot:=g_zeorMat3d;
-m_endoscopePose.m_rot[1,1]:=-1;
-m_endoscopePose.m_rot[2,2]:=-1;
-m_endoscopePose.m_rot[3,3]:=1;
-//#############################
-
 // state machine transition
 stateMachine(i_slaveInputDataPool);
 
@@ -351,19 +344,25 @@ FOR i:=1 TO g_sArmNum DO
 		
 		//panel ready
 		SlaveArmState_PanelReady:
+				// to adjust
+			IF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to stand by
-			IF NOT(m_slaveArms[i].panelOn) THEN
+			ELSIF NOT(m_slaveArms[i].panelOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			ELSIF m_slaveArms[i].instruOn  THEN
-				IF m_instrumentMountedFlag[i] THEN 
-					m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
+				IF m_instrumentMountedFlag[i] THEN
+					// to scope ready
+					IF  InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype THEN 
+						m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
+					// to instrument ready
+					ELSE
+						m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
+					END_IF
 				// to mount instrument/endoscope
 				ELSE
 					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
 				END_IF
-				
-			ELSIF (m_slaveArms[i].adjustOn) THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 			
 		//mount instrument
@@ -523,8 +522,11 @@ FOR i:=1 TO g_sArmNum DO
 			
 	END_CASE
 	
-	// to standby if setup arm is not ready
-	IF SetupArmState_Hold <> i_slavesInputDataPool.m_setupStatus.m_armState[i] AND
+	// to standby if setup arm is in Error
+	IF SetupArmState_ERROR = i_slavesInputDataPool.m_setupStatus.m_armState[i]  THEN 
+		m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+	// control is forbiddan if setup arm is not in Hold
+	ELSIF SetupArmState_Hold <> i_slavesInputDataPool.m_setupStatus.m_armState[i] AND
 	(SlaveArmState_InstruReady = m_nextSlaveArmState[i] OR SlaveArmState_MasterSlave = m_nextSlaveArmState[i]
 	 OR SlaveArmState_ScopeReady = m_nextSlaveArmState[i] OR SlaveArmState_EndoScope = m_nextSlaveArmState[i]) THEN
 		m_nextSlaveArmState[i]:=SlaveArmState_Standby;
@@ -613,9 +615,6 @@ END_FOR]]></ST>
       <LineId Id="130" Count="2" />
       <LineId Id="128" Count="1" />
       <LineId Id="140" Count="0" />
-      <LineId Id="139" Count="0" />
-      <LineId Id="141" Count="4" />
-      <LineId Id="79" Count="0" />
       <LineId Id="19" Count="1" />
       <LineId Id="153" Count="0" />
       <LineId Id="152" Count="0" />
@@ -697,14 +696,21 @@ END_FOR]]></ST>
       <LineId Id="153" Count="0" />
       <LineId Id="149" Count="1" />
       <LineId Id="146" Count="0" />
+      <LineId Id="603" Count="1" />
+      <LineId Id="602" Count="0" />
       <LineId Id="240" Count="3" />
-      <LineId Id="299" Count="1" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="591" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="589" Count="1" />
+      <LineId Id="592" Count="0" />
       <LineId Id="383" Count="0" />
       <LineId Id="487" Count="0" />
       <LineId Id="385" Count="0" />
       <LineId Id="301" Count="0" />
-      <LineId Id="244" Count="0" />
-      <LineId Id="246" Count="5" />
+      <LineId Id="248" Count="3" />
       <LineId Id="359" Count="0" />
       <LineId Id="252" Count="1" />
       <LineId Id="257" Count="0" />
@@ -784,7 +790,9 @@ END_FOR]]></ST>
       <LineId Id="522" Count="0" />
       <LineId Id="165" Count="0" />
       <LineId Id="18" Count="0" />
-      <LineId Id="472" Count="2" />
+      <LineId Id="472" Count="1" />
+      <LineId Id="586" Count="2" />
+      <LineId Id="474" Count="0" />
       <LineId Id="477" Count="1" />
       <LineId Id="475" Count="1" />
       <LineId Id="448" Count="0" />
