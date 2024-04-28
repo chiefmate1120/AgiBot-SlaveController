@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMountInstru" Id="{db93de24-03af-45f5-8edb-e02a943fe1f8}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Instrument
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountInstru EXTENDS FB_SlaveArmCtrlBase
@@ -219,9 +219,7 @@ CASE m_instruMountStatus OF
 		END_IF
 	
 	1:// calculation deviates from the instrument zero position
-		m_instruZeroDeviation[4]:=m_instruJnt4HalfRangeAng;
-		
-		FOR i:=1 TO 3 DO
+		FOR i:=1 TO 4 DO
 			m_instruZeroDeviation[i] :=  i_slaveArm.linkSingle[i+3] - i_slaveArm.instrument.onChipData.m_InstruPos[i];
 		END_FOR
 		m_instruMountStatus :=2;
@@ -235,6 +233,14 @@ CASE m_instruMountStatus OF
 				m_instruZeroDeviation[i] := m_instruZeroDeviation[i] + 2*PI;
 			END_IF
 		END_FOR
+		
+		//joint4
+		IF m_instruZeroDeviation[4]>0 AND m_instruZeroDeviation[4] < pi THEN
+			m_instruZeroDeviation[4] := m_instruZeroDeviation[4] - 2*pi;
+		ELSIF m_instruZeroDeviation[4]<0 AND m_instruZeroDeviation[4] > -pi THEN
+			m_instruZeroDeviation[4] := m_instruZeroDeviation[4] + 2*pi;
+		END_IF
+		
 		// set target joint position
 		FOR i:=1 TO 4 DO
 			m_targetMountPos[i+3]:=curJntPos[i+3] - m_instruZeroDeviation[i];
@@ -289,7 +295,13 @@ END_FOR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
-      <LineId Id="96" Count="70" />
+      <LineId Id="96" Count="28" />
+      <LineId Id="127" Count="13" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="177" Count="4" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="141" Count="25" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

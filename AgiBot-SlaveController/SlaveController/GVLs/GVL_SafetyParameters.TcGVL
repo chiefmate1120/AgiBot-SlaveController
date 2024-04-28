@@ -22,7 +22,7 @@ VAR_GLOBAL CONSTANT
 	
 	// setup joint safety error
 	g_setupMaxJntCtrlErr :Vec5d := [g_largeNum, g_largeNum, 0.005,  2(5.0*g_deg2Rad)];
-	g_setupMaxJntEncErr :Vec8d :=  [g_largeNum, g_largeNum, 0.005,  2(5.0*g_deg2Rad)];
+	g_setupMaxJntEncErr :Vec5d :=  [g_largeNum, g_largeNum, 0.005,  2(5.0*g_deg2Rad)];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

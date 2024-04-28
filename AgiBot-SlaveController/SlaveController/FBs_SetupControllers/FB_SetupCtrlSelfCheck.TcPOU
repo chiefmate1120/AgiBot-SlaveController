@@ -44,7 +44,6 @@ IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
 END_IF
 
 // traj plan
-// NOTE: current only joint3 is moved back to instrument mount position, other joints stay still
 calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
 
 // check if to transit to next segment
@@ -103,7 +102,7 @@ m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfChe
 // other segments
 IF m_selfCheckMotionNum>= 2 THEN
 	FOR i:=2 TO m_selfCheckMotionNum DO 
-		FOR j:=1 TO 7 DO 
+		FOR j:=3 TO 5 DO 
 			startJntPos[j]:=m_selfCheckPosture[i-1,j];
 			endJntPos[j]:=m_selfCheckPosture[i,j];
 		END_FOR
@@ -123,7 +122,6 @@ END_IF;
       <LineId Id="39" Count="1" />
       <LineId Id="42" Count="0" />
       <LineId Id="33" Count="0" />
-      <LineId Id="115" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="112" Count="0" />
       <LineId Id="27" Count="0" />

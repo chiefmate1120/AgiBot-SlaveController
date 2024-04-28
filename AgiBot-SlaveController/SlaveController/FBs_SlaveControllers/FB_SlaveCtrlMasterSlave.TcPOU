@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -8,6 +8,9 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// gripper match angle threshold
+	m_gripperMatchAngThres :LREAL := 2*g_deg2Rad;
+	
 	// control error thershold for safety check
 	m_maxPosTrackErr :LREAL := 0.05;
 	m_maxOriTrackErr :LREAL :=g_deg2Rad * 90;
@@ -446,7 +449,9 @@ IF m_gripperCtrlFlag THEN
 	m_slaveCmdGripForceLevel := matchedSlaveGripForce;
 	RETURN;
 ELSE
-	m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
+	//m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
+	m_gripperCtrlFlag := ABS(matchedSlaveGripAngle-i_slaveArm.curGripAngle)<m_gripperMatchAngThres OR 
+		(matchedSlaveGripAngle<=i_SlaveArm.instrument.kinematicParameters.m_minGripAngle and i_slaveArm.curGripAngle<=i_SlaveArm.instrument.kinematicParameters.m_minGripAngle);
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -699,6 +704,7 @@ END_VAR
       <LineId Id="5" Count="1" />
       <LineId Id="27" Count="1" />
       <LineId Id="13" Count="1" />
+      <LineId Id="41" Count="1" />
       <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.init">

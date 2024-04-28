@@ -34,7 +34,8 @@ VAR
 	
 	// joint single link position when instrument at zero posture
 	// TODO: move parameters below to instrument chip
-	m_zeroPosNeedleGripper :Vec5d :=[-4.5, -4.5, 2.0, -0.8 , 0];
+	m_zeroPosNeedleDriver :Vec5d :=[-4.15, -4.8, 2.18, -0.58 , 0];
+	m_zeroPosFenestraedForceps :Vec5d :=[-4.18, -4.68, 2.55, -0.54 , 0];
 	
 	// variables used to read instrument information
 	m_Step:INT;
@@ -61,6 +62,33 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="property" Id="{9d49480e-8469-42fe-9794-09bbda49b553}" />
+    <Method Name="checkInstruType" Id="{97020e4c-24ed-4bb8-b0ec-bca5a733a6da}">
+      <Declaration><![CDATA[METHOD checkInstruType : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[checkInstruType := TRUE;
+
+IF m_onChipData.m_InstruID = 20 THEN
+	m_onChipData.m_Instrutype :=  InstruType_endoscope;
+	
+ELSIF m_onChipData.m_InstruID = 14 THEN
+	m_onChipData.m_Instrutype := InstruType_FenestratedForceps;
+ELSIF m_onChipData.m_InstruID = 8 THEN
+	m_onChipData.m_Instrutype :=  InstruType_NeedleDriver;
+ELSE
+	checkInstruType := FALSE;
+END_IF
+
+//NOTE: zero posture data is defined as single link position, need to update to chip later
+IF m_onChipData.m_Instrutype = InstruType_NeedleDriver THEN
+	m_onChipData.m_InstruPos := m_zeroPosNeedleDriver;
+ELSIF m_onChipData.m_Instrutype = InstruType_FenestratedForceps THEN
+	m_onChipData.m_InstruPos := m_zeroPosFenestraedForceps;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="endoscope30Deg" Id="{4bce8a98-2eb7-4bb1-9eae-0e7d18b990ab}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY endoscope30Deg : bool]]></Declaration>
       <Get Name="Get" Id="{abceb35e-0bca-4bf2-b494-bd59bc26f3c4}">
@@ -368,7 +396,7 @@ o_jntPos[3] := i_DHJntPos[3];
 IF m_onChipData.m_Instrutype = InstruType_endoscope THEN
 	o_jntPos[8] := -i_DHJntPos[4]/m_endoscopeRotateReduction + m_jntPosOffset[8];
 	o_jntPos[4]:=0;
-	o_jntPos[6]:=0;
+	o_jntPos[5]:=0;
 	o_jntPos[6]:=0;
 	o_jntPos[7]:=0;
 	RETURN;
@@ -643,12 +671,7 @@ CASE m_Step OF
 				m_onChipData.m_ErrorID:=2;
 			END_IF*)
 		ELSE
-			IF m_onChipData.m_InstruID = 20 OR m_onChipData.m_InstruID = 9665 THEN
-				m_onChipData.m_Instrutype :=  InstruType_endoscope;
-			ELSE
-				m_onChipData.m_Instrutype :=  InstruType_NeedleGripper;
-			END_IF
-			m_onChipData.m_InstruReadSucceed:=TRUE;
+			m_onChipData.m_InstruReadSucceed:=checkInstruType();
 			m_Step:=130;
 		END_IF
 	
@@ -663,13 +686,8 @@ CASE m_Step OF
 	
 END_CASE
 
-//NOTE: zero posture data is defined as single link position, need to update to chip later
-IF m_onChipData.m_Instrutype = InstruType_NeedleGripper THEN
-	m_onChipData.m_InstruPos := m_zeroPosNeedleGripper;
-END_IF
-
 // update instrument kinematic parameters based on readed info
-IF InstruType_NeedleGripper =  m_onChipData.m_Instrutype THEN
+IF InstruType_NeedleDriver =  m_onChipData.m_Instrutype THEN
 	m_kinematicParameters.m_fingerLength := 0.01;
 END_IF
 ]]></ST>
@@ -698,6 +716,18 @@ END_FOR
     </Method>
     <LineIds Name="FB_Instrument">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.checkInstruType">
+      <LineId Id="10" Count="1" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="23" Count="3" />
+      <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.endoscope30Deg.Get">
       <LineId Id="2" Count="0" />
@@ -904,10 +934,7 @@ END_FOR
       <LineId Id="184" Count="2" />
       <LineId Id="183" Count="0" />
       <LineId Id="189" Count="0" />
-      <LineId Id="371" Count="1" />
-      <LineId Id="374" Count="1" />
       <LineId Id="373" Count="0" />
-      <LineId Id="195" Count="0" />
       <LineId Id="282" Count="0" />
       <LineId Id="175" Count="0" />
       <LineId Id="173" Count="0" />
@@ -918,8 +945,6 @@ END_FOR
       <LineId Id="308" Count="0" />
       <LineId Id="276" Count="0" />
       <LineId Id="28" Count="0" />
-      <LineId Id="362" Count="3" />
-      <LineId Id="331" Count="0" />
       <LineId Id="366" Count="0" />
       <LineId Id="330" Count="0" />
       <LineId Id="333" Count="1" />

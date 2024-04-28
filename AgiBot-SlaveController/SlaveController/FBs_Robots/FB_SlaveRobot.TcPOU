@@ -363,6 +363,9 @@ FOR i:=1 TO g_sArmNum DO
 				ELSE
 					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
 				END_IF
+			// to adjust
+			ELSIF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 			
 		//mount instrument
