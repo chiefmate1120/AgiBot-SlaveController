@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -70,9 +70,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[checkInstruType := TRUE;
 
-IF m_onChipData.m_InstruID = 20 THEN
+IF m_onChipData.m_InstruID = 20 OR m_onChipData.m_InstruID = 9665 THEN// TODO: remove 9665
 	m_onChipData.m_Instrutype :=  InstruType_endoscope;
-	
 ELSIF m_onChipData.m_InstruID = 14 THEN
 	m_onChipData.m_Instrutype := InstruType_FenestratedForceps;
 ELSIF m_onChipData.m_InstruID = 8 THEN
@@ -720,7 +719,6 @@ END_FOR
     <LineIds Name="FB_Instrument.checkInstruType">
       <LineId Id="10" Count="1" />
       <LineId Id="6" Count="1" />
-      <LineId Id="15" Count="0" />
       <LineId Id="13" Count="1" />
       <LineId Id="8" Count="1" />
       <LineId Id="16" Count="1" />
