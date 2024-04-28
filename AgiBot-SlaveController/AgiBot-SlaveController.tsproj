@@ -1250,8 +1250,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name IecBaseType="true">ARRAY [1..4] OF ST_InstruStatus</Name>
-			<Comment><![CDATA[ instrument info]]></Comment>
+			<Name GUID="{8DAC22E6-A2C5-4BF6-3510-77E847C841A8}" AutoDeleteType="true">ARRAY [1..4] OF ST_InstruStatus</Name>
 			<BitSize>512</BitSize>
 			<BaseType GUID="{2004D92F-F956-A22D-5008-84C28D13AEC5}">ST_InstruStatus</BaseType>
 			<ArrayInfo>
@@ -1366,7 +1365,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{C8258941-663D-EF6F-0B4C-691B961BFF1A}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{B881C20F-DBFA-40CB-D8AA-F2BCE3DFDEA5}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1763,7 +1762,7 @@
 						<Var>
 							<Name>RobotDynamics.m_instruInfo</Name>
 							<Comment><![CDATA[ instrument info]]></Comment>
-							<Type GUID="{B939FAFE-2E2B-C936-9FA7-169F905AF20A}">ARRAY [1..4] OF ST_InstruStatus</Type>
+							<Type GUID="{8DAC22E6-A2C5-4BF6-3510-77E847C841A8}">ARRAY [1..4] OF ST_InstruStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="1" AreaNo="17">
@@ -2126,15 +2125,6 @@
 						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
 							<OwnerB Name="TIID^Cart^Drive 4 (iPOS8015 BZ-CAT)">
 								<Link VarA="CartControl.m_slaveCart.m_testIO" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Transmit PDO 1 mapping parameters^Statusword" RestoreInfo="ANotFound"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2024-04-28T20:34:59">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
-							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{82196C8B-4280-55AC-B711-B291CA173166}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="4761"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{82196C8B-4280-55AC-B711-B291CA173166}" VarB="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="4761"/>
-								<Link VarA="SlaveArmControl.m_slaveStatus^m_instruStauts" TypeA="ARRAY [1..4] OF ST_InstruStatus" InOutA="1" ParentTypeA="ST_SlaveStatus" GuidA="{31B92794-3B8F-C258-C78D-A7B69AD3605A}" VarB="TaskDynamic Inputs^RobotDynamics.m_instruInfo" RestoreInfo="TypeChanged" IdA="4767"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>

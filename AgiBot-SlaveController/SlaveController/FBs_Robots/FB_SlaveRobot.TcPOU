@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -344,8 +344,11 @@ FOR i:=1 TO g_sArmNum DO
 		
 		//panel ready
 		SlaveArmState_PanelReady:
+			// to adjust
+			IF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to stand by
-			IF NOT(m_slaveArms[i].panelOn) THEN
+			ELSIF NOT(m_slaveArms[i].panelOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			ELSIF m_slaveArms[i].instruOn  THEN
 				IF m_instrumentMountedFlag[i] THEN
@@ -360,9 +363,6 @@ FOR i:=1 TO g_sArmNum DO
 				ELSE
 					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
 				END_IF
-			// to adjust
-			ELSIF (m_slaveArms[i].adjustOn) THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 			
 		//mount instrument
@@ -696,6 +696,8 @@ END_FOR]]></ST>
       <LineId Id="153" Count="0" />
       <LineId Id="149" Count="1" />
       <LineId Id="146" Count="0" />
+      <LineId Id="603" Count="1" />
+      <LineId Id="602" Count="0" />
       <LineId Id="240" Count="3" />
       <LineId Id="299" Count="0" />
       <LineId Id="593" Count="0" />
@@ -708,8 +710,7 @@ END_FOR]]></ST>
       <LineId Id="487" Count="0" />
       <LineId Id="385" Count="0" />
       <LineId Id="301" Count="0" />
-      <LineId Id="244" Count="0" />
-      <LineId Id="246" Count="5" />
+      <LineId Id="251" Count="0" />
       <LineId Id="359" Count="0" />
       <LineId Id="252" Count="1" />
       <LineId Id="257" Count="0" />
@@ -801,6 +802,8 @@ END_FOR]]></ST>
       <LineId Id="441" Count="0" />
       <LineId Id="326" Count="3" />
       <LineId Id="16" Count="0" />
+      <LineId Id="286" Count="1" />
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

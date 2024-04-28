@@ -70,9 +70,8 @@ END_VAR
       <Implementation>
         <ST><![CDATA[checkInstruType := TRUE;
 
-IF m_onChipData.m_InstruID = 20 THEN
+IF m_onChipData.m_InstruID = 20 OR m_onChipData.m_InstruID = 9665 THEN// TODO: remove 9665
 	m_onChipData.m_Instrutype :=  InstruType_endoscope;
-	
 ELSIF m_onChipData.m_InstruID = 14 THEN
 	m_onChipData.m_Instrutype := InstruType_FenestratedForceps;
 ELSIF m_onChipData.m_InstruID = 8 THEN
@@ -656,10 +655,11 @@ CASE m_Step OF
 		
 		
 	120://结果诊断
+	// TODO : endoscope can not be readed
 		IF m_onChipData.m_InstruID<1 THEN
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=1;
-		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
+(*		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
 			IF m_HaveRecord THEN
 				m_onChipData.m_Instrutype:=2;
@@ -668,7 +668,7 @@ CASE m_Step OF
 			ELSE
 				m_onChipData.m_Error:=TRUE;
 				m_onChipData.m_ErrorID:=2;
-			END_IF
+			END_IF*)
 		ELSE
 			m_onChipData.m_InstruReadSucceed:=checkInstruType();
 			m_Step:=130;
@@ -719,7 +719,6 @@ END_FOR
     <LineIds Name="FB_Instrument.checkInstruType">
       <LineId Id="10" Count="1" />
       <LineId Id="6" Count="1" />
-      <LineId Id="15" Count="0" />
       <LineId Id="13" Count="1" />
       <LineId Id="8" Count="1" />
       <LineId Id="16" Count="1" />
@@ -922,6 +921,7 @@ END_FOR
       <LineId Id="273" Count="1" />
       <LineId Id="153" Count="0" />
       <LineId Id="170" Count="0" />
+      <LineId Id="387" Count="0" />
       <LineId Id="172" Count="0" />
       <LineId Id="174" Count="0" />
       <LineId Id="176" Count="1" />

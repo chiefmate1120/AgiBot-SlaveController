@@ -59,7 +59,12 @@ END_VAR
 VAR 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND InstruType_endoscope = i_slaveArm.instrument.onChipData.m_Instrutype THEN
+        <ST><![CDATA[// retur directly if instrument/endoscope is not readed
+IF i_slaveArm.instrument.onChipData.m_Error THEN
+	return;
+END_IF
+
+IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND InstruType_endoscope = i_slaveArm.instrument.onChipData.m_Instrutype THEN
 	mountEndoscope(i_slaveArm);
 ELSE
 	mountInstrument(i_slaveArm);
@@ -269,6 +274,9 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntPos">
+      <LineId Id="491" Count="0" />
+      <LineId Id="493" Count="2" />
+      <LineId Id="492" Count="0" />
       <LineId Id="150" Count="0" />
       <LineId Id="477" Count="0" />
       <LineId Id="479" Count="1" />

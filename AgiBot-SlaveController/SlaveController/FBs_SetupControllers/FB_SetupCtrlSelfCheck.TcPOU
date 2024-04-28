@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlSelfCheck" Id="{de863df1-4a4d-4fa9-a2ab-b3b6dd7ec2a1}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Self-check
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlSelfCheck EXTENDS FB_SetupArmCtrlBase
