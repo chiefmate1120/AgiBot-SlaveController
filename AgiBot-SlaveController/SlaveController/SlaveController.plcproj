@@ -319,6 +319,9 @@
     <Compile Include="FBs_Robots\FB_Instrument.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Robots\FB_JointBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Robots\FB_SlaveCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -478,9 +481,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\cot.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Robots\FB_JointBase.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_SlaveArm.TcPOU">

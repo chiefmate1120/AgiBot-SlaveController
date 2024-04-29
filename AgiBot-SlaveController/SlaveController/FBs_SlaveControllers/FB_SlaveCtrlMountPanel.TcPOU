@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMountPanel" Id="{823d9da4-dfa7-45fa-b541-870812882ed0}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Panel
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountPanel EXTENDS FB_SlaveArmCtrlBase
@@ -44,7 +44,7 @@ VAR
 	i :INT;
 	curJntPos :Vec8d;
 	jntPosErr :Vec8d;
-	cycleNum :INT;
+	cycleNum :LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
@@ -74,12 +74,8 @@ CASE m_mountStatus OF
 	// determine zero position
 	1:
 		FOR i:=1 TO 5 DO
-			cycleNum := LREAL_TO_INT(curJntPos[i+3]/g_2pi);
-			IF curJntPos[i+3]> cycleNum* g_2Pi THEN
-				m_targetMountPos[i]:=cycleNum* g_2Pi;
-			ELSE
-				m_targetMountPos[i]:=(cycleNum-1)* g_2Pi;
-			END_IF	
+			cycleNum := FLOOR(curJntPos[i+3]/g_2pi);
+			m_targetMountPos[i]:=cycleNum* g_2Pi;
 		END_FOR
 		m_mountStatus :=2;
 	
@@ -152,9 +148,8 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="170" Count="1" />
       <LineId Id="158" Count="0" />
       <LineId Id="172" Count="7" />
-      <LineId Id="234" Count="3" />
-      <LineId Id="239" Count="0" />
-      <LineId Id="238" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="236" Count="0" />
       <LineId Id="181" Count="4" />
       <LineId Id="246" Count="0" />
       <LineId Id="240" Count="1" />

@@ -3,10 +3,13 @@
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT
+	// safety error counts threshold to trigger fault
+	g_faultTriggerCounts :INT :=2;
 	
 	g_jntPosLimitBuffer : LREAL :=5.0*g_deg2Rad;
 	g_jntVelLimitBuffer :LREAL :=15.0*g_deg2Rad;
 	
+	// slave arm cartesion control safety error 
 	g_maxCartPosErr :LREAL := 0.01;
 	g_maxCartOriErr :LREAL := 90.0*g_deg2Rad; //TODO：need to be refined
 	

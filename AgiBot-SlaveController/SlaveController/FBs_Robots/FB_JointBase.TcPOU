@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_JointBase" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR_INPUT
@@ -55,7 +55,7 @@ VAR
 	// joint data
 	m_curMotorPos :LREAL;
 	m_curLinkPos :LREAL;
-	m_curLinkSingle :LREAL;
+	m_curLinkSingle :LREAL;//[0-360]
 	m_curJntPos	:LREAL;
 	m_curJntVel :LREAL;
 	m_rawJntVel :LREAL;
@@ -83,6 +83,7 @@ VAR
 	// SDO writer
 	m_opModeSDOWrite:FB_EcCoESdoWrite;
 	m_MotorCurrentSDOWrite:FB_EcCoESdoWrite;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -321,6 +322,22 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="singleCyclePos" Id="{7820a7e3-0d39-4e4d-b949-8bf17eca7df5}">
+      <Declaration><![CDATA[METHOD singleCyclePos : LREal
+VAR_INPUT
+END_VAR
+VAR
+	cycles :lreal;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[cycles := ABS(FLOOR( m_curJntPos/g_2pi));
+IF m_curJntPos<0 THEN
+	singleCyclePos := m_curJntPos+cycles*g_2pi;
+ELSE
+	singleCyclePos := m_curJntPos-cycles*g_2pi;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="updateCmds" Id="{a4f5fe94-40e9-4f77-a4d8-a2af848a52e6}">
       <Declaration><![CDATA[METHOD PUBLIC updateCmds : BOOL
 VAR_INPUT
@@ -358,7 +375,7 @@ END_VAR
 m_curLinkPos:= linkEnc2Pos();
 m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
-m_curLinkSingle := m_curLinkPos - 2*PI* m_linkEncCycles;
+m_curLinkSingle := singleCyclePos();
 
 // compute joint velocity
 m_curVelCalCycles := m_curVelCalCycles+1;
@@ -460,6 +477,11 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
     <LineIds Name="FB_JointBase.rawCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_JointBase.singleCyclePos">
+      <LineId Id="8" Count="2" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
     <LineIds Name="FB_JointBase.updateCmds">
       <LineId Id="31" Count="0" />
       <LineId Id="5" Count="0" />
@@ -478,7 +500,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="18" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="16" Count="1" />
-      <LineId Id="48" Count="0" />
+      <LineId Id="52" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="33" Count="1" />
