@@ -34,8 +34,8 @@ VAR
 	
 	// joint single link position when instrument at zero posture
 	// TODO: move parameters below to instrument chip
-	m_zeroPosNeedleDriver :Vec5d :=[-4.15, -4.8, 2.18, -0.58 , 0];
-	m_zeroPosFenestraedForceps :Vec5d :=[-4.18, -4.68, 2.55, -0.54 , 0];
+	m_zeroPosNeedleDriver :Vec5d :=[2.04, 1.404, 2.168, 5.64, 0];
+	m_zeroPosFenestraedForceps :Vec5d :=[2.103, 1.603, 2.55, 5.74, 0];
 	
 	// variables used to read instrument information
 	m_Step:INT;

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupGravity" Id="{5452bfb6-8061-49fa-846a-f3728f3e7824}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupGravity
 VAR_INPUT
@@ -104,8 +104,8 @@ q3 := i_slaveJntPos[3];
 getRegMat(setupPos, q1, q2, q3, o_regMat=>regMat);
 
 // determine current arm parameters
-m_armParams[1] := GVLs_SetupArmDynamics.g_setupGravityParam[m_armIdx,1];
-m_armParams[2] := GVLs_SetupArmDynamics.g_setupGravityParam[m_armIdx,2];
+m_armParams[1] := GVLs_SetupArmDynamics.g_setupJnt5GravityParam[m_armIdx,1];
+m_armParams[2] := GVLs_SetupArmDynamics.g_setupJnt5GravityParam[m_armIdx,2];
 IF FALSE = i_instruStatus.m_ready THEN
 	// arm only
 	FOR i:=1 TO 5 DO
@@ -142,10 +142,14 @@ o_jnt3Gravity:= setupJnt3Gravity(i_setupJntPos[3]);
 VAR_INPUT
 	i_jnt3Pos :LREAL;
 END_VAR
+VAR
+	q:LREAL;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//TDDO calculate gravity of setup joint3 by polynomial fitting
-setupJnt3Gravity:=0;]]></ST>
+        <ST><![CDATA[q := LIMIT(g_setupJnt3GravityPosRange[m_armIdx,1], i_jnt3Pos, g_setupJnt3GravityPosRange[m_armIdx,2]);
+setupJnt3Gravity:=g_setupJnt3GravityParams[m_armIdx,1]*EXPT(q,3)+g_setupJnt3GravityParams[m_armIdx,2]*EXPT(q,2)+
+				g_setupJnt3GravityParams[m_armIdx,3]*q+g_setupJnt3GravityParams[m_armIdx,4];]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupGravity">
@@ -184,6 +188,7 @@ setupJnt3Gravity:=0;]]></ST>
     </LineIds>
     <LineIds Name="FB_SetupGravity.setupJnt3Gravity">
       <LineId Id="5" Count="1" />
+      <LineId Id="14" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

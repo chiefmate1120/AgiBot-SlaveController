@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -12,7 +12,8 @@ VAR
 	m_frictionScale :LREAL :=0.5;
 	
 	// velocity threshold for friction compensation 
-	m_frictionCompVelThres :LREAL:=1.0*g_deg2Rad;
+	m_jnt3FrictionCompVelThres :LREAL:=0.001;
+	m_jnt5FrictionCompVelThres :LREAL:=1.0*g_deg2Rad;
 
 END_VAR
 ]]></Declaration>
@@ -45,7 +46,10 @@ END_VAR]]></Declaration>
 m_cmdJntTrq := g_zeroVec5d;
 
 // add friction compensation
-IF ABS(i_setupArm.curJntVel[5])> m_frictionCompVelThres THEN
+IF ABS(i_setupArm.curJntVel[3])> m_jnt3FrictionCompVelThres THEN
+	m_cmdJntTrq[3]:= m_frictionScale * sign(i_setupArm.curJntVel[3])*GVLs_SetupArmDynamics.g_setupJntFriction[i_setupArm.armIdx, 3];
+END_IF
+IF ABS(i_setupArm.curJntVel[5])> m_jnt5FrictionCompVelThres THEN
 	m_cmdJntTrq[5]:= m_frictionScale * sign(i_setupArm.curJntVel[5])*GVLs_SetupArmDynamics.g_setupJntFriction[i_setupArm.armIdx, 5];
 END_IF]]></ST>
       </Implementation>
@@ -76,7 +80,10 @@ m_jntOPMode:=g_setupAllTrqMode;
     <LineIds Name="FB_SetupCtrlManualAdjust.calcCmdJntTrq">
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
-      <LineId Id="41" Count="3" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="43" Count="1" />
       <LineId Id="36" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.init">
