@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -129,77 +129,44 @@
 			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}" AutoDeleteType="true">ST_MotorInputs</Name>
-			<BitSize>160</BitSize>
-			<SubItem>
-				<Name>m_driverError</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
-				<BitSize>32</BitSize>
-				<BitOffs>0</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_statusWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<BitSize>16</BitSize>
-				<BitOffs>32</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_motorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_linkEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>96</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_current</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current from IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>128</BitOffs>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{539BF7E6-EFF8-935F-E173-DAEE1A4D7F19}" AutoDeleteType="true">Vec4i</Name>
-			<BitSize>64</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>4</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
-			<Name GUID="{9C6DCC8A-BEB9-0143-DD04-6B173CD5B189}" AutoDeleteType="true">ST_SlaveUIData</Name>
+			<Name GUID="{5972916C-3946-A182-2A8B-A33EC65A1661}" AutoDeleteType="true">ST_SlaveUIData</Name>
 			<Comment><![CDATA[ Output from UI controller
  Input to slave arm control task and cart control task  ]]></Comment>
-			<BitSize>64</BitSize>
+			<BitSize>40</BitSize>
+			<SubItem>
+				<Name>m_faultClearFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
+			</SubItem>
 			<SubItem>
 				<Name>m_slaveArmDisableFlag</Name>
-				<Type GUID="{539BF7E6-EFF8-935F-E173-DAEE1A4D7F19}">Vec4i</Type>
-				<BitSize>64</BitSize>
-				<BitOffs>0</BitOffs>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>32</BitSize>
+				<BitOffs>8</BitOffs>
 				<Default>
 					<SubItem>
 						<Name>[1]</Name>
-						<Value>0</Value>
+						<Bool>false</Bool>
 					</SubItem>
 					<SubItem>
 						<Name>[2]</Name>
-						<Value>0</Value>
+						<Bool>false</Bool>
 					</SubItem>
 					<SubItem>
 						<Name>[3]</Name>
-						<Value>0</Value>
+						<Bool>false</Bool>
 					</SubItem>
 					<SubItem>
 						<Name>[4]</Name>
-						<Value>0</Value>
+						<Bool>false</Bool>
 					</SubItem>
 				</Default>
 			</SubItem>
@@ -291,7 +258,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{BEEC3632-6B40-1B7A-3064-8FA9DC91093E}" AutoDeleteType="true">E_SetupArmState</Name>
+			<Name GUID="{A2BF5F0D-F9B4-A36D-F72F-8DC8BCBBC14E}" AutoDeleteType="true">E_SetupArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -335,8 +302,12 @@
 				<Enum>10</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SetupArmState_Disable]]></Text>
+				<Enum>11</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SetupArmState_totalNum]]></Text>
-				<Enum>10</Enum>
+				<Enum>11</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -435,11 +406,11 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<Name GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}" AutoDeleteType="true">ST_SetupStatus</Name>
 			<BitSize>3904</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{BEEC3632-6B40-1B7A-3064-8FA9DC91093E}">E_SetupArmState</Type>
+				<Type GUID="{A2BF5F0D-F9B4-A36D-F72F-8DC8BCBBC14E}">E_SetupArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -513,6 +484,43 @@
 				<Comment><![CDATA[ gravity]]></Comment>
 				<BitSize>768</BitSize>
 				<BitOffs>2304</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}" AutoDeleteType="true">ST_MotorInputs</Name>
+			<BitSize>160</BitSize>
+			<SubItem>
+				<Name>m_driverError</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_statusWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_motorEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor/relative encoder from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_linkEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ link/absolute encoder form IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_current</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current from IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>128</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -627,51 +635,7 @@
 			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
-			<BitSize>96</BitSize>
-			<SubItem>
-				<Name>m_controlWord</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
-				<Comment><![CDATA[ driver control word]]></Comment>
-				<BitSize>16</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<Value>6</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_opMode</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
-				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
-				<BitSize>8</BitSize>
-				<BitOffs>16</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdMotorEncoder</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ target motor encoder]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>32</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdCurrent</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
-				<Comment><![CDATA[ motor current to IO]]></Comment>
-				<BitSize>32</BitSize>
-				<BitOffs>64</BitOffs>
-				<Default>
-					<Value>0</Value>
-				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
-			<Name GUID="{73EFBB13-2EC6-9035-5944-50D40162B87B}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{08DC8AE5-5FCF-3A43-A9BA-DCC0F91B231A}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -747,8 +711,12 @@
 				<Enum>18</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_Disable]]></Text>
+				<Enum>19</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_totalNum]]></Text>
-				<Enum>18</Enum>
+				<Enum>19</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -864,13 +832,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{5CCD49A3-C15A-C577-5100-492D6547B704}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>12160</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{73EFBB13-2EC6-9035-5944-50D40162B87B}">E_SlaveArmState</Type>
+				<Type GUID="{08DC8AE5-5FCF-3A43-A9BA-DCC0F91B231A}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1116,6 +1084,50 @@
 			</SubItem>
 		</DataType>
 		<DataType>
+			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
+			<BitSize>96</BitSize>
+			<SubItem>
+				<Name>m_controlWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<Comment><![CDATA[ driver control word]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>6</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_opMode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000003}">SINT</Type>
+				<Comment><![CDATA[ motor control mode, 0 for position mode, 1 for torque mode]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>16</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdMotorEncoder</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ target motor encoder]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdCurrent</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[ motor current to IO]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+		</DataType>
+		<DataType>
 			<Name GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}" AutoDeleteType="true">Vec5d</Name>
 			<BitSize>320</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
@@ -1321,6 +1333,49 @@
 				<Elements>2</Elements>
 			</ArrayInfo>
 		</DataType>
+		<DataType>
+			<Name GUID="{F29BB0EB-0FFB-4666-BE4E-F64DE4BE3210}" PersistentType="true">MSCommu_SlaveUIData</Name>
+			<Comment><![CDATA[ Output from UI controller
+ Input to slave arm control task and cart control task  ]]></Comment>
+			<BitSize>40</BitSize>
+			<SubItem>
+				<Name>m_faultClearFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_slaveArmDisableFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<BitSize>32</BitSize>
+				<BitOffs>8</BitOffs>
+				<Default>
+					<SubItem>
+						<Name>[1]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+					<SubItem>
+						<Name>[2]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+					<SubItem>
+						<Name>[3]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+					<SubItem>
+						<Name>[4]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+				</Default>
+			</SubItem>
+		</DataType>
 	</DataTypes>
 	<ImageDatas>
 		<ImageData Id="1000">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
@@ -1365,7 +1420,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{5C772434-B5C0-8012-5BFB-15C911E7C375}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1374,6 +1429,31 @@
 							<Name>SlaveArmControl.m_masterRobotData</Name>
 							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
 							<Type GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}">MSCommu_MasterStatus</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveInputDataPool.m_UIData</Name>
+							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
+							<Type GUID="{5972916C-3946-A182-2A8B-A33EC65A1661}">ST_SlaveUIData</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveInputDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{4E6BEB59-9532-E943-4366-69F44E1C3BB3}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveInputDataPool.m_cartStatus</Name>
+							<Comment><![CDATA[ cart information, import from other task]]></Comment>
+							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
+							<Comment><![CDATA[ setup arms infromation;]]></Comment>
+							<Type GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}">ST_SetupStatus</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
+							<Comment><![CDATA[ slave dynamic data]]></Comment>
+							<Type GUID="{74B5FCA7-5252-49C0-519F-FB3BA531DFC6}">ST_SlaveDynaData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs</Name>
@@ -1575,31 +1655,6 @@
 							<Comment><![CDATA[ trocar and  adjust detect]]></Comment>
 							<Type>UDINT</Type>
 						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveInputDataPool.m_UIData</Name>
-							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
-							<Type GUID="{9C6DCC8A-BEB9-0143-DD04-6B173CD5B189}">ST_SlaveUIData</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveInputDataPool.m_safetyData</Name>
-							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
-							<Type GUID="{4E6BEB59-9532-E943-4366-69F44E1C3BB3}">ST_SafetyData</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveInputDataPool.m_cartStatus</Name>
-							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
-							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}">ST_SetupStatus</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
-							<Comment><![CDATA[ slave dynamic data]]></Comment>
-							<Type GUID="{74B5FCA7-5252-49C0-519F-FB3BA531DFC6}">ST_SlaveDynaData</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
 						<Name>TaskSlaveArmControl Outputs</Name>
@@ -1607,6 +1662,16 @@
 							<Name>SlaveArmControl.m_slaveRobotData</Name>
 							<Comment><![CDATA[ slave robot data, ouput to master controller box]]></Comment>
 							<Type GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}">MSCommu_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
+							<Type GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}">ST_SlaveStatus</Type>
+						</Var>
+						<Var>
+							<Name>SlaveArmControl.m_slaveJointsData</Name>
+							<Comment><![CDATA[ slave robot joint data, output to other tasks]]></Comment>
+							<Type GUID="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorOutputs</Name>
@@ -1735,16 +1800,6 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[8].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveStatus</Name>
-							<Comment><![CDATA[ slave robot status, including arm status and cartesian data]]></Comment>
-							<Type GUID="{5CCD49A3-C15A-C577-5100-492D6547B704}">ST_SlaveStatus</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveJointsData</Name>
-							<Comment><![CDATA[ slave robot joint data]]></Comment>
-							<Type GUID="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}">ST_SlaveJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
@@ -1906,12 +1961,12 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_UIData</Name>
 							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
-							<Type GUID="{9C6DCC8A-BEB9-0143-DD04-6B173CD5B189}">ST_SlaveUIData</Type>
+							<Type GUID="{5972916C-3946-A182-2A8B-A33EC65A1661}">ST_SlaveUIData</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{5CCD49A3-C15A-C577-5100-492D6547B704}">ST_SlaveStatus</Type>
+							<Type GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2018,7 +2073,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}">ST_SetupStatus</Type>
+							<Type GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
@@ -2031,7 +2086,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{5CCD49A3-C15A-C577-5100-492D6547B704}">ST_SlaveStatus</Type>
+							<Type GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -2041,7 +2096,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{79CFD807-8D2A-627E-9105-2A898D0BE41D}">ST_SetupStatus</Type>
+							<Type GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
@@ -2130,7 +2185,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
+							<Id NeedCalleeCall="true">0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2139,7 +2194,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
+							<Id NeedCalleeCall="true">1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2148,7 +2203,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>2</Id>
+							<Id NeedCalleeCall="true">2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2157,7 +2212,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>3</Id>
+							<Id NeedCalleeCall="true">3</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -2166,7 +2221,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>4</Id>
+							<Id NeedCalleeCall="true">4</Id>
 							<Name>TaskCartControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010070</OTCID>

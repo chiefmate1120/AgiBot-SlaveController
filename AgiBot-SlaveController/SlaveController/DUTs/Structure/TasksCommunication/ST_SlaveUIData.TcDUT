@@ -5,7 +5,8 @@
 // Input to slave arm control task and cart control task  
 TYPE ST_SlaveUIData :
 STRUCT
-	m_slaveArmDisableFlag :Vec4i:=[0, 0, 0, 0];
+	m_faultClearFlag:BOOL := FALSE;
+	m_slaveArmDisableFlag :ARRAY[1..4] OF BOOL:=[4(FALSE)];
 END_STRUCT
 END_TYPE
 ]]></Declaration>

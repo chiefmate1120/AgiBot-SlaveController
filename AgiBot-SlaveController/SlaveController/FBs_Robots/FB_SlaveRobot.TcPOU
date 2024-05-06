@@ -57,6 +57,7 @@ VAR
 	m_armTest :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlTest;
 	m_instruRetract :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruRetract;
 	m_instruInvasion :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruInvasion;
+	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDisable;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -190,6 +191,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_Test] := m_armTest[i];
 	m_armCtrlFactory[i,SlaveArmState_InstruRetract] := m_instruRetract[i];
 	m_armCtrlFactory[i,SlaveArmState_InstruInvasion] := m_instruInvasion[i];
+	m_armCtrlFactory[i,SlaveArmState_Disable] := m_armDisable[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -519,7 +521,12 @@ FOR i:=1 TO g_sArmNum DO
 					m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
 				END_IF
 			END_IF
-			
+		
+		// arm disable
+		SlaveArmState_Disable:
+			IF NOT(i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
+				m_nextSlaveArmState[i] := SlaveArmState_Standby;
+			END_IF
 	END_CASE
 	
 	// to standby if setup arm is in Error
@@ -537,8 +544,11 @@ FOR i:=1 TO g_sArmNum DO
 		m_nextSlaveArmState[i] := SlaveArmState_Cart;
 	END_IF
 	
+	// arm disable
+	IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+		m_nextSlaveArmState[i] := SlaveArmState_Disable;
 	// error check
-	IF TRUE = i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN
+	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN
 		m_nextSlaveArmState[i]:=SlaveArmState_Error;
 	END_IF
 END_FOR]]></ST>
@@ -598,6 +608,7 @@ END_FOR]]></ST>
       <LineId Id="117" Count="0" />
       <LineId Id="132" Count="0" />
       <LineId Id="139" Count="1" />
+      <LineId Id="147" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -791,6 +802,7 @@ END_FOR]]></ST>
       <LineId Id="165" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="472" Count="1" />
+      <LineId Id="615" Count="4" />
       <LineId Id="586" Count="2" />
       <LineId Id="474" Count="0" />
       <LineId Id="477" Count="1" />
@@ -800,7 +812,9 @@ END_FOR]]></ST>
       <LineId Id="440" Count="0" />
       <LineId Id="442" Count="1" />
       <LineId Id="441" Count="0" />
-      <LineId Id="326" Count="3" />
+      <LineId Id="326" Count="2" />
+      <LineId Id="612" Count="2" />
+      <LineId Id="329" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="286" Count="1" />
       <LineId Id="2" Count="0" />

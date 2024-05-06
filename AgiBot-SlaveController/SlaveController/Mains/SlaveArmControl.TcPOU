@@ -5,9 +5,18 @@
 VAR
 	// master robot data, input from master controller box
 	m_masterRobotData AT %I* : MSCommu_MasterStatus;
+	
+	// all data from other tasks and controller 
+	m_slaveInputDataPool : ST_SlaveInputDataPool;
 		
 	// slave robot data, ouput to master controller box
 	m_slaveRobotData AT %Q* :MSCommu_slaveStatus;
+	
+	// slave robot status, including arm status and cartesian data, output to other tasks
+	m_slaveStatus AT%Q* :ST_slaveStatus;
+	
+	// slave robot joint data, output to other tasks
+	m_slaveJointsData AT %Q* :ST_slaveJointData;
 	
 	// flag to init robot
 	m_robotInit :BOOL :=FALSE;
@@ -17,15 +26,6 @@ VAR
 	
 	// slave robot
 	m_slaveRobot:FB_SlaveRobot;
-
-	// slave robot status, including arm status and cartesian data
-	m_slaveStatus AT%Q* :ST_slaveStatus;
-	
-	// slave robot joint data
-	m_slaveJointsData AT %Q* :ST_slaveJointData;
-	
-	// all data from other tasks and controller 
-	m_slaveInputDataPool : ST_SlaveInputDataPool;
 
 	// code execute time measure
 	m_codeTime : Profiler;

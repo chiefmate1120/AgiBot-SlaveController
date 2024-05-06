@@ -13,8 +13,9 @@
 	SetupArmState_Cart := 8,
 	SetupArmState_jnt3GravityCali := 9,
 	SetupArmState_jnt5GravityCali := 10,
+	SetupArmState_Disable := 11,
 	
-	SetupArmState_totalNum :=SetupArmState_jnt5GravityCali
+	SetupArmState_totalNum :=SetupArmState_Disable
 );
 END_TYPE
 ]]></Declaration>

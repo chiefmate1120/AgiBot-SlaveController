@@ -337,6 +337,9 @@
     <Compile Include="FBs_Robots\FB_SetupRobot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SetupControllers\FB_SetupCtrlDisable.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlJnt5GraCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -344,6 +347,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlHold.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlDisable.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInstruInvasion.TcPOU">
@@ -644,6 +650,7 @@
     <PinnedGlobalDataType Include="MSCommu_MasterStatus" />
     <PinnedGlobalDataType Include="MSCommu_Mat3d" />
     <PinnedGlobalDataType Include="MSCommu_SlaveStatus" />
+    <PinnedGlobalDataType Include="MSCommu_SlaveUIData" />
     <PinnedGlobalDataType Include="MSCommu_Vec3d" />
     <PinnedGlobalDataType Include="MSCommu_Vec6d" />
   </ItemGroup>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -27,6 +27,7 @@ VAR
 	m_armCart :ARRAY[1..g_sArmNum] OF FB_SetupCtrlCart;
 	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
 	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
+	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDisable;
 	
 	
 	// arm controller interface
@@ -116,6 +117,7 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_Cart] := m_armCart[i];
 	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
+	m_armCtrlFactory[i,SetupArmState_Disable] := m_armDisable[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -226,11 +228,25 @@ END_VAR]]></Declaration>
 			IF m_armCtrl[i].isFinished  THEN
 				m_nextSetupArmState[i]:=SetupArmState_Hold;
 			END_IF 
+			
+		//joint 3 gravity calibration
+		SetupArmState_jnt3GravityCali:
+			IF m_armCtrl[i].isFinished  THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF 
 		
+		// arm disable
+		SetupArmState_Disable:
+			IF NOT(i_setupInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
+				m_nextSetupArmState[i]:= SetupArmState_Hold;
+			END_IF
 	END_CASE
 	
+	// arm disable
+	IF i_setupInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+		m_nextSetupArmState[i] := SetupArmState_Disable;
 	// error check
-	IF TRUE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
+	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
 		m_nextSetupArmState[i]:=SetupArmState_Error;
 	END_IF
 	
@@ -288,6 +304,7 @@ END_FOR]]></ST>
       <LineId Id="108" Count="1" />
       <LineId Id="117" Count="0" />
       <LineId Id="131" Count="0" />
+      <LineId Id="138" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -347,9 +364,14 @@ END_FOR]]></ST>
       <LineId Id="117" Count="5" />
       <LineId Id="202" Count="1" />
       <LineId Id="201" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="264" Count="3" />
+      <LineId Id="263" Count="0" />
       <LineId Id="123" Count="0" />
+      <LineId Id="268" Count="4" />
       <LineId Id="18" Count="0" />
       <LineId Id="234" Count="0" />
+      <LineId Id="259" Count="2" />
       <LineId Id="236" Count="2" />
       <LineId Id="235" Count="0" />
       <LineId Id="56" Count="3" />
