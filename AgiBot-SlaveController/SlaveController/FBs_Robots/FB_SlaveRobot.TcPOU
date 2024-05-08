@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -23,9 +23,9 @@ VAR
 	m_slaveArms :ARRAY[1..g_sArmNum] OF FB_SlaveArm;
 	
 	// arm state
-	m_slaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Init)];
-	m_lastSlaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Init)];
-	m_nextSlaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Init)];
+	m_slaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Error)];
+	m_lastSlaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Error)];
+	m_nextSlaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Error)];
 	
 	// matched master arm state
 	m_matchedMasterArmState :ARRAY[1..g_sArmNum] OF E_MasterArmState:=[4(E_MasterArmState.MasterArmState_Error)];
@@ -304,7 +304,7 @@ FOR i:=1 TO g_sArmNum DO
 		// init
 		SlaveArmState_Init:
 			// to selfcheck
-			IF m_armCtrl[i].isFinished  THEN
+			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_armState[1] > MasterArmState_Init  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_SelfCheck;
 			END_IF
 
@@ -545,7 +545,7 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 	
 	// arm disable
-	IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+	IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i]  AND m_slaveArmState[i] <> SlaveArmState_Init THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Disable;
 	// error check
 	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN

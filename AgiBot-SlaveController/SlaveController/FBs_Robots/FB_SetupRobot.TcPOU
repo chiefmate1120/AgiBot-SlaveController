@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -11,9 +11,9 @@ VAR
 	m_setupArms :ARRAY[1..g_sArmNum] OF FB_SetupArm;
 	
 	// arm state
-	m_setupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Init)];
-	m_lastSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Init)];
-	m_nextSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Init)];
+	m_setupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	m_lastSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
+	m_nextSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
 	
 	// all arm controller instance 
 	m_armCtrlFactory :ARRAY[1..g_sArmNum,1..SetupArmState_totalNum] OF I_SetupArmCtrl;
@@ -182,8 +182,9 @@ END_VAR]]></Declaration>
 			
 		// init
 		SetupArmState_Init:
+			// to hold. No self check for setup arm currently
 			IF m_armCtrl[i].isFinished  THEN
-				m_nextSetupArmState[i]:=SetupArmState_SelfCheck;
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
 			END_IF
 
 		//self check
@@ -243,7 +244,7 @@ END_VAR]]></Declaration>
 	END_CASE
 	
 	// arm disable
-	IF i_setupInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
+	IF i_setupInputDataPool.m_UIData.m_slaveArmDisableFlag[i] AND m_setupArmState[i] <> SetupArmState_Init THEN
 		m_nextSetupArmState[i] := SetupArmState_Disable;
 	// error check
 	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
@@ -341,6 +342,7 @@ END_FOR]]></ST>
       <LineId Id="251" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="280" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="29" Count="1" />
       <LineId Id="41" Count="2" />

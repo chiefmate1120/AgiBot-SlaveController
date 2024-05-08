@@ -20,8 +20,14 @@ VAR_GLOBAL CONSTANT
 	g_motorDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, 1, -1, 1];
 																												 
 	// joint position limit
-	g_minJntPos: ARRAY[1..g_setupJntNum] OF LREAL:=[1,1,0.00,-1.2351,-1.7473];	
-	g_maxJntPos: ARRAY[1..g_setupJntNum] OF LREAL:=[1,1,0.200,4.5579,1.7284];	
+	g_minJntPos: ARRAY[1..g_sArmNum,  1..g_setupJntNum] OF LREAL:=[ (-140-50)*g_deg2Rad, 0.779-0.36,0.00,-1.2351,-1.7473,
+																	(-115-50)*g_deg2Rad, 0.607-0.36,0.00,-1.2351,-1.7473,
+																	(-65-50)*g_deg2Rad, 0.607-0.36,0.00,-1.2351,-1.7473,
+																	(-40-50)*g_deg2Rad, 0.779-0.36,0.00,-1.2351,-1.7473];	
+	g_maxJntPos: ARRAY[1..g_sArmNum,  1..g_setupJntNum] OF LREAL:=[ (-140+50)*g_deg2Rad, 0.779,0.200,4.5579,1.7284,
+																	(-115+50)*g_deg2Rad, 0.607,0.200,4.5579,1.7284,
+																	(-65+50)*g_deg2Rad, 0.607,0.200,4.5579,1.7284,
+																	(-40+50)*g_deg2Rad, 0.779,0.200,4.5579,1.7284];	
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..g_setupJntNum] OF LREAL :=[0.1, 0.1, 0.1, 0.1, 0.1];

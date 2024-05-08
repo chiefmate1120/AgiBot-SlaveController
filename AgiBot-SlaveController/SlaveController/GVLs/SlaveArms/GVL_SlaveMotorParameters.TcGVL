@@ -20,8 +20,8 @@ VAR_GLOBAL CONSTANT
 	g_motorDir :ARRAY[1..g_sJntNum] OF INT :=[-1, 1, -1, 1, 1, 1, 1, 1];
 																 
 	// joint position limit
-	g_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-2.7,	-1.23-pi/2,	0.25, 	5(-99*pi)];	
-	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[2.7,	1.13-pi/2, 	0.53, 		5(99*pi)];
+	g_minJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[-2.7,	-1.23-pi/2,	0.25, 	5(-g_largeNum)];	
+	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[2.7,	1.13-pi/2, 	0.585, 		5(g_largeNum)];
 	
 	// DH joint position limit
 	g_minDHJntPos : ARRAY[1..6] OF LREAL :=[-2.7,	-1.23-pi/2,	0.25, -5.5, -PI/2 - 75*g_deg2Rad , -PI/2];

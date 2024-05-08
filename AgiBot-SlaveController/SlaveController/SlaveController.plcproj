@@ -190,6 +190,24 @@
     <Compile Include="DUTs\Structure\ST_InstruKinematicParam.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_cart_operation.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_DH.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_instrument_info.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_scope_info.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_state_machine_com.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_ui_control.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Mat34.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -467,6 +485,10 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\GVL_InstruCtrlParams.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -592,6 +614,7 @@
     <Folder Include="AgiMaths\MatrixLib" />
     <Folder Include="DUTs" />
     <Folder Include="DUTs\Enum" />
+    <Folder Include="DUTs\Structure\UICommunication" />
     <Folder Include="DUTs\Structure\TasksCommunication" />
     <Folder Include="DUTs\Structure\MasterSlaveCommunication" />
     <Folder Include="DUTs\Type" />

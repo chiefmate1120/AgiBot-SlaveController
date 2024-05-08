@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupJoint" Id="{6b084a85-8805-425b-acb2-a9c4952b134d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupJoint EXTENDS FB_JointBase
 VAR_INPUT
@@ -33,8 +33,8 @@ m_linkEncoderReduction :=GVL_SetupMotorParameters.g_absEncoderReduction[i_jntIdx
 m_trqConst :=GVL_SetupMotorParameters.g_motorTrqConst[i_jntIdx];
 m_maxCurrent :=GVL_SetupMotorParameters.g_motorMaxCurrent[i_jntIdx];
 m_motorDir :=GVL_SetupMotorParameters.g_motorDir[i_jntIdx];								
-m_minJntPos	:=GVL_SetupMotorParameters.g_minJntPos[i_jntIdx];
-m_maxJntPos	:=GVL_SetupMotorParameters.g_maxJntPos[i_jntIdx];
+m_minJntPos	:=GVL_SetupMotorParameters.g_minJntPos[m_armIdx,i_jntIdx];
+m_maxJntPos	:=GVL_SetupMotorParameters.g_maxJntPos[m_armIdx,i_jntIdx];
 
 //link encoder calibartion data
 m_linkEncoderDir :=GVL_SetupJointEncoderCaliData.g_asbEncoderDir[i_jntIdx];

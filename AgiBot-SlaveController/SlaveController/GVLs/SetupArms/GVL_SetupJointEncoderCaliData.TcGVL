@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SetupJointEncoderCaliData" Id="{a5e1148c-b030-4494-87c0-eb852ce07b8b}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
@@ -28,7 +28,7 @@ VAR_GLOBAL
 		[8479084, 63534315, 57409031, 9224498, 13527366,
 		 12606456, 17795974, 52220472, 9143734, 994974,
 		 12863028, 60071845, 56328180, 774190, 13414374,
-		 10068792, 61793781, 56328180, 5068940, 951234];
+		 10068792, 61793781, 55221937, 5068940, 951234];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=

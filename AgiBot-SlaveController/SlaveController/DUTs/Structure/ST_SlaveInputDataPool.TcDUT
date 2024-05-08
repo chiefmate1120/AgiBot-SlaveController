@@ -6,7 +6,7 @@ TYPE ST_SlaveInputDataPool :
 STRUCT
 		
 	// UI information, import from UI controller
-	m_UIData AT %I*:ST_SlaveUIData;
+	m_UIData :ST_SlaveUIData;
 	
 	// safety information, import from safety check task
 	m_safetyData AT %I*: ST_SafetyData;

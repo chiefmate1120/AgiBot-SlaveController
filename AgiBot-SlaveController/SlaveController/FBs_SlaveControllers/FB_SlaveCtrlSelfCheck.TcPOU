@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlSelfCheck" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheck EXTENDS FB_SlaveArmCtrlBase
@@ -91,8 +91,10 @@ m_selfCheckTrajIdx :=1;
 
 // traj plan
 // fisrt segment
+// TODO: joint1/2 stay still in case arms collision
 startJntPos:=i_slaveArm.curJntPos;
-FOR j:=1 TO 7 DO 
+endJntPos:=startJntPos;
+FOR j:=3 TO 7 DO 
 	endJntPos[j]:=m_selfCheckPosture[1,j];
 END_FOR
 m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
@@ -147,7 +149,9 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="121" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="138" Count="0" />
+      <LineId Id="172" Count="0" />
       <LineId Id="82" Count="0" />
+      <LineId Id="185" Count="0" />
       <LineId Id="98" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="99" Count="0" />

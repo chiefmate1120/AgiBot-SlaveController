@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -13,7 +13,7 @@ VAR
 	
 	// control error thershold for safety check
 	m_maxPosTrackErr :LREAL := 0.05;
-	m_maxOriTrackErr :LREAL :=g_deg2Rad * 90;
+	m_maxOriTrackErr :LREAL :=g_deg2Rad * 30;
 	
 	// filter cut-off frequency for master-slave control
 	m_cmdJntPosLpfCutoffFreq : LREAL :=5;
@@ -250,9 +250,9 @@ matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);
 calcMSErrInScope(i_endoscopePose, i_setupStatus.m_curEndPose[i_slaveArm.armIdx]);
 
 // safety check
-IF norm(m_slavePosErr) > m_maxPosTrackErr OR ABS(m_errAngle)>m_maxOriTrackErr THEN
+(*IF norm(m_slavePosErr) > m_maxPosTrackErr OR ABS(m_errAngle)>m_maxOriTrackErr THEN
 	m_isFinished := TRUE;
-END_IF 
+END_IF*) 
 
 // pose track control
 vecMultiNum(m_slavePosErr, g_slaveArmCtrlFreq, m_slaveCmdVel);
@@ -285,9 +285,11 @@ END_FOR
 m_reachWristJntLimit :=FALSE;
 FOR i:=1 TO 3 DO
 	IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i+3]) OR 
-		(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i+3]) THEN
-		wristDHJntVel[i]:=0;
+		(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i+3]) OR
+		ABS(m_errAngle)>m_maxOriTrackErr THEN
+		wristDHJntVel:=g_zeroVec3d;
 		m_reachWristJntLimit:=TRUE;
+		CONTINUE;
 	END_IF
 END_FOR
 
@@ -614,8 +616,11 @@ END_VAR
       <LineId Id="796" Count="0" />
       <LineId Id="332" Count="0" />
       <LineId Id="234" Count="1" />
-      <LineId Id="238" Count="1" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="983" Count="0" />
+      <LineId Id="239" Count="0" />
       <LineId Id="797" Count="0" />
+      <LineId Id="984" Count="0" />
       <LineId Id="240" Count="0" />
       <LineId Id="236" Count="0" />
       <LineId Id="242" Count="0" />

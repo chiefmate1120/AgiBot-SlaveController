@@ -7,7 +7,7 @@ TYPE ST_SlaveStatus :
 STRUCT
 	
 	// state machine
-	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Init)];
+	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Error)];
 	
 	// instrument info
 	m_instruStauts :ARRAY[1..g_sArmNum] OF ST_InstruStatus;

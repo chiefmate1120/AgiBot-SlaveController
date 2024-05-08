@@ -13,30 +13,27 @@ VAR
 	// cartesian pose error flag
 	m_cartPoseErrFlag :ARRAY[1..g_sArmNum] OF BOOL;
 	m_cartPoseErrCounts:ARRAY[1..g_sArmNum] OF INT;
+	m_cartPosErr :ARRAY[1..g_sArmNum] OF Vec3d;	// cartesian position error
+	m_cartOriErr:ARRAY[1..g_sArmNum] OF  Vec3d;	// cartesian rotation angle (angle  * axis)
 	
 	// joint control error flag
 	m_jntCtrlErrFlag :ARRAY[1..g_sArmNum] OF Vec8b;
 	m_jntCtrlErrCounts :ARRAY[1..g_sArmNum] OF Vec8i;
+	m_jntCtrlErr:ARRAY[1..g_sArmNum]  OF Vec8d;		// joint position control error
 	
 	// joint encoder error flag
 	m_jntEncErrFlag :ARRAY[1..g_sArmNum] OF Vec8b;
 	m_jntEncErrCounts :ARRAY[1..g_sArmNum] OF Vec8i ;
+	m_jntEncErr:ARRAY[1..g_sArmNum]  OF Vec8d;		// motor and joint encoder error
 	
 	// joint velocity error flag
 	m_jntVelErrFlag :ARRAY[1..g_sArmNum] OF Vec8b;
 	m_jntVelErrCounts :ARRAY[1..g_sArmNum] OF Vec8i;
 	
-	// cartesian position error
-	m_cartPosErr :ARRAY[1..g_sArmNum] OF Vec3d;
-	
-	// cartesian rotation angle (angle  * axis)
-	m_cartOriErr:ARRAY[1..g_sArmNum] OF  Vec3d;
+	// joint position limit error flag
+	m_jntLimitErrFlag :ARRAY[1..g_sArmNum] OF Vec8b;
+	m_jntLimitErrCounts :ARRAY[1..g_sArmNum] OF Vec8i;
 
-	// joint position control error
-	m_jntCtrlErr:ARRAY[1..g_sArmNum]  OF Vec8d;
-	
-	// motor and joint encoder error
-	m_jntEncErr:ARRAY[1..g_sArmNum]  of Vec8d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -60,7 +57,7 @@ END_VAR
         <ST><![CDATA[// calculate error
 FOR i:=1 TO g_sArmNum DO 
 	// stop check if arm is already in error state
-	IF TRUE = m_armErrFlag[i] THEN 
+	IF m_armErrFlag[i] OR i_slaveStatus.m_armState[i]=SlaveArmState_Error THEN 
 		CONTINUE;
 	END_IF
 	
@@ -79,14 +76,17 @@ FOR i:=1 TO g_sArmNum DO
 	m_jntEncErrFlag[i]:=jntEncErrCheck(i_slaveJointData.m_curMotorPos[i], i_slaveJointData.m_curLinkPos[i],
 										m_jntEncErrCounts[i], m_jntEncErr[i]);
 										
+	// joint limit error
+	m_jntLimitErrFlag[i]:=jntLimitErrCheck(i_slaveJointData.m_curJntPos[i],m_jntLimitErrCounts[i]);
+										
 	// final arm error status check
-	IF  TRUE = m_cartPoseErrFlag[i] THEN
+	IF  m_cartPoseErrFlag[i] THEN
 		m_armErrFlag[i]:=TRUE;
 		CONTINUE;
 	END_IF
 	
 	FOR j:=1 TO g_sJntNum DO 
-		IF TRUE = m_jntCtrlErrFlag[i][j] OR TRUE = m_jntEncErrFlag[i][j] OR TRUE = m_jntVelErrFlag[i][j] THEN
+		IF m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j] THEN
 			m_armErrFlag[i]:=TRUE;
 			EXIT;
 		END_IF
@@ -167,6 +167,34 @@ END_FOR
 	]]></ST>
       </Implementation>
     </Method>
+    <Method Name="jntLimitErrCheck" Id="{a4da3795-73c8-472d-94c8-3533763f2a83}">
+      <Declaration><![CDATA[METHOD jntLimitErrCheck : Vec8b
+VAR_INput
+	i_curJntPos : Vec8d;
+END_VAR
+VAR_IN_OUT
+	r_errCount:Vec8i;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint limit check
+//NOTE: only check the first three joints.
+FOR i:=1 TO 3 DO 
+	IF  i_curJntPos[i] > GVL_SlaveMotorParameters.g_maxJntPos[i] + g_slaveJntPosLimitBuffer[i] OR
+		i_curJntPos[i] < GVL_SlaveMotorParameters.g_minJntPos[i] - g_slaveJntPosLimitBuffer[i] THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;	
+	END_IF
+	jntLimitErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="poseErrCheck" Id="{9fe210b5-ecf0-4498-8364-258d193de1ff}">
       <Declaration><![CDATA[METHOD poseErrCheck : BOOL
 VAR_INPUT
@@ -217,7 +245,9 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
       <LineId Id="35" Count="1" />
       <LineId Id="109" Count="1" />
       <LineId Id="38" Count="1" />
-      <LineId Id="111" Count="2" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="144" Count="2" />
+      <LineId Id="113" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="119" Count="11" />
       <LineId Id="114" Count="0" />
@@ -248,6 +278,17 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
       <LineId Id="64" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="65" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArmCheck.jntLimitErrCheck">
+      <LineId Id="44" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="43" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCheck.poseErrCheck">
