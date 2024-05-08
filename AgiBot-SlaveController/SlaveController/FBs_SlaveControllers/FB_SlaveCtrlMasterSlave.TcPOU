@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -98,16 +98,6 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
-	// ########## test code ##############
-	m_startMSTest :BOOL :=FALSE;
-	m_testMasterVel ,m_testMasterWVel:Vec3d :=g_zeroVec3d;
-	m_testMasterMoveDir ,m_testMasterRotDir:Vec3d :=g_zeroVec3d;
-	m_testMasterMoveRange, m_testMasterRotRange:LREAL :=0;
-	m_testMasterMoveFreq, m_testMasterRotFreq:LREAL:=0;
-	m_testMasterPose :ST_Frame;
-	m_testMasterTwist:Vec6d;
-	//################################
-	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -151,37 +141,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// update test master pose
-(*IF m_startMSTest = TRUE THEN
-	testMoveVel := m_testMasterMoveRange * pi * m_testMasterMoveFreq * COS(2*pi * m_testMasterMoveFreq * m_timePeriod -pi/2);
-	testMoveDis :=testMoveVel * g_slaveArmCtrlCycleTime;
-	vecMultiNum(m_testMasterMoveDir, testMoveDis, testMasterDeltaPos);
-	vecSelfAdd(m_testMasterPose.m_pos, testMasterDeltaPos);
-	vecMultiNum(m_testMasterMoveDir, testMoveVel, m_testMasterVel);
-	
-	testRotVel := m_testMasterRotRange * pi * m_testMasterRotFreq * COS(2*pi * m_testMasterRotFreq * m_timePeriod -pi/2);
-	testRotDis :=testRotVel * g_slaveArmCtrlCycleTime;
-	testRotAxis := m_testMasterRotDir;
-	normalize(testRotAxis);
-	testMasterDeltaOri:=angAxis2Rot(testRotDis, testRotAxis);
-	matMultiply(testMasterDeltaOri, m_testMasterPose.m_rot,testMasterNextRot);
-	m_testMasterPose.m_rot:=testMasterNextRot;
-		vecMultiNum(m_testMasterRotDir, testRotVel, m_testMasterWVel);
-ELSE 
-	m_testMasterVel:=g_zeroVec3d;
-	m_testMasterWVel:=g_zeroVec3d;
-	m_timePeriod :=0;
-END_IF
-m_masterPose:=m_testMasterPose;
-m_masterTwist[1]:=m_testMasterVel[1];
-m_masterTwist[2]:=m_testMasterVel[2];
-m_masterTwist[3]:=m_testMasterVel[3];
-m_masterTwist[4]:=m_testMasterWVel[1];
-m_masterTwist[5]:=m_testMasterWVel[2];
-m_masterTwist[6]:=m_testMasterWVel[3];
-*)
-
-m_codeTime(START:=TRUE, RESET:=TRUE);
+        <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
 
 IF isFinished THEN
 	RETURN;
@@ -499,10 +459,6 @@ m_masterGripAngleVelLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 // init controller
 m_instruController.init(i_slaveArm);
 
-
-m_testMasterPose.m_pos:=g_zeroVec3d;
-m_testMasterPose.m_rot:=g_eye3d;
-
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
@@ -523,27 +479,6 @@ END_VAR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="408" Count="0" />
-      <LineId Id="435" Count="0" />
-      <LineId Id="438" Count="0" />
-      <LineId Id="507" Count="0" />
-      <LineId Id="509" Count="0" />
-      <LineId Id="439" Count="0" />
-      <LineId Id="521" Count="0" />
-      <LineId Id="511" Count="2" />
-      <LineId Id="440" Count="0" />
-      <LineId Id="515" Count="0" />
-      <LineId Id="444" Count="2" />
-      <LineId Id="522" Count="0" />
-      <LineId Id="503" Count="0" />
-      <LineId Id="523" Count="1" />
-      <LineId Id="504" Count="0" />
-      <LineId Id="437" Count="0" />
-      <LineId Id="434" Count="0" />
-      <LineId Id="525" Count="4" />
-      <LineId Id="410" Count="0" />
-      <LineId Id="530" Count="0" />
-      <LineId Id="409" Count="0" />
       <LineId Id="380" Count="0" />
       <LineId Id="463" Count="0" />
       <LineId Id="459" Count="3" />
@@ -734,9 +669,6 @@ END_VAR
       <LineId Id="79" Count="0" />
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
-      <LineId Id="101" Count="1" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="103" Count="0" />
       <LineId Id="151" Count="1" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />

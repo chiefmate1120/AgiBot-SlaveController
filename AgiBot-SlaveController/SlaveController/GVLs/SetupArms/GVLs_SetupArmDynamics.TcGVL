@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVLs_SetupArmDynamics" Id="{74cdb8b7-38be-48da-afba-0d7feec1dcd4}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
-VAR_GLOBAL CONSTANT
+VAR_GLOBAL 
 	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic
 	% graParam=[ 9.8*mx0,...
 	%            4.92539*m1 + 4.92539*m2 + 4.92539*m3 + 7.8853*m4 + 7.8853*m5 + 9.70463*mx3 - 9.8*my0 - 1.3639*my3 + 9.8*mz1,...

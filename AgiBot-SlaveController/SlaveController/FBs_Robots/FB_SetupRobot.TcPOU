@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -196,28 +196,21 @@ END_VAR]]></Declaration>
 		//hold
 		SetupArmState_Hold:
 			// to manual adjust
-			IF m_setupArms[i].manualAdjustOn THEN
+			IF m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0 THEN
 				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
-			// to auto adjust
-			ELSIF m_setupArms[i].autoAdjustDir<>0 THEN
-				m_nextSetupArmState[i]:=SetupArmState_AutoAdjust;
 			END_IF
 			
 		
 		// manual adjust
 		SetupArmState_ManualAdjust:
 			// to hold
-			IF NOT(m_setupArms[i].manualAdjustOn) THEN
+			IF NOT(m_setupArms[i].manualAdjustOn) AND m_setupArms[i].jnt5AdjustDir=0 THEN
 				m_nextSetupArmState[i] := SetupArmState_Hold;
 			END_IF
 			
 		// auto adjust
 		SetupArmState_AutoAdjust:
-			// to hold
-			IF m_setupArms[i].autoAdjustDir = 0 THEN
-				m_nextSetupArmState[i] := SetupArmState_Hold;
-			END_IF
-			
+				
 		//package
 		SetupArmState_Package:
 		
@@ -351,17 +344,12 @@ END_FOR]]></ST>
       <LineId Id="145" Count="0" />
       <LineId Id="166" Count="1" />
       <LineId Id="211" Count="0" />
-      <LineId Id="169" Count="1" />
-      <LineId Id="212" Count="0" />
-      <LineId Id="192" Count="1" />
-      <LineId Id="171" Count="0" />
+      <LineId Id="169" Count="2" />
       <LineId Id="165" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="213" Count="7" />
       <LineId Id="225" Count="0" />
-      <LineId Id="222" Count="2" />
       <LineId Id="221" Count="0" />
-      <LineId Id="226" Count="0" />
       <LineId Id="96" Count="1" />
       <LineId Id="117" Count="5" />
       <LineId Id="202" Count="1" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupArm" Id="{5c9438f2-768b-4fff-9bfc-3693d995bd67}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupArm
 VAR_INPUT
@@ -16,9 +16,9 @@ VAR
 	// adjust detect
 	m_adjustIO AT%I* :UDINT;
 	m_manualAdjustOnFlag :BOOL;
-	m_jnt3AutoAdjustDir :INT; // -1, 0, 1;
+	m_jnt5AdjustDir :INT; // -1, 0, 1;
 	m_manualAdjustDetect : FB_setupAdjustDetect;
-	m_autoAdjustDetect : FB_setupJnt3AdjustDetect;
+	m_jnt5AdjustDetect : FB_setupJnt5AdjustDetect;
 	
 	// arm cartesian data, defined in cart origin
 	m_curCartPose	:ST_Frame;
@@ -62,17 +62,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="autoAdjustDir" Id="{23463ad9-6b6b-4d71-8ec1-f29d801d18b3}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY autoAdjustDir : INT]]></Declaration>
-      <Get Name="Get" Id="{11440852-0ab4-4acb-adbb-a37bb7e50412}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[autoAdjustDir := m_jnt3AutoAdjustDir;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
     <Method Name="checkIO" Id="{fbd89c1b-d255-40db-a7aa-cd2a052b5167}">
       <Declaration><![CDATA[METHOD checkIO : BOOL
 VAR_INPUT
@@ -81,7 +70,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// check manual and auto adjust button
 m_manualAdjustOnFlag := m_manualAdjustDetect.run(m_adjustIO);
-m_jnt3AutoAdjustDir := m_autoAdjustDetect.run(m_adjustIO);
+m_jnt5AdjustDir := m_jnt5AdjustDetect.run(m_adjustIO);
 ]]></ST>
       </Implementation>
     </Method>
@@ -368,6 +357,17 @@ FOR i:=1 TO g_setupJntNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Property Name="jnt5AdjustDir" Id="{9c383f15-8b4b-4f35-9c30-cbfe61f1e499}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jnt5AdjustDir : int]]></Declaration>
+      <Get Name="Get" Id="{cda39ef3-97eb-493e-a5be-521a72a7dc1b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jnt5AdjustDir := m_jnt5AdjustDir;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="jntGravity" Id="{33c6cc0e-6d37-4855-b1be-0f076b081ccc}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntGravity :REFERENCE TO Vec5d]]></Declaration>
       <Get Name="Get" Id="{676c5d39-ab4d-45da-b342-fb30a86742c9}">
@@ -504,9 +504,6 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
     <LineIds Name="FB_SetupArm.armIdx.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SetupArm.autoAdjustDir.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SetupArm.checkIO">
       <LineId Id="21" Count="2" />
       <LineId Id="13" Count="0" />
@@ -602,6 +599,9 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="19" Count="0" />
       <LineId Id="15" Count="3" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArm.jnt5AdjustDir.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.jntGravity.Get">
       <LineId Id="2" Count="0" />

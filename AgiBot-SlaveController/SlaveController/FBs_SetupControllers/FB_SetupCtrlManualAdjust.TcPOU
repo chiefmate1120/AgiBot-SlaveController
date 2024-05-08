@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -13,7 +13,16 @@ VAR
 	
 	// velocity threshold for friction compensation 
 	m_jnt3FrictionCompVelThres :LREAL:=0.001;
-	m_jnt5FrictionCompVelThres :LREAL:=1.0*g_deg2Rad;
+	
+	// jnt5 adjust velocity
+	m_jnt5MaxAdjustVel :LREAL:=5.0*g_deg2Rad;
+	m_jnt5MaxAdjustAcc :LREAL:=60*g_deg2Rad;
+	
+	// jnt5 enabled time period
+	m_jnt5EnableTime :LREAL :=0;
+	
+	// time threshold to drive jnt5 after it's enabled
+	m_jnt5AdjustWaitTime :LREAL := 0.25;
 
 END_VAR
 ]]></Declaration>
@@ -32,7 +41,25 @@ VAR
 	i :INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cmdJntPos := i_setupArm.curJntPos;]]></ST>
+        <ST><![CDATA[// enable/disenable joint5
+IF i_setupArm.jnt5AdjustDir = 0 THEN
+	m_jntEnableFlag[5] := 0;
+	m_cmdJntPos[5]:=i_setupArm.curJntPos[5];
+	m_jnt5EnableTime:=0;
+	m_cmdJntVel[5]:=0;
+	RETURN;
+ELSE
+	m_jntEnableFlag[5] := 1;
+	m_jnt5EnableTime := m_jnt5EnableTime + g_setupArmCtrlCycleTime;
+END_IF
+
+// update command position
+IF m_jnt5EnableTime>m_jnt5AdjustWaitTime THEN
+	m_cmdJntVel[5]:=m_cmdJntVel[5] + i_setupArm.jnt5AdjustDir * m_jnt5MaxAdjustAcc * g_setupArmCtrlCycleTime;
+	m_cmdJntVel[5]:=LIMIT(-m_jnt5MaxAdjustVel, m_cmdJntVel[5], m_jnt5MaxAdjustVel);
+	m_cmdJntPos[5]:= m_cmdJntPos[5] + m_cmdJntVel[5] * g_setupArmCtrlCycleTime;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{c618bd90-4444-4b54-b7cd-0646bf55f729}">
@@ -40,17 +67,32 @@ END_VAR]]></Declaration>
 METHOD PROTECTED calcCmdJntTrq : BOOL
 VAR_IN_OUT CONSTANT
 	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR
+	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// set joint torque to zero in default
 m_cmdJntTrq := g_zeroVec5d;
 
+//enable/diable  joint1-4
+IF NOT(i_setupArm.manualAdjustOn) THEN
+	FOR i:=1 TO 4 DO
+		m_jntEnableFlag[i] := 0;
+		m_jntOPMode[i]:=DriverOPMode_Pos;
+	END_FOR
+	RETURN;
+ELSE
+	FOR i:=1 TO 4 DO
+		m_jntEnableFlag[i] := 1;
+		m_jntOPMode[i]:=DriverOPMode_Trq;
+		m_cmdJntPos[i] := i_setupArm.curJntPos[i];
+	END_FOR
+END_IF
+
 // add friction compensation
 IF ABS(i_setupArm.curJntVel[3])> m_jnt3FrictionCompVelThres THEN
 	m_cmdJntTrq[3]:= m_frictionScale * sign(i_setupArm.curJntVel[3])*GVLs_SetupArmDynamics.g_setupJntFriction[i_setupArm.armIdx, 3];
-END_IF
-IF ABS(i_setupArm.curJntVel[5])> m_jnt5FrictionCompVelThres THEN
-	m_cmdJntTrq[5]:= m_frictionScale * sign(i_setupArm.curJntVel[5])*GVLs_SetupArmDynamics.g_setupJntFriction[i_setupArm.armIdx, 5];
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -66,8 +108,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
-m_jntEnableFlag:=g_onesVec5i;
-m_jntOPMode:=g_setupAllTrqMode;
+m_jnt5EnableTime :=0;
 ]]></ST>
       </Implementation>
     </Method>
@@ -75,20 +116,42 @@ m_jntOPMode:=g_setupAllTrqMode;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.calcCmdJntPos">
+      <LineId Id="132" Count="0" />
       <LineId Id="98" Count="0" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="134" Count="1" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="115" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.calcCmdJntTrq">
-      <LineId Id="5" Count="0" />
-      <LineId Id="17" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="90" Count="2" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="93" Count="3" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="59" Count="0" />
       <LineId Id="41" Count="1" />
       <LineId Id="50" Count="1" />
       <LineId Id="49" Count="0" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="36" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.init">
       <LineId Id="57" Count="0" />
-      <LineId Id="67" Count="1" />
+      <LineId Id="66" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

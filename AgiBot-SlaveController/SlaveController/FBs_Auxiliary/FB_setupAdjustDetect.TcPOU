@@ -15,8 +15,7 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Method Name="run" Id="{9417d02d-486a-427f-b657-d20113e6f4a0}">
-      <Declaration><![CDATA[// check if instrument is on
-METHOD run : BOOL
+      <Declaration><![CDATA[METHOD run : BOOL
 VAR_INPUT
 	IOValue :UDINT;
 END_VAR
@@ -26,7 +25,7 @@ VAR_OUTPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// manuel adjust io is 4th bit 
+        <ST><![CDATA[// manuel adjust io is 5th bit 
 IF 16=(IOValue AND 10#16) THEN
 	m_manualAdjustOnCounts :=MIN(m_manualAdjustOnCounts +1,m_adjustOnCountThres);
 ELSE
