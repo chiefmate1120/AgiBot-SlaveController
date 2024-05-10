@@ -62,17 +62,15 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// calculate error
 FOR i:=1 TO g_sArmNum DO 
+	// update rcp
+	IF i_setupStatus.m_armState[i] <> SetupArmState_Hold THEN
+		m_dsrRcpPos[i] := i_setupStatus.m_rcPos[i];
+	END_IF
+
 	// stop check if arm is already in error state
 	IF m_armErrFlag[i] OR i_setupStatus.m_armState[i] = SetupArmState_Error THEN 
 		CONTINUE;
 	END_IF
-	
-	// update rcp
-	IF i_setupStatus.m_armState[i] = SetupArmState_Hold AND m_lastArmState[i] <> SetupArmState_Hold THEN
-		m_dsrRcpPos[i] := i_setupStatus.m_rcPos[i];
-	END_IF
-	m_lastArmState[i] := i_setupStatus.m_armState[i];
-	
 	
 	// only check rcp in HOLD state (for master-slave control)
 	m_rcpPosErrFlag[i]:=FALSE;
@@ -233,7 +231,11 @@ rcpErrCheck := r_errCount >= g_faultTriggerCounts;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArmCheck.check">
-      <LineId Id="152" Count="17" />
+      <LineId Id="152" Count="1" />
+      <LineId Id="241" Count="3" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="154" Count="3" />
+      <LineId Id="165" Count="4" />
       <LineId Id="171" Count="8" />
       <LineId Id="225" Count="2" />
       <LineId Id="180" Count="3" />
