@@ -10,9 +10,6 @@ VAR
 	// final arm error flag
 	m_armErrFlag :ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
 	
-	// last state machine
-	m_lastArmState:ARRAY[1..g_sArmNum] OF E_SetupArmState:=[g_sArmNum(SetupArmState_Init)];
-	
 	// original position of remote center point when fisrt enter hold state
 	m_dsrRcpPos :ARRAY[1..g_sArmNum] OF Vec3d;
 	
