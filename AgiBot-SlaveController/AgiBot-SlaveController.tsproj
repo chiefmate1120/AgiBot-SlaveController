@@ -53,12 +53,12 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}" PersistentType="true">MSCommu_MasterStatus</Name>
+			<Name GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}" PersistentType="true">MSCommu_MasterStatus</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication
  Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller
  NOTE: cast from/to a ST_MasterStatus variable for data transfer/use]]></Comment>
-			<BitSize>4864</BitSize>
+			<BitSize>2576</BitSize>
 			<SubItem>
 				<Name>m_motionScale</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
@@ -111,7 +111,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ current arm pose in monitor]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>1792</BitOffs>
+				<BitOffs>256</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmTwist</Name>
@@ -122,10 +122,19 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in monitor]]></Comment>
 				<BitSize>768</BitSize>
-				<BitOffs>4096</BitOffs>
+				<BitOffs>1792</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>2560</BitOffs>
 			</SubItem>
 			<Hides>
 				<Hide GUID="{C3DB667D-ACBF-4CBD-A758-DEBF50A1D7A2}"/>
+				<Hide GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}"/>
+				<Hide GUID="{6CDB08A3-6E8D-47A5-A4EC-185288E4D097}"/>
+				<Hide GUID="{546D824F-37A4-4F12-9F2E-0021447931BD}"/>
 			</Hides>
 		</DataType>
 		<DataType>
@@ -510,12 +519,12 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}" PersistentType="true">MSCommu_SlaveStatus</Name>
+			<Name GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}" PersistentType="true">MSCommu_SlaveStatus</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication
  Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller
  NOTE: cast from/to a ST_SlaveStatus variable for data transfer/use]]></Comment>
-			<BitSize>9088</BitSize>
+			<BitSize>5976</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
@@ -553,7 +562,7 @@
 				<Type GUID="{DD48C470-F978-4FD0-990C-EA616882EEA7}">MSCommu_Frame</Type>
 				<Comment><![CDATA[ endoscope pose in cart coordinate]]></Comment>
 				<BitSize>768</BitSize>
-				<BitOffs>640</BitOffs>
+				<BitOffs>584</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmPose</Name>
@@ -564,7 +573,7 @@
 				</ArrayInfo>
 				<Comment TxtId=""><![CDATA[current arm pose in endoscope coordinate]]></Comment>
 				<BitSize>3072</BitSize>
-				<BitOffs>4480</BitOffs>
+				<BitOffs>1352</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_masterSlavePoseError</Name>
@@ -575,7 +584,13 @@
 				</ArrayInfo>
 				<Comment TxtId=""><![CDATA[master slave pose error in endoscope coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>7552</BitOffs>
+				<BitOffs>4424</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>5960</BitOffs>
 			</SubItem>
 			<Hides>
 				<Hide GUID="{517F3A1C-E2DA-4F0E-A99C-45AEB3CB303E}"/>
@@ -589,6 +604,8 @@
 				<Hide GUID="{B82C98EE-AA6F-45F6-86B5-DED1CE625D58}"/>
 				<Hide GUID="{9E3FFBEF-BAA8-47A4-9BC7-0C4BBE2C5163}"/>
 				<Hide GUID="{9CB7F121-756E-4BF9-88E8-D7E45D0BF3D9}"/>
+				<Hide GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}"/>
+				<Hide GUID="{1CEB8DB7-193B-497B-950D-99CDDA535148}"/>
 			</Hides>
 		</DataType>
 		<DataType>
@@ -1271,15 +1288,6 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{4E8DD7B9-F3E6-F839-62CA-CC9FE47D2BB7}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..10] OF UINT</Name>
-			<BitSize>160</BitSize>
-			<BaseType GUID="{18071995-0000-0000-0000-000000000005}">UINT</BaseType>
-			<ArrayInfo>
-				<LBound>1</LBound>
-				<Elements>10</Elements>
-			</ArrayInfo>
-		</DataType>
-		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-00200000000C}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..11] OF BIT</Name>
 			<BitSize>12</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
@@ -1411,7 +1419,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{99190992-754A-726F-7A4B-02616561FC98}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{0D11CCD5-F6CF-C6BE-C471-6943E5A85238}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1419,7 +1427,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_masterRobotData</Name>
 							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
-							<Type GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}">MSCommu_MasterStatus</Type>
+							<Type GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}">MSCommu_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_safetyData</Name>
@@ -1647,7 +1655,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobotData</Name>
 							<Comment><![CDATA[ slave robot data, ouput to master controller box]]></Comment>
-							<Type GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}">MSCommu_SlaveStatus</Type>
+							<Type GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
@@ -2103,18 +2111,6 @@
 						<Var>
 							<Name>CartControl.m_slaveCart.m_testInput</Name>
 							<Comment><![CDATA[  TEST IO , just for IO link to enable ethercat ]]></Comment>
-							<Type GUID="{4E8DD7B9-F3E6-F839-62CA-CC9FE47D2BB7}">ARRAY [1..10] OF UINT</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_slaveCart.m_testIO1</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_slaveCart.m_testIO2</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_slaveCart.m_testIO4</Name>
 							<Type>UINT</Type>
 						</Var>
 					</Vars>
@@ -2124,18 +2120,6 @@
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
 							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_slaveCart.m_testOnput</Name>
-							<Type GUID="{4E8DD7B9-F3E6-F839-62CA-CC9FE47D2BB7}">ARRAY [1..10] OF UINT</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_slaveCart.m_testIO3</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_slaveCart.m_testIO5</Name>
-							<Type>UINT</Type>
 						</Var>
 					</Vars>
 					<UnrestoredVarLinks ImportTime="2023-12-15T10:38:09">
@@ -2166,6 +2150,45 @@
 						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
 							<OwnerB Name="TIID^Cart^Drive 4 (iPOS8015 BZ-CAT)">
 								<Link VarA="CartControl.m_slaveCart.m_testIO" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Transmit PDO 1 mapping parameters^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-05-13T10:15:04">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIID^Cart">
+								<Link VarA="CartControl.m_slaveCart.m_testInput[4]" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Inputs^Frm0State" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
+								<Link VarA="CartControl.m_slaveCart.m_testIO4" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="TxPdoMappingCspCsv^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Drive 4 (iPOS8015 BZ-CAT)">
+								<Link VarA="CartControl.m_slaveCart.m_testInput[1]" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Transmit PDO 1 mapping parameters^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Drive 5 (iPOS4850 BX-CAT)">
+								<Link VarA="CartControl.m_slaveCart.m_testInput[2]" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Transmit PDO 1 mapping parameters^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Drive 6 (iPOS4850 BX-CAT)">
+								<Link VarA="CartControl.m_slaveCart.m_testInput[3]" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Transmit PDO 1 mapping parameters^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^MSCommunication^Term 22 (EK1100)^Term 24 (EL1008)">
+								<Link VarA="CartControl.m_slaveCart.m_testIO1" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 1^Input" Size="1" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIID^Cart">
+								<Link VarA="CartControl.m_slaveCart.m_testOnput[4]" TypeA="UINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Outputs^Frm0Ctrl" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
+								<Link VarA="CartControl.m_slaveCart.m_testIO5" TypeA="UINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="RxPdoMappingCspCsv^Controlword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Drive 4 (iPOS8015 BZ-CAT)">
+								<Link VarA="CartControl.m_slaveCart.m_testOnput[1]" TypeA="UINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Receive PDO 1 mapping parameters^Controlword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Drive 5 (iPOS4850 BX-CAT)">
+								<Link VarA="CartControl.m_slaveCart.m_testOnput[2]" TypeA="UINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Receive PDO 1 mapping parameters^Controlword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^Cart^Drive 6 (iPOS4850 BX-CAT)">
+								<Link VarA="CartControl.m_slaveCart.m_testOnput[3]" TypeA="UINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Receive PDO 1 mapping parameters^Controlword" RestoreInfo="ANotFound"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -3066,9 +3089,6 @@
 				<Image Id="8" AddrType="9" ImageType="3">
 					<Name>Image</Name>
 				</Image>
-				<Image Id="5" AddrType="10" ImageType="3">
-					<Name>Image-2</Name>
-				</Image>
 				<Box Id="20" BoxType="9099">
 					<Name>Term 20 (EK1100)</Name>
 					<ImageId>1001</ImageId>
@@ -3079,8 +3099,8 @@
 						<EtherCAT SlaveType="3" AdsServerAddress="a9feba270216ea03" PdiType="#x0008" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="63" EoeType="1" FoeType="1" VendorId="#x00000002" ProductCode="#x1a273052" RevisionNo="#x00060000" InfoDataAddr="true" InfoDataNetId="true" InfoDataDcTimes="true" TimeoutMailbox2="2000" GenerateOwnNetId="true" ExternalDcRefClock="true" CheckRevisionNoType="3" PortPhys="51" DcTimeLoopControlOnly="true" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6695 EtherCAT Bridge terminal (Primary)" Desc="EL6695" PortABoxInfo="#x01000014">
 							<SyncMan>0010000426000100010000008000da050004001026010000</SyncMan>
 							<SyncMan>0016000422000100020000008000da050004001622010000</SyncMan>
-							<SyncMan>001c70046400010003000000000000000000001c64010000</SyncMan>
-							<SyncMan>008e76022000010004000000000000000200008e20010000</SyncMan>
+							<SyncMan>001ceb026400010003000000000000000000001c64010000</SyncMan>
+							<SyncMan>008e58012000010004000000000000000200008e20010000</SyncMan>
 							<Fmmu>0000000000000000001c00020100000001000000000000000000000000000000</Fmmu>
 							<Fmmu>0000000000000000008e00010100000002000000000000000000000000000000</Fmmu>
 							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
@@ -3188,12 +3208,12 @@
 							</Pdo>
 							<Pdo Name="IO Inputs" Index="#x1a08" Flags="#x0020" SyncMan="3">
 								<Entry Name="MasterRobotData" Index="#x6000" Sub="#x01">
-									<Type GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}">MSCommu_MasterStatus</Type>
+									<Type GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}">MSCommu_MasterStatus</Type>
 								</Entry>
 							</Pdo>
 							<Pdo Name="IO Outputs" Index="#x1608" InOut="1" Flags="#x0020" SyncMan="2">
 								<Entry Name="SlaveRobotData" Index="#x7000" Sub="#x01">
-									<Type GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}">MSCommu_SlaveStatus</Type>
+									<Type GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}">MSCommu_SlaveStatus</Type>
 								</Entry>
 							</Pdo>
 							<CoeProfile ProfileNo="5001"/>
@@ -8080,8 +8100,6 @@
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500821000403}" Id="#x02030140"/>
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500821010403}" Id="#x020300b0"/>
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500831000403}" Id="#x020300f0"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0420-500840000403}" Id="#x02030080"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0420-500851000403}" Id="#x02030110"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030090" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030050" Watchdog="10000000040000000400000004000000"/>
@@ -8092,32 +8110,12 @@
 		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030070" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00E0-0304-0020-5008E0000403}" Id="#x02030130" Watchdog="00000000000000000000000000000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
-			<OwnerB Name="TIID^Cart">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput[4]" VarB="Inputs^Frm0State"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_slaveCart.m_testOnput[4]" VarB="Outputs^Frm0Ctrl"/>
-			</OwnerB>
 			<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testIO4" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_slaveCart.m_testIO5" VarB="RxPdoMappingCspCsv^Controlword"/>
-			</OwnerB>
-			<OwnerB Name="TIID^Cart^Drive 4 (iPOS8015 BZ-CAT)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput[1]" VarB="Transmit PDO 1 mapping parameters^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_slaveCart.m_testOnput[1]" VarB="Receive PDO 1 mapping parameters^Controlword"/>
-			</OwnerB>
-			<OwnerB Name="TIID^Cart^Drive 5 (iPOS4850 BX-CAT)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput[2]" VarB="Transmit PDO 1 mapping parameters^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_slaveCart.m_testOnput[2]" VarB="Receive PDO 1 mapping parameters^Controlword"/>
-			</OwnerB>
-			<OwnerB Name="TIID^Cart^Drive 6 (iPOS4850 BX-CAT)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput[3]" VarB="Transmit PDO 1 mapping parameters^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_slaveCart.m_testOnput[3]" VarB="Receive PDO 1 mapping parameters^Controlword"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput" VarB="TxPdoMappingCspCsv^Statusword"/>
 			</OwnerB>
 			<OwnerB Name="TIID^MSCommunication^Term 20 (EK1100)^Term 21 (EL6695)">
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_masterRobotData" VarB="IO Inputs^MasterRobotData"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobotData" VarB="IO Outputs^SlaveRobotData"/>
-			</OwnerB>
-			<OwnerB Name="TIID^MSCommunication^Term 22 (EK1100)^Term 24 (EL1008)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testIO1" VarB="Channel 1^Input"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SetupJoint12">
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>

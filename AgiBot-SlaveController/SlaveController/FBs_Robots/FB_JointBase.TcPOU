@@ -143,7 +143,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="initJntPos" Id="{c1110436-e250-45fb-8008-63b89ff1e4a3}">
-      <Declaration><![CDATA[METHOD initJntPos : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC initJntPos : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -179,7 +179,7 @@ END_VAR
       </Set>
     </Property>
     <Method Name="isEnabled" Id="{6575d317-fe99-4038-982b-c3651c898873}">
-      <Declaration><![CDATA[METHOD isEnabled : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC isEnabled : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -279,7 +279,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="motorEnc2Pos" Id="{5111dbab-73a3-4041-b0b2-3d1b70394152}">
-      <Declaration><![CDATA[METHOD PUBLIC motorEnc2Pos : LREAL
+      <Declaration><![CDATA[METHOD PROTECTED motorEnc2Pos : LREAL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -323,7 +323,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="singleCyclePos" Id="{7820a7e3-0d39-4e4d-b949-8bf17eca7df5}">
-      <Declaration><![CDATA[METHOD singleCyclePos : LREal
+      <Declaration><![CDATA[METHOD PROTECTED singleCyclePos : LREal
 VAR_INPUT
 END_VAR
 VAR

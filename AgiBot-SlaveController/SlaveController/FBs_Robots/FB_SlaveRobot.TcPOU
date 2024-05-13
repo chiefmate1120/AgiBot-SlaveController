@@ -7,6 +7,10 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// flag if master are connected
+	m_masterOnLine :BOOL :=FALSE;
+	m_masterOnLineCheck :FB_masterConnectionCheck;
+	
 	// master-slave motion scale
 	m_motionScale :LREAL;
 	
@@ -71,7 +75,7 @@ END_VAR
 ]]></ST>
     </Implementation>
     <Method Name="controllerTransit" Id="{8f288ee3-c1dd-4604-a493-d121fbcd6b66}">
-      <Declaration><![CDATA[METHOD controllerTransit : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED controllerTransit : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -211,6 +215,9 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motionScale := i_slaveInputDataPool.m_masterStatus.m_motionScale;
 m_teleSlaveArmIdx := i_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx;
+
+// check master connection
+m_masterOnLine := m_masterOnLineCheck.check(i_slaveInputDataPool.m_masterStatus.m_masterHeartBeat);
 
 // check if endoscope is mounted
 m_endoscopeMounted := FALSE;
@@ -616,6 +623,8 @@ END_FOR]]></ST>
     <LineIds Name="FB_SlaveRobot.run">
       <LineId Id="78" Count="0" />
       <LineId Id="111" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="161" Count="0" />
       <LineId Id="121" Count="0" />
       <LineId Id="120" Count="0" />
       <LineId Id="123" Count="0" />

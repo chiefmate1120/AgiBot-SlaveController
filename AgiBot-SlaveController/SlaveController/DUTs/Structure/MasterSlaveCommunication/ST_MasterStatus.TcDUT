@@ -4,6 +4,9 @@
     <Declaration><![CDATA[// Input from master arm control task, including arm status and cartesian data
 TYPE ST_MasterStatus :
 STRUCT
+	// master heart beat
+	m_masterHeartBeat :int:=0;;
+	
 	// linear motion scale
 	m_motionScale : LREAL:=1;
 	

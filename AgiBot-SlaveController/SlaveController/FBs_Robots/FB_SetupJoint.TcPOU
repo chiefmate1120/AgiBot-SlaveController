@@ -13,7 +13,7 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Method Name="init" Id="{5a12a14b-8e26-44ab-8937-95ebfb655807}">
-      <Declaration><![CDATA[METHOD init : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_INPUT
 	i_armIdx :INT;
 	i_jntIdx :INT;

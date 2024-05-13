@@ -63,7 +63,7 @@ END_VAR
     </Implementation>
     <Folder Name="property" Id="{9d49480e-8469-42fe-9794-09bbda49b553}" />
     <Method Name="checkInstruType" Id="{97020e4c-24ed-4bb8-b0ec-bca5a733a6da}">
-      <Declaration><![CDATA[METHOD checkInstruType : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED checkInstruType : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -108,7 +108,7 @@ END_VAR
       </Set>
     </Property>
     <Method Name="gripAngleMap" Id="{b8d7e03a-0cbe-42c6-a7e6-6b03109deb8f}">
-      <Declaration><![CDATA[METHOD gripAngleMap : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC gripAngleMap : BOOL
 VAR_INPUT
 	// master gripper angle
 	i_masterGripAng :LREAL;
@@ -140,7 +140,7 @@ END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="gripperAngleForwardTransform_ID12" Id="{d3dda96d-7b55-4cf3-9ffe-c8cf53ace77d}">
-      <Declaration><![CDATA[METHOD gripperAngleForwardTransform_ID12 : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED gripperAngleForwardTransform_ID12 : BOOL
 VAR_INPUT
 	frontAngle:LREAL;
 END_VAR
@@ -182,7 +182,7 @@ endAngle:=Angle_Inc_C*2;
       </Implementation>
     </Method>
     <Method Name="gripperAngleInverseTransform_ID12" Id="{d41bf91a-0d5c-464e-b520-ee71cb3a1637}">
-      <Declaration><![CDATA[METHOD gripperAngleInverseTransform_ID12 : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED gripperAngleInverseTransform_ID12 : BOOL
 VAR_INPUT
 	endAngle:LREAL;
 END_VAR
@@ -223,7 +223,7 @@ frontAngle:=Angle_Inc_A*2;
       </Implementation>
     </Method>
     <Method Name="init" Id="{b6799ae1-8e52-4442-8aea-44a9f33a3afc}">
-      <Declaration><![CDATA[METHOD init : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_INPUT
 	armIdx :INT;
 END_VAR
@@ -235,7 +235,7 @@ m_jointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];]
       </Implementation>
     </Method>
     <Method Name="initInstruJntPos" Id="{9abce61f-f34d-42ca-a401-a8190ac28e6c}">
-      <Declaration><![CDATA[METHOD initInstruJntPos : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC initInstruJntPos : BOOL
 VAR_INPUT
 	m_curJntPos :Vec8d;
 END_VAR
@@ -323,7 +323,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="InstruIDRecord" Id="{f3567262-d84c-4741-97fb-36ae0b451ee9}">
-      <Declaration><![CDATA[METHOD InstruIDRecord :ARRAY [1..100] OF  ULINT
+      <Declaration><![CDATA[METHOD PROTECTED InstruIDRecord :ARRAY [1..100] OF  ULINT
 VAR_INPUT
 	i_NewValue:ULINT;
 	i_ArrayData:ARRAY [1..100] OF ULINT;
@@ -355,7 +355,7 @@ END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="instruIK" Id="{9a18f93c-de08-4a8c-a2e3-32833c619719}">
-      <Declaration><![CDATA[METHOD instruIK : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC instruIK : BOOL
 VAR_INPUT
 	// DH  joint positon
 	i_DHJntPos :Vec6d;
@@ -474,7 +474,7 @@ r_DHJntVel[6]:=-r_DHJntVel[6];]]></ST>
       </Implementation>
     </Method>
     <Method Name="InstruSreiesFind" Id="{f880300d-e9dd-456f-88b6-72b1cc8bd3d5}">
-      <Declaration><![CDATA[METHOD InstruSreiesFind : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED InstruSreiesFind : BOOL
 VAR_INPUT
 	i_NewValue:ULINT;
 	i_ArrayData:ARRAY [1..100] OF ULINT;
@@ -520,7 +520,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="readParameters" Id="{fafb5a79-7caf-47d4-9d2f-b3dbd95048cf}">
-      <Declaration><![CDATA[METHOD readParameters : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC readParameters : BOOL
 VAR_INPUT
 	startFlag :BOOL;
 END_VAR
@@ -693,7 +693,7 @@ END_IF
       </Implementation>
     </Method>
     <Method Name="reset" Id="{90292eaa-1cc4-4b19-b4f6-6bcd7c03eb33}">
-      <Declaration><![CDATA[METHOD reset : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC reset : BOOL
 VAR_INPUT
 END_VAR
 VAR

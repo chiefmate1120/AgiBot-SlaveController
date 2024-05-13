@@ -115,7 +115,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="calcJaco" Id="{1172e5e4-b7f2-4690-a821-6304414cea84}">
-      <Declaration><![CDATA[METHOD PUBLIC calcJaco : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED calcJaco : BOOL
 VAR_IN_OUT CONSTANT
 	i_DHJntPos :Vec6d;
 END_VAR
@@ -200,7 +200,7 @@ r_jaco[6,6]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
       </Implementation>
     </Method>
     <Method Name="checkIO" Id="{613633aa-f5bc-4224-95e6-e974a90f8e6a}">
-      <Declaration><![CDATA[METHOD checkIO : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED checkIO : BOOL
 VAR_INPUT
 END_VAR
 
@@ -548,7 +548,7 @@ m_instrument.init(i_armIdx);
       </Implementation>
     </Method>
     <Method Name="initJntPos" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
-      <Declaration><![CDATA[METHOD initJntPos : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC initJntPos : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -659,7 +659,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="modifyJaco" Id="{d0ec41d7-ce80-43b2-a117-9fcbd2b4368b}">
-      <Declaration><![CDATA[METHOD PUBLIC modifyJaco : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED modifyJaco : BOOL
 VAR_IN_OUT CONSTANT
 	i_DHJntPos :Vec6d;
 END_VAR
@@ -772,7 +772,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="recordInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
-      <Declaration><![CDATA[METHOD recordInstruDepth : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC recordInstruDepth : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>

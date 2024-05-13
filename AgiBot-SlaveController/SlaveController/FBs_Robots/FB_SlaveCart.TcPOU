@@ -1,16 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
 VAR
 	//  TEST IO , just for IO link to enable ethercat 
-	m_testInput AT%I* :ARRAY[1..10]  OF UINT;
-	m_testOnput AT%q* :ARRAY[1..10]  OF UINT;
-	m_testIO1 AT%I* :BOOL;
-	m_testIO2 AT%I* :BOOL;
-	m_testIO3 AT%Q* :UINT;
-	m_testIO4 AT%I* :UINT;
-	m_testIO5 AT%Q* :UINT;
+	m_testInput AT%I* :UINT;
 
 	
 	// cart status
@@ -37,7 +31,7 @@ END_VAR
       </Implementation>
     </Method>
     <Method Name="run" Id="{5adedbe6-c484-4199-b427-bc8af7c6d1b0}">
-      <Declaration><![CDATA[METHOD run : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -59,7 +53,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="updateCmds" Id="{a083537e-6f52-4b88-8b83-3c9a5d0db87a}">
-      <Declaration><![CDATA[METHOD updateCmds : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED updateCmds : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -70,7 +64,7 @@ END_VAR]]></Declaration>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
-      <Declaration><![CDATA[METHOD updateStatus : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED updateStatus : BOOL
 VAR_INPUT
 END_VAR
 VAR

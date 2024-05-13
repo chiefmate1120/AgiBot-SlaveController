@@ -277,6 +277,9 @@
     <Compile Include="FBs_Auxiliary\FB_setupJnt5AdjustDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_masterConnectionCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Auxiliary\FB_TrocarDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>

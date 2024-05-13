@@ -63,7 +63,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="checkIO" Id="{fbd89c1b-d255-40db-a7aa-cd2a052b5167}">
-      <Declaration><![CDATA[METHOD checkIO : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED checkIO : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>

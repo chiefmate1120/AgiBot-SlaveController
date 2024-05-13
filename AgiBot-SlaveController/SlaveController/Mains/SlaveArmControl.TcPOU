@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="SlaveArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SlaveArmControl
 VAR
@@ -82,7 +82,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[masterStatus.m_motionScale := masterInputData.m_motionScale;
+        <ST><![CDATA[masterStatus.m_masterHeartBeat := masterInputData.m_heartBeat;
+masterStatus.m_motionScale := masterInputData.m_motionScale;
 
 FOR i:=1 TO g_mArmNum DO
 	masterStatus.m_armState[i] := masterInputData.m_armState[i];
@@ -113,7 +114,14 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
+        <ST><![CDATA[// Slave heart beat
+IF slaveOutputData.m_heartBeat > 10 THEN
+	slaveOutputData.m_heartBeat :=0;
+ELSE
+	slaveOutputData.m_heartBeat :=slaveOutputData.m_heartBeat+1;
+END_IF
+
+slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
 slaveOutputData.m_endoscopePose.m_pos :=slaveStatus.m_endoscopePose.m_pos;
 slaveOutputData.m_endoscopePose.m_rot :=slaveStatus.m_endoscopePose.m_rot;
 FOR i:= 1 TO g_sArmNum DO
@@ -196,6 +204,7 @@ END_VAR
       <LineId Id="87" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.masterInputDataCast">
+      <LineId Id="46" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
@@ -206,6 +215,11 @@ END_VAR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.slaveOutputDataCast">
+      <LineId Id="107" Count="0" />
+      <LineId Id="109" Count="1" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="108" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="35" Count="0" />
