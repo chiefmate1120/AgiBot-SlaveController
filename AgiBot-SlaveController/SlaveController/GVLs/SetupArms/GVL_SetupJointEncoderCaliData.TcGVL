@@ -1,14 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <GVL Name="GVL_SetupJointEncoderCaliData" Id="{a5e1148c-b030-4494-87c0-eb852ce07b8b}">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SetupJointEncoderCaliData" Id="{7aad2946-ee5e-4a08-bfa7-a07100afac79}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
+// Robot5 --joints parameters of setup arms
 VAR_GLOBAL
-		// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 100000;
-
-	// absolute encoder direction
-	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, -1, 1, -1];
-													
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
 		[10820860, 64919092, 57409031, 1851032, 1117696,
@@ -36,7 +31,14 @@ VAR_GLOBAL
 		 0, 0, 0, 1, 1,
 		 0, 0, 0, 1, 1,
 		 0, 0, 0, 1, 1];
-	
+		 
+//################ DO NOT modify parameters below ###########################
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
+
+	// absolute encoder direction
+	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, -1, 1, -1];
+													
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
 		[0, 0, 0, 0, 0,

@@ -49,7 +49,6 @@ VAR_GLOBAL
 	 0.0189,    0.1789,
 	 0.0189,    0.1789];
  	
-	 
 	// joint gravity offset
 	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
 	[0, 0, 0, 0,  0,

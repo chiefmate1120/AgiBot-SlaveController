@@ -596,11 +596,11 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\SlaveArms\GVL_SlaveMotorParameters.TcGVL">
+    <Compile Include="GVLs\SlaveArms\GVL_SlaveJointEncoderCaliData.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\SlaveArms\GVL_SlaveJointEncoderCaliData.TcGVL">
+    <Compile Include="GVLs\SlaveArms\GVL_SlaveMotorParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

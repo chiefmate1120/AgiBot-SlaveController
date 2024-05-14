@@ -4,12 +4,6 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot3 --joints parameters of setup arms
 VAR_GLOBAL
-		// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 100000;
-
-	// absolute encoder direction
-	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, -1, 1, -1];
-													
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
 		[5813168, 22663264, 1978132, 1938100, 13659124,
@@ -37,7 +31,14 @@ VAR_GLOBAL
 		 0, 0, 0, 1, 1,
 		 1, 0, 0, 1, 0,
 		 1, 0, 0, 1, 1];
-	
+		 
+//################ DO NOT modify parameters below ###########################
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
+
+	// absolute encoder direction
+	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, -1, 1, -1];
+													
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
 		[0, 0, 0, 0, 0,
