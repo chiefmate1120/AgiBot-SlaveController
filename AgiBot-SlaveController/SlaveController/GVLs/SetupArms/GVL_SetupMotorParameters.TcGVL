@@ -5,6 +5,7 @@
 {attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
 	// encoder resolution
+	//TODO: resolution of joint 2/3 need verification
 	g_incEncoderRes :ARRAY[1..g_setupJntNum] OF DINT :=[5(65536)];
 	g_absEncoderRes :ARRAY[1..g_setupJntNum] OF DINT :=[16777216,8192, 8192, 2(16777216)];
 	

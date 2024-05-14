@@ -39,7 +39,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// safety check
-IF ABS(i_setupArm.curJntVel[3]) > 0.02 THEN
+IF ABS(i_setupArm.curJntVel[3]) > 0.05 THEN
 	m_isFinished:=TRUE;
 	RETURN;
 END_IF

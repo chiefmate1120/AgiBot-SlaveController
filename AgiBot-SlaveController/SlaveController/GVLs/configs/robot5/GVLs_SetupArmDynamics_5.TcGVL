@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVLs_SetupArmDynamics" Id="{85fb4cf1-93e1-46c2-9468-807a08845e10}">
+  <GVL Name="GVLs_SetupArmDynamics_5" Id="{cd54ecd6-fba5-49f0-ae27-07363ca685a1}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
+{attribute 'qualified_only'}
 // Robot5 --dynamic parameters of setup arms
 VAR_GLOBAL 
 	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic

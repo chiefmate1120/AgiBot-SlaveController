@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVLs_SetupArmDynamics" Id="{85fb4cf1-93e1-46c2-9468-807a08845e10}">
+  <GVL Name="GVLs_SetupArmDynamics_3" Id="{726f6a9b-c53b-4c5a-b9a0-a82ea5d70cba}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
-// Robot5 --dynamic parameters of setup arms
+{attribute 'qualified_only'}
+// Robot3 --dynamic parameters of setup arms
 VAR_GLOBAL 
 	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic
 	% graParam=[ 9.8*mx0,...
@@ -26,10 +27,10 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 gravity parameter
 	g_setupJnt3GravityParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[12196.3, -2231.22, 128.3, -102.578,
-	 8476.95, -1240.58, 104.752, -105.76,
-	 14956.5, -4297.99, 622.564, -131.776,
-	 14926.3, -2807.93, 154.175, -103.6];
+	[13129.9, -3010.8, 300.188, -99.7871,
+	 14085.9, -3787.37, 476.955, -104.313,
+	  6440.78, -1524.39, 415.869, -117.102,
+	 22097.9, -5714.59, 558.077, -104.732];
 	 
 	(* setup joint3 friction parameters
 	 graParams = [p1mp2,p3,p4]
@@ -37,10 +38,10 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 friction parameter
 	g_setupJnt3FrictionParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[ -14017.8, 4829.59, -538.059, 77.276,
-	  -19818.6, 7327.61, -903.65, 81.3597,
-	-60054.7, 22353.3, -2711.22, 147.637,
-	-25150.3, 8097.23, -822.128, 75.4573];
+	[-11173.7, 3888.25, -491.555, 79.4495,
+	 -17709.9, 6947.19, -897.825, 94.243,
+	 -49343.5, 18899.5, -2449.52, 166.011,
+	-11537.6, 3698.16, -380.906, 51.8712];
 	
 	g_setupJnt3GravityPosRange :ARRAY[1..4, 1..2] OF REAL :=
 	[0.0189, 	0.1789,
@@ -51,17 +52,10 @@ VAR_GLOBAL
 	 
 	// joint gravity offset
 	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
-	[0, 0, 10, 0,  0,
-	 0, 0, 10, 0,  0,
-	 0, 0, 10, 0,  0,
-	 0, 0, 10, 0,  0];
-	 
-	// joint friction
-	g_setupJntFriction :ARRAY[1..4,1..5] OF REAL := 
-	[0, 0, 59.17, 0,  36.1551,
-	 0, 0, 47.6474, 0,  23.5557,
-	 0, 0, 49.7242, 0,  34.7673,
-	 0, 0, 50.3778, 0,   22.5034];
+	[0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0];
 
 END_VAR]]></Declaration>
   </GVL>
