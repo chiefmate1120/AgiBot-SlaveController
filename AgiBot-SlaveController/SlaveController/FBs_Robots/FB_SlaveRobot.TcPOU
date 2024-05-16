@@ -7,6 +7,9 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// flag if robot self-check passed
+	m_selfCheckPass :ARRAY[1..g_sArmNum] OF BOOL :=[4(false)];
+	
 	// flag if master are connected
 	m_masterOnLine :BOOL :=FALSE;
 	m_masterOnLineCheck :FB_masterConnectionCheck;
@@ -121,7 +124,8 @@ r_slaveStatus.m_endoscopeMounted :=m_endoscopeMounted;
 r_slaveStatus.m_endoscopePose :=m_endoscopePose;
 
 FOR i:=1 TO g_sArmNum DO
-	
+	r_slaveStatus.m_selfCheckPass[i] := m_selfCheckPass[i];	
+
 	// instrument data
 	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.onChipData.m_Instrutype;
 	r_slaveStatus.m_instruStauts[i].m_ready:=m_instrumentMountedFlag[i];
@@ -165,6 +169,7 @@ END_VAR
 	m_slaveArmState[i]:=SlaveArmState_Init;
 	m_lastSlaveArmState[i]:=SlaveArmState_Init;
 	m_nextSlaveArmState[i]:=SlaveArmState_Init;
+	m_selfCheckPass[i]:=false;
 	
 	// command init
 	m_armCtrlCmds[i].m_jntEnableFlag := g_zeroVec8i;
@@ -303,16 +308,25 @@ FOR i:=1 TO g_sArmNum DO
 	CASE m_slaveArmState[i] OF
 		// error
 		SlaveArmState_Error:
-			// to standby
 			IF FALSE = i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN
-				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+				// to standby
+				IF m_selfCheckPass[i] THEN
+					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+				// to init
+				ELSE
+					m_nextSlaveArmState[i] :=SlaveArmState_Init;
+				END_IF
 			END_IF
 			
 		// init
 		SlaveArmState_Init:
+			m_selfCheckPass[i]:=FALSE;
 			// to selfcheck
-			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_armState[1] > MasterArmState_Init  THEN
+			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_slaveSelfCheckFlag  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_SelfCheck;
+			// to adjust
+			ELSIF m_slaveArms[i].adjustOn THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 
 		//self check
@@ -320,6 +334,7 @@ FOR i:=1 TO g_sArmNum DO
 			// to standby
 			IF m_armCtrl[i].isFinished  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				m_selfCheckPass[i]:=TRUE;
 			END_IF
 		
 		//standby
@@ -460,9 +475,14 @@ FOR i:=1 TO g_sArmNum DO
 			
 		//arm adjust
 		SlaveArmState_Adjust:
-			// to standby
 			IF NOT(m_slaveArms[i].adjustOn) THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				// to standby
+				IF m_selfCheckPass[i] THEN
+					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+				// to init
+				ELSE
+					m_nextSlaveArmState[i] :=SlaveArmState_Init;
+				END_IF
 			END_IF
 		
 		// package
@@ -477,9 +497,14 @@ FOR i:=1 TO g_sArmNum DO
 			
 		// Cart
 		SlaveArmState_Cart:
-			// to standby
 			IF NOT(i_slavesInputDataPool.m_cartStatus.m_inMotion) THEN
-				m_nextSlaveArmState[i] := SlaveArmState_Standby;
+				// to standby
+				IF m_selfCheckPass[i] THEN
+					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+				// to init
+				ELSE
+					m_nextSlaveArmState[i] :=SlaveArmState_Init;
+				END_IF
 			END_IF
 		
 		// Gravity Calibration
@@ -532,11 +557,17 @@ FOR i:=1 TO g_sArmNum DO
 		// arm disable
 		SlaveArmState_Disable:
 			IF NOT(i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
-				m_nextSlaveArmState[i] := SlaveArmState_Standby;
+				// to standby
+				IF m_selfCheckPass[i] THEN
+					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
+				// to init
+				ELSE
+					m_nextSlaveArmState[i] :=SlaveArmState_Init;
+				END_IF
 			END_IF
 	END_CASE
 	
-	// control is forbiddan if setup arm is not in Hold
+	// control is forbidden if setup arm is not in Hold
 	IF SetupArmState_Hold <> i_slavesInputDataPool.m_setupStatus.m_armState[i] AND
 		(SlaveArmState_InstruReady = m_nextSlaveArmState[i] OR SlaveArmState_MasterSlave = m_nextSlaveArmState[i]
 		 OR SlaveArmState_ScopeReady = m_nextSlaveArmState[i] OR SlaveArmState_EndoScope = m_nextSlaveArmState[i]) THEN
@@ -575,6 +606,7 @@ END_FOR]]></ST>
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="97" Count="0" />
+      <LineId Id="158" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="98" Count="0" />
@@ -600,6 +632,7 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="47" Count="3" />
+      <LineId Id="154" Count="0" />
       <LineId Id="80" Count="2" />
       <LineId Id="87" Count="5" />
       <LineId Id="94" Count="0" />
@@ -679,15 +712,27 @@ END_FOR]]></ST>
       <LineId Id="345" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="322" Count="2" />
-      <LineId Id="349" Count="4" />
+      <LineId Id="350" Count="0" />
+      <LineId Id="631" Count="0" />
+      <LineId Id="627" Count="0" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="632" Count="0" />
+      <LineId Id="628" Count="0" />
+      <LineId Id="630" Count="0" />
+      <LineId Id="629" Count="0" />
+      <LineId Id="352" Count="1" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="634" Count="0" />
       <LineId Id="358" Count="0" />
       <LineId Id="19" Count="0" />
-      <LineId Id="29" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="636" Count="2" />
+      <LineId Id="635" Count="0" />
       <LineId Id="41" Count="2" />
       <LineId Id="354" Count="0" />
       <LineId Id="45" Count="1" />
+      <LineId Id="633" Count="0" />
       <LineId Id="44" Count="0" />
       <LineId Id="145" Count="0" />
       <LineId Id="166" Count="1" />
@@ -779,8 +824,8 @@ END_FOR]]></ST>
       <LineId Id="417" Count="0" />
       <LineId Id="424" Count="0" />
       <LineId Id="278" Count="4" />
-      <LineId Id="200" Count="0" />
       <LineId Id="306" Count="0" />
+      <LineId Id="639" Count="5" />
       <LineId Id="451" Count="1" />
       <LineId Id="455" Count="1" />
       <LineId Id="454" Count="0" />
@@ -788,7 +833,9 @@ END_FOR]]></ST>
       <LineId Id="460" Count="0" />
       <LineId Id="459" Count="0" />
       <LineId Id="461" Count="0" />
-      <LineId Id="433" Count="6" />
+      <LineId Id="433" Count="4" />
+      <LineId Id="439" Count="0" />
+      <LineId Id="645" Count="5" />
       <LineId Id="462" Count="1" />
       <LineId Id="465" Count="5" />
       <LineId Id="464" Count="0" />
@@ -808,7 +855,9 @@ END_FOR]]></ST>
       <LineId Id="165" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="472" Count="1" />
-      <LineId Id="615" Count="4" />
+      <LineId Id="615" Count="2" />
+      <LineId Id="651" Count="5" />
+      <LineId Id="618" Count="1" />
       <LineId Id="586" Count="1" />
       <LineId Id="478" Count="0" />
       <LineId Id="475" Count="1" />

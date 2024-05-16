@@ -53,12 +53,12 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}" PersistentType="true">MSCommu_MasterStatus</Name>
+			<Name GUID="{836E6C85-C5BD-4453-9D12-7387EC94DE46}" PersistentType="true">MSCommu_MasterStatus</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication
  Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller
  NOTE: cast from/to a ST_MasterStatus variable for data transfer/use]]></Comment>
-			<BitSize>2576</BitSize>
+			<BitSize>2584</BitSize>
 			<SubItem>
 				<Name>m_motionScale</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
@@ -66,7 +66,7 @@
 				<BitSize>64</BitSize>
 				<BitOffs>0</BitOffs>
 				<Default>
-					<Value>1</Value>
+					<Value>1.5</Value>
 				</Default>
 			</SubItem>
 			<SubItem>
@@ -127,14 +127,31 @@
 			<SubItem>
 				<Name>m_heartBeat</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<Comment TxtId=""><![CDATA[master robot heart beats]]></Comment>
 				<BitSize>16</BitSize>
 				<BitOffs>2560</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_slaveSelfCheckFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment TxtId=""><![CDATA[slave robot self-check trigger flag]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>2576</BitOffs>
+				<Default>
+					<Value>FALSE</Value>
+				</Default>
 			</SubItem>
 			<Hides>
 				<Hide GUID="{C3DB667D-ACBF-4CBD-A758-DEBF50A1D7A2}"/>
 				<Hide GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}"/>
 				<Hide GUID="{6CDB08A3-6E8D-47A5-A4EC-185288E4D097}"/>
 				<Hide GUID="{546D824F-37A4-4F12-9F2E-0021447931BD}"/>
+				<Hide GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}"/>
+				<Hide GUID="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}"/>
+				<Hide GUID="{30EB73AD-DCBD-4726-BC5B-A242518DAEE2}"/>
 			</Hides>
 		</DataType>
 		<DataType>
@@ -519,12 +536,12 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}" PersistentType="true">MSCommu_SlaveStatus</Name>
+			<Name GUID="{2804E760-8BC4-47C7-961D-42B56DF513BF}" PersistentType="true">MSCommu_SlaveStatus</Name>
 			<Comment><![CDATA[ data type specialized for master-slave control box communication
  Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller
  NOTE: cast from/to a ST_SlaveStatus variable for data transfer/use]]></Comment>
-			<BitSize>5976</BitSize>
+			<BitSize>5984</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
@@ -589,8 +606,19 @@
 			<SubItem>
 				<Name>m_heartBeat</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<Comment TxtId=""><![CDATA[slave robot heart beats]]></Comment>
 				<BitSize>16</BitSize>
 				<BitOffs>5960</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_seflCheckPass</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment TxtId=""><![CDATA[slave robot pass self-check]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>5976</BitOffs>
+				<Default>
+					<Value>FALSE</Value>
+				</Default>
 			</SubItem>
 			<Hides>
 				<Hide GUID="{517F3A1C-E2DA-4F0E-A99C-45AEB3CB303E}"/>
@@ -606,6 +634,10 @@
 				<Hide GUID="{9CB7F121-756E-4BF9-88E8-D7E45D0BF3D9}"/>
 				<Hide GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}"/>
 				<Hide GUID="{1CEB8DB7-193B-497B-950D-99CDDA535148}"/>
+				<Hide GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}"/>
+				<Hide GUID="{8015CFC1-0ED6-4FEC-809E-7A75CA581222}"/>
+				<Hide GUID="{966C1673-6483-4C70-8FC5-9522CD95DCF2}"/>
+				<Hide GUID="{09C125A5-8425-4F20-931D-CF2EF9E7D9C3}"/>
 			</Hides>
 		</DataType>
 		<DataType>
@@ -806,10 +838,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
-			<BitSize>12160</BitSize>
+			<BitSize>12224</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{08DC8AE5-5FCF-3A43-A9BA-DCC0F91B231A}">E_SlaveArmState</Type>
@@ -823,19 +855,48 @@
 				<Default>
 					<SubItem>
 						<Name>[1]</Name>
-						<EnumText>E_SlaveArmState.SlaveArmState_Init</EnumText>
+						<EnumText>E_SlaveArmState.SlaveArmState_Error</EnumText>
 					</SubItem>
 					<SubItem>
 						<Name>[2]</Name>
-						<EnumText>E_SlaveArmState.SlaveArmState_Init</EnumText>
+						<EnumText>E_SlaveArmState.SlaveArmState_Error</EnumText>
 					</SubItem>
 					<SubItem>
 						<Name>[3]</Name>
-						<EnumText>E_SlaveArmState.SlaveArmState_Init</EnumText>
+						<EnumText>E_SlaveArmState.SlaveArmState_Error</EnumText>
 					</SubItem>
 					<SubItem>
 						<Name>[4]</Name>
-						<EnumText>E_SlaveArmState.SlaveArmState_Init</EnumText>
+						<EnumText>E_SlaveArmState.SlaveArmState_Error</EnumText>
+					</SubItem>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_selfCheckPass</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ self-check pass flag]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+				<Default>
+					<SubItem>
+						<Name>[1]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+					<SubItem>
+						<Name>[2]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+					<SubItem>
+						<Name>[3]</Name>
+						<Bool>false</Bool>
+					</SubItem>
+					<SubItem>
+						<Name>[4]</Name>
+						<Bool>false</Bool>
 					</SubItem>
 				</Default>
 			</SubItem>
@@ -848,14 +909,14 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ instrument info]]></Comment>
 				<BitSize>512</BitSize>
-				<BitOffs>64</BitOffs>
+				<BitOffs>128</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_endoscopeMounted</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[ flag if endoscope is mounted]]></Comment>
 				<BitSize>8</BitSize>
-				<BitOffs>576</BitOffs>
+				<BitOffs>640</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -865,7 +926,7 @@
 				<Type GUID="{A41C2452-5720-3408-E222-D9CF54E07AAF}">ST_Frame</Type>
 				<Comment><![CDATA[ endoscope pose in cart coordinate]]></Comment>
 				<BitSize>768</BitSize>
-				<BitOffs>640</BitOffs>
+				<BitOffs>704</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdArmPose</Name>
@@ -876,7 +937,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ command arm pose in slave arm coordinate]]></Comment>
 				<BitSize>3072</BitSize>
-				<BitOffs>1408</BitOffs>
+				<BitOffs>1472</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmPose</Name>
@@ -887,7 +948,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ current arm pose in slave arm coordinate]]></Comment>
 				<BitSize>3072</BitSize>
-				<BitOffs>4480</BitOffs>
+				<BitOffs>4544</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdArmTwist</Name>
@@ -898,7 +959,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in  slave arm coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>7552</BitOffs>
+				<BitOffs>7616</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmTwist</Name>
@@ -909,7 +970,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in  slave arm coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>9088</BitOffs>
+				<BitOffs>9152</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_masterSlavePoseError</Name>
@@ -920,7 +981,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ master slave pose error [position, angle*axis] in endoscope coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>10624</BitOffs>
+				<BitOffs>10688</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1315,6 +1376,205 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
+			<Name GUID="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}" AutoDeleteType="true">MSCommu_MasterStatus</Name>
+			<Comment><![CDATA[ data type specialized for master-slave control box communication
+ Output from master arm control task, including arm status and cartesian data
+ Input to safety task and Slave controller
+ NOTE: cast from/to a ST_MasterStatus variable for data transfer/use]]></Comment>
+			<BitSize>2584</BitSize>
+			<SubItem>
+				<Name>m_motionScale</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<Comment><![CDATA[ linear motion scale]]></Comment>
+				<BitSize>64</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>1.5</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_armState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ state machine]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_teleSlaveArmIdx</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ index(0 to 4) of slave arm which is tele-linked to master arm]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_gripAngle</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ grip angle]]></Comment>
+				<BitSize>128</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curArmPose</Name>
+				<Type GUID="{DD48C470-F978-4FD0-990C-EA616882EEA7}">MSCommu_Frame</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ current arm pose in monitor]]></Comment>
+				<BitSize>1536</BitSize>
+				<BitOffs>256</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curArmTwist</Name>
+				<Type GUID="{F7F26096-FFFF-4AFB-AA6C-06EBC55FD920}">MSCommu_Vec6d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in monitor]]></Comment>
+				<BitSize>768</BitSize>
+				<BitOffs>1792</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>2560</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_slaveSelfCheckFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>2576</BitOffs>
+				<Default>
+					<Value>FALSE</Value>
+				</Default>
+			</SubItem>
+			<Hides>
+				<Hide GUID="{C3DB667D-ACBF-4CBD-A758-DEBF50A1D7A2}"/>
+				<Hide GUID="{F5BE16C1-AC9B-4120-A2DF-C86767900D28}"/>
+				<Hide GUID="{6CDB08A3-6E8D-47A5-A4EC-185288E4D097}"/>
+				<Hide GUID="{546D824F-37A4-4F12-9F2E-0021447931BD}"/>
+				<Hide GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}"/>
+			</Hides>
+		</DataType>
+		<DataType>
+			<Name GUID="{966C1673-6483-4C70-8FC5-9522CD95DCF2}" AutoDeleteType="true">MSCommu_SlaveStatus</Name>
+			<Comment><![CDATA[ data type specialized for master-slave control box communication
+ Output from slave arm control task, including arm status and cartesian data
+ Input to safety task and Master controller
+ NOTE: cast from/to a ST_SlaveStatus variable for data transfer/use]]></Comment>
+			<BitSize>5984</BitSize>
+			<SubItem>
+				<Name>m_armState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ state machine]]></Comment>
+				<BitSize>64</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_instruStauts</Name>
+				<Type GUID="{A08D5A40-E42B-47E3-ACC0-DC2B0A8D995B}">MSCommu_InstruStatus</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ instrument info]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_endoscopeMounted</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment><![CDATA[ flag if endoscope is mounted]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>576</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_endoscopePose</Name>
+				<Type GUID="{DD48C470-F978-4FD0-990C-EA616882EEA7}">MSCommu_Frame</Type>
+				<Comment><![CDATA[ endoscope pose in cart coordinate]]></Comment>
+				<BitSize>768</BitSize>
+				<BitOffs>584</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curArmPose</Name>
+				<Type GUID="{DD48C470-F978-4FD0-990C-EA616882EEA7}">MSCommu_Frame</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment TxtId=""><![CDATA[current arm pose in endoscope coordinate]]></Comment>
+				<BitSize>3072</BitSize>
+				<BitOffs>1352</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_masterSlavePoseError</Name>
+				<Type GUID="{F7F26096-FFFF-4AFB-AA6C-06EBC55FD920}">MSCommu_Vec6d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment TxtId=""><![CDATA[master slave pose error in endoscope coordinate]]></Comment>
+				<BitSize>1536</BitSize>
+				<BitOffs>4424</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>5960</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_seflCheckPass</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>5976</BitOffs>
+				<Default>
+					<Value>FALSE</Value>
+				</Default>
+			</SubItem>
+			<Hides>
+				<Hide GUID="{517F3A1C-E2DA-4F0E-A99C-45AEB3CB303E}"/>
+				<Hide GUID="{2B406446-DF47-400B-A407-C83DF87D4927}"/>
+				<Hide GUID="{2FC0CC2E-D2B5-40AF-96B0-8634FA172AA0}"/>
+				<Hide GUID="{23B837D9-9522-4B0F-B7B5-8AAA2EDC3C08}"/>
+				<Hide GUID="{00795E59-2B10-48A4-B683-714838E19B1F}"/>
+				<Hide GUID="{6992280D-2725-4A15-83C1-E1F0C395D5D4}"/>
+				<Hide GUID="{4EAFFB5F-B0AA-4FD0-8248-04CF04A12A36}"/>
+				<Hide GUID="{1FD19203-78F5-407C-88BA-11454F6E40E8}"/>
+				<Hide GUID="{B82C98EE-AA6F-45F6-86B5-DED1CE625D58}"/>
+				<Hide GUID="{9E3FFBEF-BAA8-47A4-9BC7-0C4BBE2C5163}"/>
+				<Hide GUID="{9CB7F121-756E-4BF9-88E8-D7E45D0BF3D9}"/>
+				<Hide GUID="{06F7FB1B-C17F-4DDD-959E-121FB4564584}"/>
+				<Hide GUID="{1CEB8DB7-193B-497B-950D-99CDDA535148}"/>
+				<Hide GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}"/>
+				<Hide GUID="{8015CFC1-0ED6-4FEC-809E-7A75CA581222}"/>
+			</Hides>
+		</DataType>
+		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-002000000018}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..2] OF BYTE</Name>
 			<BitSize>24</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
@@ -1419,7 +1679,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{81CD320A-D573-C24A-2B6F-28A45FCB57DD}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{73F0EFC3-48D8-90C1-3E3C-29B61B38916B}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1427,7 +1687,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_masterRobotData</Name>
 							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
-							<Type GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}">MSCommu_MasterStatus</Type>
+							<Type GUID="{836E6C85-C5BD-4453-9D12-7387EC94DE46}">MSCommu_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_safetyData</Name>
@@ -1655,12 +1915,12 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobotData</Name>
 							<Comment><![CDATA[ slave robot data, ouput to master controller box]]></Comment>
-							<Type GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}">MSCommu_SlaveStatus</Type>
+							<Type GUID="{2804E760-8BC4-47C7-961D-42B56DF513BF}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}">ST_SlaveStatus</Type>
+							<Type GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -1960,7 +2220,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}">ST_SlaveStatus</Type>
+							<Type GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2080,7 +2340,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{FAD64637-127B-7E53-94A8-8F02A8B2726B}">ST_SlaveStatus</Type>
+							<Type GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -2189,6 +2449,13 @@
 							</OwnerB>
 							<OwnerB Name="TIID^Cart^Drive 6 (iPOS4850 BX-CAT)">
 								<Link VarA="CartControl.m_slaveCart.m_testOnput[3]" TypeA="UINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="Receive PDO 1 mapping parameters^Controlword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-05-15T11:39:55">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIID^MSCommunication^Term 20 (EK1100)^Term 21 (EL6695)">
+								<Link VarA="SlaveArmControl.m_masterRobotData" TypeA="MSCommu_MasterStatus" InOutA="0" GuidA="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}" VarB="IO Inputs^MasterRobotData" RestoreInfo="TypeChanged" IdA="547" RestoreInfo="RestoredWithTypeChange"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -3099,8 +3366,8 @@
 						<EtherCAT SlaveType="3" AdsServerAddress="a9feba270216ea03" PdiType="#x0008" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="63" EoeType="1" FoeType="1" VendorId="#x00000002" ProductCode="#x1a273052" RevisionNo="#x00060000" InfoDataAddr="true" InfoDataNetId="true" InfoDataDcTimes="true" TimeoutMailbox2="2000" GenerateOwnNetId="true" ExternalDcRefClock="true" CheckRevisionNoType="3" PortPhys="51" DcTimeLoopControlOnly="true" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6695 EtherCAT Bridge terminal (Primary)" Desc="EL6695" PortABoxInfo="#x01000014">
 							<SyncMan>0010000426000100010000008000da050004001026010000</SyncMan>
 							<SyncMan>0016000422000100020000008000da050004001622010000</SyncMan>
-							<SyncMan>001ceb026400010003000000000000000000001c64010000</SyncMan>
-							<SyncMan>008e58012000010004000000000000000200008e20010000</SyncMan>
+							<SyncMan>001cec026400010003000000000000000000001c64010000</SyncMan>
+							<SyncMan>008e59012000010004000000000000000200008e20010000</SyncMan>
 							<Fmmu>0000000000000000001c00020100000001000000000000000000000000000000</Fmmu>
 							<Fmmu>0000000000000000008e00010100000002000000000000000000000000000000</Fmmu>
 							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
@@ -3208,12 +3475,12 @@
 							</Pdo>
 							<Pdo Name="IO Inputs" Index="#x1a08" Flags="#x0020" SyncMan="3">
 								<Entry Name="MasterRobotData" Index="#x6000" Sub="#x01">
-									<Type GUID="{96140B0C-C750-426B-9A81-17F05A9EB778}">MSCommu_MasterStatus</Type>
+									<Type GUID="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}">MSCommu_MasterStatus</Type>
 								</Entry>
 							</Pdo>
 							<Pdo Name="IO Outputs" Index="#x1608" InOut="1" Flags="#x0020" SyncMan="2">
 								<Entry Name="SlaveRobotData" Index="#x7000" Sub="#x01">
-									<Type GUID="{70B731CA-1A71-4572-B0A8-E537CC6567CF}">MSCommu_SlaveStatus</Type>
+									<Type GUID="{966C1673-6483-4C70-8FC5-9522CD95DCF2}">MSCommu_SlaveStatus</Type>
 								</Entry>
 							</Pdo>
 							<CoeProfile ProfileNo="5001"/>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="SlaveArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SlaveArmControl
 VAR
@@ -84,6 +84,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[masterStatus.m_masterHeartBeat := masterInputData.m_heartBeat;
 masterStatus.m_motionScale := masterInputData.m_motionScale;
+masterStatus.m_slaveSelfCheckFlag := masterInputData.m_slaveSelfCheckFlag;
 
 FOR i:=1 TO g_mArmNum DO
 	masterStatus.m_armState[i] := masterInputData.m_armState[i];
@@ -120,6 +121,8 @@ IF slaveOutputData.m_heartBeat > 10 THEN
 ELSE
 	slaveOutputData.m_heartBeat :=slaveOutputData.m_heartBeat+1;
 END_IF
+
+slaveOutputData.m_seflCheckPass:= slaveStatus.m_selfCheckPass[1] AND slaveStatus.m_selfCheckPass[2] AND slaveStatus.m_selfCheckPass[3] AND slaveStatus.m_selfCheckPass[4];
 
 slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
 slaveOutputData.m_endoscopePose.m_pos :=slaveStatus.m_endoscopePose.m_pos;
@@ -206,6 +209,7 @@ END_VAR
     <LineIds Name="SlaveArmControl.masterInputDataCast">
       <LineId Id="46" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="59" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="26" Count="2" />
@@ -219,6 +223,8 @@ END_VAR
       <LineId Id="109" Count="1" />
       <LineId Id="112" Count="1" />
       <LineId Id="111" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="129" Count="0" />
       <LineId Id="108" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="33" Count="0" />
