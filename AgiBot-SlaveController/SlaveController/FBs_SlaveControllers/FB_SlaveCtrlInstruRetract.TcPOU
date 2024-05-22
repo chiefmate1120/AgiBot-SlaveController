@@ -81,7 +81,7 @@ m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 
 // planning for joint3 motion
-m_retractPos :=GVL_SlaveMotorParameters.g_maxJntPos[3]+m_retractLimitBuffer;
+m_retractPos :=GVL_SlaveMotorParameters.g_maxJntPos[3]-m_retractLimitBuffer;
 q[1]:=i_slaveArm.curJntPos[3];
 q[2]:= m_retractPos;
 v[1]:=0;
