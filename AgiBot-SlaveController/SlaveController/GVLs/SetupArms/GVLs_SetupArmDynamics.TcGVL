@@ -21,7 +21,7 @@ VAR_GLOBAL
 	  0.0196,   59.3080 ];
 
 	(* setup joint3 gravity parameters
-	 graParams = [p1mp2,p3,p4]
+	 graParams = [p1,p2,p3,p4]
 	 gravity = p1*q^3 + p2*q^2 + p3^q + p4
 	 q(- [q0,q1]*)
  	// setup joint3 gravity parameter
