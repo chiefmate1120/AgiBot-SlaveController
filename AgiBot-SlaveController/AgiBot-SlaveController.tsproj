@@ -1648,11 +1648,14 @@
 	</ImageDatas>
 	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
-			<Settings MaxCpus="8" NonWinCpus="2">
+			<Settings MaxCpus="20">
 				<Cpu CpuId="1" RtLimit="90"/>
 				<Cpu CpuId="2" RtLimit="90"/>
 				<Cpu CpuId="3"/>
+				<Cpu CpuId="4" RtLimit="90"/>
+				<Cpu CpuId="5" RtLimit="90" BaseTime="0"/>
 				<Cpu CpuId="6" BaseTime="2500"/>
+				<Debugger Priority="61"/>
 			</Settings>
 			<Licenses CacheOrCheckLicensesOnStartup="true">
 				<Target>
@@ -1669,17 +1672,20 @@
 				<Task Id="5" Priority="3" CycleTime="10000" AmsPort="352" Affinity="#x00000004" AdtTasks="true">
 					<Name>TaskSetupArmControl</Name>
 				</Task>
-				<Task Id="1" Priority="4" CycleTime="10000" AmsPort="353" AdtTasks="true">
+				<Task Id="1" Priority="4" CycleTime="10000" AmsPort="353" Affinity="#x00000008" AdtTasks="true">
 					<Name>TaskSafetyCheck</Name>
 				</Task>
-				<Task Id="7" Priority="5" CycleTime="10000" AmsPort="354" AdtTasks="true">
+				<Task Id="7" Priority="5" CycleTime="10000" AmsPort="354" Affinity="#x00000008" AdtTasks="true">
 					<Name>TaskCartControl</Name>
+				</Task>
+				<Task Id="8" Priority="6" CycleTime="100000" AmsPort="355" Affinity="#x00000020" AdtTasks="true">
+					<Name>CTaskSlaveDynamics</Name>
 				</Task>
 			</Tasks>
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{73F0EFC3-48D8-90C1-3E3C-29B61B38916B}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{019926B6-8B23-2695-F6DC-07F0784B9618}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2455,7 +2461,7 @@
 					<UnrestoredVarLinks ImportTime="2024-05-15T11:39:55">
 						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
 							<OwnerB Name="TIID^MSCommunication^Term 20 (EK1100)^Term 21 (EL6695)">
-								<Link VarA="SlaveArmControl.m_masterRobotData" TypeA="MSCommu_MasterStatus" InOutA="0" GuidA="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}" VarB="IO Inputs^MasterRobotData" RestoreInfo="TypeChanged" IdA="547" RestoreInfo="RestoredWithTypeChange"/>
+								<Link VarA="SlaveArmControl.m_masterRobotData" TypeA="MSCommu_MasterStatus" InOutA="0" GuidA="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}" VarB="IO Inputs^MasterRobotData" RestoreInfo="TypeChanged" IdA="1" RestoreInfo="RestoredWithTypeChange"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -2516,8 +2522,11 @@
 				</Instance>
 			</Project>
 		</Plc>
+		<Cpp>
+			<Project GUID="{8ED95E9F-00B5-4111-BCDE-5B41D45CE5E5}" Name="CSyncModules" PrjFilePath="CSyncModules\CSyncModules.vcxproj" TmcFilePath="CSyncModules\CSyncModules.tmc"/>
+		</Cpp>
 		<Io>
-			<Device Id="5" DevType="109" DevFlags="#x0004">
+			<Device Id="5" Disabled="true" DevType="109" DevFlags="#x0004">
 				<Name>Device 5 (RT-Ethernet Adapter)</Name>
 				<AddressInfo>
 					<Pnp>
@@ -2530,7 +2539,7 @@
 					<Esl SyncSlaveProtocolPort="-1"/>
 				</Ethernet>
 			</Device>
-			<Device Id="6" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="169.254.186.39.7.1" RemoteName="Cart" InfoImageId="7">
+			<Device Id="6" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="169.254.186.39.7.1" RemoteName="Cart" InfoImageId="7">
 				<Name>Cart</Name>
 				<AddressInfo>
 					<Pnp>
@@ -3344,7 +3353,7 @@
 				</Box>
 				<EtherCAT ManualDcSelect="true" DcSyncMode="2" EnableVirtualSwitch="true" MaxSwitchPorts="4" MaxSwitchFrames="160" MaxSwitchMACs="100"/>
 			</Device>
-			<Device Id="1" DevType="111" DevFlags="#x0003" AmsPort="28673" AmsNetId="169.254.186.39.2.1" RemoteName="MSCommunication" InfoImageId="9">
+			<Device Id="1" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28673" AmsNetId="169.254.186.39.2.1" RemoteName="MSCommunication" InfoImageId="9">
 				<Name>MSCommunication</Name>
 				<AddressInfo>
 					<Pnp>
@@ -3772,7 +3781,7 @@
 				</Box>
 				<EtherCAT ManualDcSelect="true" DcSyncMode="4" EnableVirtualSwitch="true" MaxSwitchPorts="2" MaxSwitchFrames="120" MaxSwitchMACs="100"/>
 			</Device>
-			<Device Id="2" DevType="111" DevFlags="#x0003" AmsPort="28674" AmsNetId="169.254.186.39.3.1" RemoteName="SlaveArm1" InfoImageId="11">
+			<Device Id="2" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28674" AmsNetId="169.254.186.39.3.1" RemoteName="SlaveArm1" InfoImageId="11">
 				<Name>SlaveArm1</Name>
 				<AddressInfo>
 					<TcCom>
@@ -4917,7 +4926,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="7" DevType="111" DevFlags="#x0003" AmsPort="28679" AmsNetId="169.254.186.39.8.1" RemoteName="SlaveArm2" InfoImageId="13">
+			<Device Id="7" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28679" AmsNetId="169.254.186.39.8.1" RemoteName="SlaveArm2" InfoImageId="13">
 				<Name>SlaveArm2</Name>
 				<AddressInfo>
 					<TcCom>
@@ -6062,7 +6071,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="8" DevType="111" DevFlags="#x0003" AmsPort="28680" AmsNetId="169.254.186.39.9.1" RemoteName="SlaveArm3" InfoImageId="15">
+			<Device Id="8" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28680" AmsNetId="169.254.186.39.9.1" RemoteName="SlaveArm3" InfoImageId="15">
 				<Name>SlaveArm3</Name>
 				<AddressInfo>
 					<TcCom>
@@ -7207,7 +7216,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="9" DevType="111" DevFlags="#x0003" AmsPort="28681" AmsNetId="169.254.186.39.10.1" RemoteName="SlaveArm4" InfoImageId="17">
+			<Device Id="9" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28681" AmsNetId="169.254.186.39.10.1" RemoteName="SlaveArm4" InfoImageId="17">
 				<Name>SlaveArm4</Name>
 				<AddressInfo>
 					<TcCom>
@@ -8358,25 +8367,11 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500800010403}" Id="#x020300c0"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500880000403}" Id="#x02030100"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008A0000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030060"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008E0000403}" Id="#x02030120"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500811000403}" Id="#x02030080"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500821000403}" Id="#x02030110"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500821010403}" Id="#x020300b0"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500831000403}" Id="#x020300f0"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0420-500840000403}" Id="#x020300a0"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030090" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030050" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-0100-0304-0020-500800010403}" Id="#x020300e0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x020300d0" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030070" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502003-00E0-0304-0020-5008E0000403}" Id="#x02030130" Watchdog="00000000000000000000000000000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
 			<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput" VarB="TxPdoMappingCspCsv^Statusword"/>
