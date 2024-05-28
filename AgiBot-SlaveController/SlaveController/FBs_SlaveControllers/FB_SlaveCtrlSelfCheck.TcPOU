@@ -8,7 +8,7 @@ VAR CONSTANT
 END_VAR
 VAR
 	// slave self-check motion parameters
-	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[0.0, 	-PI/2, 0.52, 	0, 0, 0, 0,0];																			//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
+	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_sJntNum] OF LREAL:=[0.0, 	-PI/2, 0.55, 	0, 0, 0, 0,0];																			//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
 	m_selfCheckMaxjntVel:Vec8d:=[0.2, 0.2, 0.1, 5(1.0)];
 	m_selfCheckMaxjntAcc:Vec8d:=[1.0, 1.0, 0.5, 5(2.0)];
 	m_selfCheckMaxjntJerk:Vec8d:=[2.0,2.0, 1.0, 5(4.0)];

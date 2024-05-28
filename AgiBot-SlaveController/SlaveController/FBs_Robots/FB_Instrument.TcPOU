@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -36,6 +36,7 @@ VAR
 	// TODO: move parameters below to instrument chip
 	m_zeroPosNeedleDriver :Vec5d :=[2.04, 1.404, 2.168, 5.64, 0];
 	m_zeroPosFenestraedForceps :Vec5d :=[2.103, 1.603, 2.55, 5.74, 0];
+	m_zeroPoMarylandForceps :Vec5d :=[1.874, 1.891, 2.005, 5.711,  0];
 	
 	// variables used to read instrument information
 	m_Step:INT;
@@ -70,12 +71,14 @@ END_VAR
       <Implementation>
         <ST><![CDATA[checkInstruType := TRUE;
 
-IF m_onChipData.m_InstruID = 20 OR m_onChipData.m_InstruID = 9665 THEN// TODO: remove 9665
+IF m_onChipData.m_InstruID = 20  THEN
 	m_onChipData.m_Instrutype :=  InstruType_endoscope;
 ELSIF m_onChipData.m_InstruID = 14 THEN
 	m_onChipData.m_Instrutype := InstruType_FenestratedForceps;
 ELSIF m_onChipData.m_InstruID = 8 THEN
 	m_onChipData.m_Instrutype :=  InstruType_NeedleDriver;
+ELSIF m_onChipData.m_InstruID = 13 THEN
+	m_onChipData.m_Instrutype :=  InstruType_MarylandForceps;
 ELSE
 	checkInstruType := FALSE;
 END_IF
@@ -85,6 +88,8 @@ IF m_onChipData.m_Instrutype = InstruType_NeedleDriver THEN
 	m_onChipData.m_InstruPos := m_zeroPosNeedleDriver;
 ELSIF m_onChipData.m_Instrutype = InstruType_FenestratedForceps THEN
 	m_onChipData.m_InstruPos := m_zeroPosFenestraedForceps;
+ELSIF m_onChipData.m_Instrutype = InstruType_MarylandForceps THEN
+	m_onChipData.m_InstruPos := m_zeroPoMarylandForceps;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -721,10 +726,13 @@ END_FOR
       <LineId Id="6" Count="1" />
       <LineId Id="13" Count="1" />
       <LineId Id="8" Count="1" />
+      <LineId Id="33" Count="1" />
       <LineId Id="16" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="19" Count="1" />
       <LineId Id="23" Count="3" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.endoscope30Deg.Get">
