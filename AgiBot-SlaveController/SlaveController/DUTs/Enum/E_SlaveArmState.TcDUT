@@ -22,8 +22,9 @@
 	SlaveArmState_InstruRetract :=17,
 	SlaveArmState_InstruInvasion :=18,
 	SlaveArmState_Disable := 19,
+	SlaveArmState_InstruCali := 20,
 	
-	SlaveArmState_totalNum :=SlaveArmState_Disable
+	SlaveArmState_totalNum :=SlaveArmState_InstruCali
 );
 END_TYPE
 ]]></Declaration>

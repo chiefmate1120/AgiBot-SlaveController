@@ -219,9 +219,6 @@ m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
 m_panelOnFlag := m_panelDetect.run(m_panelInstrumentOnIO);
 m_instruOnFlag := m_instruDetect.run(m_panelInstrumentOnIO);
 
-// handle trocar and instrument signal as a whole
-m_instruOnFlag := m_instruOnFlag AND m_trocarOnFlag;
-
 //read instrument information
 IF FALSE = m_instruOnFlag THEN
 	m_instrument.reset();
@@ -836,6 +833,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="trocarOn" Id="{ad96c106-befc-48a9-abe7-5d7b42881f88}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC trocarOn : bool]]></Declaration>
+      <Get Name="Get" Id="{bb55ac1e-1079-48fa-ba1e-bc9844803f5a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[trocarOn := m_trocarOnFlag;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -998,9 +1006,6 @@ END_FOR
       <LineId Id="56" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="6" Count="2" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="60" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="41" Count="0" />
@@ -1171,6 +1176,9 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simJacoInv.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.trocarOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateCmds">

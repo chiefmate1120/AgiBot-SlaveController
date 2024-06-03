@@ -379,6 +379,9 @@
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInstruRetract.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInstruCali.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>

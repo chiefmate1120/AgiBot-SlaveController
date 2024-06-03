@@ -1,0 +1,398 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlInstruCali" Id="{f6122a4e-e5d8-4252-8b12-6598a16e0174}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Mounting Instrument
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruCali EXTENDS FB_SlaveArmCtrlBase
+VAR
+	// mount motion planning
+	m_jntOTG :ARRAY[1..8] OF FB_secOrdTrajFilter;
+	m_instruMountVel :LREAL := 2*PI;
+	m_instruMountAcc :LREAL := 4*PI;
+	
+	// 	cali status
+	m_rollJntCaliStatus :INT := 0;
+	m_pitchJntCaliStatus :INT := 0;
+	m_yawJntCaliStatus :INT := 0;
+	
+	// joint current threshold which indicate panel is buckled with instrument
+	m_maxJntCurrent :LREAL := 150;
+	
+	// joint position at limits
+	m_jntLimitPos1, m_jntLimitPos2, m_jntCaliPos :LREAL;
+
+	// flag if joint is mounted
+	m_jointMounted :ARRAY[1..8] OF BOOL := [5(FALSE)];
+	
+	// instrument mount motion range
+	m_mountMotionAng :LREAL :=pi;
+	
+	// command mount motion
+	m_targetMountPos :Vec8d;
+	
+	// instrument zero position
+	m_instruZeroPosition :Vec5d;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{92420bbe-f9a2-4f31-a213-0e60613d7858}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// retur directly if instrument/endoscope is not readed
+IF NOT i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
+	m_rollJntCaliStatus :=0;
+	m_pitchJntCaliStatus :=0;
+	m_yawJntCaliStatus :=0;
+	FOR i:=4 TO 8 DO
+		m_jointMounted[i]:=FALSE;
+	END_FOR
+	return;
+END_IF
+
+IF m_rollJntCaliStatus <> -1 THEN
+	rollJntCali(i_slaveArm);
+ELSIF m_pitchJntCaliStatus <> -1 THEN
+	pitchJntCali(i_slaveArm);
+ELSIF InstruType_CauteryHook = i_slaveArm.instrument.onChipData.m_Instrutype AND m_yawJntCaliStatus <> -1 THEN
+	//TODO
+	RETURN;
+ELSIF m_yawJntCaliStatus <> -1 THEN
+	yawJntCali_gripper(i_slaveArm);
+END_IF
+
+IF m_yawJntCaliStatus = -1 THEN
+	FOR  i:=1 TO  5 DO
+		m_instruZeroPosition[i]:=i_slaveArm.linkSingle[i+3];
+	END_FOR
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{d75d663d-308e-4f56-ae72-9d04b2f0e2be}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+m_jntOPMode[5] := DriverOPMode_PosTrq;
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
+m_jntOPMode[8] := DriverOPMode_PosTrq;
+
+FOR i:=4 TO 8 DO
+	m_targetMountPos[i]:=m_cmdJntPos[i];
+	m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+	m_jointMounted[i]:=FALSE;
+END_FOR
+
+m_rollJntCaliStatus :=0;
+m_pitchJntCaliStatus :=0;
+m_yawJntCaliStatus :=0;
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="pitchJntCali" Id="{e9c6d1cd-4c78-4bd5-b668-b8facd8b1f86}">
+      <Declaration><![CDATA[METHOD pitchJntCali : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntPos :Vec8d;
+	jntRange:LREAL;
+	jntIdx :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[jntIdx:=6;
+curJntPos := i_slaveArm.curJntPos;
+
+CASE m_pitchJntCaliStatus OF
+	// roll clockwise
+	0:
+		m_targetMountPos[jntIdx]:=curJntPos[jntIdx]+m_mountMotionAng;
+	
+		//buckle roll joint
+		IF i_slaveArm.filtJntCurrent[jntIdx]> m_maxJntCurrent THEN 
+			m_jntLimitPos1 := curJntPos[jntIdx];
+			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			m_pitchJntCaliStatus := 1;
+		END_IF
+		
+	// roll anticlockwise
+	1:
+		m_targetMountPos[jntIdx]:=curJntPos[jntIdx]-m_mountMotionAng;
+	
+		//buckle roll joint
+		IF i_slaveArm.filtJntCurrent[jntIdx]<- m_maxJntCurrent THEN 
+			m_jntLimitPos2 := curJntPos[jntIdx];
+			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			m_pitchJntCaliStatus := 2;
+		END_IF
+	
+	2:// calculate center/calibarted position
+		jntRange := m_jntLimitPos1 - m_jntLimitPos2;
+		m_jntCaliPos := curJntPos[jntIdx] + jntRange/2;
+		m_targetMountPos[jntIdx] := m_jntCaliPos;
+		m_pitchJntCaliStatus := 3;
+
+	3:
+		IF ABS(m_jntCaliPos-curJntPos[jntIdx]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh  THEN
+			m_pitchJntCaliStatus := -1;
+		END_IF
+		
+END_CASE
+
+// traj plan
+m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="rollJntCali" Id="{6fecbb26-dee3-460d-8ebc-c5e9758738f5}">
+      <Declaration><![CDATA[METHOD rollJntCali : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntPos :Vec8d;
+	jntRange:LREAL;
+	jntIdx :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[jntIdx:=7;
+curJntPos := i_slaveArm.curJntPos;
+
+CASE m_rollJntCaliStatus OF
+	// roll clockwise
+	0:
+		m_targetMountPos[jntIdx]:=curJntPos[jntIdx]+m_mountMotionAng;
+	
+		//buckle roll joint
+		IF i_slaveArm.filtJntCurrent[jntIdx]> m_maxJntCurrent THEN 
+			m_jntLimitPos1 := curJntPos[jntIdx];
+			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			m_rollJntCaliStatus := 1;
+		END_IF
+		
+	// roll anticlockwise
+	1:
+		m_targetMountPos[jntIdx]:=curJntPos[jntIdx]-m_mountMotionAng;
+	
+		//buckle roll joint
+		IF i_slaveArm.filtJntCurrent[jntIdx]<- m_maxJntCurrent THEN 
+			m_jntLimitPos2 := curJntPos[jntIdx];
+			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			m_rollJntCaliStatus := 2;
+		END_IF
+	
+	2:// calculate center/calibarted position
+		jntRange := m_jntLimitPos1 - m_jntLimitPos2;
+		m_jntCaliPos := curJntPos[jntIdx] + jntRange/2;
+		m_targetMountPos[jntIdx] := m_jntCaliPos;
+		m_rollJntCaliStatus := 3;
+
+	3:
+		IF ABS(m_jntCaliPos-curJntPos[jntIdx]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh  THEN
+			m_rollJntCaliStatus := -1;
+		END_IF
+		
+END_CASE
+
+// traj plan
+m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="yawJntCali_gripper" Id="{98a7face-4e61-461c-9585-b9ec777fc235}">
+      <Declaration><![CDATA[METHOD yawJntCali_gripper : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i :INT;
+	curJntPos :Vec8d;
+	jntRange:LREAL;
+	jntIdx :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
+
+CASE m_yawJntCaliStatus OF
+	// roll clockwise
+	0:
+		//buckle panel with instrument
+		FOR i:=4 TO 5 DO
+			// check if buckled 
+			IF i_slaveArm.filtJntCurrent[i]<- m_maxJntCurrent THEN 
+				m_jointMounted[i]:=TRUE;
+				m_targetMountPos[i]:=curJntPos[i];
+				m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			END_IF
+			
+			// set target joint position
+			IF FALSE = m_jointMounted[i] THEN
+				m_targetMountPos[i]:=curJntPos[i]-m_mountMotionAng;
+			END_IF
+		END_FOR
+		
+		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+			m_yawJntCaliStatus := 1;
+			m_jointMounted[4]:=FALSE;
+			m_jointMounted[5]:=FALSE;
+		END_IF
+
+	// roll anticlockwise
+	1:
+		//buckle panel with instrument
+		FOR i:=4 TO 5 DO
+			// check if buckled 
+			IF i_slaveArm.filtJntCurrent[i]> m_maxJntCurrent THEN 
+				m_jointMounted[i]:=TRUE;
+				m_targetMountPos[i]:=curJntPos[i];
+				m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
+			END_IF
+			
+			// set target joint position
+			IF FALSE = m_jointMounted[i] THEN
+				m_targetMountPos[i]:=curJntPos[i]+m_mountMotionAng;
+			END_IF
+		END_FOR
+		
+		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+			m_yawJntCaliStatus := -1;
+		END_IF
+	
+		
+END_CASE
+
+// traj plan
+m_jntOTG[4].run(m_targetMountPos[4],0.0, o_cmdAcc=>m_cmdJntAcc[4],o_cmdVel=>m_cmdJntVel[4],o_cmdPos=>m_cmdJntPos[4]);
+m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cmdJntVel[5],o_cmdPos=>m_cmdJntPos[5]);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlInstruCali">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruCali.calcCmdJntPos">
+      <LineId Id="491" Count="0" />
+      <LineId Id="493" Count="0" />
+      <LineId Id="519" Count="1" />
+      <LineId Id="517" Count="0" />
+      <LineId Id="540" Count="0" />
+      <LineId Id="543" Count="0" />
+      <LineId Id="539" Count="0" />
+      <LineId Id="494" Count="1" />
+      <LineId Id="507" Count="0" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="508" Count="0" />
+      <LineId Id="510" Count="6" />
+      <LineId Id="509" Count="0" />
+      <LineId Id="532" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="535" Count="0" />
+      <LineId Id="537" Count="1" />
+      <LineId Id="534" Count="0" />
+      <LineId Id="478" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruCali.init">
+      <LineId Id="174" Count="14" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="208" Count="1" />
+      <LineId Id="192" Count="3" />
+      <LineId Id="92" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruCali.pitchJntCali">
+      <LineId Id="176" Count="45" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruCali.rollJntCali">
+      <LineId Id="177" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="71" Count="2" />
+      <LineId Id="146" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="79" Count="1" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="152" Count="9" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="173" Count="2" />
+      <LineId Id="126" Count="1" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="137" Count="3" />
+      <LineId Id="142" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_gripper">
+      <LineId Id="177" Count="4" />
+      <LineId Id="225" Count="12" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="238" Count="1" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="260" Count="1" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="191" Count="2" />
+      <LineId Id="243" Count="16" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="214" Count="4" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="219" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

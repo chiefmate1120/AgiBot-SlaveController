@@ -65,6 +65,7 @@ VAR
 	m_instruRetract :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruRetract;
 	m_instruInvasion :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruInvasion;
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDisable;
+	m_instruCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruCali;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -201,6 +202,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_InstruRetract] := m_instruRetract[i];
 	m_armCtrlFactory[i,SlaveArmState_InstruInvasion] := m_instruInvasion[i];
 	m_armCtrlFactory[i,SlaveArmState_Disable] := m_armDisable[i];
+	m_armCtrlFactory[i,SlaveArmState_InstruCali] := m_instruCali[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -374,7 +376,7 @@ FOR i:=1 TO g_sArmNum DO
 			// to stand by
 			ELSIF NOT(m_slaveArms[i].panelOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
-			ELSIF m_slaveArms[i].instruOn  THEN
+			ELSIF m_slaveArms[i].instruOn AND m_slaveArms[i].trocarOn  THEN
 				IF m_instrumentMountedFlag[i] THEN
 					// to scope ready
 					IF  InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype THEN 
@@ -392,7 +394,7 @@ FOR i:=1 TO g_sArmNum DO
 		//mount instrument
 		SlaveArmState_MountInstru:
 			// to panel ready
-			IF NOT m_slaveArms[i].instruOn THEN
+			IF NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			ELSIF m_armCtrl[i].isFinished THEN
 				m_instrumentMountedFlag[i] :=TRUE;
@@ -418,7 +420,7 @@ FOR i:=1 TO g_sArmNum DO
 		// instrument ready
 		SlaveArmState_InstruReady:
 			// to instrument retract
-			IF NOT m_slaveArms[i].instruOn THEN
+			IF  NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
@@ -438,7 +440,7 @@ FOR i:=1 TO g_sArmNum DO
 			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			// to instrument retract
-			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
+			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			END_IF
@@ -446,7 +448,7 @@ FOR i:=1 TO g_sArmNum DO
 		//endoscope ready
 		SlaveArmState_ScopeReady:
 			// to instrument retract
-			IF NOT m_slaveArms[i].instruOn THEN
+			IF NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
@@ -468,7 +470,7 @@ FOR i:=1 TO g_sArmNum DO
 				OR MasterArmState_Endoscope <> i_slavesInputDataPool.m_masterStatus.m_armState[2] THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			// to instrument retract
-			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
+			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			END_IF
@@ -646,6 +648,7 @@ END_FOR]]></ST>
       <LineId Id="132" Count="0" />
       <LineId Id="139" Count="1" />
       <LineId Id="147" Count="0" />
+      <LineId Id="161" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />

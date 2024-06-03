@@ -641,7 +641,7 @@
 			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{08DC8AE5-5FCF-3A43-A9BA-DCC0F91B231A}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{504A4D97-68FB-2F4B-E6BA-05791203AEC0}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -721,8 +721,12 @@
 				<Enum>19</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_InstruCali]]></Text>
+				<Enum>20</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_totalNum]]></Text>
-				<Enum>19</Enum>
+				<Enum>20</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -838,13 +842,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>12224</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{08DC8AE5-5FCF-3A43-A9BA-DCC0F91B231A}">E_SlaveArmState</Type>
+				<Type GUID="{504A4D97-68FB-2F4B-E6BA-05791203AEC0}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1920,7 +1924,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}">ST_SlaveStatus</Type>
+							<Type GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2220,7 +2224,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}">ST_SlaveStatus</Type>
+							<Type GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2340,7 +2344,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{05DAA658-FD47-A6C2-F22E-DC92237FDDFC}">ST_SlaveStatus</Type>
+							<Type GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
