@@ -59,7 +59,7 @@ END_VAR
 VAR 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// retur directly if instrument/endoscope is not readed
+        <ST><![CDATA[// return directly if instrument/endoscope is not readed
 IF i_slaveArm.instrument.onChipData.m_Error THEN
 	return;
 END_IF

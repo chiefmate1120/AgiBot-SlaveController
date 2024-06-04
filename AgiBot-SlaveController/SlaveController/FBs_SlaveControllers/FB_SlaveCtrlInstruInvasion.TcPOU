@@ -8,6 +8,15 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// max damping when reaching invasion depth
+	m_maxDamp :LREAL :=100;
+	
+	// current distance form target invasion depth 
+	m_invasionDis :LREAL :=0;
+	
+	// distance threshold from target depth to start enable damp
+	m_dampDisThres :LREAL :=0.03;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -32,7 +41,32 @@ END_VAR]]></Declaration>
 curInstruDepth := i_slaveArm.curJntPos[3]-i_slaveArm.instrument.kinematicParameters.m_rodLength-i_slaveArm.instrument.kinematicParameters.m_headLength
 						- i_slaveArm.instrument.kinematicParameters.m_fingerLength;
 
+m_invasionDis:=curInstruDepth-i_slaveArm.m_instruInvasionDepth;
+						
 m_isFinished := curInstruDepth<= i_slaveArm.m_instruInvasionDepth;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{48bb9834-7afe-4e4a-9ec9-117889c76c2c}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	dampScale :lreal ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+dampScale  :=LIMIT(0, 1-m_invasionDis/m_dampDisThres,1);
+m_cmdJntTrq[3]:= -dampScale * m_maxDamp * i_slaveArm.curJntVel[3];
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -52,7 +86,7 @@ m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
-
+m_invasionDis:=m_dampDisThres;
 
 // only joint 3 is allowed to be pushed
 m_jntOPMode := g_slaveAllPosMode;
@@ -72,9 +106,19 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="152" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="137" Count="1" />
+      <LineId Id="164" Count="0" />
       <LineId Id="140" Count="0" />
+      <LineId Id="165" Count="0" />
       <LineId Id="139" Count="0" />
       <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruInvasion.calcCmdJntTrq">
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruInvasion.init">
       <LineId Id="83" Count="0" />

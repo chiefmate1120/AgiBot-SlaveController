@@ -30,13 +30,13 @@ VAR
 	m_endoscopeRotateReduction :LREAL := 2/3;
 	
 	// flag if endoscope is 30deg
-	m_endoscope30Deg :BOOL:=true;
+	m_endoscope30Deg :BOOL:=TRUE;
 	
-	// joint single link position when instrument at zero posture
-	// TODO: move parameters below to instrument chip
-	m_zeroPosNeedleDriver :Vec5d :=[2.04, 1.404, 2.168, 5.64, 0];
-	m_zeroPosFenestraedForceps :Vec5d :=[2.103, 1.603, 2.55, 5.74, 0];
-	m_zeroPoMarylandForceps :Vec5d :=[1.874, 1.891, 2.005, 5.711,  0];
+	// udint code for zero position
+	m_zeroPosCode : UDINT;
+	
+	// joint4 zero position, which is supposed to be a contant value
+	m_jnt4ZeroPos :LREAL := 5.7;
 	
 	// variables used to read instrument information
 	m_Step:INT;
@@ -79,18 +79,14 @@ ELSIF m_onChipData.m_InstruID = 8 THEN
 	m_onChipData.m_Instrutype :=  InstruType_NeedleDriver;
 ELSIF m_onChipData.m_InstruID = 13 THEN
 	m_onChipData.m_Instrutype :=  InstruType_MarylandForceps;
+ELSIF m_onChipData.m_InstruID = 15 THEN
+	m_onChipData.m_Instrutype :=  InstruType_CurvedScissors;
 ELSE
 	checkInstruType := FALSE;
 END_IF
 
-//NOTE: zero posture data is defined as single link position, need to update to chip later
-IF m_onChipData.m_Instrutype = InstruType_NeedleDriver THEN
-	m_onChipData.m_InstruPos := m_zeroPosNeedleDriver;
-ELSIF m_onChipData.m_Instrutype = InstruType_FenestratedForceps THEN
-	m_onChipData.m_InstruPos := m_zeroPosFenestraedForceps;
-ELSIF m_onChipData.m_Instrutype = InstruType_MarylandForceps THEN
-	m_onChipData.m_InstruPos := m_zeroPoMarylandForceps;
-END_IF]]></ST>
+RETURN;
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="endoscope30Deg" Id="{4bce8a98-2eb7-4bb1-9eae-0e7d18b990ab}" FolderPath="property\">
@@ -598,34 +594,11 @@ CASE m_Step OF
 		
 		
 	70: //处理位置，L1:0-9位，L2:10-19位，L3:20-29位
-		m_PosL1:=16#000001FF AND m_PosReadResult;  //0000  01FF                             01,1111,1111
-		m_PosL2:=SHR((16#0007FC00 AND m_PosReadResult),10);  //0007  F600        0111,1111,1100,0000,0000
-		m_PosL3:=SHR((16#1FF00000 AND m_PosReadResult),20); //        01,1111,1111,0000,0000,0000,0000,0000
-		m_signL1:=16#0200 AND m_PosReadResult;
-		m_signL2:=SHR((16#80000 AND m_PosReadResult),10);
-		m_signL3:=SHR((16#20000000 AND m_PosReadResult),20);
-		
-		IF m_signL1=512 THEN
-			m_onChipData.m_InstruPos[1]:=-UDINT_TO_LREAL(m_PosL1)/50;
-		ELSE
-			m_onChipData.m_InstruPos[1]:=UDINT_TO_LREAL(m_PosL1)/50;
-		END_IF
-		
-		IF m_signL2=512 THEN
-			m_onChipData.m_InstruPos[2]:=-UDINT_TO_LREAL(m_PosL2)/50;
-		ELSE
-			m_onChipData.m_InstruPos[2]:=UDINT_TO_LREAL(m_PosL2)/50;
-		END_IF
-		
-		IF m_signL3=512 THEN
-			m_onChipData.m_InstruPos[3]:=-UDINT_TO_LREAL(m_PosL3)/50;
-		ELSE
-			m_onChipData.m_InstruPos[3]:=UDINT_TO_LREAL(m_PosL3)/50;
-		END_IF
+		zeroPosDecode(m_PosReadResult, o_q1=>m_onChipData.m_InstruPos[1],o_q2=>m_onChipData.m_InstruPos[2],o_q3=>m_onChipData.m_InstruPos[3]);
+		m_onChipData.m_InstruPos[4] := m_jnt4ZeroPos;
+		m_onChipData.m_InstruPos[5] := 0;
 		
 		m_Step:=80;
-	
-		
 		
 	80://读取器械使用次数 6094
 		m_SdoRead(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr,	nSubIndex:= 0, nIndex:= 16#6094, pDstBuf:= ADR(m_UsageReadResult), cbBufLen:= SIZEOF(m_UsageReadResult), bExecute:= TRUE, 	tTimeout:= , bBusy=> , bError=> , nErrId=> , cbRead=> );
@@ -718,6 +691,97 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="writeZeroPosToChip" Id="{bd19b6c1-405e-4351-971f-f03bf3bea173}">
+      <Declaration><![CDATA[METHOD PUBLIC writeZeroPosToChip : BOOL
+VAR_INPUT
+	i_q1:LREAL;
+	i_q2:LREAL;
+	i_q3:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[zeroPosCode(i_q1,i_q2,i_q3, o_code=>m_zeroPosCode);
+
+writeZeroPosToChip:=FALSE;
+m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr, nSubIndex:= 0, nIndex:= 16#6096, pSrcBuf:= ADR(m_zeroPosCode), cbBufLen:= SIZEOF(m_zeroPosCode), bExecute:= TRUE, );
+IF NOT m_SdoWrite.bBusy THEN
+	m_SdoWrite(bExecute:=FALSE);
+	writeZeroPosToChip:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="zeroPosCode" Id="{84c93418-be66-4d42-a7c9-9496164ac08f}">
+      <Declaration><![CDATA[// code instrument joints(4/5/6) zero position as a UDINT
+// joint1 : bit 21-30; joint2: bit 11-20; joint3: bit1-10
+// zeroPos: [0, 2pi]; code:[0-3sFF]
+METHOD PROTECTED zeroPosCode : BOOL
+VAR_INPUT
+	i_q1:LREAL;
+	i_q2:LREAL;
+	i_q3:LREAL;
+END_VAR
+VAR_OUTPUT
+	o_code:UDINT;
+END_VAR
+VAR
+	posCode:UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// highest bit set to 1
+o_code:=2;
+
+// joint1
+posCode := LREAL_TO_UDINT(16#3FF * LIMIT(0,i_q1/g_2pi,1));
+o_code := SHL(o_code, 10);
+o_code := o_code OR posCode;
+
+// joint2
+posCode := LREAL_TO_UDINT(16#3FF * LIMIT(0,i_q2/g_2pi,1));
+o_code := SHL(o_code, 10);
+o_code := o_code OR posCode;
+
+// joint3
+posCode := LREAL_TO_UDINT(16#3FF * LIMIT(0,i_q3/g_2pi,1));
+o_code := SHL(o_code, 10);
+o_code := o_code OR posCode;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="zeroPosDecode" Id="{7d5604d0-0288-46b2-b433-10a7497ca58f}">
+      <Declaration><![CDATA[// decode instrument joints(4/5/6) zero position from a UDINT
+// joint1 : bit 21-30; joint2: bit 11-20; joint4: bit1-10
+// zeroPos: [0, 2pi]; code:[0-2FF]
+METHOD PROTECTED zeroPosDecode : BOOL
+VAR_INPUT
+	i_posCode :UDINT;
+END_VAR
+VAR_OUTPUT
+	o_q1:LREAL;
+	o_q2:LREAL;
+	o_q3:LREAL;
+END_VAR
+VAR
+	posCode:UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint3
+posCode := i_posCode AND 16#3FF;
+o_q3 := g_2pi *  posCode/16#3FF;
+
+// joint2
+i_posCode := SHR(i_posCode, 10);
+posCode := i_posCode AND 16#3FF;
+o_q2 := g_2pi *  posCode/16#3FF;
+
+// joint1
+i_posCode := SHR(i_posCode, 10);
+posCode := i_posCode AND 16#3FF;
+o_q1 := g_2pi *  posCode/16#3FF;
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_Instrument">
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -726,13 +790,14 @@ END_FOR
       <LineId Id="6" Count="1" />
       <LineId Id="13" Count="1" />
       <LineId Id="8" Count="1" />
-      <LineId Id="33" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
       <LineId Id="16" Count="1" />
       <LineId Id="5" Count="0" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="23" Count="3" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="31" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.endoscope30Deg.Get">
@@ -903,11 +968,10 @@ END_FOR
       <LineId Id="97" Count="0" />
       <LineId Id="131" Count="0" />
       <LineId Id="98" Count="0" />
-      <LineId Id="107" Count="22" />
-      <LineId Id="360" Count="1" />
+      <LineId Id="395" Count="2" />
+      <LineId Id="361" Count="0" />
       <LineId Id="104" Count="0" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="141" Count="1" />
+      <LineId Id="142" Count="0" />
       <LineId Id="56" Count="0" />
       <LineId Id="137" Count="3" />
       <LineId Id="136" Count="0" />
@@ -965,6 +1029,39 @@ END_FOR
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />
       <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.writeZeroPosToChip">
+      <LineId Id="16" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="17" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.zeroPosCode">
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="51" Count="2" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="55" Count="2" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.zeroPosDecode">
+      <LineId Id="40" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="68" Count="3" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

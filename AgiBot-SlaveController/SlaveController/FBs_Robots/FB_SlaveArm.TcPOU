@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -37,6 +37,7 @@ VAR
 	
 	// instrument invasion depth before it's unmounted
 	m_instruInvasionDepth :LREAL;
+	m_instruInvasionDepthSafetyBuffer :LREAL:= 0.005;
 
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
@@ -775,7 +776,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.kinematicParameters.m_rodLength-m_instrument.kinematicParameters.m_headLength
-						- m_instrument.kinematicParameters.m_fingerLength;]]></ST>
+						- m_instrument.kinematicParameters.m_fingerLength+m_instruInvasionDepthSafetyBuffer;]]></ST>
       </Implementation>
     </Method>
     <Property Name="simCartPose" Id="{6426ffc4-f74f-4984-ac32-a9f9d8b8c8ca}" FolderPath="property\">
