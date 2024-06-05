@@ -1,6 +1,7 @@
 #pragma once
 
-#include <math.h>
+//#include <math.h>
+#include <TcMath.h>
 #include <stdlib.h>
 #include <string.h>
 

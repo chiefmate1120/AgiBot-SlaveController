@@ -75,8 +75,9 @@ LUDecomposition<ParentType> LUDecompose(MatrixBase<ParentType, Dim, Dim, typenam
 
         for (int j = 0; j < Dim; ++j)
         {
-            typename ParentType::DType this_elem = fabs(A(i, j));
-            largest_elem = max(this_elem, largest_elem);
+            typename ParentType::DType this_elem = fabs_(A(i, j));
+            //largest_elem = max(this_elem, largest_elem);
+            largest_elem = this_elem>largest_elem?this_elem:largest_elem;
         }
 
         // No nonzero largest element.
@@ -124,7 +125,7 @@ LUDecomposition<ParentType> LUDecompose(MatrixBase<ParentType, Dim, Dim, typenam
 
         for (int i = j; i < Dim; i++)
         {
-            typename ParentType::DType this_elem = row_scale[i] * fabs(A(i, j));
+            typename ParentType::DType this_elem = row_scale[i] * fabs_(A(i, j));
 
             if (this_elem >= largest_elem)
             {
@@ -349,7 +350,7 @@ typename DerivedType::DType Norm(const DownCast<DerivedType> &A)
             sum_sq += A(i, j) * A(i, j);
         }
     }
-    return sqrt(sum_sq);
+    return sqrt_(sum_sq);
 }
 
 template <class DerivedType>

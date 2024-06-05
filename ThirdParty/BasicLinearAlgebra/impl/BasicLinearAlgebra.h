@@ -1,10 +1,10 @@
 #pragma once
 
-#include <math.h>
+#include <TcMath.h>
+//#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "Arduino.h"
+//#include "Arduino.h"
 
 namespace BLA
 {
@@ -446,7 +446,7 @@ bool All(const MatrixBase<DerivedType, DerivedType::Rows, DerivedType::Cols, boo
 
     return true;
 }
-
+/*
 inline Print &operator<<(Print &strm, const int obj)
 {
     strm.print(obj);
@@ -486,6 +486,6 @@ Print &operator<<(Print &strm, const MatrixBase<DerivedType, Rows, Cols, DType> 
         strm << (i == Rows - 1 ? ']' : ',');
     }
     return strm;
-}
+}*/
 
 }  // namespace BLA
