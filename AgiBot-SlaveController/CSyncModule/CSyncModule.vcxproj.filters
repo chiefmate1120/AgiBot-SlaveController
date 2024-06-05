@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{3a3e7f54-2f12-41ce-95d3-55a3bb836408}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9bd65e0e-785f-4125-af49-5fc29ef44059}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TwinCAT UM Files">
+      <UniqueIdentifier>{13584745-1aa1-405a-b759-a7fe9a7f5832}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TwinCAT RT Files">
+      <UniqueIdentifier>{46433e94-8ca5-4426-a788-309cc0e7f8dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TwinCAT OS Files">
+      <UniqueIdentifier>{239fdf2f-03f2-4028-a341-dbcf0167e142}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TMC Files">
+      <UniqueIdentifier>{33cd8a66-af70-4130-8705-fc4366bc8b0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AgiMath">
+      <UniqueIdentifier>{cd7d910b-462c-4ce6-8e23-7f5608362938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AgiMath\Inc">
+      <UniqueIdentifier>{b312586e-a69a-4950-842b-6a47cbb04744}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AgiMath\Src">
+      <UniqueIdentifier>{a80a38e1-58be-4199-b251-4df9eb742d94}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h">
+      <Filter>TwinCAT UM Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TcPch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncModuleClassFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncModuleInterfaces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncModuleServices.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncModuleCtrl.h">
+      <Filter>TwinCAT UM Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncModuleDriver.h">
+      <Filter>TwinCAT RT Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AgiFrame.h">
+      <Filter>AgiMath\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="AgiMathDefs.h">
+      <Filter>AgiMath\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="AgiMathExample.h">
+      <Filter>AgiMath\Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="AgiMatrix.h">
+      <Filter>AgiMath\Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TcPch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncModuleClassFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncModuleCtrl.cpp">
+      <Filter>TwinCAT UM Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncModuleW32.cpp">
+      <Filter>TwinCAT UM Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncModuleDriver.cpp">
+      <Filter>TwinCAT RT Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncModuleMain.cpp">
+      <Filter>TwinCAT OS Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AgiFrame.cpp">
+      <Filter>AgiMath\Src</Filter>
+    </ClCompile>
+    <ClCompile Include="AgiMathDefs.cpp">
+      <Filter>AgiMath\Src</Filter>
+    </ClCompile>
+    <ClCompile Include="AgiMathExample.cpp">
+      <Filter>AgiMath\Src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CSyncModule.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="CSyncModuleW32.rc">
+      <Filter>TwinCAT UM Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CSyncModuleW32.def">
+      <Filter>TwinCAT UM Files</Filter>
+    </None>
+    <None Include="CSyncModule.tmc">
+      <Filter>TMC Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="CSyncModuleW32.idl">
+      <Filter>TwinCAT UM Files</Filter>
+    </Midl>
+  </ItemGroup>
+</Project>
