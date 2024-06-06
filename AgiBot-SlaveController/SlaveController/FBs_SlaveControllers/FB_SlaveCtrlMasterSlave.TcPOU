@@ -8,6 +8,9 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// master-slave motion scale
+	m_MSMotionScale :LREAL;
+		
 	// gripper match angle threshold
 	m_gripperMatchAngThres :LREAL := 2*g_deg2Rad;
 	
@@ -128,16 +131,7 @@ VAR
 	armDHJntVel, wristDHJntVel :Vec3d;
 	tmpFrame : ST_Frame;
 	slaveSimDHJntPos :Vec6d;
-	MSMotionScale :LREAL;
 	
-	// ##############test code##########
-	testMasterDeltaPos :Vec3d;
-	testMasterDeltaOri :Mat3d;
-	testMasterNextRot:Mat3d;
-	testMoveDis, testMoveVel :LREAL;
-	testRotDis, testRotVel :LREAL;
-	testRotAxis :Vec3d;
-	//###############################
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -169,6 +163,9 @@ IF TRUE = m_firstIn THEN
 	matTranspose(m_masterOriginPose.m_rot, tmpMat3d);
 	matMultiply(tmpMat3d, m_slavePoseInScope.m_rot,m_MSOriDeviation);
 	m_lastMasterGripAngle := m_masterGripAngle;
+	
+	// only update motion scale while entering teleControl 
+	m_MSMotionScale := 1.0/ MAX(1,  i_masterStatus.m_motionScale);
 END_IF
 
 // compute master twist in slave arm coordinate
@@ -188,8 +185,8 @@ END_FOR*)
 
 // compute slave command pose in scope
 vecSub(m_masterPose.m_pos, m_masterOriginPose.m_pos, masterMotionRange);
-MSMotionScale := 1.0/ MAX(1,  i_masterStatus.m_motionScale);
-vecSelfMultiNum(masterMotionRange, MSMotionScale);
+
+vecSelfMultiNum(masterMotionRange, m_MSMotionScale);
 vecAdd(m_slaveOriginPose.m_pos, masterMotionRange, m_slaveCmdPoseInScope.m_pos);
 matMultiply(m_masterPose.m_rot, m_MSOriDeviation, m_slaveCmdPoseInScope.m_rot);
 
@@ -499,7 +496,9 @@ END_VAR
       <LineId Id="154" Count="0" />
       <LineId Id="314" Count="0" />
       <LineId Id="158" Count="1" />
-      <LineId Id="944" Count="0" />
+      <LineId Id="1022" Count="0" />
+      <LineId Id="1024" Count="1" />
+      <LineId Id="1023" Count="0" />
       <LineId Id="153" Count="0" />
       <LineId Id="321" Count="9" />
       <LineId Id="163" Count="0" />
@@ -508,7 +507,7 @@ END_VAR
       <LineId Id="568" Count="0" />
       <LineId Id="162" Count="0" />
       <LineId Id="316" Count="0" />
-      <LineId Id="908" Count="0" />
+      <LineId Id="1020" Count="0" />
       <LineId Id="317" Count="1" />
       <LineId Id="166" Count="0" />
       <LineId Id="320" Count="0" />

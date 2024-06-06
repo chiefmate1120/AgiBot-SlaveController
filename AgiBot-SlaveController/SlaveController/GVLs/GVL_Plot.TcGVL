@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_Plot" Id="{4dbbfddf-4213-4d20-b9c3-2deb05645af9}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	targetSpacePos:ARRAY[1..4,1..6] OF LREAL;
+	targetJointPos:ARRAY[1..4,1..6] OF LREAL;
+	
+	actualSpacePos:ARRAY[1..4,1..6] OF LREAL;
+	actualJointPos:ARRAY[1..4,1..6] OF LREAL;	
+	
+	masterPosInc:ARRAY[1..2,1..3] OF LREAL;
+	slavePosInc:ARRAY[1..4,1..3] OF LREAL;
+	
+	masterAbsPos:ARRAY[1..2,1..3] OF LREAL; //master arm absolute position
+	slaveAbsPos:ARRAY[1..2,1..3] OF LREAL; //slave arm absolute position
+	
+	endoJntPos:ARRAY[1..6] OF LREAL;
+	endoJntPosInitial:ARRAY[1..6] OF LREAL;
+	endoRotAngle:LREAL;
+	
+	endoPose:ST_Frame;
+	endoPoseInitial:ST_Frame;	
+	endoPoseAddRot:ST_Frame;
+	endoRelCar:ST_Frame;	
+	
+	A1Imagine,A3Imagine:ST_Frame;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

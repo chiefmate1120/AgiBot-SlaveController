@@ -7,6 +7,9 @@
     <RootNamespace>Slave Measurement Project</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Scope Project1-endoscope.tcscopex">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="SetupGravityCaliData.tcscopex">
       <SubType>Content</SubType>
     </Content>

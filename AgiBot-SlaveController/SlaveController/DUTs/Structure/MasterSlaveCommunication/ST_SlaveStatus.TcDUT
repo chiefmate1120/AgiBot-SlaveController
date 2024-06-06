@@ -9,6 +9,9 @@ STRUCT
 	// state machine
 	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Error)];
 	
+	// self-check pass flag
+	m_selfCheckPass :ARRAY[1..g_sArmNum] OF BOOL :=[4(False)];
+	
 	// instrument info
 	m_instruStauts :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
 	

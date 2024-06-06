@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="MinDistSigCircle" Id="{fdae1f86-c93f-4eef-992e-f500beca46ea}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION MinDistSigCircle : lreal
+VAR_INPUT
+	current:LREAL;
+	target:LREAL;	
+END_VAR
+VAR
+	p1,p2,p3,p4:LREAL;
+	d1,d2,d3:LREAL;
+	min_target:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+//check the minimum distance motion for two target value
+//for example:current=180,target=-179,the minimum distace is 1
+p1:=current;
+p2:=target;            d1:=ABS(p2-p1);
+p3:=target+2*pi;      d2:=ABS(p3-p1);
+p4:=target-2*pi;       d3:=ABS(p4-p1);
+
+IF (d1<d2 AND d1<d3) THEN
+	min_target:=p2;
+ELSIF (d2<d1 AND d2<d3) THEN
+	min_target:=p3;
+ELSE
+	min_target:=p4;
+END_IF
+
+MinDistSigCircle:=min_target;]]></ST>
+    </Implementation>
+    <LineIds Name="MinDistSigCircle">
+      <LineId Id="29" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="9" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -27,6 +27,7 @@ END_VAR
         <ST><![CDATA[m_cmdJntPos[1]:=i_slaveArm.curJntPos[1];
 m_cmdJntPos[2]:=i_slaveArm.curJntPos[2];
 m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
+m_cmdJntPos := i_slaveArm.curJntPos;
 m_cmdCartPose:=i_slaveArm.curCartPose;]]></ST>
       </Implementation>
     </Method>
@@ -85,6 +86,7 @@ copyCmds(r_slaveArmCtrlCmd);
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntPos">
       <LineId Id="27" Count="0" />
       <LineId Id="57" Count="1" />
+      <LineId Id="67" Count="0" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntTrq">

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -27,7 +27,7 @@ VAR
 	m_jntPosOffset:Vec8d;
 	
 	// reduction from motor joint to endoscope rotate joint
-	m_endoscopeRotateReduction :LREAL := 2/3;
+	m_endoscopeRotateReduction :LREAL := 2.0/3.0;
 	
 	// flag if endoscope is 30deg
 	m_endoscope30Deg :BOOL:=true;
@@ -280,7 +280,8 @@ r_DHJntPos[3]:=i_jntPos[3];
 IF m_onChipData.m_Instrutype = InstruType_endoscope THEN
 	r_DHJntPos[4]:=-m_endoscopeRotateReduction*(i_jntPos[8]-m_jntPosOffset[8]);
 	IF m_endoscope30Deg THEN
-		r_DHJntPos[5]:=-pi/2+30*g_deg2Rad;
+		//r_DHJntPos[5]:=-pi/2+30*g_deg2Rad;
+		r_DHJntPos[5]:=-pi/2;
 	ELSE
 		r_DHJntPos[5]:=-pi/2;
 	END_IF
@@ -688,6 +689,8 @@ END_CASE
 // update instrument kinematic parameters based on readed info
 IF InstruType_NeedleDriver =  m_onChipData.m_Instrutype THEN
 	m_kinematicParameters.m_fingerLength := 0.01;
+ELSIF  InstruType_Endoscope =  m_onChipData.m_Instrutype THEN
+	m_kinematicParameters.m_headLength := 0.0;
 END_IF
 ]]></ST>
       </Implementation>
@@ -774,6 +777,7 @@ END_FOR
       <LineId Id="190" Count="0" />
       <LineId Id="193" Count="0" />
       <LineId Id="196" Count="1" />
+      <LineId Id="221" Count="0" />
       <LineId Id="199" Count="1" />
       <LineId Id="198" Count="0" />
       <LineId Id="191" Count="0" />
@@ -946,6 +950,7 @@ END_FOR
       <LineId Id="366" Count="0" />
       <LineId Id="330" Count="0" />
       <LineId Id="333" Count="1" />
+      <LineId Id="395" Count="1" />
       <LineId Id="332" Count="0" />
       <LineId Id="196" Count="0" />
     </LineIds>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -445,7 +445,7 @@ END_VAR
     </Property>
     <Method Name="forwardKinematic" Id="{182b544f-f7c4-475e-8af7-8c07aa230234}">
       <Declaration><![CDATA[// from active joint position to cartesian pose in arm origin
-METHOD PROTECTED forwardKinematic : BOOL
+METHOD PUBLIC forwardKinematic : BOOL //METHOD PROTECTED forwardKinematic : BOOL
 VAR_IN_OUT CONSTANT
 	i_DHJntPos :Vec6d;
 END_VAR
