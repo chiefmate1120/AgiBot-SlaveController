@@ -1661,11 +1661,6 @@
 				<Debugger Priority="61"/>
 				<IoIdleTask Affinity="#x00000008"/>
 			</Settings>
-			<Licenses CacheOrCheckLicensesOnStartup="true">
-				<Target>
-					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020017" DongleLevel="90" DongleSystemId="{741D1667-7821-75A1-E7B3-294A9B25E832}" DongleSerialNumber="000brza4"/>
-				</Target>
-			</Licenses>
 			<Tasks>
 				<Task Id="3" Priority="1" CycleTime="2500" AmsPort="350" Affinity="#x00000002" AdtTasks="true">
 					<Name>TaskSlaveArmControl</Name>
@@ -1689,7 +1684,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{D3507D6A-C606-4722-FAA6-535A9E839FE8}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{683A2F44-A2B5-5638-21E4-303B44B2F501}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2391,6 +2386,14 @@
 							<Comment><![CDATA[ Output cart status]]></Comment>
 							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
 						</Var>
+						<Var>
+							<Name>CartControl.PlcVar</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.PlcVarDouble</Name>
+							<Type>LREAL</Type>
+						</Var>
 					</Vars>
 					<UnrestoredVarLinks ImportTime="2023-12-15T10:38:09">
 						<OwnerA Name="InputDst" Prefix="TIPC^MasterArmControl^MasterArmControl Instance" Type="1">
@@ -2466,6 +2469,13 @@
 						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
 							<OwnerB Name="TIID^MSCommunication^Term 20 (EK1100)^Term 21 (EL6695)">
 								<Link VarA="SlaveArmControl.m_masterRobotData" TypeA="MSCommu_MasterStatus" InOutA="0" GuidA="{DF8C3B49-71AF-472D-A748-CA1BC4D7DE82}" VarB="IO Inputs^MasterRobotData" RestoreInfo="TypeChanged" IdA="1" RestoreInfo="RestoredWithTypeChange"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-06-06T22:04:49">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIXC^CSyncModule^CSyncModule_Obj1 (Main)">
+								<Link VarA="CartControl.PlcVar" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="Inputs^Value" RestoreInfo="TypeMismatch" OldTypeA="DINT" OldGuidA="{18071995-0000-0000-0000-000000000009}" NewTypeA="BOOL" NewGuidA="{18071995-0000-0000-0000-000000000030}"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -2688,6 +2698,193 @@
 							</Value>
 							<Value>
 								<Name>Parameter.data3</Name>
+								<Value>0</Value>
+							</Value>
+						</ParameterValues>
+						<InterfacePointerValues>
+							<Value>
+								<Name>CyclicCaller</Name>
+								<OTCID>#x02010080</OTCID>
+							</Value>
+						</InterfacePointerValues>
+					</TmcDesc>
+				</Instance>
+			</Project>
+			<Project GUID="{618392EE-38C3-46B1-8F67-30FD49D5487B}" Name="CADSModule" PrjFilePath="CADSModule\CADSModule.vcxproj" TmcFilePath="CADSModule\CADSModule.tmc">
+				<Instance Id="#x01010020" KeepUnrestoredLinks="2">
+					<Name>CADSModule_Obj1 (Main)</Name>
+					<TmcDesc GUID="{0E481AB9-7BF0-4B56-AB95-991881772E5F}">
+						<Name>Main</Name>
+						<CLSID ClassFactory="CADSModule">{0E481AB9-7BF0-4B56-AB95-991881772E5F}</CLSID>
+						<Licenses>
+							<License>
+								<LicenseId>{304D006A-8299-4560-AB79-438534B50288}</LicenseId>
+							</License>
+						</Licenses>
+						<InitSequence>PSO</InitSequence>
+						<Contexts>
+							<Context>
+								<Id>1</Id>
+								<ManualConfig>
+									<OTCID>#x02010080</OTCID>
+								</ManualConfig>
+								<Priority>6</Priority>
+								<CycleTime>10000000</CycleTime>
+							</Context>
+						</Contexts>
+						<Interfaces>
+							<Interface DisableCodeGeneration="true">
+								<Type GUID="{00000012-0000-0000-E000-000000000064}">ITComObject</Type>
+							</Interface>
+							<Interface>
+								<Type GUID="{03000010-0000-0000-E000-000000000064}">ITcCyclic</Type>
+							</Interface>
+							<Interface DisableCodeGeneration="true">
+								<Type GUID="{03000012-0000-0000-E000-000000000064}">ITcADI</Type>
+							</Interface>
+							<Interface DisableCodeGeneration="true">
+								<Type GUID="{03000018-0000-0000-E000-000000000064}">ITcWatchSource</Type>
+							</Interface>
+						</Interfaces>
+						<Parameters>
+							<Parameter HideParameter="true">
+								<Name>TraceLevelMax</Name>
+								<Comment><![CDATA[Controls the amount of log messages.]]></Comment>
+								<BitSize>32</BitSize>
+								<BaseType GUID="{8007AE3B-86BB-40F2-B385-EF87FCC239A4}">TcTraceLevel</BaseType>
+								<PTCID>#x03002103</PTCID>
+								<ContextId>1</ContextId>
+							</Parameter>
+							<Parameter>
+								<Name>DefaultAdsPort</Name>
+								<Comment><![CDATA[ADS port number to be used by the module instance. With value 0xFFFF a port number will be created. Allowed range is 2000-9999.]]></Comment>
+								<BitSize>16</BitSize>
+								<BaseType GUID="{18071995-0000-0000-0000-000000000004}">WORD</BaseType>
+								<Default>
+									<Value>-1</Value>
+								</Default>
+								<PTCID>#x00000001</PTCID>
+								<ContextId>1</ContextId>
+							</Parameter>
+							<Parameter>
+								<Name>ContextAdsPort</Name>
+								<Comment><![CDATA[ADS port number of the task associated with context 1]]></Comment>
+								<BitSize>16</BitSize>
+								<BaseType GUID="{18071995-0000-0000-0000-000000000004}">WORD</BaseType>
+								<PTCID>#x03002090</PTCID>
+								<ContextId>1</ContextId>
+							</Parameter>
+							<Parameter OnlineParameter="true" DisableCodeGeneration="true" CreateSymbol="true">
+								<Name>AdsPort</Name>
+								<Comment><![CDATA[ADS port number actually used by the module instance.]]></Comment>
+								<BitSize>16</BitSize>
+								<BaseType GUID="{18071995-0000-0000-0000-000000000004}">WORD</BaseType>
+								<PTCID>#x00000002</PTCID>
+								<ContextId>1</ContextId>
+							</Parameter>
+							<Parameter OnlineParameter="true" CreateSymbol="true">
+								<Name>Counter</Name>
+								<Comment><![CDATA[Incremented continuously if module instance is in started mode.]]></Comment>
+								<BitSize>32</BitSize>
+								<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+								<PTCID>#x00000003</PTCID>
+								<ContextId>1</ContextId>
+							</Parameter>
+						</Parameters>
+						<DataAreas>
+							<DataArea>
+								<AreaNo AreaType="InputDst" CreateSymbols="true">0</AreaNo>
+								<Name>Inputs</Name>
+								<ContextId>1</ContextId>
+								<ByteSize>12</ByteSize>
+								<Symbol>
+									<Name>Value</Name>
+									<BitSize>32</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+									<BitOffs>0</BitOffs>
+								</Symbol>
+								<Symbol>
+									<Name>Status</Name>
+									<BitSize>32</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+									<BitOffs>32</BitOffs>
+								</Symbol>
+								<Symbol>
+									<Name>Data</Name>
+									<BitSize>32</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+									<BitOffs>64</BitOffs>
+								</Symbol>
+							</DataArea>
+							<DataArea>
+								<AreaNo AreaType="OutputSrc" CreateSymbols="true">1</AreaNo>
+								<Name>Outputs</Name>
+								<ContextId>1</ContextId>
+								<ByteSize>12</ByteSize>
+								<Symbol>
+									<Name>Value</Name>
+									<BitSize>32</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+									<BitOffs>0</BitOffs>
+								</Symbol>
+								<Symbol>
+									<Name>Control</Name>
+									<BitSize>32</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+									<BitOffs>32</BitOffs>
+								</Symbol>
+								<Symbol>
+									<Name>Data</Name>
+									<BitSize>32</BitSize>
+									<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+									<BitOffs>64</BitOffs>
+								</Symbol>
+							</DataArea>
+						</DataAreas>
+						<InterfacePointers>
+							<InterfacePointer>
+								<PTCID>#x03002060</PTCID>
+								<Name>CyclicCaller</Name>
+								<Type GUID="{0300001E-0000-0000-E000-000000000064}">ITcCyclicCaller</Type>
+							</InterfacePointer>
+						</InterfacePointers>
+						<Deployment>
+							<FileEntry TargetPlatform="TwinCAT RT (x86)">
+								<SourceFile>%SOLUTIONDEPLOYMENTPATH%TwinCAT RT (x86)\%CLASSFACTORYNAME%.sys</SourceFile>
+								<DestinationFile>%TC_DRIVERAUTOINSTALLPATH%%CLASSFACTORYNAME%.sys</DestinationFile>
+							</FileEntry>
+							<FileEntry TargetPlatform="TwinCAT RT (x86)">
+								<SourceFile>%SOLUTIONDEPLOYMENTPATH%TwinCAT RT (x86)\%CLASSFACTORYNAME%.pdb</SourceFile>
+								<DestinationFile>%TC_DRIVERAUTOINSTALLPATH%%CLASSFACTORYNAME%.pdb</DestinationFile>
+							</FileEntry>
+							<FileEntry TargetPlatform="TwinCAT RT (x64)">
+								<SourceFile>%SOLUTIONDEPLOYMENTPATH%TwinCAT RT (x64)\%CLASSFACTORYNAME%.sys</SourceFile>
+								<DestinationFile>%TC_DRIVERAUTOINSTALLPATH%%CLASSFACTORYNAME%.sys</DestinationFile>
+							</FileEntry>
+							<FileEntry TargetPlatform="TwinCAT RT (x64)">
+								<SourceFile>%SOLUTIONDEPLOYMENTPATH%TwinCAT RT (x64)\%CLASSFACTORYNAME%.pdb</SourceFile>
+								<DestinationFile>%TC_DRIVERAUTOINSTALLPATH%%CLASSFACTORYNAME%.pdb</DestinationFile>
+							</FileEntry>
+						</Deployment>
+						<ParameterValues>
+							<Value>
+								<Name>TraceLevelMax</Name>
+								<EnumText>tlAlways</EnumText>
+							</Value>
+							<Value>
+								<Name>DefaultAdsPort</Name>
+								<Value>65535</Value>
+							</Value>
+							<Value>
+								<Name>ContextAdsPort</Name>
+								<Value>355</Value>
+							</Value>
+							<Value>
+								<Name>AdsPort</Name>
+								<Value>0</Value>
+							</Value>
+							<Value>
+								<Name>Counter</Name>
 								<Value>0</Value>
 							</Value>
 						</ParameterValues>

@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SetupJointEncoderCaliData_3_1" Id="{0a2ae077-effe-45ac-a83e-137a026cfca3}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// Robot3 --joints parameters of setup arms
+VAR_GLOBAL
+	// absolute encoder value at minimal joint positon
+	g_setupMinLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
+		[5813168, 22663264, 1978132, 1938100, 13659124,
+		 13487924, 17543781, 3084321, 10238892, 1028618,
+		  3186404, 15837168, 878439, 6065586, 9487992,
+		  553720, 24385008, 4169014, 6084058, 984346];
+		 
+	// absolute encoder value at maximum joint positon
+	g_setupMaxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
+		[1055544, 21209065, 1176866, 385208, 4921448,
+		 8781908, 16093586, 2285859, 8654922, 9089506,
+		 15289572, 14389054, 85603, 4478314, 767644,
+		  12599264, 22936561, 3373290, 4489778, 9055426];
+	
+	// absolute encoder value at calibrated positon
+	g_setupCaliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
+		[3511708, 21210622, 1977753, 9295000, 9311970,
+		  11205276, 16093586, 3084321, 783598, 13445092,
+		 844948, 14389054, 878439, 13364040, 5122582,
+		  14940512, 22936561, 4169014, 13457164, 13393096];
+	
+	 // if absolute encoder value cross zeros within joint motion range
+	g_setupLinkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
+		[0, 0, 0, 1, 0,
+		 0, 0, 0, 1, 1,
+		 1, 0, 0, 1, 0,
+		 1, 0, 0, 1, 1];
+	
+	 (* setup joint3 gravity parameters
+	 graParams = [p1mp2,p3,p4]
+	 gravity = p1*q^3 + p2*q^2 + p3^q + p4
+	 q(- [q0,q1]*)
+ 	// setup joint3 gravity parameter
+	g_setupJnt3GravityParams :ARRAY[1..4, 1..4] OF LREAL :=
+	[13129.9, -3010.8, 300.188, -99.7871,
+	 14085.9, -3787.37, 476.955, -104.313,
+	  6440.78, -1524.39, 415.869, -117.102,
+	 22097.9, -5714.59, 558.077, -104.732];
+	 
+	(* setup joint3 friction parameters
+	 graParams = [p1mp2,p3,p4]
+	 friciton = p1*q^3 + p2*q^2 + p3^q + p4
+	 q(- [q0,q1]*)
+ 	// setup joint3 friction parameter
+	g_setupJnt3FrictionParams :ARRAY[1..4, 1..4] OF LREAL :=
+	[-11173.7, 3888.25, -491.555, 79.4495,
+	 -17709.9, 6947.19, -897.825, 94.243,
+	 -49343.5, 18899.5, -2449.52, 166.011,
+	-11537.6, 3698.16, -380.906, 51.8712];
+	
+	g_setupJnt3GravityPosRange :ARRAY[1..4, 1..2] OF REAL :=
+	[0.0189, 	0.1789,
+	 0.0182,    0.1784,
+	 0.0189,    0.1789,
+	 0.0189,    0.1789];
+ 	
+	// joint gravity offset
+	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
+	[0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0];
+	
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -487,6 +487,26 @@
     <Compile Include="FBs_Filters\FB_LowPassFilter.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GVLs\ADS\GVLs_SetupArmDynamics_3_1.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\ADS\GVLs_SlaveArmDynamics_3_1.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\ADS\GVL_CPPTest.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\ADS\GVL_SetupJointEncoderCaliData_3_1.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\ADS\GVL_SlaveJointEncoderCaliData_3_1.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\configs\robot3\GVLs_SetupArmDynamics_3.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -670,6 +690,7 @@
     <Folder Include="GVLs\configs" />
     <Folder Include="GVLs\configs\robot3" />
     <Folder Include="GVLs\configs\robot5" />
+    <Folder Include="GVLs\ADS" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="FBs_Auxiliary" />
