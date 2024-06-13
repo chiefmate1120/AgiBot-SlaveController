@@ -14,9 +14,6 @@ VAR
 	m_retractAcc: LREAL:= 0.2;
 	m_retractJerk: LREAL:= 1;
 	
-	m_retractLimitBuffer:LREAL := 0.02;
-	m_retractPos :LREAL;
-	
 	// wait time before retract, ensure instruments is removed 
 	m_waitTime :LREAL :=2.0;
 	
@@ -38,15 +35,32 @@ END_VAR
 VAR 
 	i :INT;
 	curJntVel :Vec8d;
+	q:ARRAY[1..2] OF LREAL;
+	v:ARRAY[1..2] OF LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// check if planner is ready
+        <ST><![CDATA[// if instrument is on again, wait and re-plan the traj
+IF i_slaveArm.instruOn THEN
+	m_cmdJntVel[3]:=0;
+	m_cmdJntAcc[3] :=0;
+	
+	// planning for joint3 motion
+	q[1]:=i_slaveArm.curJntPos[3];
+	q[2]:= GVL_SlaveMotorParameters.g_maxDHJntPos[3];
+	v[1]:=0;
+	v[2]:=0;
+	m_retractPlanner.init(q,v, m_retractVel, m_retractAcc, m_retractJerk);
+	m_timePeriod := 0;
+END_IF
+
+// check if planner is ready
 IF m_retractPlanner.isGene = FALSE THEN
 	calcCmdJntPos:=FALSE;
 	m_timePeriod:=0;
 	RETURN;
 END_IF
 
+// wait
 IF m_timePeriod< m_waitTime THEN
 	RETURN;
 END_IF
@@ -54,7 +68,7 @@ END_IF
 // traj plan
 calcCmdJntPos :=m_retractPlanner.evaluate(m_timePeriod-m_waitTime, q=> m_cmdJntPos[3], q_dot=>m_cmdJntVel[3], q_dot=> m_cmdJntAcc[3]);
 
-IF m_timePeriod -m_waitTime > m_retractPlanner.duration AND  ABS(i_slaveArm.curJntPos[3] - m_retractPos) < g_cartCtrlPosTolHign THEN
+IF m_timePeriod -m_waitTime > m_retractPlanner.duration AND  ABS(i_slaveArm.curJntPos[3] - GVL_SlaveMotorParameters.g_maxDHJntPos[3]) < g_cartCtrlPosTolHigh THEN
 	m_isFinished:=TRUE;
 END_IF
 ]]></ST>
@@ -81,9 +95,8 @@ m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 
 // planning for joint3 motion
-m_retractPos :=GVL_SlaveMotorParameters.g_maxJntPos[3]-m_retractLimitBuffer;
 q[1]:=i_slaveArm.curJntPos[3];
-q[2]:= m_retractPos;
+q[2]:= GVL_SlaveMotorParameters.g_maxDHJntPos[3];
 v[1]:=0;
 v[2]:=0;
 m_retractPlanner.init(q,v, m_retractVel, m_retractAcc, m_retractJerk);]]></ST>
@@ -93,11 +106,21 @@ m_retractPlanner.init(q,v, m_retractVel, m_retractAcc, m_retractJerk);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruRetract.calcCmdJntPos">
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="163" Count="4" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="155" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="111" Count="0" />
       <LineId Id="39" Count="1" />
+      <LineId Id="172" Count="0" />
       <LineId Id="138" Count="0" />
       <LineId Id="121" Count="0" />
       <LineId Id="139" Count="2" />
@@ -111,9 +134,7 @@ m_retractPlanner.init(q,v, m_retractVel, m_retractAcc, m_retractJerk);]]></ST>
     <LineIds Name="FB_SlaveCtrlInstruRetract.init">
       <LineId Id="152" Count="3" />
       <LineId Id="163" Count="0" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="171" Count="4" />
+      <LineId Id="170" Count="5" />
     </LineIds>
   </POU>
 </TcPlcObject>

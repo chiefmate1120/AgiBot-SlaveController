@@ -379,10 +379,10 @@ FOR i:=1 TO g_sArmNum DO
 			ELSIF m_slaveArms[i].instruOn AND m_slaveArms[i].trocarOn  THEN
 				IF m_instrumentMountedFlag[i] THEN
 					// to scope ready
-					IF  InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype THEN 
+					IF  InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype AND m_slaveArms[i].instruInReadyPos() THEN 
 						m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
 					// to instrument ready
-					ELSE
+					ELSIF  m_slaveArms[i].instruInReadyPos() THEN
 						m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
 					END_IF
 				// to mount instrument/endoscope
@@ -407,12 +407,9 @@ FOR i:=1 TO g_sArmNum DO
 				// to instrument invasion
 				IF m_instruInvasionEnableFlag[i] THEN
 					m_nextSlaveArmState[i] := SlaveArmState_InstruInvasion;
-				// to endoscope ready
-				ELSIF InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype THEN
-					m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
-				// to instrument ready
+				// to panel ready
 				ELSE
-					m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
+					m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 				END_IF
 				
 			END_IF
@@ -547,13 +544,8 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to instrument ready
 			ELSIF m_armCtrl[i].isFinished THEN
-				// to endoscope ready
-				IF InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype THEN
-					m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
-				// to instrument ready
-				ELSE
-					m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
-				END_IF
+			// to panel ready
+				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			END_IF
 		
 		// arm disable
@@ -790,8 +782,6 @@ END_FOR]]></ST>
       <LineId Id="488" Count="0" />
       <LineId Id="490" Count="0" />
       <LineId Id="494" Count="0" />
-      <LineId Id="492" Count="1" />
-      <LineId Id="491" Count="0" />
       <LineId Id="259" Count="4" />
       <LineId Id="360" Count="0" />
       <LineId Id="264" Count="1" />
@@ -852,10 +842,8 @@ END_FOR]]></ST>
       <LineId Id="576" Count="2" />
       <LineId Id="575" Count="0" />
       <LineId Id="523" Count="4" />
-      <LineId Id="546" Count="5" />
-      <LineId Id="528" Count="0" />
-      <LineId Id="522" Count="0" />
-      <LineId Id="165" Count="0" />
+      <LineId Id="546" Count="2" />
+      <LineId Id="664" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="472" Count="1" />
       <LineId Id="615" Count="2" />

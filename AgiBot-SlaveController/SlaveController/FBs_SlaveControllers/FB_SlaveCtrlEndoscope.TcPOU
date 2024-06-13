@@ -8,22 +8,176 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// scope motion master-salve scale
+	m_MSMotionScale :LREAL :=0.5;
+	
+	// scope motion singularity scale
+	m_singMotionScale :LREAL :=1;
+	m_minSingMotionScale :LREAL := 0.5;
+	
+	// distance threshold between scope and remote center without sigularity scale 
+	m_RCDisThres :LREAL :=0.1;
+	
 	// filter cut-off frequency for master-slave control
 	m_cmdJntPosLpfCutoffFreq : LREAL :=5;
 	
 	// last command joint position
 	m_lastCmdJntPos :Vec8d;
 	
-	// enter master-slave control for the first time
-	m_firstIn :BOOL := TRUE;
+	// command velocity filter
+	m_cmdVelLpf:ARRAY[1..4] OF FB_LowPassFilter;
 	
-	// command joint position filter
-	m_cmdJntPosLpf:ARRAY[1..4] OF FB_LowPassFilter;
+	// scope command linear/rotate velocity in local/view coordinate
+	m_cmdVelLocal :Vec3d;
+	m_cmdWVelLocal :LREAL;
+	
+	// scope command linear velocity in base coordinate
+	m_cmdVel:Vec3d;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="calcCmdJntPos" Id="{87ce9b58-87b9-4be1-8d6a-40a3604816ed}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i,j : INT;
+	posJaco, posJacoInv:Mat3d;
+	armDHJntVel :Vec3d;
+
+	cmdVelScale :LREAL;
+	jnt3Limit :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF isFinished THEN
+	RETURN;
+END_IF
+
+motionScale(i_slaveArm);
+
+cmdVelCalc(i_masterStatus);
+
+// filt command velocity
+m_cmdVelLocal[1] := m_cmdVelLpf[1].run(m_cmdVelLocal[1]);
+m_cmdVelLocal[2] := m_cmdVelLpf[2].run(m_cmdVelLocal[2]);
+m_cmdVelLocal[3] := m_cmdVelLpf[3].run(m_cmdVelLocal[3]);
+m_cmdWVelLocal := m_cmdVelLpf[4].run(m_cmdWVelLocal);
+
+// get linear velocity in base
+matMultiVec(i_slaveArm.simCartPose.m_rot, m_cmdVelLocal, m_cmdVel);
+
+// position jacobian and its inverse
+FOR i:=1 TO 3 DO
+	FOR j:=1 TO 3 DO
+		posJaco[i,j]:=i_slaveArm.simJaco[i,j];
+	END_FOR 
+END_FOR
+invMat3(posJaco, posJacoInv);
+
+// command joint velocity of joint 1-3
+matMultiVec(posJacoInv, m_cmdVel, armDHJntVel);
+
+// limit DH joints velocity 
+cmdVelScale := 1;
+FOR i:=1 TO 3 DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(armDHJntVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
+
+// limit arm joint position
+FOR i:=1 TO 3 DO
+	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
+		(armDHJntVel[i] <0 and	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
+		armDHJntVel[i]:=0;
+	END_IF
+END_FOR
+
+// joint 3 up limit to remote center
+jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis;
+IF (armDHJntVel[3] > 0 AND  i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
+	armDHJntVel[3]:=0;
+END_IF
+
+// limit rotate joint veloicyt
+m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLocal, GVL_SlaveMotorParameters.g_maxJntVel[8]);
+
+// set command joint velocity
+m_cmdJntVel[1]:= armDHJntVel[1];
+m_cmdJntVel[2]:= armDHJntVel[2];
+m_cmdJntVel[3]:= armDHJntVel[3];
+m_cmdJntVel[8]:= -m_cmdWVelLocal;
+
+// integral to command joint position
+m_cmdJntPos[1]:=m_simJntPos[1]+m_cmdJntVel[1]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[2]:=m_simJntPos[2]+m_cmdJntVel[2]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[3]:=m_simJntPos[3]+m_cmdJntVel[3]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[8]:=m_simJntPos[8]+m_cmdJntVel[8]*g_slaveArmCtrlCycleTime;
+
+m_simJntPos := m_cmdJntPos;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="cmdVelCalc" Id="{8dff4bd5-a9d3-4558-a30c-87d4912e2ece}">
+      <Declaration><![CDATA[METHOD PROTECTED cmdVelCalc : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterStatus :ST_MasterStatus;
+END_VAR
+
+VAR
+	leftVel, rightVel :Vec3d;
+	i:INT;
+	radiusVec :Vec3d;
+	radiusLength :LREAL;
+	leftWVel, rightWVel :Vec3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i :=1 TO 3 DO 
+	leftVel[i] := i_masterStatus.m_curArmTwist[1][i];
+	rightVel[i] := i_masterStatus.m_curArmTwist[2][i];
+END_FOR
+
+// master linear velocity
+vecAdd(leftVel, rightVel , m_cmdVelLocal);
+vecSelfMultiNum(m_cmdVelLocal, 0.5);
+
+// motion scale
+vecSelfMultiNum(m_cmdVelLocal, m_MSMotionScale* m_singMotionScale);
+
+
+// radius vector from right arm to left arm
+vecSub(i_masterStatus.m_curArmPose[1].m_pos, i_masterStatus.m_curArmPose[2].m_pos, radiusVec);
+vecSelfMultiNum(radiusVec, 0.5);
+radiusVec[3]:=0;
+radiusLength := norm(radiusVec);
+normalize(radiusVec);
+
+// left rotate velocity
+leftVel[3]:= 0;
+leftWVel := cross(radiusVec, leftVel);
+
+// right rotate velocity
+// radius vector from left arm to right arm
+vecSelfMultiNum(radiusVec, -1.0);
+rightVel[3]:= 0;
+rightWVel := cross(radiusVec, rightVel);
+
+m_cmdWVelLocal:= (leftWVel[3] + rightWVel[3])/(2.0*radiusLength);
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{1a1ae9a3-2ece-47df-b70b-10ebc4e0a4e2}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
@@ -40,16 +194,11 @@ END_VAR
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 m_simJntPos :=m_cmdJntPos;
 m_lastCmdJntPos :=m_cmdJntPos;
-m_jntOPMode[1] := DriverOPMode_PosTrq;
-m_jntOPMode[2] := DriverOPMode_PosTrq;
-m_jntOPMode[3] := DriverOPMode_PosTrq;
-m_jntOPMode[4] := DriverOPMode_PosTrq;
-
-m_firstIn :=TRUE;
+m_jntOPMode := g_slaveAllPosTrqMode;
 
 // init filter
-FOR i:=1 TO g_sJntNum DO
-	m_cmdJntPosLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+FOR i:=1 TO 4 DO
+	m_cmdVelLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 END_FOR
 
 // update commands to arm
@@ -58,18 +207,112 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="motionScale" Id="{57c57b39-44ad-430e-93ea-c178c23fdca0}">
+      <Declaration><![CDATA[METHOD PROTECTED motionScale : LREAL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	RCDis :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[RCDis := ABS(i_slaveArm.curJntPos[3] - i_slaveArm.instrument.kinematicParameters.m_rodLength);
+
+IF RCDis < GVL_SlaveArmKinematic.g_minScopeRCDis THEN
+	motionScale := m_minSingMotionScale;
+ELSIF RCDis > m_RCDisThres THEN
+	motionScale :=1 ;
+ELSE
+	motionScale := m_minSingMotionScale + (1- m_minSingMotionScale) * (RCDis - GVL_SlaveArmKinematic.g_minScopeRCDis)/(m_RCDisThres - GVL_SlaveArmKinematic.g_minScopeRCDis);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SlaveCtrlEndoscope">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
+      <LineId Id="459" Count="2" />
+      <LineId Id="1062" Count="0" />
+      <LineId Id="462" Count="0" />
+      <LineId Id="1064" Count="0" />
+      <LineId Id="1063" Count="0" />
+      <LineId Id="1085" Count="0" />
+      <LineId Id="1084" Count="0" />
+      <LineId Id="1086" Count="3" />
+      <LineId Id="1070" Count="0" />
+      <LineId Id="1069" Count="0" />
+      <LineId Id="1071" Count="0" />
+      <LineId Id="1073" Count="0" />
+      <LineId Id="1072" Count="0" />
+      <LineId Id="1074" Count="1" />
+      <LineId Id="1081" Count="0" />
+      <LineId Id="1080" Count="0" />
+      <LineId Id="1076" Count="0" />
+      <LineId Id="1082" Count="0" />
+      <LineId Id="1092" Count="0" />
+      <LineId Id="1091" Count="0" />
+      <LineId Id="1093" Count="0" />
+      <LineId Id="1095" Count="0" />
+      <LineId Id="1119" Count="7" />
+      <LineId Id="1128" Count="3" />
+      <LineId Id="1133" Count="4" />
+      <LineId Id="1139" Count="1" />
+      <LineId Id="1142" Count="0" />
+      <LineId Id="1151" Count="0" />
+      <LineId Id="1150" Count="0" />
+      <LineId Id="1153" Count="1" />
+      <LineId Id="1083" Count="0" />
+      <LineId Id="1155" Count="2" />
+      <LineId Id="1159" Count="0" />
+      <LineId Id="1161" Count="0" />
+      <LineId Id="1160" Count="0" />
+      <LineId Id="1162" Count="3" />
+      <LineId Id="1167" Count="0" />
+      <LineId Id="1166" Count="0" />
+      <LineId Id="1066" Count="0" />
+      <LineId Id="206" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.cmdVelCalc">
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="2" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="19" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.init">
       <LineId Id="13" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="114" Count="0" />
       <LineId Id="19" Count="0" />
-      <LineId Id="91" Count="2" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="77" Count="0" />
+      <LineId Id="165" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="74" Count="1" />
@@ -77,6 +320,15 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="148" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.motionScale">
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="18" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -64,7 +64,7 @@ IF m_jnt5EnableTime>m_jnt5AdjustWaitTime THEN
 	m_cmdJntVel[5]:=LIMIT(-m_jnt5MaxAdjustVel, m_cmdJntVel[5], m_jnt5MaxAdjustVel);
 	
 	// joint limit
-	IF (m_cmdJntPos[5] > GVL_SetupMotorParameters.g_maxJntPos[i_setupArm.armIdx, 5] AND m_cmdJntVel[5]>0) OR (m_cmdJntPos[5] < GVL_SetupMotorParameters.g_maxJntPos[i_setupArm.armIdx, 5] AND m_cmdJntVel[5]<0)  THEN
+	IF (m_cmdJntPos[5] > GVL_SetupMotorParameters.g_maxJntPos[i_setupArm.armIdx, 5] AND m_cmdJntVel[5]>0) OR (m_cmdJntPos[5] < GVL_SetupMotorParameters.g_minJntPos[i_setupArm.armIdx, 5] AND m_cmdJntVel[5]<0)  THEN
 		m_cmdJntVel[5] := 0;
 	END_IF
 	

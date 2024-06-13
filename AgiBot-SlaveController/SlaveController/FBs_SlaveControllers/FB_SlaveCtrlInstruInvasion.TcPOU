@@ -8,8 +8,11 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// invasion buffer
+	m_instruInvasionDepthSafetyBuffer :LREAL:= 0.01;
+		
 	// max damping when reaching invasion depth
-	m_maxDamp :LREAL :=100;
+	m_maxDamp :LREAL :=500;
 	
 	// current distance form target invasion depth 
 	m_invasionDis :LREAL :=0;
@@ -39,7 +42,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
 // compute current instrument depth
 curInstruDepth := i_slaveArm.curJntPos[3]-i_slaveArm.instrument.kinematicParameters.m_rodLength-i_slaveArm.instrument.kinematicParameters.m_headLength
-						- i_slaveArm.instrument.kinematicParameters.m_fingerLength;
+						- i_slaveArm.instrument.kinematicParameters.m_fingerLength-m_instruInvasionDepthSafetyBuffer;
 
 m_invasionDis:=curInstruDepth-i_slaveArm.m_instruInvasionDepth;
 						

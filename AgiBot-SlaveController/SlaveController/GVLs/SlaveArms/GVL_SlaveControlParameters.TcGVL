@@ -15,7 +15,7 @@ VAR_GLOBAL CONSTANT
 	g_jntCtrlAngTolHigh :LREAL :=1*g_deg2Rad;
 	g_cartCtrlPosTolLow :LREAL :=0.0002;
 	g_cartCtrlOriTolLow :LREAL :=0.2*g_deg2Rad;
-	g_cartCtrlPosTolHign :LREAL :=0.001;
+	g_cartCtrlPosTolHigh :LREAL :=0.001;
 	g_cartCtrlOriTolHigh :LREAL :=1*g_deg2Rad;
 	
 	// filter cut-off frequency for velocity and torque

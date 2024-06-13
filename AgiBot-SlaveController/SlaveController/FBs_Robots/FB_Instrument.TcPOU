@@ -81,11 +81,37 @@ ELSIF m_onChipData.m_InstruID = 13 THEN
 	m_onChipData.m_Instrutype :=  InstruType_MarylandForceps;
 ELSIF m_onChipData.m_InstruID = 15 THEN
 	m_onChipData.m_Instrutype :=  InstruType_CurvedScissors;
+ELSIF m_onChipData.m_InstruID = 11 THEN
+	m_onChipData.m_Instrutype :=  InstruType_SCNeedleDriver;
+ELSIF m_onChipData.m_InstruID = 7 THEN
+	m_onChipData.m_Instrutype :=  InstruType_CadiereForceps;
 ELSE
 	checkInstruType := FALSE;
 END_IF
 
-RETURN;
+// update instrument kinematic parameters based on readed info
+// rod length
+IF InstruType_Endoscope =  m_onChipData.m_Instrutype THEN
+	m_kinematicParameters.m_rodLength := 0.48;
+ELSE 
+	m_kinematicParameters.m_fingerLength := 0.5392;
+END_IF
+
+// head length
+IF InstruType_Endoscope =  m_onChipData.m_Instrutype THEN
+	m_kinematicParameters.m_headLength := 0.0;
+ELSE 
+	m_kinematicParameters.m_fingerLength := 0.01;
+END_IF
+
+// finger length
+IF InstruType_NeedleDriver =  m_onChipData.m_Instrutype THEN
+	m_kinematicParameters.m_fingerLength := 0.01;
+ELSE 
+	m_kinematicParameters.m_fingerLength := 0.0;
+END_IF
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -661,13 +687,7 @@ CASE m_Step OF
 		m_kinematicParameters.kz:=kz[paramIdx];
 		m_Step:=-1;
 	
-END_CASE
-
-// update instrument kinematic parameters based on readed info
-IF InstruType_NeedleDriver =  m_onChipData.m_Instrutype THEN
-	m_kinematicParameters.m_fingerLength := 0.01;
-END_IF
-]]></ST>
+END_CASE]]></ST>
       </Implementation>
     </Method>
     <Method Name="reset" Id="{90292eaa-1cc4-4b19-b4f6-6bcd7c03eb33}">
@@ -794,9 +814,19 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="34" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="40" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="82" Count="1" />
       <LineId Id="16" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="38" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="52" Count="5" />
+      <LineId Id="64" Count="5" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="71" Count="5" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="51" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
@@ -1015,11 +1045,6 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="308" Count="0" />
       <LineId Id="276" Count="0" />
       <LineId Id="28" Count="0" />
-      <LineId Id="366" Count="0" />
-      <LineId Id="330" Count="0" />
-      <LineId Id="333" Count="1" />
-      <LineId Id="332" Count="0" />
-      <LineId Id="196" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">
       <LineId Id="5" Count="2" />
