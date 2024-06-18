@@ -8,6 +8,16 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR
+	// instrument type
+	m_instruType : 	E_InstrumentType := InstruType_UNKNOWM;
+	
+	// flag if instrument is singer finger
+	m_isSingleFinger:BOOL:= FALSE;
+	
+	// current and max allowed read tries
+	m_curReadTries :INT :=0;
+	m_maxReadTries :INT := 5;
+	
 	//IP of operating arm
 	m_armNetId:T_AmsNetId; 	
 	
@@ -27,7 +37,7 @@ VAR
 	m_jntPosOffset:Vec8d;
 	
 	// reduction from motor joint to endoscope rotate joint
-	m_endoscopeRotateReduction :LREAL := 2/3;
+	m_endoscopeRotateReduction :LREAL := 2.0/3.0;
 	
 	// flag if endoscope is 30deg
 	m_endoscope30Deg :BOOL:=TRUE;
@@ -67,48 +77,58 @@ END_VAR
       <Declaration><![CDATA[METHOD PROTECTED checkInstruType : BOOL
 VAR_INPUT
 END_VAR
+VAR
+	paramIdx :INT;
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[checkInstruType := TRUE;
+        <ST><![CDATA[checkInstruType := m_onChipData.m_InstruID >= InstruType_First AND m_onChipData.m_InstruID <= InstruType_Last ;
 
-IF m_onChipData.m_InstruID = 20  THEN
-	m_onChipData.m_Instrutype :=  InstruType_endoscope;
-ELSIF m_onChipData.m_InstruID = 14 THEN
-	m_onChipData.m_Instrutype := InstruType_FenestratedForceps;
-ELSIF m_onChipData.m_InstruID = 8 THEN
-	m_onChipData.m_Instrutype :=  InstruType_NeedleDriver;
-ELSIF m_onChipData.m_InstruID = 13 THEN
-	m_onChipData.m_Instrutype :=  InstruType_MarylandForceps;
-ELSIF m_onChipData.m_InstruID = 15 THEN
-	m_onChipData.m_Instrutype :=  InstruType_CurvedScissors;
-ELSIF m_onChipData.m_InstruID = 11 THEN
-	m_onChipData.m_Instrutype :=  InstruType_SCNeedleDriver;
-ELSIF m_onChipData.m_InstruID = 7 THEN
-	m_onChipData.m_Instrutype :=  InstruType_CadiereForceps;
-ELSE
-	checkInstruType := FALSE;
+// return directly if instrument ID is invalid
+IF NOT(checkInstruType) THEN
+	RETURN;
 END_IF
+m_onChipData.m_Instrutype :=  m_onChipData.m_InstruID;
+m_instruType := m_onChipData.m_InstruID;
+m_isSingleFinger :=  (m_instruType = InstruType_CauteryHook OR  m_instruType = InstruType_CauterySpatula );
 
 // update instrument kinematic parameters based on readed info
+// TODO: move instrument kinematic parameters to chip 
+paramIdx :=LIMIT(1, m_onChipData.m_InstruID, 30);
+m_kinematicParameters.k13:=k13[paramIdx];
+m_kinematicParameters.k23:=k23[paramIdx];
+m_kinematicParameters.kx:=kx[paramIdx];
+m_kinematicParameters.ky:=ky[paramIdx];
+m_kinematicParameters.kz:=kz[paramIdx];
+		
 // rod length
-IF InstruType_Endoscope =  m_onChipData.m_Instrutype THEN
+IF InstruType_Endoscope =  m_instruType THEN
 	m_kinematicParameters.m_rodLength := 0.48;
 ELSE 
 	m_kinematicParameters.m_fingerLength := 0.5392;
 END_IF
 
 // head length
-IF InstruType_Endoscope =  m_onChipData.m_Instrutype THEN
+IF InstruType_Endoscope =  m_instruType THEN
 	m_kinematicParameters.m_headLength := 0.0;
 ELSE 
 	m_kinematicParameters.m_fingerLength := 0.01;
 END_IF
 
 // finger length
-IF InstruType_NeedleDriver =  m_onChipData.m_Instrutype THEN
+IF InstruType_NeedleDriver =  m_instruType THEN
 	m_kinematicParameters.m_fingerLength := 0.01;
 ELSE 
 	m_kinematicParameters.m_fingerLength := 0.0;
+END_IF
+
+//TODO: update instrument joint motion range
+IF m_isSingleFinger THEN
+	m_kinematicParameters.m_wristMinDHJntPos[3]:=-110.0 * g_deg2Rad;
+	m_kinematicParameters.m_wristMaxDHJntPos[3]:=110.0 * g_deg2Rad;
+ELSE
+	m_kinematicParameters.m_wristMinDHJntPos[3]:=-90.0 * g_deg2Rad;
+	m_kinematicParameters.m_wristMaxDHJntPos[3]:=90.0 * g_deg2Rad;
 END_IF
 
 
@@ -153,7 +173,14 @@ VAR
 	gripLevel :REAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// finger closed and force applied
+        <ST><![CDATA[// suppose finger is  closed and zero force if instrument has only one finger
+IF m_isSingleFinger THEN
+	o_instruGripAngle := 0;
+	o_instruGripForceLevel:= 0;
+	RETURN;
+END_IF 
+
+// finger closed and force applied
 IF i_masterGripAng < g_masterGripForceStartAng THEN
 	o_instruGripAngle := m_kinematicParameters.m_minGripAngle;
 	// NOTE: force is applied from 50%，as minimum gripper angle already apply some sort of force
@@ -254,11 +281,21 @@ frontAngle:=Angle_Inc_A*2;
 VAR_INPUT
 	armIdx :INT;
 END_VAR
+VAR
+	i:INT;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Update the IP and port number of the operating arm
 m_armNetId:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
-m_jointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];]]></ST>
+m_jointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];
+
+// init joint motion range
+FOR i:=1 TO 3 DO
+	m_kinematicParameters.m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
+	m_kinematicParameters.m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
+END_FOR
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="initInstruJntPos" Id="{9abce61f-f34d-42ca-a401-a8190ac28e6c}">
@@ -304,8 +341,8 @@ r_DHJntPos[2]:=i_jntPos[2];
 r_DHJntPos[3]:=i_jntPos[3];
 
 // ################## endoscope ############################
-IF m_onChipData.m_Instrutype = InstruType_endoscope THEN
-	r_DHJntPos[4]:=-m_endoscopeRotateReduction*(i_jntPos[8]-m_jntPosOffset[8]);
+IF m_instruType = InstruType_endoscope THEN
+	r_DHJntPos[4]:=m_endoscopeRotateReduction*(i_jntPos[8]-m_jntPosOffset[8]);
 	IF m_endoscope30Deg THEN
 		r_DHJntPos[5]:=-pi/2+30*g_deg2Rad;
 	ELSE
@@ -322,6 +359,11 @@ jntPosL2:=(i_jntPos[5]-m_jntPosOffset[5]);
 jntPosL3:=(i_jntPos[6]-m_jntPosOffset[6]);
 jntPosL4:=-(i_jntPos[7]-m_jntPosOffset[7]);
 jntPosL5:=-(i_jntPos[8]-m_jntPosOffset[8]);
+
+// diable L1 if instrument is single finger
+IF m_isSingleFinger THEN
+	jntPosL1 := -jntPosL2;
+END_IF
 
 // instrument FK in local coordinate
 r_DHJntPos[4]:=jntPosL4/m_kinematicParameters.kx;
@@ -419,7 +461,7 @@ o_jntPos[2] := i_DHJntPos[2];
 o_jntPos[3] := i_DHJntPos[3];
 
 // ################## endoscope ############################
-IF m_onChipData.m_Instrutype = InstruType_endoscope THEN
+IF m_instruType = InstruType_endoscope THEN
 	o_jntPos[8] := -i_DHJntPos[4]/m_endoscopeRotateReduction + m_jntPosOffset[8];
 	o_jntPos[4]:=0;
 	o_jntPos[5]:=0;
@@ -559,7 +601,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// TODO: read m_kinematic parameters from chip 
 //Take the rising edge of the read signal
 m_ReadDelay(IN:= m_Step=10, PT:= m_DealyTime, Q=> , ET=> );//计时器
-IF startFlag THEN
+IF startFlag AND m_curReadTries < m_maxReadTries THEN
 	m_Step:=0;
 	m_onChipData.m_InstruReadSucceed:=FALSE;
 	m_onChipData.m_Error:=FALSE;
@@ -657,10 +699,9 @@ CASE m_Step OF
 		END_IF
 		
 		
-		
 	120://结果诊断
-	// TODO : endoscope can not be readed
-		IF m_onChipData.m_InstruID<1 THEN
+		m_onChipData.m_InstruReadSucceed:=checkInstruType();
+		IF NOT(m_onChipData.m_InstruReadSucceed) THEN
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=1;
 (*		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
@@ -673,19 +714,9 @@ CASE m_Step OF
 				m_onChipData.m_Error:=TRUE;
 				m_onChipData.m_ErrorID:=2;
 			END_IF*)
-		ELSE
-			m_onChipData.m_InstruReadSucceed:=checkInstruType();
-			m_Step:=130;
 		END_IF
-	
-	130://控制参数赋值、现在先用原有的  后续改为从芯片中读取
-		paramIdx :=LIMIT(1, m_onChipData.m_InstruID, 30);
-		m_kinematicParameters.k13:=k13[paramIdx];
-		m_kinematicParameters.k23:=k23[paramIdx];
-		m_kinematicParameters.kx:=kx[paramIdx];
-		m_kinematicParameters.ky:=ky[paramIdx];
-		m_kinematicParameters.kz:=kz[paramIdx];
-		m_Step:=-1;
+		m_Step :=-1;
+		m_curReadTries := m_curReadTries +1;
 	
 END_CASE]]></ST>
       </Implementation>
@@ -698,15 +729,25 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_onChipData.m_InstruID := 0;
+        <ST><![CDATA[m_Step := -1;
+m_curReadTries := 0;
+m_onChipData.m_InstruID := 0;
 m_onChipData.m_InstruseriesNum :=0;
 m_onChipData.m_Instrutype :=InstruType_UNKNOWM;
 m_onChipData.m_Error:=FALSE;
 m_onChipData.m_ErrorID:=0;
 m_onChipData.m_InstruReadSucceed:=FALSE;
+m_isSingleFinger:=FALSE;
+m_instruType:=InstruType_UNKNOWM;
 
 FOR i:= 4 TO 8 BY 1 DO
 	m_jntPosOffset[i]:=0;
+END_FOR
+
+// init joint motion range
+FOR i:=1 TO 3 DO
+	m_kinematicParameters.m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
+	m_kinematicParameters.m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
 END_FOR
 ]]></ST>
       </Implementation>
@@ -806,26 +847,32 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.checkInstruType">
-      <LineId Id="10" Count="1" />
-      <LineId Id="6" Count="1" />
-      <LineId Id="13" Count="1" />
-      <LineId Id="8" Count="1" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="82" Count="1" />
-      <LineId Id="16" Count="1" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="130" Count="1" />
       <LineId Id="38" Count="0" />
       <LineId Id="45" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="104" Count="4" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="109" Count="0" />
       <LineId Id="52" Count="5" />
       <LineId Id="64" Count="5" />
       <LineId Id="63" Count="0" />
       <LineId Id="71" Count="5" />
       <LineId Id="70" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="91" Count="0" />
       <LineId Id="51" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
@@ -837,6 +884,10 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.gripAngleMap">
+      <LineId Id="80" Count="0" />
+      <LineId Id="83" Count="3" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="81" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="25" Count="0" />
@@ -863,6 +914,13 @@ o_q1 := g_2pi *  posCode/16#3FF;
     <LineIds Name="FB_Instrument.init">
       <LineId Id="7" Count="1" />
       <LineId Id="5" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.initInstruJntPos">
       <LineId Id="9" Count="0" />
@@ -885,6 +943,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="201" Count="0" />
       <LineId Id="132" Count="1" />
       <LineId Id="126" Count="4" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="223" Count="2" />
       <LineId Id="160" Count="0" />
       <LineId Id="156" Count="0" />
       <LineId Id="86" Count="1" />
@@ -1021,7 +1082,6 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="164" Count="2" />
       <LineId Id="161" Count="0" />
       <LineId Id="273" Count="1" />
-      <LineId Id="153" Count="0" />
       <LineId Id="170" Count="0" />
       <LineId Id="387" Count="0" />
       <LineId Id="172" Count="0" />
@@ -1033,26 +1093,22 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="281" Count="0" />
       <LineId Id="184" Count="2" />
       <LineId Id="183" Count="0" />
-      <LineId Id="189" Count="0" />
-      <LineId Id="373" Count="0" />
-      <LineId Id="282" Count="0" />
       <LineId Id="175" Count="0" />
-      <LineId Id="173" Count="0" />
-      <LineId Id="275" Count="0" />
-      <LineId Id="379" Count="0" />
-      <LineId Id="171" Count="0" />
-      <LineId Id="283" Count="3" />
-      <LineId Id="308" Count="0" />
+      <LineId Id="405" Count="1" />
       <LineId Id="276" Count="0" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">
+      <LineId Id="51" Count="1" />
       <LineId Id="5" Count="2" />
       <LineId Id="11" Count="1" />
       <LineId Id="16" Count="0" />
+      <LineId Id="58" Count="1" />
       <LineId Id="26" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />
+      <LineId Id="41" Count="4" />
+      <LineId Id="39" Count="0" />
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.writeZeroPosToChip">

@@ -18,7 +18,7 @@ VAR
 	
 	// collision and safety check threshold
 	m_jntCtrlErr:Vec8d;
-	m_jntCtrlErrThres :Vec8d:=[2(2.0*g_deg2rad), 0.005, 5(2.0*g_deg2rad)];
+	m_jntCtrlErrThres :Vec8d:=[2(5.0*g_deg2rad), 0.02, 5(5.0*g_deg2rad)];
 	
 END_VAR
 ]]></Declaration>

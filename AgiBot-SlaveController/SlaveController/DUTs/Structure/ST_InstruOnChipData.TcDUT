@@ -9,6 +9,7 @@ STRUCT
 	
 	// series number
 	m_InstruseriesNum : ULINT:=0;
+	
 	// instrument type
 	m_Instrutype : E_InstrumentType := InstruType_UNKNOWM;
 	

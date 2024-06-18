@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -128,7 +128,7 @@ FOR i:=1 TO g_sArmNum DO
 	r_slaveStatus.m_selfCheckPass[i] := m_selfCheckPass[i];	
 
 	// instrument data
-	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.onChipData.m_Instrutype;
+	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.m_instruType;
 	r_slaveStatus.m_instruStauts[i].m_ready:=m_instrumentMountedFlag[i];
 	r_slaveStatus.m_instruStauts[i].m_fingerAngle:=m_slaveArms[i].curGripAngle;
 	
@@ -229,7 +229,7 @@ m_masterOnLine := m_masterOnLineCheck.check(i_slaveInputDataPool.m_masterStatus.
 // check if endoscope is mounted
 m_endoscopeMounted := FALSE;
 FOR i:=1 TO g_sArmNum DO 
-	IF m_slaveArms[i].instrument.onChipData.m_Instrutype=InstruType_endoscope THEN
+	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
 		m_endoscopeMounted := TRUE;
 		m_endoscopePose := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], m_slaveArms[i].curCartPose);
 	END_IF
@@ -379,7 +379,7 @@ FOR i:=1 TO g_sArmNum DO
 			ELSIF m_slaveArms[i].instruOn AND m_slaveArms[i].trocarOn  THEN
 				IF m_instrumentMountedFlag[i] THEN
 					// to scope ready
-					IF  InstruType_endoscope = m_slaveArms[i].instrument.onChipData.m_Instrutype AND m_slaveArms[i].instruInReadyPos() THEN 
+					IF  InstruType_endoscope = m_slaveArms[i].instrument.m_instruType AND m_slaveArms[i].instruInReadyPos() THEN 
 						m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
 					// to instrument ready
 					ELSIF  m_slaveArms[i].instruInReadyPos() THEN

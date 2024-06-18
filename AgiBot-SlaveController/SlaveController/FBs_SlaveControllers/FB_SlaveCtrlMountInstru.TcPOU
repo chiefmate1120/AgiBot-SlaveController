@@ -64,7 +64,7 @@ IF i_slaveArm.instrument.onChipData.m_Error THEN
 	return;
 END_IF
 
-IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND InstruType_endoscope = i_slaveArm.instrument.onChipData.m_Instrutype THEN
+IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND InstruType_endoscope = i_slaveArm.instrument.m_instruType THEN
 	mountEndoscope(i_slaveArm);
 ELSE
 	mountInstrument(i_slaveArm);
@@ -192,6 +192,11 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
 
+// joint4 stay still if instrument has only on finger
+IF i_slaveArm.instrument.m_isSingleFinger THEN
+	m_jointMounted[1]:=TRUE;
+END_IF
+
 CASE m_instruMountStatus OF
 	// To lock panel with instrument
 	0:
@@ -295,7 +300,11 @@ END_FOR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
-      <LineId Id="96" Count="28" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="193" Count="2" />
+      <LineId Id="97" Count="27" />
       <LineId Id="127" Count="13" />
       <LineId Id="175" Count="0" />
       <LineId Id="177" Count="4" />

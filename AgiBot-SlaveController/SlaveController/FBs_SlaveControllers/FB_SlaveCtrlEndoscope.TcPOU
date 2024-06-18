@@ -114,7 +114,7 @@ m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLoc
 m_cmdJntVel[1]:= armDHJntVel[1];
 m_cmdJntVel[2]:= armDHJntVel[2];
 m_cmdJntVel[3]:= armDHJntVel[3];
-m_cmdJntVel[8]:= -m_cmdWVelLocal;
+m_cmdJntVel[8]:= -m_cmdWVelLocal/i_slaveArm.instrument.m_endoscopeRotateReduction;
 
 // integral to command joint position
 m_cmdJntPos[1]:=m_simJntPos[1]+m_cmdJntVel[1]*g_slaveArmCtrlCycleTime;

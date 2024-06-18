@@ -20,12 +20,10 @@ STRUCT
 	k13:LREAL:=0.775;
 	k23:LREAL:=0.775;
 	m_openAngleDir:INT:=-1;
-
-	Len_fixed_point:LREAL:=0.2;	//不动点距离安装面的长度
-	Len_mounting_surface:LREAL:=0.009; //器械安装面距离滑块的长度(图中的L3)
-	Len_Hight:lreal:=0; //器械杆的高度
-	slope_angle:LREAL:=0; //如果器械是摄像头，还需要考虑摄像头的斜面角度
-	open_angle_max:LREAL:=1.57;
+	
+	// instrument wrist DH joint limit
+	m_wristMinDHJntPos :Vec3d;
+	m_wristMaxDHJntPos :Vec3d;
 
 END_STRUCT
 END_TYPE

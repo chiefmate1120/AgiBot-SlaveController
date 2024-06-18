@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -735,7 +735,7 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{4ECE723D-4261-7668-069E-C65E39A9CFE5}" AutoDeleteType="true">E_InstrumentType</Name>
+			<Name GUID="{E9F34464-3454-B6ED-9FDF-9A41626D877B}" AutoDeleteType="true">E_InstrumentType</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -743,57 +743,65 @@
 				<Enum>0</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[InstruType_Endoscope]]></Text>
-				<Enum>1</Enum>
-			</EnumInfo>
-			<EnumInfo>
 				<Text><![CDATA[InstruType_CadiereForceps]]></Text>
-				<Enum>2</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[InstruType_NeedleDriver]]></Text>
-				<Enum>3</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[InstruType_SCNeedleDriver]]></Text>
-				<Enum>4</Enum>
-				<Comment><![CDATA[ suture-cut needle driver]]></Comment>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[InstruType_MegaSCNeedleDriver]]></Text>
-				<Enum>5</Enum>
-				<Comment><![CDATA[ mega suture-cut needle driver]]></Comment>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[InstruType_RoundTipScissors]]></Text>
-				<Enum>6</Enum>
-			</EnumInfo>
-			<EnumInfo>
-				<Text><![CDATA[InstruType_ProGraspForceps]]></Text>
 				<Enum>7</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[InstruType_MarylandForceps]]></Text>
+				<Text><![CDATA[InstruType_NeedleDriver]]></Text>
 				<Enum>8</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_MegaSCNeedleDriver]]></Text>
+				<Enum>9</Enum>
+				<Comment><![CDATA[ mega suture-cut needle driver]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_SCNeedleDriver]]></Text>
+				<Enum>10</Enum>
+				<Comment><![CDATA[ suture-cut needle driver]]></Comment>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_RoundTipScissors]]></Text>
+				<Enum>11</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_ProGraspForceps]]></Text>
+				<Enum>12</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_MarylandForceps]]></Text>
+				<Enum>13</Enum>
 				<Comment><![CDATA[ Maryland bipolar forceps]]></Comment>
 			</EnumInfo>
 			<EnumInfo>
 				<Text><![CDATA[InstruType_FenestratedForceps]]></Text>
-				<Enum>9</Enum>
+				<Enum>14</Enum>
 				<Comment><![CDATA[ Fnestrated bipolar forceps]]></Comment>
 			</EnumInfo>
 			<EnumInfo>
 				<Text><![CDATA[InstruType_CurvedScissors]]></Text>
-				<Enum>10</Enum>
+				<Enum>15</Enum>
 				<Comment><![CDATA[ monopolar curved scissors]]></Comment>
 			</EnumInfo>
 			<EnumInfo>
 				<Text><![CDATA[InstruType_CauteryHook]]></Text>
-				<Enum>11</Enum>
+				<Enum>16</Enum>
 			</EnumInfo>
 			<EnumInfo>
 				<Text><![CDATA[InstruType_CauterySpatula]]></Text>
-				<Enum>12</Enum>
+				<Enum>17</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_Endoscope]]></Text>
+				<Enum>20</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_First]]></Text>
+				<Enum>7</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_Last]]></Text>
+				<Enum>20</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -802,7 +810,7 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{2004D92F-F956-A22D-5008-84C28D13AEC5}" AutoDeleteType="true">ST_InstruStatus</Name>
+			<Name GUID="{B5ECD4BD-E32C-0B75-D4B9-522F66360850}" AutoDeleteType="true">ST_InstruStatus</Name>
 			<BitSize>128</BitSize>
 			<SubItem>
 				<Name>m_ready</Name>
@@ -815,7 +823,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>m_type</Name>
-				<Type GUID="{4ECE723D-4261-7668-069E-C65E39A9CFE5}">E_InstrumentType</Type>
+				<Type GUID="{E9F34464-3454-B6ED-9FDF-9A41626D877B}">E_InstrumentType</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>16</BitOffs>
 				<Default>
@@ -842,7 +850,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{9121FD4E-1DF8-5BA0-304A-F0C44AAE2357}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>12224</BitSize>
@@ -906,7 +914,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>m_instruStauts</Name>
-				<Type GUID="{2004D92F-F956-A22D-5008-84C28D13AEC5}">ST_InstruStatus</Type>
+				<Type GUID="{B5ECD4BD-E32C-0B75-D4B9-522F66360850}">ST_InstruStatus</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1301,9 +1309,9 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{8DAC22E6-A2C5-4BF6-3510-77E847C841A8}" AutoDeleteType="true">ARRAY [1..4] OF ST_InstruStatus</Name>
+			<Name GUID="{CF06BF9C-80F6-CCE0-235C-329907B40F2F}" AutoDeleteType="true">ARRAY [1..4] OF ST_InstruStatus</Name>
 			<BitSize>512</BitSize>
-			<BaseType GUID="{2004D92F-F956-A22D-5008-84C28D13AEC5}">ST_InstruStatus</BaseType>
+			<BaseType GUID="{B5ECD4BD-E32C-0B75-D4B9-522F66360850}">ST_InstruStatus</BaseType>
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>4</Elements>
@@ -1683,7 +1691,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{86CBCAF7-A46B-493F-61C4-28F6881EBD9F}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1924,7 +1932,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}">ST_SlaveStatus</Type>
+							<Type GUID="{9121FD4E-1DF8-5BA0-304A-F0C44AAE2357}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2075,7 +2083,7 @@
 						<Var>
 							<Name>RobotDynamics.m_instruInfo</Name>
 							<Comment><![CDATA[ instrument info]]></Comment>
-							<Type GUID="{8DAC22E6-A2C5-4BF6-3510-77E847C841A8}">ARRAY [1..4] OF ST_InstruStatus</Type>
+							<Type GUID="{CF06BF9C-80F6-CCE0-235C-329907B40F2F}">ARRAY [1..4] OF ST_InstruStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="1" AreaNo="17">
@@ -2224,7 +2232,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}">ST_SlaveStatus</Type>
+							<Type GUID="{9121FD4E-1DF8-5BA0-304A-F0C44AAE2357}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2344,7 +2352,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{8CBCE30A-809E-C8FE-217A-F4ADC166E360}">ST_SlaveStatus</Type>
+							<Type GUID="{9121FD4E-1DF8-5BA0-304A-F0C44AAE2357}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -2465,7 +2473,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id NeedCalleeCall="true">0</Id>
+							<Id>0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2474,7 +2482,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">1</Id>
+							<Id>1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2483,7 +2491,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">2</Id>
+							<Id>2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2492,7 +2500,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">3</Id>
+							<Id>3</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -2501,7 +2509,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">4</Id>
+							<Id>4</Id>
 							<Name>TaskCartControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010070</OTCID>

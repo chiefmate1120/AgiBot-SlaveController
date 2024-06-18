@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_InstruCtrlParams" Id="{f4067b3b-1600-41bf-bbfc-2a09113afeea}">
     <Declaration><![CDATA[// TODO： Code review and refined
 VAR_GLOBAL
@@ -34,14 +34,6 @@ VAR_GLOBAL
 	TroCar_Len:LREAL:=0.1;//穿刺器长度、此处使用的是短穿刺器
 	Zero_To_Bottom_J8:LREAL:=0.14;//8关节刻度线到最底部长度
 
-	
-	// Add by NiFeijian,  new method to mount panel and instrument, can be repalced later
-	// joint position of panel locked position
-	g_panelLockedPosition :Vec5d:=[0.0, 0.0, 0.0, 0.0, 0.0];	
-	
-	// motor position when instrument is at zero position
-	g_instruZeroPosition :Vec5d :=[0.0, 0.0, 0.0, 0.0, 0.0];// move to instrument chip and read online
-	
 	// master gripper angle limit
 	g_maxMasterGripAngle :LREAL := 30*g_deg2Rad;
 	g_minMasterGripAngle : LREAL :=0.0;

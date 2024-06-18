@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMountPanel" Id="{823d9da4-dfa7-45fa-b541-870812882ed0}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Mounting Panel
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMountPanel EXTENDS FB_SlaveArmCtrlBase
@@ -20,7 +20,7 @@ VAR
 	m_panelMountAcc :LREAL := 4*pi;
 	
 	// joint current threshold which indicate motor is buckled with panel
-	m_maxJntCurrent :INT := 100;
+	m_maxJntCurrent :INT := 80;
 	
 	// command mount motion
 	m_mountStepPos :LREAL := 45.0 * g_deg2Rad;
@@ -67,7 +67,7 @@ CASE m_mountStatus OF
 			END_IF
 		END_FOR
 		
-		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4] AND m_jointMounted[5]) or m_timePeriod > 8.0 THEN
+		IF (m_jointMounted[1] AND m_jointMounted[2] AND m_jointMounted[3] AND m_jointMounted[4] AND m_jointMounted[5]) or m_timePeriod > 5.0 THEN
 			m_mountStatus:=1;
 		END_IF
 	
