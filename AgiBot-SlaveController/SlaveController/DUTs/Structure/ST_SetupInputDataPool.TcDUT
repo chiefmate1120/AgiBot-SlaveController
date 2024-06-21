@@ -5,9 +5,6 @@
 TYPE ST_SetupInputDataPool :
 STRUCT
 				
-	// UI information, import from UI controller
-	m_UIData AT %I*:ST_SlaveUIData;
-	
 	// slave status, import from slave control task
 	m_slaveStatus AT %I*: ST_SlaveStatus;
 	

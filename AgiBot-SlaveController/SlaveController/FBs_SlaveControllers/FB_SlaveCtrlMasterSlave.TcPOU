@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -19,7 +19,7 @@ VAR
 	
 	// control error thershold from joint limit back to free space
 	m_maxPosTrackErr :LREAL := 0.05;
-	m_maxOriTrackErr :LREAL :=g_deg2Rad * 2;
+	m_maxOriTrackErr :LREAL :=g_deg2Rad * 5;
 	
 	// filter cut-off frequency for master-slave control
 	m_cmdJntPosLpfCutoffFreq : LREAL :=5;
@@ -243,18 +243,20 @@ FOR i:=1 TO 3 DO
 END_FOR
 
 IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_maxOriTrackErr) THEN
-	m_reachWristJntLimit:= TRUE;
+	wristDHJntVel:=g_zeroVec3d;
+	m_reachWristJntLimit:=TRUE;
 ELSE
 	m_reachWristJntLimit :=FALSE;
+	FOR i:=1 TO 3 DO
+		IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i]) OR 
+			(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i])  THEN
+			wristDHJntVel:=g_zeroVec3d;
+			m_reachWristJntLimit:=TRUE;
+			CONTINUE;
+		END_IF
+	END_FOR
 END_IF
-FOR i:=1 TO 3 DO
-	IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i]) OR 
-		(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i])  THEN
-		wristDHJntVel:=g_zeroVec3d;
-		m_reachWristJntLimit:=TRUE;
-		CONTINUE;
-	END_IF
-END_FOR
+
 
 // modify arm joints velocity to compensate wrist joint motion
 FOR i:=1 TO 3 DO
@@ -563,13 +565,11 @@ END_VAR
       <LineId Id="1088" Count="0" />
       <LineId Id="796" Count="0" />
       <LineId Id="1089" Count="0" />
+      <LineId Id="1127" Count="0" />
       <LineId Id="1091" Count="1" />
+      <LineId Id="1120" Count="6" />
+      <LineId Id="1119" Count="0" />
       <LineId Id="1090" Count="0" />
-      <LineId Id="234" Count="1" />
-      <LineId Id="238" Count="1" />
-      <LineId Id="797" Count="0" />
-      <LineId Id="984" Count="0" />
-      <LineId Id="240" Count="0" />
       <LineId Id="236" Count="0" />
       <LineId Id="242" Count="0" />
       <LineId Id="228" Count="0" />

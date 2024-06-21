@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVLs_SlaveArmDynamics" Id="{df4fb32e-58eb-444d-823e-cc22793fbc57}">
+  <GVL Name="GVL_SlaveArmDynamics_3" Id="{eee54b3a-62fd-4a3c-b65e-d55178ffd497}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
+{attribute 'qualified_only'}
+// Robot3 --dynamic parameters of slave arms
 VAR_GLOBAL CONSTANT
 	
 (*graParam=[ 9.8*m5,...
@@ -9,7 +11,7 @@ VAR_GLOBAL CONSTANT
            9.8*mz2 - 9.8*my5 - 9.8*my1 + 9.8*mz3 + 9.8*mz4,...
            2.19651*m3 + 2.19651*m4 + 0.00000258969*m5 + 8.64766*mx2 - 4.61063*my2 + 9.8*my4 + 9.8*mz5,...
           1.1711*m3 + 1.1711*m4 + 0.00000122416*m5 + 4.61063*mx2 - 9.8*mx4 - 9.8*mx5 + 8.64766*my2]'
-*)			
+*)				
 	// robot No.4
 	g_gravityParam :ARRAY[1..4,1..5] OF REAL := 
 	[ 7.5951,    1.6336,   -4.2417,    9.4106,    4.7289,
@@ -27,13 +29,7 @@ VAR_GLOBAL CONSTANT
 			  4.5927,    9.6040,    3.7367, 0.03, 0.03, 0.03, 0,
 		      4.3557,    8.4286,    5.9078,  0.03, 0.03, 0.03, 0.03, 0,
               4.1447,    7.2202,    6.8253,  0.03, 0.03, 0.03, 0.03, 0	 ];
-	
-	// joint velocity threshold for full friction compensation
-	g_fullFrictionVel :LREAL :=2.0*g_deg2Rad;
-	
-	// friciton compensation scael
-	g_frictionCompScale :LREAL := 0.8;
-	
+
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

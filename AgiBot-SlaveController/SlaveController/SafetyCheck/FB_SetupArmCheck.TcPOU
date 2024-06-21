@@ -69,9 +69,9 @@ FOR i:=1 TO g_sArmNum DO
 		CONTINUE;
 	END_IF
 	
-	// only check rcp in HOLD state (for master-slave control)
+	// only check rcp when slave in master-slave control state (for master-slave control)
 	m_rcpPosErrFlag[i]:=FALSE;
-	IF  SetupArmState_Hold = i_setupStatus.m_armState[i] THEN 
+	IF SlaveArmControl.m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave THEN 
 		m_rcpPosErrFlag[i]:=rcpErrCheck(m_dsrRcpPos[i],  i_setupStatus.m_rcPos[i], m_rcpPosErrCounts[i] ,m_rcpPosErr[i]);
 	END_IF
 	

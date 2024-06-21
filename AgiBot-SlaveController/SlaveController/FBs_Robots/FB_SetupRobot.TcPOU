@@ -231,13 +231,13 @@ END_VAR]]></Declaration>
 		
 		// arm disable
 		SetupArmState_Disable:
-			IF NOT(i_setupInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
+			IF NOT(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
 				m_nextSetupArmState[i]:= SetupArmState_Hold;
 			END_IF
 	END_CASE
 	
 	// arm disable
-	IF i_setupInputDataPool.m_UIData.m_slaveArmDisableFlag[i] AND m_setupArmState[i] <> SetupArmState_Init THEN
+	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
 		m_nextSetupArmState[i] := SetupArmState_Disable;
 	// error check
 	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN

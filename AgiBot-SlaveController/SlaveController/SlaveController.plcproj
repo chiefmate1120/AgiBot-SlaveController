@@ -487,11 +487,11 @@
     <Compile Include="FBs_Filters\FB_LowPassFilter.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GVLs\configs\robot3\GVLs_SetupArmDynamics_3.TcGVL">
+    <Compile Include="GVLs\configs\robot3\GVL_SetupArmDynamics_3.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\configs\robot3\GVLs_SlaveArmDynamics_3.TcGVL">
+    <Compile Include="GVLs\configs\robot3\GVL_SlaveArmDynamics_3.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -503,11 +503,11 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\configs\robot5\GVLs_SetupArmDynamics_5.TcGVL">
+    <Compile Include="GVLs\configs\robot5\GVL_SetupArmDynamics_5.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\configs\robot5\GVLs_SlaveArmDynamics_5.TcGVL">
+    <Compile Include="GVLs\configs\robot5\GVL_SlaveArmDynamics_5.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -516,6 +516,22 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\configs\robot5\GVL_SlaveJointEncoderCaliData_5.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot4\GVL_SetupArmDynamics_4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot4\GVL_SetupJointEncoderCaliData_4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot4\GVL_SlaveArmDynamics_4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot4\GVL_SlaveJointEncoderCaliData_4.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -567,7 +583,7 @@
     <Compile Include="FBs_SlaveControllers\I_SlaveArmCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GVLs\SetupArms\GVLs_SetupArmDynamics.TcGVL">
+    <Compile Include="GVLs\SetupArms\GVL_SetupArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -587,7 +603,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\SlaveArms\GVLs_SlaveArmDynamics.TcGVL">
+    <Compile Include="GVLs\SlaveArms\GVL_SlaveArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -670,6 +686,7 @@
     <Folder Include="GVLs\configs" />
     <Folder Include="GVLs\configs\robot3" />
     <Folder Include="GVLs\configs\robot5" />
+    <Folder Include="GVLs\configs\robot4" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="FBs_Auxiliary" />

@@ -440,7 +440,7 @@ FOR i:=1 TO g_setupJntNum DO
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
 		m_jntPIDCtrl[i].reset();
-		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i]+GVLs_SetupArmDynamics.g_setupJntGravityOffset[m_armIdx, i];
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i]+GVL_SetupArmDynamics.g_setupJntGravityOffset[m_armIdx, i];
 		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
 		m_jntPIDCtrl[i].reset();

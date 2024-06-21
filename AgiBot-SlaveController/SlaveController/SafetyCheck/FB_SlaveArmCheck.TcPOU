@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArmCheck" Id="{7fa43d5a-568e-4b76-ad81-6c5cf7c4ee74}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArmCheck
 VAR_INPUT
@@ -61,9 +61,9 @@ FOR i:=1 TO g_sArmNum DO
 		CONTINUE;
 	END_IF
 	
-	// only check cartesion pose error in master-slave mode
+	// only check cartesion pose error in master-slave mode and within joint limit
 	m_cartPoseErrFlag[i]:=FALSE;
-	IF  SlaveArmState_MasterSlave = i_slaveStatus.m_armState[i] THEN 
+	IF  SlaveArmState_MasterSlave = i_slaveStatus.m_armState[i] AND norm(i_slaveStatus.m_masterSlavePoseError[i])<g_smallNum THEN 
 		m_cartPoseErrFlag[i]:=poseErrCheck(i_slaveStatus.m_cmdArmPose[i],  i_slaveStatus.m_curArmPose[i],
 											m_cartPoseErrCounts[i], m_cartPosErr[i], m_cartOriErr[i]);
 	END_IF

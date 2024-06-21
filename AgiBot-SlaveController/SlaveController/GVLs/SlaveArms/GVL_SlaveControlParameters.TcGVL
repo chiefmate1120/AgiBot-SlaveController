@@ -30,6 +30,11 @@ VAR_GLOBAL CONSTANT
 	// joint is assumed to be static if velocity is less than this value
 	g_jntStaticVelThres :LREAL :=0.2*g_deg2Rad;
 	
+	// joint velocity threshold for full friction compensation
+	g_fullFrictionVel :LREAL :=2.0*g_deg2Rad;
+	
+	// friciton compensation scael
+	g_frictionCompScale :LREAL := 0.8;
 	
 END_VAR]]></Declaration>
   </GVL>

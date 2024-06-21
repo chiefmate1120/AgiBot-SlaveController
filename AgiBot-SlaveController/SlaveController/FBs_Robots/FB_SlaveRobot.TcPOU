@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -360,8 +360,7 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 				m_panelMountedFlag[i] :=TRUE;
 				
-				// NOTICE: multiple cycles joints back to center during initialization
-				// 			need to reset joints encoder data again
+				// reset joints encoder data again
 				m_slaveArms[i].initJntPos();
 			// to standby
 			ELSIF NOT(m_slaveArms[i].panelOn) THEN
@@ -379,14 +378,14 @@ FOR i:=1 TO g_sArmNum DO
 			ELSIF m_slaveArms[i].instruOn AND m_slaveArms[i].trocarOn  THEN
 				IF m_instrumentMountedFlag[i] THEN
 					// to scope ready
-					IF  InstruType_endoscope = m_slaveArms[i].instrument.m_instruType AND m_slaveArms[i].instruInReadyPos() THEN 
+					IF  InstruType_endoscope = m_slaveArms[i].instrument.m_instruType AND m_slaveArms[i].instruReady() THEN 
 						m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
 					// to instrument ready
-					ELSIF  m_slaveArms[i].instruInReadyPos() THEN
+					ELSIF  m_slaveArms[i].instruReady() THEN
 						m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
 					END_IF
 				// to mount instrument/endoscope
-				ELSE
+				ELSIF m_slaveArms[i].readyForInstruMount() THEN
 					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
 				END_IF
 			END_IF
@@ -398,8 +397,7 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			ELSIF m_armCtrl[i].isFinished THEN
 				m_instrumentMountedFlag[i] :=TRUE;
-				// NOTICE: multiple cycles joints back to center during initialization
-				// 			need to reset joints encoder data again
+				// reset joints encoder data again
 				m_slaveArms[i].initJntPos();
 				
 				// record current joint position as offset for instrument
@@ -417,7 +415,7 @@ FOR i:=1 TO g_sArmNum DO
 		// instrument ready
 		SlaveArmState_InstruReady:
 			// to instrument retract
-			IF  NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
+			IF  NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
@@ -437,7 +435,7 @@ FOR i:=1 TO g_sArmNum DO
 			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			// to instrument retract
-			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
+			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			END_IF
@@ -445,7 +443,7 @@ FOR i:=1 TO g_sArmNum DO
 		//endoscope ready
 		SlaveArmState_ScopeReady:
 			// to instrument retract
-			IF NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
+			IF NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
@@ -467,7 +465,7 @@ FOR i:=1 TO g_sArmNum DO
 				OR MasterArmState_Endoscope <> i_slavesInputDataPool.m_masterStatus.m_armState[2] THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			// to instrument retract
-			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
+			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 				m_slaveArms[i].recordInstruDepth();
 			END_IF
@@ -475,12 +473,15 @@ FOR i:=1 TO g_sArmNum DO
 		//arm adjust
 		SlaveArmState_Adjust:
 			IF NOT(m_slaveArms[i].adjustOn) THEN
-				// to standby
-				IF m_selfCheckPass[i] THEN
-					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 				// to init
-				ELSE
+				IF NOT (m_selfCheckPass[i]) THEN
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
+				// to retract
+				ELSIF  NOT(m_slaveArms[i].instruOn) THEN
+					m_nextSlaveArmState[i] :=SlaveArmState_InstruRetract;
+				// to standby
+				ELSE
+					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 				END_IF
 			END_IF
 		
@@ -746,7 +747,7 @@ END_FOR]]></ST>
       <LineId Id="151" Count="1" />
       <LineId Id="224" Count="0" />
       <LineId Id="154" Count="0" />
-      <LineId Id="156" Count="1" />
+      <LineId Id="156" Count="0" />
       <LineId Id="155" Count="0" />
       <LineId Id="357" Count="0" />
       <LineId Id="204" Count="1" />
@@ -775,7 +776,6 @@ END_FOR]]></ST>
       <LineId Id="295" Count="1" />
       <LineId Id="294" Count="0" />
       <LineId Id="297" Count="0" />
-      <LineId Id="355" Count="0" />
       <LineId Id="258" Count="0" />
       <LineId Id="543" Count="2" />
       <LineId Id="495" Count="0" />
@@ -818,7 +818,11 @@ END_FOR]]></ST>
       <LineId Id="424" Count="0" />
       <LineId Id="278" Count="4" />
       <LineId Id="306" Count="0" />
-      <LineId Id="639" Count="5" />
+      <LineId Id="639" Count="1" />
+      <LineId Id="672" Count="0" />
+      <LineId Id="642" Count="2" />
+      <LineId Id="675" Count="0" />
+      <LineId Id="673" Count="1" />
       <LineId Id="451" Count="1" />
       <LineId Id="455" Count="1" />
       <LineId Id="454" Count="0" />

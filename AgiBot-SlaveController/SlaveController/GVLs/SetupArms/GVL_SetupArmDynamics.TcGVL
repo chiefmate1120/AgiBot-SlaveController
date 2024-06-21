@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVLs_SetupArmDynamics" Id="{85fb4cf1-93e1-46c2-9468-807a08845e10}">
+  <GVL Name="GVL_SetupArmDynamics" Id="{92b9648f-0da4-4d72-8af1-58a93083201e}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
+{attribute 'qualified_only'}
 // Robot5 --dynamic parameters of setup arms
 VAR_GLOBAL 
 	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic
@@ -26,10 +27,10 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 gravity parameter
 	g_setupJnt3GravityParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[12196.3, -2231.22, 128.3, -102.578,
-	 8476.95, -1240.58, 104.752, -105.76,
-	 14956.5, -4297.99, 622.564, -131.776,
-	 14926.3, -2807.93, 154.175, -103.6];
+	[ 12732.1, -2686.58, 277.075, -95.1403,
+	 -4213.4, 1194.4, 207.745, -118.926,
+	3798.81, -862.596, 397.288, -127.846,
+	 35991.5, -10457.4, 1058.33, -122.463];
 	 
 	(* setup joint3 friction parameters
 	 graParams = [p1mp2,p3,p4]
@@ -37,24 +38,24 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 friction parameter
 	g_setupJnt3FrictionParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[ -14017.8, 4829.59, -538.059, 77.276,
-	  -19818.6, 7327.61, -903.65, 81.3597,
-	-60054.7, 22353.3, -2711.22, 147.637,
-	-25150.3, 8097.23, -822.128, 75.4573];
+	[  -41668.6, 14453.2, -1563.43, 100.562,
+	 -16563.6, 8089.53, -1307.53, 112.977,
+	-39448.5, 15129.4, -1976.17, 137.28,
+	-26846.1, 9145.03, -1006.01, 79.1108];
 	
 	g_setupJnt3GravityPosRange :ARRAY[1..4, 1..2] OF REAL :=
-	[0.0189, 	0.1789,
-	 0.0182,    0.1784,
-	 0.0189,    0.1789,
-	 0.0189,    0.1789];
+	[ 0.0189,    0.1788,
+	  0.0189,    0.1790,
+	  0.0188,    0.1788,
+	  0.0188,    0.1788];
  	
 	 
 	// joint gravity offset
 	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
-	[0, 0, 10, 0,  0,
-	 0, 0, 10, 0,  0,
-	 0, 0, 10, 0,  0,
-	 0, 0, 10, 0,  0];
+	[0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0];
 
 END_VAR]]></Declaration>
   </GVL>

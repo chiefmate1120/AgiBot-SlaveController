@@ -44,8 +44,8 @@ g_tcpRotation :Mat3d :=[0.0,	0.0,	1.0,
 					    0.0,	-1.0,	0.0];
 
 // minimum distance between instrument/endoscope tip and remote center
-g_minInstruRCDis:LREAL := 0.05;
-g_minScopeRCDis:LREAL := 0.05;
+g_minInstruRCDis:LREAL := 0.03;
+g_minScopeRCDis:LREAL := 0.02;
 
 END_VAR]]></Declaration>
   </GVL>

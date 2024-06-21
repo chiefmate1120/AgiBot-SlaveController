@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -152,9 +152,9 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[q := LIMIT(g_setupJnt3GravityPosRange[i_armIdx,1], i_jnt3Pos, g_setupJnt3GravityPosRange[i_armIdx,2]);
-jnt3Friction:=g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,3)+g_setupJnt3FrictionParams[i_armIdx,2]*EXPT(q,2)+
-				g_setupJnt3FrictionParams[i_armIdx,3]*q+g_setupJnt3FrictionParams[i_armIdx,4];]]></ST>
+        <ST><![CDATA[q := LIMIT(GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[i_armIdx,1], i_jnt3Pos, GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[i_armIdx,2]);
+jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,3)+GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,2]*EXPT(q,2)+
+				GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,3]*q+GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,4];]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupCtrlManualAdjust">

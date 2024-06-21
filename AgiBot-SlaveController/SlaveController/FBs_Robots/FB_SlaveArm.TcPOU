@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -563,27 +563,6 @@ END_FOR
 updateStatus();]]></ST>
       </Implementation>
     </Method>
-    <Method Name="instruInReadyPos" Id="{4f7fb741-1810-447d-a3ef-fca916ec7903}">
-      <Declaration><![CDATA[// check if instrument is in ready position(far enough from romote center) for following manipulation
-METHOD PUBLIC instruInReadyPos : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF NOT(m_instrument.onChipData.m_InstruReadSucceed) THEN
-	instruInReadyPos :=FALSE;
-	RETURN;
-END_IF
-
-IF m_instrument.m_instruType = InstruType_Endoscope THEN
-	instruInReadyPos := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis);
-ELSE
-	instruInReadyPos := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
-											+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis);
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="instrument" Id="{ef5d0758-d499-4e04-a177-87950f9a716b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY instrument : REFERENCE TO FB_Instrument]]></Declaration>
       <Get Name="Get" Id="{3a5249de-ec45-4e88-a302-3df6650a3ff5}">
@@ -606,6 +585,32 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="instruReady" Id="{4f7fb741-1810-447d-a3ef-fca916ec7903}">
+      <Declaration><![CDATA[// check if instrument is in ready position(far enough from romote center) for following manipulation
+METHOD PUBLIC instruReady : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	// check buffer
+	checkBuffer :LREAL := 0.005;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT(m_instrument.onChipData.m_InstruReadSucceed) THEN
+	instruReady :=FALSE;
+	RETURN;
+END_IF
+
+IF m_instrument.m_instruType = InstruType_Endoscope THEN
+	instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis+checkBuffer);
+ELSE
+	instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
+										+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="isEnabled" Id="{00a67cf8-62b1-4004-a2ca-9469bb0f3cab}">
       <Declaration><![CDATA[METHOD PUBLIC isEnabled : BOOL
 VAR_IN_OUT CONSTANT
@@ -697,7 +702,7 @@ VAR
 	s1,s2,s4,s5,s6,s7 :LREAL;
 	
 	// modify joint3 position to avoid jacobian singularity
-	m_Jnt3PosThres :LREAL := -0.05;
+	m_Jnt3PosThres :LREAL := -0.03;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
@@ -791,6 +796,21 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="readyForInstruMount" Id="{70a1cabf-0568-4973-adb8-2d2bf84e7996}">
+      <Declaration><![CDATA[// check if instrument is in ready position(far enough from romote center) for following manipulation
+METHOD PUBLIC readyForInstruMount : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	// check buffer
+	checkBuffer :LREAL := 0.005;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[readyForInstruMount := (m_curJntPos[3]> GVL_SlaveMotorParameters.g_maxDHJntPos[3]-checkBuffer AND m_panelOnFlag);]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="recordInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
       <Declaration><![CDATA[METHOD PUBLIC recordInstruDepth : BOOL
 VAR_INPUT
@@ -1139,24 +1159,15 @@ END_FOR
       <LineId Id="32" Count="1" />
       <LineId Id="25" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.instruInReadyPos">
-      <LineId Id="5" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="8" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="10" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
       <LineId Id="6" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instruOn.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruReady">
+      <LineId Id="38" Count="10" />
+      <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.isEnabled">
       <LineId Id="19" Count="0" />
@@ -1198,6 +1209,9 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.rawJntCurrent.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.readyForInstruMount">
+      <LineId Id="49" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.recordInstruDepth">
       <LineId Id="5" Count="1" />

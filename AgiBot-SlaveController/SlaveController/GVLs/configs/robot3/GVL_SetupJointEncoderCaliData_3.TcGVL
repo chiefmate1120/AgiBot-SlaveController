@@ -53,7 +53,6 @@ VAR_GLOBAL
 		 -65*g_deg2Rad, 0.607, 0.0, 90.0*g_deg2Rad, 0.0,
  		 -40*g_deg2Rad, 0.779, 0.0, 90.0*g_deg2Rad, 0.0];
 	
-
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

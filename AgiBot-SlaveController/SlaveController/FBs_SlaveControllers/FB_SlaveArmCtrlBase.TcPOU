@@ -139,7 +139,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// add joint friction compensation
 FOR i:=1 TO g_sJntNum DO
 	frictionScale :=LIMIT(-1.0, i_slaveArm.curJntVel[i]/g_fullFrictionVel,1.0);
-	m_cmdJntTrq[i]:=m_cmdJntTrq[i]+frictionScale * g_frictionCompScale * g_slaveJntFriction[i_slaveArm.armIdx, i];
+	m_cmdJntTrq[i]:=m_cmdJntTrq[i]+frictionScale * g_frictionCompScale * GVL_SlaveArmDynamics.g_slaveJntFriction[i_slaveArm.armIdx, i];
 END_FOR
 ]]></ST>
       </Implementation>

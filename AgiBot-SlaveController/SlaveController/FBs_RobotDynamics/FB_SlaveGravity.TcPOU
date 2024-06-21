@@ -107,19 +107,19 @@ getRegMat(i_setupPos, q1, q2, q3, o_regMat=>regMat);
 IF FALSE = i_instruStatus.m_ready THEN
 	// arm only
 	FOR i:=1 TO 5 DO
-		m_armParams[i]:=g_gravityParam[m_armIdx,i];
+		m_armParams[i]:=GVL_SlaveArmDynamics.g_gravityParam[m_armIdx,i];
 	END_FOR
 
 // endoscope
 ELSIF InstruType_endoscope = i_instruStatus.m_type THEN 
 	FOR i:=1 TO 5 DO
-		m_armParams[i]:=g_gravityParam[m_armIdx,i]+g_gravityEndoscope[i];
+		m_armParams[i]:=GVL_SlaveArmDynamics.g_gravityParam[m_armIdx,i]+GVL_SlaveArmDynamics.g_gravityEndoscope[i];
 	END_FOR
 
 // instrument
 ELSE
 	FOR i:=1 TO 5 DO
-		m_armParams[i]:=g_gravityParam[m_armIdx,i]+g_gravityInstrument[i];
+		m_armParams[i]:=GVL_SlaveArmDynamics.g_gravityParam[m_armIdx,i]+GVL_SlaveArmDynamics.g_gravityInstrument[i];
 	END_FOR
 // TODO:Trocar
 END_IF

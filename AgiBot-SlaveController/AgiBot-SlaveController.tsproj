@@ -1327,40 +1327,6 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{D3E7AA22-2E04-B3A6-FB69-C6DE4BDC56DB}" AutoDeleteType="true">ST_SlaveUIData</Name>
-			<Comment><![CDATA[ Output from UI controller
- Input to slave arm control task and cart control task  ]]></Comment>
-			<BitSize>32</BitSize>
-			<SubItem>
-				<Name>m_slaveArmDisableFlag</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<BitSize>32</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<SubItem>
-						<Name>[1]</Name>
-						<Bool>false</Bool>
-					</SubItem>
-					<SubItem>
-						<Name>[2]</Name>
-						<Bool>false</Bool>
-					</SubItem>
-					<SubItem>
-						<Name>[3]</Name>
-						<Bool>false</Bool>
-					</SubItem>
-					<SubItem>
-						<Name>[4]</Name>
-						<Bool>false</Bool>
-					</SubItem>
-				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-00200000000C}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..11] OF BIT</Name>
 			<BitSize>12</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
@@ -1691,7 +1657,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{86CBCAF7-A46B-493F-61C4-28F6881EBD9F}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{A5399754-AD0B-B121-D019-0070A4A3DA6F}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2223,11 +2189,6 @@
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_adjustIO</Name>
 							<Comment><![CDATA[ adjust detect]]></Comment>
 							<Type>UDINT</Type>
-						</Var>
-						<Var>
-							<Name>SetupArmControl.m_setupInputDataPool.m_UIData</Name>
-							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
-							<Type GUID="{D3E7AA22-2E04-B3A6-FB69-C6DE4BDC56DB}">ST_SlaveUIData</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>

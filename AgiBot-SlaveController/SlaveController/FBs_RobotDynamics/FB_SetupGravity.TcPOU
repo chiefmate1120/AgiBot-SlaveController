@@ -104,24 +104,24 @@ q3 := i_slaveJntPos[3];
 getRegMat(setupPos, q1, q2, q3, o_regMat=>regMat);
 
 // determine current arm parameters
-m_armParams[1] := GVLs_SetupArmDynamics.g_setupJnt5GravityParam[m_armIdx,1];
-m_armParams[2] := GVLs_SetupArmDynamics.g_setupJnt5GravityParam[m_armIdx,2];
+m_armParams[1] := GVL_SetupArmDynamics.g_setupJnt5GravityParam[m_armIdx,1];
+m_armParams[2] := GVL_SetupArmDynamics.g_setupJnt5GravityParam[m_armIdx,2];
 IF FALSE = i_instruStatus.m_ready THEN
 	// arm only
 	FOR i:=1 TO 5 DO
-		m_armParams[i+2]:=g_gravityParam[m_armIdx,i];
+		m_armParams[i+2]:= GVL_SlaveArmDynamics.g_gravityParam[m_armIdx,i];
 	END_FOR
 
 // endoscope
 ELSIF InstruType_endoscope = i_instruStatus.m_type THEN 
 	FOR i:=1 TO 5 DO
-		m_armParams[i+2]:=g_gravityParam[m_armIdx,i]+g_gravityEndoscope[i];
+		m_armParams[i+2]:=GVL_SlaveArmDynamics.g_gravityParam[m_armIdx,i]+GVL_SlaveArmDynamics.g_gravityEndoscope[i];
 	END_FOR
 
 // instrument
 ELSE
 	FOR i:=1 TO 5 DO
-		m_armParams[i+2]:=g_gravityParam[m_armIdx,i]+g_gravityInstrument[i];
+		m_armParams[i+2]:=GVL_SlaveArmDynamics.g_gravityParam[m_armIdx,i]+GVL_SlaveArmDynamics.g_gravityInstrument[i];
 	END_FOR
 // TODO:Trocar
 END_IF
@@ -147,9 +147,9 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[q := LIMIT(g_setupJnt3GravityPosRange[m_armIdx,1], i_jnt3Pos, g_setupJnt3GravityPosRange[m_armIdx,2]);
-setupJnt3Gravity:=g_setupJnt3GravityParams[m_armIdx,1]*EXPT(q,3)+g_setupJnt3GravityParams[m_armIdx,2]*EXPT(q,2)+
-				g_setupJnt3GravityParams[m_armIdx,3]*q+g_setupJnt3GravityParams[m_armIdx,4];]]></ST>
+        <ST><![CDATA[q := LIMIT(GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[m_armIdx,1], i_jnt3Pos, GVL_SetupArmDynamics.g_setupJnt3GravityPosRange[m_armIdx,2]);
+setupJnt3Gravity:=GVL_SetupArmDynamics.g_setupJnt3GravityParams[m_armIdx,1]*EXPT(q,3)+GVL_SetupArmDynamics.g_setupJnt3GravityParams[m_armIdx,2]*EXPT(q,2)+
+				GVL_SetupArmDynamics.g_setupJnt3GravityParams[m_armIdx,3]*q+GVL_SetupArmDynamics.g_setupJnt3GravityParams[m_armIdx,4];]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupGravity">
@@ -177,7 +177,9 @@ setupJnt3Gravity:=g_setupJnt3GravityParams[m_armIdx,1]*EXPT(q,3)+g_setupJnt3Grav
       <LineId Id="142" Count="3" />
       <LineId Id="182" Count="0" />
       <LineId Id="201" Count="1" />
-      <LineId Id="183" Count="17" />
+      <LineId Id="183" Count="2" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="187" Count="13" />
       <LineId Id="165" Count="2" />
       <LineId Id="203" Count="0" />
       <LineId Id="170" Count="2" />
