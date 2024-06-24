@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupCtrlInit" Id="{eac05193-39e5-4249-a95b-72d2422e8330}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Setup Arm Init
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlInit EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_initState :INT :=0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{1e0a883f-c826-468a-9931-3e424876db21}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+	curJntVel :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_timePeriod > 1.0 then
+	m_isFinished :=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{dbcec065-8704-4c57-a097-e13d35679382}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+
+
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlInit">
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlInit.calcCmdJntPos">
+      <LineId Id="98" Count="0" />
+      <LineId Id="109" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlInit.init">
+      <LineId Id="11" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

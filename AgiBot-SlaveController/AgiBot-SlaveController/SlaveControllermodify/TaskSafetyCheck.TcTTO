@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <Task Name="TaskSafetyCheck" Id="{8efb99c5-ab36-4777-9905-9e5965170816}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>1000</CycleTime>
+    <Priority>4</Priority>
+    <PouCall>
+      <Name>SafetyCheck</Name>
+    </PouCall>
+    <TaskFBGuid>{70c3c90d-4d2b-48e9-8e71-eae5956774c6}</TaskFBGuid>
+    <Fb_init>{d01729ed-5b04-447c-92a0-82bc94272e43}</Fb_init>
+    <Fb_exit>{8967833e-c7ab-4e82-825b-b0e87bcbe5c0}</Fb_exit>
+    <CycleUpdate>{6f3e0f6f-eafd-44dc-928c-24a6c7e38ce1}</CycleUpdate>
+    <PostCycleUpdate>{38f76497-51c9-4827-b70a-00d3fc303df8}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

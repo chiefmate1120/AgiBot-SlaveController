@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlInstruInvasion" Id="{ea7b020b-d76c-4bb7-93d3-7a449a773602}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm Adjust
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruInvasion EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{69de60b3-1c13-41f6-898e-63d0fb34a945}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	curInstruDepth:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
+// compute current instrument depth
+curInstruDepth := i_slaveArm.curJntPos[3]-i_slaveArm.instrument.kinematicParameters.m_rodLength-i_slaveArm.instrument.kinematicParameters.m_headLength
+						- i_slaveArm.instrument.kinematicParameters.m_fingerLength;
+
+m_isFinished := curInstruDepth<= i_slaveArm.m_instruInvasionDepth;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{bcdf683e-60d5-4385-b995-2cd1f6e8f528}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
+
+// only joint 3 is allowed to be pushed
+m_jntOPMode := g_slaveAllPosMode;
+m_jntOPMode[3]:=DriverOPMode_Trq;
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlInstruInvasion">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruInvasion.calcCmdJntPos">
+      <LineId Id="152" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruInvasion.init">
+      <LineId Id="83" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

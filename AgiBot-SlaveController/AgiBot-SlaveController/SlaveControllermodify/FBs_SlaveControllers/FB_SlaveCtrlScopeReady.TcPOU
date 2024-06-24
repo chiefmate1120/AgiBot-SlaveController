@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlScopeReady" Id="{8f1fa27f-82b4-47b3-b6c5-b44a0294afb4}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief:Scope Ready
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlScopeReady EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{123c05e3-bc04-4957-aa3c-36d268db0a85}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+
+
+VAR
+	j:INT;
+	maxJntErr:LREAL;
+	jntCtrlErr:Vec7d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+
+//init
+SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlScopeReady">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlScopeReady.init">
+      <LineId Id="73" Count="3" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

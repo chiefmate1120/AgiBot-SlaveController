@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupCtrlJnt3GraCali" Id="{918257b4-79e0-4cbe-9388-5407668bd820}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: setup arm gravity calibration
+// For trajectory synchronizaiton, the planner generate a trajecotry for setup joint3/5 and slave joint 1-3, but only former used here 
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlJnt3GraCali EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+// cali trajectory
+	m_caliMotionSegs :INT :=3;
+	m_graCaliTraj:ARRAY [1..3] OF LREAL:=[0.002,0.198,0.002];
+	
+	m_caliMaxjntVel:LREAL:=0.01;
+	m_caliMaxjntAcc:LREAL:=0.5;
+	m_caliMaxjntJerk:LREAL:=1.0;
+	
+	m_caliTrajIdx: INT := 1;
+	m_caliPlanner: ARRAY[1..3] OF FB_BasicDoubleS;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{a63b9a9d-25a2-41d4-8171-8d1a059bf096}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+	curJntVel :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// safety check
+IF ABS(i_setupArm.curJntVel[3]) > 0.05 THEN
+	m_isFinished:=TRUE;
+	RETURN;
+END_IF
+
+// check if planner is ready
+IF m_caliPlanner[m_caliTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_caliPlanner[m_caliTrajIdx].evaluate(m_timePeriod, q=> m_cmdJntPos[3], q_dot=>m_cmdJntVel[3], q_ddot=> m_cmdJntAcc[3]);
+
+// check if to transit to next segment
+IF(m_timePeriod > m_caliPlanner[m_caliTrajIdx].duration  AND ABS(i_setupArm.curJntVel[3])<GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	m_caliTrajIdx:=m_caliTrajIdx+1;
+	m_timePeriod:=0;
+END_IF
+
+// check if to terminated
+IF(m_caliTrajIdx > m_caliMotionSegs) THEN
+	m_isFinished:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{bae0ef4c-6ba5-4959-9e4d-ec4abb1bbb84}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+
+VAR
+	i,j :INT;
+	startJntPos,endJntPos :LREAL;
+	q,v:ARRAY[1..2] OF lreal;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+m_jntEnableFlag[3]:=1;
+m_jntOPMode[3]:= DriverOPMode_Pos;
+m_caliTrajIdx :=1;
+
+// traj plan
+// fisrt segment
+q[1]:=i_setupArm.curJntPos[3];
+q[2]:=m_graCaliTraj[1];
+v[1]:=0;
+v[2]:=0;
+m_caliPlanner[1].init(q,v,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
+
+// other segments
+FOR i:=2 TO m_caliMotionSegs DO 
+	q[1]:=m_graCaliTraj[i-1];
+	q[2]:=m_graCaliTraj[i];
+	m_caliPlanner[i].init(q,v,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlJnt3GraCali">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlJnt3GraCali.calcCmdJntPos">
+      <LineId Id="143" Count="23" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlJnt3GraCali.init">
+      <LineId Id="152" Count="17" />
+      <LineId Id="126" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_com_upper_PC" Id="{b6fc928c-802a-4bca-a5ad-5de470837f32}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	//从上位机读取
+	surgical_status:BOOL;  //true手术开始,false 手术结束
+	//operation_finished:BOOL; //手术结束---无需操作
+	surgical_site:UINT; //手术部位---无需操作
+	surgical_location:UINT;  //手术方位---无需操作
+	ui_emergency_recovery:BOOL; //UI急停恢复
+	ui_control:ST_ui_control; //UI控制
+	ui_control_last:ST_ui_control; //UI控制
+	
+	arm1_type,arm2_type,arm3_type,arm4_type:INT; //器械ID类型
+	
+	
+	//互相通信	
+	limit_height:UINT;	
+	enable_limit_height:BOOL;
+	
+	//从医生平台读取
+	ui_reset_fault:UINT;//故障清除	---尝试清除故障
+	
+	
+	
+	//上传到上位机
+	//Robot_Status_ID:UINT;  //状态码
+	error_ID_type3:UDINT;  //错误码	
+	error_ID_type2:UDINT;  //错误码	
+	error_ID_type1:UDINT;  //错误码	
+	error_ID_type0:UDINT;  //错误码	
+	self_check_finished:BOOL;  //自检完成
+	
+	instrument_information:ARRAY[1..4] OF ST_instrument_info;
+	instrument1:ST_instrument_info;  //器械信息
+	instrument2:ST_instrument_info;  //器械信息		
+	instrument3:ST_instrument_info;  //器械信息
+	instrument4:ST_instrument_info;  //器械信息
+	scope_info:ST_scope_info;	  //腔镜信息
+	
+	power_supply_mode:UINT; //供电模式
+	low_battery:BOOL; //电池电量过低
+	battery_power_value:UINT:=51;//电池电量
+	
+	ui_poweroff:BOOL;//ui关机确认按钮按下
+	plc_enable_poweroff:BOOL:=FALSE;//PLC确认关机
+	
+	stop_button:UINT:=1; //急停 0：急停按下， 1：急停恢复	
+	version:STRING;		
+	cart_operation:ST_Cart_operation;
+	
+	state_machine:ST_state_machine_com;
+	
+	//Cart_operation_last:ST_Cart_operation;
+	//emergency_stop_recovery:BOOL;	
+	
+	In_Surgical_Status:BOOL;	
+	camera_gravity_angle:REAL;
+	scope_angle:INT;
+	current_error_type:UINT;//0无故障、1提示、2可恢复故障、3不可恢复故障
+	scope_up_down:UINT;//30°内窥镜旋转、1为内窥镜斜面向下、2为向上
+	
+	a8usb_rec_array:ARRAY[0..21] OF USINT;
+	slaver_systemchecking:UINT:=0;//从端自检0未在自检中、1为在自检中
+	slaver_systemcheck_ok:UINT:=0;//从端自检完成 0系统自检未完成（未成功）、1系统自检成功
+	slaver_arm_disable:UINT:=0;//从端手术臂禁用、0都不禁用、1-4对应1-4号臂的禁用
+	clear_cart_fault:INT;//患者台车错误复位
+	parking_enable:INT;//驻车功能开始、稳定脚部署、检测信号由1变为0就取消部署
+	parking_finish:INT;//驻车完成、稳定脚部署完成、取消部署完成后、需将此置为0
+	manual_mode:BOOL;//底盘手拉杆状态 false为自动状态、TRUE为手动状态
+	has_cart_recoverable_error:INT;//台车可恢复故障标志位
+	cart_running_alone:BOOL;//患者台车单独运行
+	torcars_status:BOOL;//穿刺器信号、0为穿刺器全部移除、1为有穿刺器
+	work_heart:INT;//心跳信号、0/1交替变换、间隔1s
+	left_right_ctrl:INT;//0左眼，1右眼
+	arrErrorMotorActualPositionTS:ARRAY [1..150]OF ARRAY[1..4,1..16] OF LREAL;//#2002 报警前150个周期数据
+	arrErrorMotorTargetPositionTS:ARRAY [1..150]OF ARRAY[1..4,1..16] OF LREAL;
+	arrErrorAfterMotorActualPositionTS:ARRAY [1..50]OF ARRAY[1..4,1..16] OF LREAL;//#2002 报警后50个周期数据
+	arrErrorAfterMotorTargetPositionTS:ARRAY [1..50]OF ARRAY[1..4,1..16] OF LREAL;
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

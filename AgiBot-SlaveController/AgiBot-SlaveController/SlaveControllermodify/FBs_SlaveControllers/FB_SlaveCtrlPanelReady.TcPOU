@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlPanelReady" Id="{f4ef749e-f294-45ac-8079-35edcc11796e}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Panel Ready
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlPanelReady EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <LineIds Name="FB_SlaveCtrlPanelReady">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

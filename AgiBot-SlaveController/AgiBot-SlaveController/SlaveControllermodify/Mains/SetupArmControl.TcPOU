@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="SetupArmControl" Id="{a6c9020b-9167-4968-90cd-3bec678d54ed}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SetupArmControl
+VAR
+	// flag to init robot
+	m_robotInit :BOOL :=FALSE;
+	
+	// wait time before robot init  for ethercat to be statble 
+	m_robotInitWaitTime : LREAL:=0;
+	
+	// setup robot
+	m_setupRobot:FB_SetupRobot;
+	
+	// setup robot information
+	m_setupStatus AT %Q* :ST_SetupStatus;
+	
+	// setup robot joint data
+	m_setupJointsData AT %Q* :ST_SetupJointData;
+	
+	// all data from other tasks and controller 
+	m_setupInputDataPool : ST_SetupInputDataPool;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// wait communication to be stable
+IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
+	m_robotInitWaitTime := m_robotInitWaitTime+g_setupArmCtrlCycleTime;
+	RETURN;
+END_IF
+
+// robot init
+IF m_robotInit =FALSE THEN
+	m_setupRobot.Init();
+	m_robotInit:=TRUE;
+END_IF
+
+// robot run
+m_setupRobot.run(m_setupInputDataPool);
+
+// update data pool
+m_setupRobot.getStatus(m_setupStatus,m_setupJointsData);]]></ST>
+    </Implementation>
+    <LineIds Name="SetupArmControl">
+      <LineId Id="112" Count="1" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="64" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

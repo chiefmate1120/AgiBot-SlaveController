@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="matAdd" Id="{4e22d7b7-80d8-4535-9c7a-bbfaf09d968a}" SpecialFunc="None">
+    <Declaration><![CDATA[// C = A + B;
+FUNCTION matAdd : BOOL
+VAR_IN_OUT CONSTANT
+	matA :ARRAY[*,*] OF LREAL;
+	matB :ARRAY[*,*] OF LREAL;
+END_VAR
+
+VAR_IN_OUT 
+	matC :ARRAY[*,*] OF LREAL;
+END_VAR
+
+VAR
+	m,n :DINT;
+	i,j, k :DINT;
+ 
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(matC,1);
+n:= UPPER_BOUND(matC,2);
+FOR i:=1 TO m DO
+	FOR j:=1 TO n DO
+		matC[i,j]:=matA[i,j] + matB[i,j];
+	END_FOR
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="matAdd">
+      <LineId Id="69" Count="5" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

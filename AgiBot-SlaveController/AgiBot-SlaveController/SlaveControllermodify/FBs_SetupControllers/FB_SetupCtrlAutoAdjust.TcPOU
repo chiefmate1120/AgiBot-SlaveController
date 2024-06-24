@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupCtrlAutoAdjust" Id="{53032ea5-b008-491f-a641-5219ef32615c}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Setup Arm Adjust
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlAutoAdjust EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{dd68468f-e9b8-4053-9776-4b6e1ffcee16}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlAutoAdjust">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlAutoAdjust.init">
+      <LineId Id="57" Count="1" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

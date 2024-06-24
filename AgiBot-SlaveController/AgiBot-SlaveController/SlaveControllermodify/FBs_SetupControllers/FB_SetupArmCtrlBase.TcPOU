@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupArmCtrlBase" Id="{0b31894e-90eb-4625-a1b2-b64eb3714a74}" SpecialFunc="None">
+    <Declaration><![CDATA[// Setup Arm Base Controller, Hold at Current Posture
+FUNCTION_BLOCK FB_SetupArmCtrlBase IMPLEMENTS I_SetupArmCtrl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// flag if the controller has finished all its jobs
+	m_isFinished:BOOL:=FALSE;
+	
+	// controller execute time period
+	m_timePeriod :LREAL:=0;
+	
+	// arm control data
+	m_cmdJntPos : VEC5d;
+	m_cmdJntVel : VEC5d;
+	m_cmdJntAcc : VEC5d;
+	m_cmdJntTrq : VEC5d;
+	m_jntOPMode : Vec5i;
+	m_jntEnableFlag :Vec5i;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{93f4b4dc-c2f7-491d-8c73-da994ea2dbef}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{6ae77395-a816-419a-a1f1-e8f5e88f907c}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec5d;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{39abdba7-12c4-423b-9680-dbfc1169a913}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_timePeriod:=0;
+m_jntEnableFlag :=g_zeroVec5i;// setup arm joint is diabled by default
+m_jntOPMode:=g_setupAllPosMode;
+m_cmdJntPos:=i_setupArm.curJntPos;
+m_cmdJntVel:=g_zeroVec5d;
+m_cmdJntAcc:=g_zeroVec5d;
+m_cmdJntTrq:=g_zeroVec5d;
+
+// update commands to arm
+r_setupArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
+r_setupArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
+r_setupArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
+r_setupArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
+r_setupArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
+r_setupArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="isFinished" Id="{1ba11897-c13c-426e-b2eb-85c7dda0df9b}">
+      <Declaration><![CDATA[PROPERTY isFinished : BOOL]]></Declaration>
+      <Get Name="Get" Id="{90cfe719-a7f9-4e4f-9a72-5775b0006367}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[isFinished:=m_isFinished;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="reset" Id="{90707f36-a1c9-4b9c-b59d-3c71748b414a}">
+      <Declaration><![CDATA[{warning '添加方法实现'}
+METHOD reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_isFinished:=FALSE;
+m_timePeriod:=0;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{08326719-dfd7-43d5-bd4f-6865187be57d}">
+      <Declaration><![CDATA[{warning '添加方法实现'}
+METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_isFinished THEN
+	RETURN;
+END_IF
+
+// check if arm enabled
+IF FALSE = i_setupArm.isEnabled(m_jntEnableFlag) THEN
+//	RETURN;
+END_IF
+
+// calculate command joint position--Motion control
+calcCmdJntPos(i_setupArm);
+
+// calculate command joint torque -- Force control
+calcCmdJntTrq(i_setupArm);
+
+// update commands to arm
+r_setupArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
+r_setupArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
+r_setupArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
+r_setupArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
+r_setupArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
+r_setupArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
+
+// update time period
+m_timePeriod := m_timePeriod+g_setupArmCtrlCycleTime;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupArmCtrlBase">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCtrlBase.calcCmdJntPos">
+      <LineId Id="27" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCtrlBase.calcCmdJntTrq">
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCtrlBase.init">
+      <LineId Id="49" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="90" Count="4" />
+      <LineId Id="83" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCtrlBase.isFinished.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCtrlBase.reset">
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCtrlBase.run">
+      <LineId Id="138" Count="3" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="88" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
