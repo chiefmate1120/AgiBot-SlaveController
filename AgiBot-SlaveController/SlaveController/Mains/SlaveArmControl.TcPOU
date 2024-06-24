@@ -172,7 +172,13 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//TODO]]></ST>
+        <ST><![CDATA[//endoscope type
+IF m_slaveRobot.m_endoScopeType = EndoscopeType_0  THEN
+	GVL_com_upper_PC.scope_angle:= 0;
+ELSIF m_slaveRobot.m_endoScopeType = EndoscopeType_30  THEN
+	GVL_com_upper_PC.scope_angle := 30;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="SlaveArmControl">
@@ -252,6 +258,7 @@ END_VAR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
+      <LineId Id="18" Count="5" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

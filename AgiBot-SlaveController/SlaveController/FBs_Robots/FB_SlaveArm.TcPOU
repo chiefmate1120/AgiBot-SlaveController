@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -28,9 +28,9 @@ VAR
 	m_adjustOnFlag :BOOL;
 	m_trocarOnFlag :BOOL :=FALSE;
 	
-	//TODO: endoscope toggle detect
-	m_30degEndoscopeToggle : FB_IOToggleCheck;
-	m_endoscopeViewToggle : FB_IOCheck;
+	//endoscope type and posture switch
+	m_endoscopeTypeSwitch : FB_IOToggleCheck;
+	m_endoscopePostureSwitch : FB_IOToggleCheck;
 	
 	// instrument instance
 	m_instrument : FB_Instrument;
@@ -228,12 +228,21 @@ m_ReadLDP(CLK:= m_instruOnFlag, Q=>startFlag );
 startFlag := startFlag OR m_instrument.onChipData.m_ErrorID = 1;
 m_instrument.readParameters(startFlag );
 
-// TODO: need review
-// check endoscope toggle 
-IF m_30degEndoscopeToggle.check(m_adjustIO=0) THEN
-	m_instrument.endoscope30Deg := NOT(m_instrument.endoscope30Deg);
+// check endoscope type and posture 
+IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
+	IF m_instrument.curScopeType = EndoScopeType_30 THEN
+		m_instrument.nextScopeType := EndoscopeType_0;
+	ELSE
+		m_instrument.nextScopeType := EndoscopeType_30;
+	END_IF
 END_IF
-m_endoscopeViewToggle.check(m_adjustIO=0);
+IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) THEN
+	IF m_instrument.curScopePosture = EndoScopePosture_HeadDown THEN
+		m_instrument.nextScopePosture := EndoscopePosture_HeadUp;
+	ELSE
+		m_instrument.nextScopePosture := EndoScopePosture_HeadDown;
+	END_IF
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -542,6 +551,10 @@ END_FOR
 
 // instrument init
 m_instrument.init(i_armIdx);
+
+// endosocpe toggle button check
+m_endoscopeTypeSwitch.init(0, 1000);
+m_endoscopePostureSwitch.init(0,1000);
 
 ]]></ST>
       </Implementation>
@@ -1058,10 +1071,13 @@ END_FOR
       <LineId Id="85" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="39" Count="0" />
-      <LineId Id="71" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="72" Count="1" />
-      <LineId Id="75" Count="1" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="98" Count="5" />
       <LineId Id="74" Count="0" />
       <LineId Id="45" Count="0" />
     </LineIds>
@@ -1151,6 +1167,10 @@ END_FOR
       <LineId Id="208" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="209" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="219" Count="0" />
       <LineId Id="206" Count="0" />
       <LineId Id="80" Count="0" />
     </LineIds>

@@ -26,6 +26,11 @@ VAR
 	// endoscope pose in cart coordinate
 	m_endoscopePose : ST_Frame;
 	
+	// endoscope type 
+	m_endoscopeType : E_EndoscopeType:= EndoScopeType_30;
+	m_lastEndoScopePostureRobot : E_EndoscopePosture:= EndoScopePosture_HeadDown;
+	m_lastEndoScopePostureUI : E_EndoscopePosture:= EndoScopePosture_HeadDown;
+	
 	// slave arms, responsible for arm kinematic and control
 	m_slaveArms :ARRAY[1..g_sArmNum] OF FB_SlaveArm;
 	
@@ -66,6 +71,7 @@ VAR
 	m_instruInvasion :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruInvasion;
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDisable;
 	m_instruCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruCali;
+	m_scopeToggle :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlScopeToggle;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -203,6 +209,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_InstruInvasion] := m_instruInvasion[i];
 	m_armCtrlFactory[i,SlaveArmState_Disable] := m_armDisable[i];
 	m_armCtrlFactory[i,SlaveArmState_InstruCali] := m_instruCali[i];
+	m_armCtrlFactory[i,SlaveArmState_ScopeToggle] := m_scopeToggle[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -232,6 +239,10 @@ FOR i:=1 TO g_sArmNum DO
 	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
 		m_endoscopeMounted := TRUE;
 		m_endoscopePose := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], m_slaveArms[i].curCartPose);
+		m_endoScopeType := m_slaveArms[i].instrument.curScopeType;
+		
+		//set endoscope  posture from UI data
+		updateScopeUIInfo();
 	END_IF
 END_FOR
 
@@ -449,6 +460,10 @@ FOR i:=1 TO g_sArmNum DO
 			// to Adjust
 			ELSIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
+			// to scope toggle
+			ELSIF m_slaveArms[i].instrument.curScopePosture <> m_slaveArms[i].instrument.nextScopePosture OR
+					m_slaveArms[i].instrument.curScopeType <> m_slaveArms[i].instrument.nextScopeType THEN
+				m_nextSlaveArmState[i] := SlaveArmState_ScopeToggle;
 			// to endoscope control
 			ELSIF MasterArmState_Endoscope = i_slavesInputDataPool.m_masterStatus.m_armState[1] AND 
 				  MasterArmState_Endoscope = i_slavesInputDataPool.m_masterStatus.m_armState[2] THEN
@@ -464,6 +479,10 @@ FOR i:=1 TO g_sArmNum DO
 			ELSIF MasterArmState_Endoscope <> i_slavesInputDataPool.m_masterStatus.m_armState[1]
 				OR MasterArmState_Endoscope <> i_slavesInputDataPool.m_masterStatus.m_armState[2] THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+			// to scope toggle
+			ELSIF m_slaveArms[i].instrument.curScopePosture <> m_slaveArms[i].instrument.nextScopePosture OR
+					m_slaveArms[i].instrument.curScopeType <> m_slaveArms[i].instrument.nextScopeType THEN
+				m_nextSlaveArmState[i] := SlaveArmState_ScopeToggle;
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
@@ -483,6 +502,17 @@ FOR i:=1 TO g_sArmNum DO
 				ELSE
 					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 				END_IF
+			END_IF
+		
+		//scope toggle
+		SlaveArmState_ScopeToggle:
+			// to instrument retract
+			IF NOT(m_slaveArms[i].instruOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
+				m_slaveArms[i].recordInstruDepth();
+			// to standby
+			ELSIF m_armCtrl[i].isFinished THEN
+				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
 			END_IF
 		
 		// package
@@ -584,6 +614,44 @@ FOR i:=1 TO g_sArmNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="updateScopeUIInfo" Id="{8acce6ed-98d8-433e-be8e-5c90fe998877}">
+      <Declaration><![CDATA[METHOD PROTECTED updateScopeUIInfo : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if endoscope is mounted
+FOR i:=1 TO g_sArmNum DO 
+	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
+		
+		// update command endoscope posture from UI
+		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI THEN
+			IF GVL_com_upper_PC.scope_up_down = 1 THEN
+				m_slaveArms[i].instrument.nextScopePosture := EndoScopePosture_HeadDown;
+			ELSIF  GVL_com_upper_PC.scope_up_down = 2 THEN
+				m_slaveArms[i].instrument.nextScopePosture := EndoscopePosture_HeadUp;
+			END_IF
+		END_IF
+		
+		// update current endoscope posture to UI
+		IF m_slaveArms[i].instrument.curScopePosture <> m_lastEndoScopePostureRobot THEN
+			IF m_slaveArms[i].instrument.curScopePosture = EndoScopePosture_HeadDown THEN
+				GVL_com_upper_PC.scope_up_down := 1 ;
+			ELSIF  m_slaveArms[i].instrument.curScopePosture = EndoScopePosture_HeadUp THEN
+				GVL_com_upper_PC.scope_up_down := 2;
+			END_IF
+		END_IF
+		m_lastEndoScopePostureRobot := m_slaveArms[i].instrument.curScopePosture;
+		
+	END_IF
+END_FOR
+
+m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SlaveRobot">
       <LineId Id="60" Count="0" />
       <LineId Id="9" Count="0" />
@@ -642,6 +710,7 @@ END_FOR]]></ST>
       <LineId Id="139" Count="1" />
       <LineId Id="147" Count="0" />
       <LineId Id="161" Count="0" />
+      <LineId Id="168" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -659,6 +728,9 @@ END_FOR]]></ST>
       <LineId Id="123" Count="0" />
       <LineId Id="127" Count="0" />
       <LineId Id="130" Count="2" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="173" Count="0" />
       <LineId Id="128" Count="1" />
       <LineId Id="140" Count="0" />
       <LineId Id="19" Count="1" />
@@ -802,6 +874,7 @@ END_FOR]]></ST>
       <LineId Id="557" Count="0" />
       <LineId Id="409" Count="4" />
       <LineId Id="416" Count="0" />
+      <LineId Id="683" Count="3" />
       <LineId Id="414" Count="0" />
       <LineId Id="404" Count="0" />
       <LineId Id="415" Count="0" />
@@ -813,6 +886,8 @@ END_FOR]]></ST>
       <LineId Id="423" Count="0" />
       <LineId Id="553" Count="1" />
       <LineId Id="552" Count="0" />
+      <LineId Id="688" Count="2" />
+      <LineId Id="687" Count="0" />
       <LineId Id="558" Count="0" />
       <LineId Id="417" Count="0" />
       <LineId Id="424" Count="0" />
@@ -824,6 +899,11 @@ END_FOR]]></ST>
       <LineId Id="675" Count="0" />
       <LineId Id="673" Count="1" />
       <LineId Id="451" Count="1" />
+      <LineId Id="691" Count="2" />
+      <LineId Id="699" Count="2" />
+      <LineId Id="698" Count="0" />
+      <LineId Id="697" Count="0" />
+      <LineId Id="694" Count="2" />
       <LineId Id="455" Count="1" />
       <LineId Id="454" Count="0" />
       <LineId Id="457" Count="1" />
@@ -867,6 +947,33 @@ END_FOR]]></ST>
       <LineId Id="16" Count="0" />
       <LineId Id="286" Count="1" />
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

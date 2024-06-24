@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -39,8 +39,13 @@ VAR
 	// reduction from motor joint to endoscope rotate joint
 	m_endoscopeRotateReduction :LREAL := 2.0/3.0;
 	
-	// flag if endoscope is 30deg
-	m_endoscope30Deg :BOOL:=TRUE;
+	//endoscope type
+	m_curEndoscopeType :E_EndoscopeType:=EndoScopeType_30;
+	m_nextEndoscopeType :E_EndoscopeType:=EndoScopeType_30;
+	
+	//endoscope posutre
+	m_curEndoscopePosture :E_EndoscopePosture:=EndoscopePosture_HeadDown;
+	m_nextEndoscopePosture :E_EndoscopePosture:=EndoscopePosture_HeadDown;
 	
 	// udint code for zero position
 	m_zeroPosCode : UDINT;
@@ -135,22 +140,41 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="endoscope30Deg" Id="{4bce8a98-2eb7-4bb1-9eae-0e7d18b990ab}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY endoscope30Deg : bool]]></Declaration>
+    <Property Name="curScopePosture" Id="{c327ac7d-1ff6-4f6a-8d7d-377863afa9ff}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curScopePosture : E_EndoscopePosture]]></Declaration>
+      <Get Name="Get" Id="{3340ac94-9c36-4f32-8601-dac4725b2a6d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curScopePosture:= m_curEndoscopePosture;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f31b6899-d58a-4db8-8485-bf28ba7830a5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_curEndoscopePosture := curScopePosture;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="curScopeType" Id="{4bce8a98-2eb7-4bb1-9eae-0e7d18b990ab}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curScopeType : E_EndoscopeType]]></Declaration>
       <Get Name="Get" Id="{abceb35e-0bca-4bf2-b494-bd59bc26f3c4}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[endoscope30Deg := m_endoscope30Deg;]]></ST>
+          <ST><![CDATA[curScopeType := m_curEndoscopeType;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{0322fa43-406c-4982-b018-d60301dbd76c}">
+      <Set Name="Set" Id="{b042366b-dcc9-4e34-ab02-a26f6cf69d06}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[m_endoscope30Deg := endoscope30Deg;]]></ST>
+          <ST><![CDATA[m_curEndoscopeType := curScopeType;]]></ST>
         </Implementation>
       </Set>
     </Property>
@@ -343,7 +367,7 @@ r_DHJntPos[3]:=i_jntPos[3];
 // ################## endoscope ############################
 IF m_instruType = InstruType_endoscope THEN
 	r_DHJntPos[4]:=m_endoscopeRotateReduction*(i_jntPos[8]-m_jntPosOffset[8]);
-	IF m_endoscope30Deg THEN
+	IF m_curEndoscopeType = EndoScopeType_30 THEN
 		r_DHJntPos[5]:=-pi/2+30*g_deg2Rad;
 	ELSE
 		r_DHJntPos[5]:=-pi/2;
@@ -566,6 +590,17 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="instruType" Id="{dee9b466-61c8-4830-8c3c-8317ba8d7fb1}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC instruType : INT]]></Declaration>
+      <Get Name="Get" Id="{49e23c7c-bb55-4631-aecb-7cce8ba4d643}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruType := m_instruType;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="kinematicParameters" Id="{e7ad17bd-82e9-477e-9e66-6a8feac51534}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY kinematicParameters :REFERENCE TO ST_InstruKinematicParam]]></Declaration>
       <Get Name="Get" Id="{d0447347-931d-4e2e-81b2-c8e4acc99fd6}">
@@ -576,6 +611,44 @@ END_VAR
           <ST><![CDATA[kinematicParameters ref=m_kinematicParameters;]]></ST>
         </Implementation>
       </Get>
+    </Property>
+    <Property Name="nextScopePosture" Id="{48ece37f-c5c3-453e-afe5-8c33fe7eb315}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY nextScopePosture : E_EndoscopePosture]]></Declaration>
+      <Get Name="Get" Id="{07de26d8-dacc-432f-85c8-f04024d47afd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nextScopePosture:= m_nextEndoscopePosture;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{33462dd0-4b03-403d-a99e-110b0590fa7e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_nextEndoscopePosture := nextScopePosture;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="nextScopeType" Id="{dca96b48-db31-4f08-81c0-25e9bd0712eb}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY nextScopeType : E_EndoscopePosture]]></Declaration>
+      <Get Name="Get" Id="{815f56b6-cf18-45a1-a9a3-a7d0c73baa6e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nextScopeType:= m_nextEndoscopeType;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a373dd0f-9a3d-404d-a5d3-2cea57ae861a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_nextEndoscopeType := nextScopeType;]]></ST>
+        </Implementation>
+      </Set>
     </Property>
     <Property Name="onChipData" Id="{093a4217-bb32-41a8-a667-4570e97851b1}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY onChipData : REFERENCE TO ST_InstruOnChipData]]></Declaration>
@@ -749,6 +822,12 @@ FOR i:=1 TO 3 DO
 	m_kinematicParameters.m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
 	m_kinematicParameters.m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
 END_FOR
+
+// reset endoscope type and posture
+m_curEndoscopeType :=EndoScopeType_30;
+m_nextEndoscopeType :=EndoScopeType_30;
+m_curEndoscopePosture :=EndoscopePosture_HeadDown;
+m_nextEndoscopePosture :=EndoscopePosture_HeadDown;
 ]]></ST>
       </Implementation>
     </Method>
@@ -877,10 +956,16 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.endoscope30Deg.Get">
+    <LineIds Name="FB_Instrument.curScopePosture.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.endoscope30Deg.Set">
+    <LineIds Name="FB_Instrument.curScopePosture.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.curScopeType.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.curScopeType.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.gripAngleMap">
@@ -1007,7 +1092,22 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="34" Count="8" />
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Instrument.instruType.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Instrument.kinematicParameters.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.nextScopePosture.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.nextScopePosture.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.nextScopeType.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.nextScopeType.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.onChipData.Get">
@@ -1109,6 +1209,11 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="21" Count="0" />
       <LineId Id="41" Count="4" />
       <LineId Id="39" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="65" Count="0" />
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.writeZeroPosToChip">

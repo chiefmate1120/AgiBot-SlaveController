@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_EndoscopeType" Id="{7bbe9ea4-82a3-4146-8613-f9d73d6783a3}">
+    <Declaration><![CDATA[TYPE E_EndoscopeType :
+(
+	EndoscopeType_0:=1,
+	EndoScopeType_30:=2
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

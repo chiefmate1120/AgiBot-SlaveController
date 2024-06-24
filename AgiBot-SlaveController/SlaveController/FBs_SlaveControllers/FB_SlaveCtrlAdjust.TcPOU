@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlAdjust" Id="{065dc40e-4d51-49bc-8f28-94a80cbbd0fd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlAdjust EXTENDS FB_SlaveArmCtrlBase
@@ -27,7 +27,13 @@ END_VAR
         <ST><![CDATA[m_cmdJntPos[1]:=i_slaveArm.curJntPos[1];
 m_cmdJntPos[2]:=i_slaveArm.curJntPos[2];
 m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
-m_cmdJntPos[7]:=i_slaveArm.curJntPos[7];
+IF m_jntOPMode[8] = DriverOPMode_Trq THEN
+	m_cmdJntPos[8]:=i_slaveArm.curJntPos[8];
+END_IF
+IF m_jntOPMode[7] = DriverOPMode_Trq THEN
+	m_cmdJntPos[7]:=i_slaveArm.curJntPos[7];
+END_IF
+
 m_cmdCartPose:=i_slaveArm.curCartPose;]]></ST>
       </Implementation>
     </Method>
@@ -72,8 +78,17 @@ m_jntOPMode[3]:=DriverOPMode_Trq;
 m_jntOPMode[4]:=DriverOPMode_PosTrq;
 m_jntOPMode[5]:=DriverOPMode_PosTrq;
 m_jntOPMode[6]:=DriverOPMode_PosTrq;
-m_jntOPMode[7]:=DriverOPMode_Trq;
+m_jntOPMode[7]:=DriverOPMode_PosTrq;
 m_jntOPMode[8]:=DriverOPMode_PosTrq;
+
+IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
+	IF i_slaveArm.instrument.instruType = InstruType_Endoscope THEN
+		m_jntOPMode[8]:=DriverOPMode_Trq;
+	ELSE
+		m_jntOPMode[7]:=DriverOPMode_Trq;
+	END_IF
+END_IF
+
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -86,6 +101,9 @@ copyCmds(r_slaveArmCtrlCmd);
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntPos">
       <LineId Id="27" Count="0" />
       <LineId Id="57" Count="1" />
+      <LineId Id="76" Count="2" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="79" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="39" Count="0" />
     </LineIds>
@@ -107,7 +125,16 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="71" Count="0" />
       <LineId Id="118" Count="0" />
       <LineId Id="99" Count="0" />
-      <LineId Id="128" Count="2" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="147" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="144" Count="0" />
       <LineId Id="127" Count="0" />
       <LineId Id="108" Count="1" />
       <LineId Id="68" Count="0" />

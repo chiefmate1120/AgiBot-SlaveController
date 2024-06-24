@@ -3,7 +3,7 @@
   <GVL Name="GVL_SetupArmDynamics_4" Id="{c7888ba4-84c9-432f-959c-0df738cb2515}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
-// Robot5 --dynamic parameters of setup arms
+// Robot4 --dynamic parameters of setup arms
 VAR_GLOBAL 
 	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic
 	% graParam=[ 9.8*mx0,...
