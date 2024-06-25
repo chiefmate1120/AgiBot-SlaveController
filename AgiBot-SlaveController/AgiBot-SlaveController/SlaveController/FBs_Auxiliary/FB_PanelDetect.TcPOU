@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_PanelDetect" Id="{47cf5248-c8cb-4b89-a8d5-96d08d2b209c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PanelDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_panelOnCounts :INT :=0;
+	m_panelOnCountThres :INT :=50;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{b2b5e204-adc8-4a47-b4a0-7ccab0ad6803}">
+      <Declaration><![CDATA[// check if panel is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Panel single  At installation--2#0000   not installation --2#0101
+IF (IOValue AND 16#05) = 0 THEN
+	m_panelOnCounts := MIN( m_panelOnCounts +1,m_panelOnCountThres);
+ELSIF (IOValue AND 16#05) = 5  THEN
+	m_panelOnCounts :=0;
+END_IF
+run := m_panelOnCounts >= m_panelOnCountThres;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_PanelDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PanelDetect.run">
+      <LineId Id="39" Count="5" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

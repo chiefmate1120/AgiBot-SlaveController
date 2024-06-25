@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="SlaveArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SlaveArmControl
+VAR
+	// master robot data, input from master controller box
+	m_masterRobotData AT %I* : MSCommu_MasterStatus;
+	
+	// all data from other tasks and controller 
+	m_slaveInputDataPool : ST_SlaveInputDataPool;
+		
+	// slave robot data, ouput to master controller box
+	m_slaveRobotData AT %Q* :MSCommu_slaveStatus;
+	
+	// slave robot status, including arm status and cartesian data, output to other tasks
+	m_slaveStatus AT%Q* :ST_slaveStatus;
+	
+	// slave robot joint data, output to other tasks
+	m_slaveJointsData AT %Q* :ST_slaveJointData;
+	
+	// flag to init robot
+	m_robotInit :BOOL :=FALSE;
+	
+	// wait time before robot init  for ethercat to be statble 
+	m_robotInitWaitTime : LREAL:=0;
+	
+	// slave robot
+	m_slaveRobot:FB_SlaveRobot;
+
+	// code execute time measure
+	m_codeTime : Profiler;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+
+// wait communication to be stable
+IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
+	m_robotInitWaitTime := m_robotInitWaitTime+g_slaveArmCtrlCycleTime;
+	RETURN;
+END_IF
+
+// robot init
+IF m_robotInit =FALSE THEN
+	m_slaveRobot.Init();
+	m_robotInit:=TRUE;
+END_IF
+
+// input from UI
+UIInputProcess();
+
+// master input data cast
+masterInputDataCast(m_masterRobotData, m_slaveInputDataPool.m_masterStatus);
+
+// robot run
+m_slaveRobot.run(m_slaveInputDataPool);
+
+// update data pool
+m_slaveRobot.getStatus(m_slaveStatus,m_slaveJointsData);
+
+// slave output data cast
+slaveOutputDataCast(m_slaveInputDataPool.m_setupStatus, m_slaveStatus, m_slaveRobotData);
+
+// output to UI
+UIOutputProcess();
+
+m_codeTime(START:=FALSE);]]></ST>
+    </Implementation>
+    <Method Name="masterInputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
+      <Declaration><![CDATA[// convert from MSCommu_Mastertatus for master-slave communication to local ST_MasterStatus for control
+METHOD masterInputDataCast : BOOL
+VAR_IN_OUT CONSTANT
+	masterInputData:MSCommu_MasterStatus;
+END_VAR
+VAR_IN_OUT
+	masterStatus :ST_MasterStatus;
+END_VAR
+
+VAR
+	i : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[masterStatus.m_masterHeartBeat := masterInputData.m_heartBeat;
+masterStatus.m_motionScale := masterInputData.m_motionScale;
+masterStatus.m_slaveSelfCheckFlag := masterInputData.m_slaveSelfCheckFlag;
+
+FOR i:=1 TO g_mArmNum DO
+	masterStatus.m_armState[i] := masterInputData.m_armState[i];
+	masterStatus.m_teleSlaveArmIdx[i] :=masterInputData.m_teleSlaveArmIdx[i];
+	masterStatus.m_gripAngle[i] := masterInputData.m_gripAngle[i];
+	masterStatus.m_curArmPose[i].m_pos := masterInputData.m_curArmPose[i].m_pos;
+	masterStatus.m_curArmPose[i].m_rot := masterInputData.m_curArmPose[i].m_rot;
+	masterStatus.m_curArmTwist[i] :=masterInputData.m_curArmTwist[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveOutputDataCast" Id="{110717ec-abfc-4dc8-a3ed-d3c3fbcf321b}">
+      <Declaration><![CDATA[// convert from local ST_SlaveStatus for control to MSCommu_SlaveStatus for master-slave communication
+METHOD slaveOutputDataCast : BOOL
+VAR_IN_OUT CONSTANT
+	setupStatus :ST_SetupStatus;
+	slaveStatus :ST_SlaveStatus;
+END_VAR
+VAR_IN_OUT 
+	slaveOutputData : MSCommu_SlaveStatus;
+END_VAR
+
+VAR
+	slavePoseInCart, slavePoseInScope:ST_Frame;
+	tmpFrame :ST_Frame;
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Slave heart beat
+IF slaveOutputData.m_heartBeat > 10 THEN
+	slaveOutputData.m_heartBeat :=0;
+ELSE
+	slaveOutputData.m_heartBeat :=slaveOutputData.m_heartBeat+1;
+END_IF
+
+slaveOutputData.m_seflCheckPass:= slaveStatus.m_selfCheckPass[1] AND slaveStatus.m_selfCheckPass[2] AND slaveStatus.m_selfCheckPass[3] AND slaveStatus.m_selfCheckPass[4];
+
+slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
+slaveOutputData.m_endoscopePose.m_pos :=slaveStatus.m_endoscopePose.m_pos;
+slaveOutputData.m_endoscopePose.m_rot :=slaveStatus.m_endoscopePose.m_rot;
+FOR i:= 1 TO g_sArmNum DO
+	slaveOutputData.m_armState[i] := slaveStatus.m_armState[i];
+	slaveOutputData.m_instruStauts[i].m_fingerAngle := slaveStatus.m_instruStauts[i].m_fingerAngle;
+	slaveOutputData.m_instruStauts[i].m_ready := slaveStatus.m_instruStauts[i].m_ready;
+	slaveOutputData.m_instruStauts[i].m_type := slaveStatus.m_instruStauts[i].m_type;
+
+	slavePoseInCart := transform(setupStatus.m_curEndPose[i], slaveStatus.m_curArmPose[i]);
+	tmpFrame :=invFrame(slaveStatus.m_endoscopePose);
+	slavePoseInScope := transform(tmpFrame, slavePoseInCart);
+	slaveOutputData.m_curArmPose[i].m_pos :=slavePoseInScope.m_pos;
+	slaveOutputData.m_curArmPose[i].m_rot :=slavePoseInScope.m_rot;
+	slaveOutputData.m_masterSlavePoseError[i] :=slaveStatus.m_masterSlavePoseError[i];
+END_FOR
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIInputProcess" Id="{9dd02246-5151-482e-a090-b6247e0a96d4}">
+      <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
+METHOD UIInputProcess : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:int;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// arm disable
+FOR i:=1 TO g_sArmNum DO 
+	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]:= FALSE;
+END_FOR
+IF GVL_com_upper_PC.slaver_arm_disable >0 AND GVL_com_upper_PC.slaver_arm_disable<= g_sArmNum THEN
+	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[GVL_com_upper_PC.slaver_arm_disable]:= TRUE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIOutputProcess" Id="{d0fa8c54-c1d5-4f7b-80a8-06c5ca1c6dd6}">
+      <Declaration><![CDATA[METHOD UIOutputProcess : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TODO]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="SlaveArmControl">
+      <LineId Id="85" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.masterInputDataCast">
+      <LineId Id="46" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.slaveOutputDataCast">
+      <LineId Id="107" Count="0" />
+      <LineId Id="109" Count="1" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.UIInputProcess">
+      <LineId Id="19" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="33" Count="4" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="SlaveArmControl.UIOutputProcess">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

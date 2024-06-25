@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <TcEventSources Version="2">
 	<Source>
-		<GUID>{28111931-0002-0000-5230-B61721001300}</GUID>
-		<Name LcId="1031">EL6070-0033 1K. Licence-Key-Klemme, individuelle Lizenzen</Name>
-		<Name LcId="1033">EL6070-0033 1Ch. Licence key terminal, individual licences</Name>
+		<GUID>{28111931-0002-0000-5230-B61700001300}</GUID>
+		<Name LcId="1031">EL6070 1K. Lizenzierungs-Klemme</Name>
+		<Name LcId="1033">EL6070 1Ch. Licensing-Terminal</Name>
 		<Event>
 			<Id>4736</Id>
 			<Message LcId="1031">File {0} erased successfully</Message>

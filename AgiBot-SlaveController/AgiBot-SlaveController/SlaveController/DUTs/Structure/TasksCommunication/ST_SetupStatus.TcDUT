@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_SetupStatus" Id="{ec66e8f3-c0e7-419f-a13a-f4c74251ea99}">
+    <Declaration><![CDATA[TYPE ST_SetupStatus :
+STRUCT
+	// state machine
+	m_armState:ARRAY[1..g_sArmNum] OF E_SetupArmState:=[g_sArmNum(SetupArmState_Error)];
+	
+	// current pose of set arm distal end
+	m_curEndPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// position of remote center point
+	m_rcPos :ARRAY[1..g_sArmNum] OF Vec3d;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

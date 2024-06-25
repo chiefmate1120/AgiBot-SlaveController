@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SlaveCtrlTest" Id="{25b7ca7b-a3c0-4d1d-9db6-09421c0085dc}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlTest EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+// ################ variables for single DH  joint test ##################
+	m_enableFrictionComp :BOOL :=false;
+	m_freqTestFlag :BOOL:=FALSE;
+	m_initJntPos :Vec6d;
+	m_cmdDHJntPos :Vec6d;
+	m_cmdDHJntVel :Vec6d;
+	m_jntMotionFreq :Vec6d :=[0.2, 0.2, 0.1, 3(0.1)];
+	m_jntMotionRange :Vec6d :=[pi/6, pi/6, 0.1, 3(pi/6)];
+	m_testJntIdx :INT :=1;
+	m_gripperAngle : LREAL :=0;
+	m_gripForceLevel :LREAL :=0;
+	m_lastCmdJntPos :Vec8d ;
+	
+	m_stepTestFlag :BOOL :=FALSE;
+	m_jntStep : LREAL := 5*g_deg2Rad;
+	
+	// instrument controller
+	m_instruController : FB_InstrumentControl;
+	m_instruCmdJntPos,m_instruCmdJntVel : Vec5d;
+	m_instruCmdJntTrq :Vec5d;
+	
+	
+	m_errCmdPos, m_errCurPos :LREAL;
+	m_errPosIdx : int;
+	
+//####################################################################
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{010d1f8e-611a-45d6-a3e6-a98e946007a3}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i:INT :=0;
+	errThres :LREAL;
+	m_masterGripAngle: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Just for joint controller test
+IF m_testJntIdx >=1 AND m_testJntIdx <=7 THEN
+	IF m_freqTestFlag THEN 
+		m_cmdDHJntPos[m_testJntIdx]:=m_initJntPos[m_testJntIdx]+m_jntMotionRange[m_testJntIdx]/2
+										+0.5*m_jntMotionRange[m_testJntIdx]*SIN(2*pi*m_jntMotionFreq[m_testJntIdx]*m_timePeriod-pi/2);
+		m_cmdDHJntVel[m_testJntIdx]:=0.5*m_jntMotionRange[m_testJntIdx]*2*pi*m_jntMotionFreq[m_testJntIdx]*COS(2*pi*m_jntMotionFreq[m_testJntIdx]*m_timePeriod-pi/2);
+	ELSIF m_stepTestFlag THEN
+		m_cmdDHJntPos[m_testJntIdx]:=m_initJntPos[m_testJntIdx]+m_jntStep;
+	ELSE
+		m_timePeriod:=0;
+	END_IF
+	
+END_IF
+
+// calculate target motor joint position from DH joint position
+i_slaveArm.instrument.instruIK(m_cmdDHJntPos,m_gripperAngle, o_jntPos=>m_cmdJntPos);
+
+IF m_freqTestFlag THEN 
+	vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+	vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+ELSE
+	m_cmdJntVel:=g_zeroVec8d;
+END_IF
+m_lastCmdJntPos:=m_cmdJntPos;
+
+FOR i:=1 TO 3 DO 
+	IF i=3 THEN
+		errThres := 0.01;
+	ELSE
+		errThres :=5*g_deg2rad;
+	END_IF
+	
+	IF ABS(m_cmdDHJntPos[i]-i_slaveArm.curDHJntPos[i])>errThres THEN
+		m_isFinished:=TRUE;
+		m_errPosIdx:=i;
+		m_errCmdPos:=m_cmdJntPos[i];
+		m_errCurPos :=i_slaveArm.curJntPos[i];
+	END_IF
+	
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{7ca43581-7589-4aef-a767-3681b3b7ea42}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	nullspaceMat :Mat7d;
+	ctrlTrq : Vec7d;
+	i : int ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+// instrument joint control
+
+FOR i:=1 TO 5 DO 
+	m_instruCmdJntPos[i]:=m_cmdJntPos[i+3];
+	m_instruCmdJntVel[i]:=m_cmdJntVel[i+3];
+END_FOR
+m_instruController.run(m_instruCmdJntPos,m_instruCmdJntVel, m_cmdDHJntPos[6], m_cmdDHJntVel[6], m_gripForceLevel, i_slaveArm, o_cmdJntTrq=>m_instruCmdJntTrq);
+
+FOR i:=1 TO 5 DO
+	m_cmdJntTrq[i+3]:=m_instruCmdJntTrq[i];
+END_FOR
+
+// add friction
+IF m_enableFrictionComp THEN
+	enableFrictionCompensation(i_slaveArm);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{59631f67-fc70-45f4-a6d2-b7e272ec8be8}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_lastCmdJntPos:=m_cmdJntPos;
+m_jntOPMode[1] := DriverOPMode_PosTrq;
+m_jntOPMode[2] := DriverOPMode_PosTrq;
+m_jntOPMode[3] := DriverOPMode_PosTrq;
+m_jntOPMode[4] := DriverOPMode_Trq;
+m_jntOPMode[5] := DriverOPMode_Trq;
+m_jntOPMode[6] := DriverOPMode_Trq;
+m_jntOPMode[7] := DriverOPMode_Trq;
+m_jntOPMode[8] := DriverOPMode_Trq;
+
+m_initJntPos :=i_slaveArm.curDHJntPos;
+m_cmdDHJntPos :=m_initJntPos;
+m_cmdDHJntVel :=g_zeroVec6d;
+m_gripperAngle := i_slaveArm.curGripAngle;
+
+// init instrument controller
+m_instruController.init(i_slaveArm);
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCtrlTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlTest.calcCmdJntPos">
+      <LineId Id="114" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="203" Count="1" />
+      <LineId Id="208" Count="2" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="186" Count="2" />
+      <LineId Id="212" Count="2" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="124" Count="1" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="127" Count="1" />
+      <LineId Id="170" Count="2" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="113" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlTest.calcCmdJntTrq">
+      <LineId Id="146" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="135" Count="3" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="139" Count="5" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="178" Count="2" />
+      <LineId Id="177" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlTest.init">
+      <LineId Id="13" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="86" Count="6" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="81" Count="2" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

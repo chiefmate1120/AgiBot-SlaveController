@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_SetupArmCtrlCmds" Id="{9bf694ba-a37b-4722-96a8-c1a6b09950ae}">
+    <Declaration><![CDATA[TYPE ST_SetupArmCtrlCmds :
+STRUCT
+	// arm control data
+	m_jntEnableFlag : Vec5i;
+	m_jntOPMode : Vec5i;
+	m_cmdJntPos : VEC5d;
+	m_cmdJntVel : VEC5d;
+	m_cmdJntAcc : VEC5d;
+	m_cmdJntTrq : VEC5d;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

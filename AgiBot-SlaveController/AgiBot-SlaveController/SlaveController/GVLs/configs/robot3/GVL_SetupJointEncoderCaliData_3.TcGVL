@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SetupJointEncoderCaliData_3" Id="{99de9dbd-bea7-4a13-9e2d-f3c9b68014d6}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// Robot3 --joints parameters of setup arms
+VAR_GLOBAL
+	// absolute encoder value at minimal joint positon
+	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
+		[5813168, 22663264, 1978132, 1938100, 13659124,
+		 13487924, 17543781, 3084321, 10238892, 1028618,
+		  3186404, 15837168, 878439, 6065586, 9487992,
+		  553720, 24385008, 4169014, 6084058, 984346];
+		 
+	// absolute encoder value at maximum joint positon
+	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
+		[1055544, 21209065, 1176866, 385208, 4921448,
+		 8781908, 16093586, 2285859, 8654922, 9089506,
+		 15289572, 14389054, 85603, 4478314, 767644,
+		  12599264, 22936561, 3373290, 4489778, 9055426];
+	
+	// absolute encoder value at calibrated positon
+	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
+		[3511708, 21210622, 1977753, 9295000, 9311970,
+		  11205276, 16093586, 3084321, 783598, 13445092,
+		 844948, 14389054, 878439, 13364040, 5122582,
+		  14940512, 22936561, 4169014, 13457164, 13393096];
+	
+	 // if absolute encoder value cross zeros within joint motion range
+	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
+		[0, 0, 0, 1, 0,
+		 0, 0, 0, 1, 1,
+		 1, 0, 0, 1, 0,
+		 1, 0, 0, 1, 1];
+		 
+//################ DO NOT modify parameters below ###########################
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
+
+	// absolute encoder direction
+	g_asbEncoderDir :ARRAY[1..g_setupJntNum] OF INT :=[-1, -1, -1, 1, -1];
+													
+	// flag if joint can rotate multiple cycles
+	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
+		[0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0];
+		 
+	// joint position at link encoder calibrated point
+	g_linkEncCaliJntPos :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF LREAL :=
+		[-140*g_deg2Rad, 0.779, 0.0, 90.0*g_deg2Rad, 0.0,
+		 -115*g_deg2Rad, 0.607, 0.0, 90.0*g_deg2Rad, 0.0,
+		 -65*g_deg2Rad, 0.607, 0.0, 90.0*g_deg2Rad, 0.0,
+ 		 -40*g_deg2Rad, 0.779, 0.0, 90.0*g_deg2Rad, 0.0];
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

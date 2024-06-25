@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupCtrlJnt5GraCali" Id="{742a7c37-2108-447e-a095-ea9ab3206b7a}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: setup arm gravity calibration
+// For trajectory synchronizaiton, the planner generate a trajecotry for setup joint3/5 and slave joint 1-3, but only former used here 
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlJnt5GraCali EXTENDS FB_SetupArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+// cali trajectory
+	m_caliMotionSegs :INT :=3;
+	m_graCaliTraj:ARRAY [1..3] OF LREAL:=[PI/2-pi/3, PI/2-PI/6, PI/2-pi/3];
+	
+		 
+	m_caliMaxjntVel:LREAL:=2.5 * g_deg2Rad;
+	m_caliMaxjntAcc:LREAL:=0.5;
+	m_caliMaxjntJerk:LREAL:=2.0;
+	
+	m_caliTrajIdx: INT := 1;
+	m_caliPlanner: ARRAY[1..3] OF FB_BasicDoubleS;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{30706fea-fa22-4600-affa-2edaaea78691}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+	curJntVel :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// safety check
+IF ABS(i_setupArm.curJntVel[5]) > 10*g_deg2Rad THEN
+	m_isFinished:=TRUE;
+	RETURN;
+END_IF
+
+// check if planner is ready
+IF m_caliPlanner[m_caliTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_caliPlanner[m_caliTrajIdx].evaluate(m_timePeriod, q=> m_cmdJntPos[5], q_dot=>m_cmdJntVel[5], q_ddot=> m_cmdJntAcc[5]);
+
+// check if to transit to next segment
+IF(m_timePeriod > m_caliPlanner[m_caliTrajIdx].duration  AND ABS(i_setupArm.curJntVel[5])<GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	m_caliTrajIdx:=m_caliTrajIdx+1;
+	m_timePeriod:=0;
+END_IF
+
+// check if to terminated
+IF(m_caliTrajIdx > m_caliMotionSegs) THEN
+	m_isFinished:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{2e96f170-5dad-491c-ad85-3dab2234e4af}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+
+VAR
+	i,j :INT;
+	startJntPos,endJntPos :LREAL;
+	q,v:ARRAY[1..2] OF lreal;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+m_jntEnableFlag[5]:=1;
+m_jntOPMode[5]:= DriverOPMode_PosTrq;
+m_caliTrajIdx :=1;
+
+// traj plan
+// fisrt segment
+q[1]:=i_setupArm.curJntPos[5];
+q[2]:=m_graCaliTraj[1];
+v[1]:=0;
+v[2]:=0;
+m_caliPlanner[1].init(q,v,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
+
+// other segments
+FOR i:=2 TO m_caliMotionSegs DO 
+	q[1]:=m_graCaliTraj[i-1];
+	q[2]:=m_graCaliTraj[i];
+	m_caliPlanner[i].init(q,v,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlJnt5GraCali">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlJnt5GraCali.calcCmdJntPos">
+      <LineId Id="159" Count="0" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="114" Count="9" />
+      <LineId Id="125" Count="7" />
+      <LineId Id="98" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlJnt5GraCali.init">
+      <LineId Id="57" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="154" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="126" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

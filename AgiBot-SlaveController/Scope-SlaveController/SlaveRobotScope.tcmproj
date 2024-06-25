@@ -7,9 +7,6 @@
     <RootNamespace>Slave Measurement Project</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="cartData.tcscopex">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="SetupGravityCaliData.tcscopex">
       <SubType>Content</SubType>
     </Content>

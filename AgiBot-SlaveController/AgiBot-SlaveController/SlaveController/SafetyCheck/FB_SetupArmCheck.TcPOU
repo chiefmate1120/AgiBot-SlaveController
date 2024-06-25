@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SetupArmCheck" Id="{e758489d-b7ab-4083-a13e-e0865f9223c6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupArmCheck
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// final arm error flag
+	m_armErrFlag :ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
+	
+	// original position of remote center point when fisrt enter hold state
+	m_dsrRcpPos :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	// rcp error flag
+	m_rcpPosErrFlag :ARRAY[1..g_sArmNum] OF BOOL;
+	m_rcpPosErrCounts :ARRAY[1..g_sArmNum] OF INT := [4(0)];
+	m_rcpPosErr :ARRAY[1..g_sArmNum] OF Vec3d;		// rcp position error
+	
+	// joint control error flag
+	m_jntCtrlErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	m_jntCtrlErrCounts :ARRAY[1..g_sArmNum] OF Vec5i;
+	m_jntCtrlErr:ARRAY[1..g_sArmNum]  OF Vec5d;	// joint position control error
+	
+	// joint encoder error flag
+	m_jntEncErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	m_jntEncErrCounts :ARRAY[1..g_sArmNum] OF Vec5i ;
+	m_jntEncErr:ARRAY[1..g_sArmNum]  OF Vec5d;		// motor and joint encoder error
+	
+	// joint velocity error flag
+	m_jntVelErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	m_jntVelErrCounts :ARRAY[1..g_sArmNum] OF Vec5i ;
+	
+	// joint position limit error flag
+	m_jntLimitErrFlag :ARRAY[1..g_sArmNum] OF Vec5b;
+	m_jntLimitErrCounts :ARRAY[1..g_sArmNum] OF Vec5i;
+	
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="check" Id="{2c2db747-eadc-432f-8869-05ad8bbc1acb}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupStatus : ST_SetupStatus;
+	i_setupJointData :ST_SetupJointData;
+END_VAR
+VAR_OUTPUT
+	o_errorFlag :ARRAY[1..g_sArmNum] OF BOOL ;
+END_VAR
+
+VAR
+	i ,j:INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate error
+FOR i:=1 TO g_sArmNum DO 
+	// update rcp
+	IF i_setupStatus.m_armState[i] <> SetupArmState_Hold THEN
+		m_dsrRcpPos[i] := i_setupStatus.m_rcPos[i];
+	END_IF
+
+	// stop check if arm is already in error state
+	IF m_armErrFlag[i] OR i_setupStatus.m_armState[i] = SetupArmState_Error THEN 
+		CONTINUE;
+	END_IF
+	
+	// only check rcp when slave in master-slave control state (for master-slave control)
+	m_rcpPosErrFlag[i]:=FALSE;
+	IF SlaveArmControl.m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave THEN 
+		m_rcpPosErrFlag[i]:=rcpErrCheck(m_dsrRcpPos[i],  i_setupStatus.m_rcPos[i], m_rcpPosErrCounts[i] ,m_rcpPosErr[i]);
+	END_IF
+	
+	// joint control error
+	m_jntCtrlErrFlag[i]:=jntCtrlErrCheck(i_setupJointData.m_cmdJntPos[i], i_setupJointData.m_curJntPos[i],
+										m_jntCtrlErrCounts[i], m_jntCtrlErr[i]);
+	
+	// encoder error
+	m_jntEncErrFlag[i]:=jntEncErrCheck(i_setupJointData.m_curMotorPos[i], i_setupJointData.m_curLinkPos[i],
+										m_jntEncErrCounts[i] , m_jntEncErr[i]);
+							
+	// joint limit error
+	m_jntLimitErrFlag[i]:=jntLimitErrCheck(i, i_setupJointData.m_curJntPos[i],m_jntLimitErrCounts[i]);
+										
+	// final arm error status check
+	IF  m_rcpPosErrFlag[i] THEN
+		m_armErrFlag[i]:=TRUE;
+		CONTINUE;
+	END_IF
+	
+	FOR j:=1 TO g_setupJntNum DO 
+		IF  m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j]  THEN
+			m_armErrFlag[i]:=TRUE;
+			EXIT;
+		END_IF
+	END_FOR
+	
+END_FOR
+
+o_errorFlag:=m_armErrFlag;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntCtrlErrCheck" Id="{f6fb8ca3-8b0c-48d0-a2c9-a609f09c24db}">
+      <Declaration><![CDATA[METHOD jntCtrlErrCheck : Vec5b
+VAR_INput
+	i_cmdJntPos : Vec5d;
+	i_curJntPos : Vec5d;
+END_VAR
+VAR_IN_OUT
+	r_errCount:Vec5i;
+	r_jntCtrlErr :Vec5d;
+END_VAR
+
+VAR
+	i :INT;
+	err:Vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_cmdJntPos,i_curJntPos,  err);
+r_jntCtrlErr:=err;
+
+// joint error check
+FOR i:=1 TO g_setupJntNum DO 
+	IF ABS(r_jntCtrlErr[i]) > g_setupMaxJntCtrlErr[i] THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;
+	END_IF
+	jntCtrlErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntEncErrCheck" Id="{6da94a09-09aa-4f72-8d8e-c6be158d127a}">
+      <Declaration><![CDATA[METHOD jntEncErrCheck : Vec5b
+VAR_INput
+	i_motorJntPos : Vec5d;
+	i_linkJntPos : Vec5d;
+END_VAR
+VAR_IN_OUT
+	r_errCount:Vec5i;
+	r_jntEncErr :Vec5d;
+END_VAR
+
+VAR
+	i :INT;
+	err : vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  err);
+r_jntEncErr:=err;
+
+// joint error check
+FOR i:=1 TO g_setupJntNum DO 
+	IF  ABS(r_jntEncErr[i]) > g_setupMaxJntCtrlErr[i] THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;
+	END_IF
+	jntEncErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntLimitErrCheck" Id="{e5cb08f3-1b27-485f-8fcc-37a6dc740799}">
+      <Declaration><![CDATA[METHOD jntLimitErrCheck : Vec5b
+VAR_INPUT
+	i_armIdx : INT;
+	i_curJntPos : Vec5d;
+END_VAR
+VAR_IN_OUT
+	r_errCount:Vec5i;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint limit check
+FOR i:=1 TO 5 DO 
+	IF  i_curJntPos[i] > GVL_SetupMotorParameters.g_maxJntPos[i_armIdx,i] + g_setupJntPosLimitBuffer[i] OR
+		i_curJntPos[i] < GVL_SetupMotorParameters.g_minJntPos[i_armIdx,i] - g_setupJntPosLimitBuffer[i] THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;	
+	END_IF
+	jntLimitErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="rcpErrCheck" Id="{ee28dada-ba2b-4f9e-8a63-19fb6ed167a8}">
+      <Declaration><![CDATA[METHOD rcpErrCheck : BOOL
+VAR_INPUT
+	i_cmdPos : Vec3d;
+	i_curPos : Vec3d;
+END_VAR
+VAR_IN_OUT
+	r_errCount:INT;
+	r_posErr :Vec3d;
+END_VAR
+
+VAR
+	err:Vec3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_cmdPos, i_curPos,err);
+r_posErr:=err;
+
+IF  (norm(err)>g_rcpDeviationThres) THEN
+	r_errCount:= r_errCount +1;
+ELSE 
+	r_errCount:=0;
+END_IF
+rcpErrCheck := r_errCount >= g_faultTriggerCounts;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupArmCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.check">
+      <LineId Id="152" Count="1" />
+      <LineId Id="241" Count="3" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="154" Count="3" />
+      <LineId Id="165" Count="4" />
+      <LineId Id="171" Count="8" />
+      <LineId Id="225" Count="2" />
+      <LineId Id="180" Count="3" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="185" Count="10" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.jntCtrlErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.jntEncErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.jntLimitErrCheck">
+      <LineId Id="44" Count="2" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupArmCheck.rcpErrCheck">
+      <LineId Id="8" Count="0" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

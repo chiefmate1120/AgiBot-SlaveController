@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_SetupCtrlSelfCheck" Id="{de863df1-4a4d-4fa9-a2ab-b3b6dd7ec2a1}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Setup Arm Self-check
+FUNCTION_BLOCK PUBLIC FB_SetupCtrlSelfCheck EXTENDS FB_SetupArmCtrlBase
+VAR CONSTANT
+	m_selfCheckMotionNum :INT :=1;
+END_VAR
+VAR
+	// slave self-check motion parameters
+	m_selfCheckPosture:ARRAY [1..m_selfCheckMotionNum, 1..g_setupJntNum] OF LREAL:=[0.0, 0.0, 0.1, pi/2, PI/2];																			//PI/4, -PI/4, 0.3, pi, pi, pi, pi, pi];
+	m_selfCheckMaxjntVel:Vec5d:=[0.1, 0.1, 0.05, 0.1, 0.1];
+	m_selfCheckMaxjntAcc:Vec5d:=[0.1, 0.1, 0.25, 0.5, 0.5];
+	m_selfCheckMaxjntJerk:Vec5d:=[0.1,0.1, 0.5, 1.0, 1.0];
+	
+	m_selfCheckTrajIdx: INT := 1;
+	m_slefCheckPlanner: ARRAY[1..m_selfCheckMotionNum] OF FB_setupTrajMoveJ;
+	
+	// collision and safety check threshold
+	m_jntCtrlErr:Vec5d;
+	m_jntCtrlErrThres :Vec5d:=[2.0*g_deg2rad, 0.005,  0.005, 2(2.0*g_deg2rad)];
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{d8beec4e-d9e1-4918-810b-b7d735a8f515}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if planner is ready
+IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
+	calcCmdJntPos:=FALSE;
+	RETURN;
+END_IF
+
+// traj plan
+calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+
+// check if to transit to next segment
+IF(m_timePeriod > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(i_setupArm.m_curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
+	m_timePeriod:=0;
+END_IF
+
+// safety check
+vecSub(m_cmdJntPos, i_setupArm.m_curJntPos, m_jntCtrlErr);
+FOR i:=1 TO g_setupJntNum DO 
+	IF ABS(m_jntCtrlErr[i])> m_jntCtrlErrThres[i] THEN
+		m_isFinished:=TRUE;
+		RETURN;
+	END_IF
+END_FOR
+
+
+// check if to terminated
+IF(m_selfCheckTrajIdx > m_selfCheckMotionNum) THEN
+	m_isFinished:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{57d7becd-4a0a-4f37-8764-94cf78ff725a}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+VAR_IN_OUT 
+	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
+END_VAR
+
+
+VAR
+	i,j :INT;
+	startJntPos,endJntPos :Vec5d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
+m_jntEnableFlag[3]:=1;
+m_jntEnableFlag[4]:=1;
+m_jntEnableFlag[5]:=1;
+
+// traj plan
+m_selfCheckTrajIdx :=1;
+// fisrt segment
+startJntPos:=i_setupArm.curJntPos;
+endJntPos := startJntPos;
+FOR j:=3 TO 5 DO 
+	endJntPos[j]:=m_selfCheckPosture[1,j];
+END_FOR
+m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
+
+// other segments
+IF m_selfCheckMotionNum>= 2 THEN
+	FOR i:=2 TO m_selfCheckMotionNum DO 
+		FOR j:=3 TO 5 DO 
+			startJntPos[j]:=m_selfCheckPosture[i-1,j];
+			endJntPos[j]:=m_selfCheckPosture[i,j];
+		END_FOR
+		m_slefCheckPlanner[i].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
+	END_FOR
+END_IF;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SetupCtrlSelfCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlSelfCheck.calcCmdJntPos">
+      <LineId Id="41" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="131" Count="9" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlSelfCheck.init">
+      <LineId Id="57" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="150" Count="1" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="152" Count="14" />
+      <LineId Id="137" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

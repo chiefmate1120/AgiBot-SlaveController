@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SlaveArmDynamics_3" Id="{eee54b3a-62fd-4a3c-b65e-d55178ffd497}">
+    <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
+{attribute 'qualified_only'}
+// Robot3 --dynamic parameters of slave arms
+VAR_GLOBAL CONSTANT
+	
+(*graParam=[ 9.8*m5,...
+           0.41601*m2 + 0.41601*m3 + 0.0000216012*m4 + 0.0000216012*m5 + 9.8*mx1 - 1.3639*mx3 - 9.70463*my3,...
+           9.8*mz2 - 9.8*my5 - 9.8*my1 + 9.8*mz3 + 9.8*mz4,...
+           2.19651*m3 + 2.19651*m4 + 0.00000258969*m5 + 8.64766*mx2 - 4.61063*my2 + 9.8*my4 + 9.8*mz5,...
+          1.1711*m3 + 1.1711*m4 + 0.00000122416*m5 + 4.61063*mx2 - 9.8*mx4 - 9.8*mx5 + 8.64766*my2]'
+*)				
+	// robot No.4
+	g_gravityParam :ARRAY[1..4,1..5] OF REAL := 
+	[ 7.5951,    1.6336,   -4.2417,    9.4106,    4.7289,
+	  7.4741,    3.7472,   -4.4567,   10.5517,    7.6095,
+	  7.6732,    3.7472,   -4.4458,    9.6721,    7.2742,
+	  7.4582,    3.5688,   -3.7215,    9.2746,    5.7641];
+	 
+	g_gravityTrocar :ARRAY[1..5] OF REAL :=[0.1661, -0.4124,  0.0964,   -0.7987,   -0.6999 ];
+	g_gravityInstrument :ARRAY[1..5] OF REAL :=[ 3.1217,  -0.3099,   0.0778,   -1.2498,   -0.8041];
+	g_gravityEndoscope :ARRAY[1..5] OF REAL :=[10.8619,  -0.8575,   -1.0274,   -0.2425,   -0.0869];
+	
+	// joint friction(with instrument mounted)
+	g_slaveJntFriction :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF LREAL :=
+			[ 5.3354,    9.5437,    4.6271,  0.03, 0.03, 0.03, 0.03, 0,
+			  4.5927,    9.6040,    3.7367, 0.03, 0.03, 0.03, 0,
+		      4.3557,    8.4286,    5.9078,  0.03, 0.03, 0.03, 0.03, 0,
+              4.1447,    7.2202,    6.8253,  0.03, 0.03, 0.03, 0.03, 0	 ];
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

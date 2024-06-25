@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SlaveJointEncoderCaliData_4" Id="{8ce64b0d-2a8e-4dd0-82ae-8b5669176ef8}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// Robot4 --joints parameters of slave arms
+VAR_GLOBAL CONSTANT
+	// absolute encoder value at minimal joint positon
+	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
+		[5070618, 12248428, 9957376, 0, 0, 0, 0, 0,
+		 4919708, 12165470, 13694272, 0, 0, 0, 0, 0,
+		 9158200, 3936684, 16444112, 0, 0, 0, 0, 0,
+		 13295020, 16357370, 9921792, 0, 0, 0, 0, 0];
+		 
+	// absolute encoder value at maximum joint positon
+	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
+		[2939662, 5069530, 2375904, 0, 0, 0, 0, 0,
+		2804134, 4974626, 6119888, 0, 0, 0, 0, 0,
+		 6996994, 13526094, 8890176, 0, 0, 0, 0, 0,
+		 11165812, 9145900, 2372960, 0, 0, 0, 0, 0];
+	
+	// absolute encoder value at calibrated positon
+	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
+		[12427638, 8080000, 2375904, 15243664, 15283488, 7042832, 6950144, 7012272,
+		12242476, 7980988, 6119888, 15217500, 15280288, 6866960, 6936528, 6826016,
+		 16513242, 16579922, 8890176, 15265256, 15406944, 6400940, 6866960, 6902000,
+		 3889656, 12177274, 2372960,15290800, 15066000, 6861290, 6710544, 6927488];
+	
+	 // if absolute encoder value cross zeros within joint motion range
+	 // NOTICE: joint 7 is always 0.
+	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF INT :=
+		[1, 0, 1, 1, 1, 1, 1, 1,
+		 1, 0, 1, 1, 1, 1, 1, 1,
+		 1, 1, 1, 1, 1, 1, 1, 1,
+		 1, 0, 1, 1, 1, 1, 1, 1];
+		 
+	 // joint SDO address
+	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.186.39.3.1','169.254.186.39.8.1','169.254.186.39.9.1','169.254.186.39.10.1'];
+	g_slaveJointNetPort:ARRAY[1..g_sArmNum,1..g_sJntNum] OF UINT :=[
+		1006,	1007,	1008,	2(1009),	3(1010),
+		1006,	1007,	1008,	2(1009),	3(1010),
+		1006,	1007,	1008,	2(1009),	3(1010),
+		1006,	1007,	1008,	2(1009),	3(1010)];
+		
+//################ DO NOT modify parameters below ###########################
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
+	
+	// absolute encoder direction
+	g_asbEncoderDir :ARRAY[1..g_sJntNum] OF INT :=[1, -1, 1, 1, 1, 1, 1, 1];
+	
+	// flag if joint can rotate multiple cycles
+	g_multipleCyclesJoint :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF INT :=
+		[0, 0, 0, 1, 1, 1, 1, 1,
+		 0, 0, 0, 1, 1, 1, 1, 1,
+		 0, 0, 0, 1, 1, 1, 1, 1,
+		 0, 0, 0, 1, 1, 1, 1, 1];
+		 
+	// joint position at link encoder calibrated point
+	g_linkEncCaliJntPos :ARRAY[1..g_sJntNum] OF LREAL :=
+		[0.0, -PI/2, 0.581633, 5(0.0)];
+
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

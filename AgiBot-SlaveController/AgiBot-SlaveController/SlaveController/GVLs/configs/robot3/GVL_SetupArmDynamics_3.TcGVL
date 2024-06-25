@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SetupArmDynamics_3" Id="{726f6a9b-c53b-4c5a-b9a0-a82ea5d70cba}">
+    <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
+{attribute 'qualified_only'}
+// Robot3 --dynamic parameters of setup arms
+VAR_GLOBAL 
+	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic
+	% graParam=[ 9.8*mx0,...
+	%            4.92539*m1 + 4.92539*m2 + 4.92539*m3 + 7.8853*m4 + 7.8853*m5 + 9.70463*mx3 - 9.8*my0 - 1.3639*my3 + 9.8*mz1,...
+	%            9.8*m5,...
+	%            0.41601*m2 + 0.41601*m3 + 0.0000216012*m4 + 0.0000216012*m5 + 9.8*mx1 - 1.3639*mx3 - 9.70463*my3,...
+	%            9.8*mz2 - 9.8*my5 - 9.8*my1 + 9.8*mz3 + 9.8*mz4,...
+	%            2.19651*m3 + 2.19651*m4 + 0.00000258969*m5 + 8.64766*mx2 - 4.61063*my2 + 9.8*my4 + 9.8*mz5,...
+	%            1.1711*m3 + 1.1711*m4 + 0.00000122416*m5 + 4.61063*mx2 - 9.8*mx4 - 9.8*mx5 + 8.64766*my2]';
+	*)				
+	//setup joint5 gravity parameters
+	g_setupJnt5GravityParam :ARRAY[1..4,1..2] OF REAL := 
+	[ 0.0000,   54.4806,
+	  0.0196,   61.5623,
+	  0.0196,   65.0026,
+	  0.0196,   59.3080 ];
+
+	(* setup joint3 gravity parameters
+	 graParams = [p1mp2,p3,p4]
+	 gravity = p1*q^3 + p2*q^2 + p3^q + p4
+	 q(- [q0,q1]*)
+ 	// setup joint3 gravity parameter
+	g_setupJnt3GravityParams :ARRAY[1..4, 1..4] OF LREAL :=
+	[13129.9, -3010.8, 300.188, -99.7871,
+	 14085.9, -3787.37, 476.955, -104.313,
+	  6440.78, -1524.39, 415.869, -117.102,
+	 22097.9, -5714.59, 558.077, -104.732];
+	 
+	(* setup joint3 friction parameters
+	 graParams = [p1mp2,p3,p4]
+	 friciton = p1*q^3 + p2*q^2 + p3^q + p4
+	 q(- [q0,q1]*)
+ 	// setup joint3 friction parameter
+	g_setupJnt3FrictionParams :ARRAY[1..4, 1..4] OF LREAL :=
+	[-11173.7, 3888.25, -491.555, 79.4495,
+	 -17709.9, 6947.19, -897.825, 94.243,
+	 -49343.5, 18899.5, -2449.52, 166.011,
+	-11537.6, 3698.16, -380.906, 51.8712];
+	
+	g_setupJnt3GravityPosRange :ARRAY[1..4, 1..2] OF REAL :=
+	[0.0189, 	0.1789,
+	 0.0182,    0.1784,
+	 0.0189,    0.1789,
+	 0.0189,    0.1789];
+ 	
+	// joint gravity offset
+	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
+	[0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0,
+	 0, 0, 0, 0,  0];
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

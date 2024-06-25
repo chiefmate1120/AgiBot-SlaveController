@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM CartControl
+VAR
+	// cart instance
+	m_cartRobot :FB_CartRobot;
+	
+	// Output cart status
+	m_cartStatus AT%Q* : ST_CartStatus;
+	
+	
+	m_cartDataPool: ST_CartInputDataPool;
+	
+	// wait time before cart init for ethercat to be statble 
+	m_cartInitWaitTime : LREAL:=0;
+	
+	// cart init flag
+	m_cartInit :BOOL :=FALSE;
+	
+	m_workHeartTon0 : TON;
+	m_workHeartTon1 : TON;
+	m_dumpEnergy : UINT:=51;
+	m_cartInSterileStateTon :Ton;
+	m_cartInSterileState :BOOL;
+	//Aseptic sleeve is installed flag
+	m_asepticInstalledFlag : Vec4b;
+	m_slaveArmDisableFlag : Vec4b;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// wait communication to be stable
+IF(m_cartInitWaitTime<g_robotInitWaitTime) THEN
+	m_cartInitWaitTime := m_cartInitWaitTime+g_cartCtrlCycleTime;
+	RETURN;
+END_IF
+
+// cart init
+IF m_cartInit =FALSE THEN
+	m_cartRobot.Init();
+	m_cartInit:=TRUE;
+END_IF
+
+// input from UI
+UIInputProcess();
+
+//Aseptic sleeve deployment completed
+m_cartDataPool.m_cartStatus.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveRobot.m_panelMountedFlag[1] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[2]
+																									AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[3] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[4];
+
+// cart run
+m_cartRobot.run(m_cartDataPool);
+
+
+UIOutputProcess();
+]]></ST>
+    </Implementation>
+    <Method Name="UIInputProcess" Id="{90031281-ad03-48e9-82ab-c27609373d51}">
+      <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
+METHOD UIInputProcess : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:int;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// cart Joystick data
+m_cartDataPool.m_UIData.m_joystickDataFromUI := GVL_com_upper_PC.a8usb_rec_array;
+
+m_cartDataPool.m_UIData.m_ctrlEnableFromUI := GVL_com_upper_PC.ui_control;
+
+//limit_height:UINT;  上位机的高度值单位是mm，系统的高度值单位是m，底座高度是1850mm
+//打开ui_control.limit_height_adjusting后可以调整立柱，并实时将立柱当前高度上传
+IF (GVL_com_upper_PC.ui_control.limit_height_adjusting=TRUE) THEN
+	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
+	GVL_com_upper_PC.limit_height :=LREAL_TO_UINT (m_cartRobot.m_slaveCart.curJntPos[5] * 1000 + 1850);
+ELSIF 	 (GVL_com_upper_PC.ui_control.limit_height_adjusting=FALSE) AND GVL_com_upper_PC.enable_limit_height AND ABS((m_cartDataPool.m_UIData.m_standColumnHightLimit *1000+1850)-GVL_com_upper_PC.limit_height)>5 THEN
+	m_cartDataPool.m_UIData.m_standColumnHightLimit := UINT_TO_LREAL(GVL_com_upper_PC.limit_height-1850)/1000;
+ELSIF GVL_com_upper_PC.enable_limit_height=FALSE THEN
+	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
+END_IF
+
+
+//Surgical orientation selection
+m_cartDataPool.m_UIData.m_surgicalSite := GVL_com_upper_PC.surgical_site;
+m_cartDataPool.m_UIData.m_surgicalLocation := GVL_com_upper_PC.surgical_location;
+
+m_dumpEnergy := GVL_com_upper_PC.battery_power_value;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIOutputProcess" Id="{27946789-ba17-4b7b-ba83-4bc0e56b91c4}">
+      <Declaration><![CDATA[METHOD UIOutputProcess : BOOL
+VAR_INPUT
+END_VAR
+VAR 
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TODO
+//work heart
+m_workHeartTon0(IN:= GVL_com_upper_PC.work_heart = 1, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon1(IN:= GVL_com_upper_PC.work_heart = 0, PT:= T#1S, Q=> , ET=> );
+IF m_workHeartTon0.Q THEN
+	GVL_com_upper_PC.work_heart :=0 ;
+ELSIF m_workHeartTon1.Q THEN
+	GVL_com_upper_PC.work_heart  :=1 ;
+END_IF
+
+GVL_com_upper_PC.cart_operation.draping_posture_state := m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDrapingState;
+GVL_com_upper_PC.cart_operation.docking_posture_state := m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDockingState;
+
+GVL_com_upper_PC.torcars_status := INT_TO_BOOL(m_cartRobot.m_slaveCart.m_trocarOnFlag);
+
+GVL_com_upper_PC.Cart_running_alone := NOT SlaveArmControl.m_slaveRobot.m_masterOnLine;
+GVL_com_upper_PC.has_Cart_recoverable_error := 0;
+
+IF GVL_com_upper_PC.surgical_status = 1 THEN
+	IF m_cartDataPool.m_cartStatus.m_asepticDeployCompletedFlag =FALSE THEN
+		m_slaveArmDisableFlag := g_zeroVec4b;
+	END_IF
+ELSE
+	m_slaveArmDisableFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag;	
+END_IF
+
+FOR i := 1 TO 4 BY 1 DO
+	m_asepticInstalledFlag[i] := m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];
+END_FOR
+
+GVL_com_upper_PC.Cart_operation.Arm1_setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[1]); 
+GVL_com_upper_PC.Cart_operation.Arm2_setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[2]); 
+GVL_com_upper_PC.Cart_operation.Arm3_setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[3]); 
+GVL_com_upper_PC.Cart_operation.Arm4_setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[4]); 
+
+GVL_com_upper_PC.Cart_operation.setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[1]) AND BOOL_TO_UINT(m_asepticInstalledFlag[2]) AND BOOL_TO_UINT(m_asepticInstalledFlag[3]) AND BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
+
+GVL_com_upper_PC.Cart_operation.scope_install_state := BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_endoscopeMounted);
+
+FOR i := 1 TO 4 BY 1 DO
+	IF NOT SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.onChipData.m_Instrutype=InstruType_endoscope THEN
+		IF SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i] AND SlaveArmControl.m_slaveRobot.m_endoscopeMounted THEN
+			GVL_com_upper_PC.Cart_operation.all_fixed_point_confirm := 1;
+			EXIT;
+		ELSE
+			GVL_com_upper_PC.Cart_operation.all_fixed_point_confirm := 0;
+		END_IF	
+	END_IF	
+END_FOR
+
+
+//Cart_static_in_sterile_state:UINT; //台车进入无菌区，并且台车停止运动(连续10s没有运动)，0：没有完成，1：完成
+IF m_cartRobot.m_slaveCart.m_cartDataFromUI.m_cartDockingState = 1 THEN
+	IF m_cartRobot.m_CartState = CartJointState_Movement THEN
+		m_cartInSterileState := FALSE;
+	ELSIF m_cartRobot.m_lastCartState = CartJointState_Movement THEN
+		m_cartInSterileState := TRUE;
+	END_IF
+ELSE
+	m_cartInSterileState := FALSE;
+	GVL_com_upper_PC.Cart_operation.Cart_static_in_sterile_state:=0;
+END_IF
+m_cartInSterileStateTon(IN:= m_cartInSterileState, PT:= T#10S, Q=> , ET=> );
+IF m_cartInSterileStateTon.Q THEN
+	GVL_com_upper_PC.Cart_operation.Cart_static_in_sterile_state:=1;
+END_IF
+
+GVL_com_upper_PC.manual_mode := NOT m_cartRobot.m_slaveCart.m_stabilizFootSensorManual;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="CartControl">
+      <LineId Id="16" Count="10" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="87" Count="3" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="CartControl.UIInputProcess">
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="55" Count="9" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="CartControl.UIOutputProcess">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="116" Count="2" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="39" Count="7" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="77" Count="2" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="95" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

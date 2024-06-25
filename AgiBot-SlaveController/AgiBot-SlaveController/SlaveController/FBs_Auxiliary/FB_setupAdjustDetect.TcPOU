@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_setupAdjustDetect" Id="{c0770542-a14f-401c-951e-b289373a905f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_setupAdjustDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_manualAdjustOnCounts :INT :=0;
+	m_adjustOnCountThres :INT :=50;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{9417d02d-486a-427f-b657-d20113e6f4a0}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+
+VAR_OUTPUT
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// manuel adjust io is 5th bit 
+IF 16=(IOValue AND 10#16) THEN
+	m_manualAdjustOnCounts :=MIN(m_manualAdjustOnCounts +1,m_adjustOnCountThres);
+ELSE
+	m_manualAdjustOnCounts :=0;
+END_IF
+
+run := m_manualAdjustOnCounts >= m_adjustOnCountThres;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_setupAdjustDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_setupAdjustDetect.run">
+      <LineId Id="49" Count="5" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
