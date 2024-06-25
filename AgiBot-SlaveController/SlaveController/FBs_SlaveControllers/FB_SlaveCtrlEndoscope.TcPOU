@@ -8,83 +8,421 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// scope motion master-salve scale
-	m_MSMotionScale :LREAL :=0.5;
-	
-	// scope motion singularity scale
-	m_singMotionScale :LREAL :=1;
-	m_minSingMotionScale :LREAL := 0.5;
-	
-	// distance threshold between scope and remote center without sigularity scale 
-	m_RCDisThres :LREAL :=0.1;
-	
 	// filter cut-off frequency for master-slave control
 	m_cmdJntPosLpfCutoffFreq : LREAL :=5;
 	
 	// last command joint position
 	m_lastCmdJntPos :Vec8d;
 	
-	// command velocity filter
-	m_cmdVelLpf:ARRAY[1..4] OF FB_LowPassFilter;
+	// enter master-slave control for the first time
+	m_firstIn :BOOL := TRUE;
 	
-	// scope command linear/rotate velocity in local/view coordinate
-	m_cmdVelLocal :Vec3d;
-	m_cmdWVelLocal :LREAL;
+	//endoscope motion scale	
+	m_endoMotionScale:LREAL:=0.1;
 	
-	// scope command linear velocity in base coordinate
-	m_cmdVel:Vec3d;
+	// command joint position filter
+	m_cmdJntPosLpf:ARRAY[1..4] OF FB_LowPassFilter;
 	
+	// code execute time measure
+	m_codeTime : Profiler;
+	
+	// simulated DH joint position
+	m_simDHJntPos : Vec6d;
+	
+	// simulated slave twist of DH joint
+	m_simDHJointVel :Vec6d;
+	
+	//arm postion err
+	armPosErr:Vec3d;
+	
+	//track kp
+	kp:LREAL:=1000000;
+	
+	//command space velocity
+	m_slaveCmdVel:Vec3d;
+	
+	// control error thershold for safety check
+	m_maxPosTrackErr :LREAL := 0.05;
+	
+	//time
+	m_t:LREAL;
+	
+	//center point start position of master arms
+	m_centerPntStart:Vec3d;
+	
+	//slave arm joint positon initial values
+	m_startPosJ4:LREAL;
+	m_relAngleLast:LREAL;
+	m_relAngleStart:LREAL;
+	
+	//endoscope pose initial value
+	m_endoPoseInitial:ST_Frame;
+	
+	//S1---setup arm posture of leftArm,  A1---slave arm posture of leftArm  S2---setup arm posture of endoscopeArm   A2---slave arm posture of endoscopeArm
+	m_TA1RelA2,m_TA1RelA2Init,m_TA3RelA2Init:ST_Frame;
+	m_TA1RelA2Real,m_TA3RelA2Real:ST_Frame;
+	m_S2,m_A2,m_S1,m_A1,m_S3,m_A3,m_frontTransform,m_frontTransformActual:ST_Frame;
+	m_A1Imagine,m_A3Imagine:ST_Frame;
+	m_A1Imagine_ForPose,m_TA1RelA2Init_ForPose,m_frontTransform_ForPose:ST_Frame;	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="calcCmdJntPos" Id="{87ce9b58-87b9-4be1-8d6a-40a3604816ed}">
-      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_IN_OUT CONSTANT
-	i_endoscopePose : ST_Frame;
-	i_masterStatus :ST_MasterStatus;
-	i_setupStatus: ST_SetupStatus;
-	i_slaveArm :FB_SlaveArm;
+    <Method Name="armAbsPosCal" Id="{1db53e92-abe8-4454-b3ad-6efac3921583}">
+      <Declaration><![CDATA[METHOD armAbsPosCal : BOOL
+VAR_INPUT	
+	i_setupArmPose_InstrumentArm:ST_Frame; //setup arm pose for instrument arm	
+	i_setupArmPose_endoscopeArm:ST_Frame; //setup arm pose for endoscope arm
+	i_slaveArmPose_endoscopeArm:ST_Frame; //slave arm pose for endoscope arm
+	i_slaveArmPoseRelToEndoscope : ST_Frame; //slave arm pose relative to endoscope
 END_VAR
 
-VAR 
-	i,j : INT;
-	posJaco, posJacoInv:Mat3d;
-	armDHJntVel :Vec3d;
+VAR_OUTPUT
+	o_slaveArmPose_InstrumentArm:ST_Frame;
+END_VAR
 
-	cmdVelScale :LREAL;
-	jnt3Limit :LREAL;
+VAR
+	S1:ST_Frame;
+	A2:ST_Frame;
+	S2:ST_Frame;
+	TA1RelA2 : ST_Frame;
+	A1:ST_Frame;
+	tmpFrame,tmpFrame_1 : ST_Frame;	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//data copy
+S1:=i_setupArmPose_InstrumentArm;
+S2:=i_setupArmPose_endoscopeArm;
+A2:=i_slaveArmPose_endoscopeArm;
+TA1RelA2:=i_slaveArmPoseRelToEndoscope;
+
+//A1=INV(S1)*S2*A2*T_A1_A2-----A1Imagine
+tmpFrame :=invFrame(S1); //INV(S1)
+tmpFrame := transform(tmpFrame, S2); //INV(S1)*S2
+tmpFrame := transform(tmpFrame, A2); //INV(S1)*S2*A2
+A1 := transform(tmpFrame, TA1RelA2); //INV(S1)*S2*A2*T_A1_A2
+o_slaveArmPose_InstrumentArm:=A1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="armRelToEndoscope" Id="{1cae8f81-df92-463b-97d9-777b8f26781f}">
+      <Declaration><![CDATA[METHOD armRelToEndoscope : BOOL
+VAR_INPUT
+	i_setupArmPose_InstrumentArm:ST_Frame; //setup arm pose for instrument arm	
+	i_slaveArmPose_InstrumentArm:ST_Frame; //slave arm pose for instrument arm
+	i_setupArmPose_endoscopeArm:ST_Frame; //setup arm pose for endoscope arm
+	i_slaveArmPose_endoscopeArm:ST_Frame; //slave arm pose for endoscope arm
+END_VAR
+
+VAR_OUTPUT
+	o_slaveArmPoseRelToEndoscope : ST_Frame;  //slave arm pose relative to endoscope
+END_VAR
+
+VAR
+	A1:ST_Frame;
+	S1:ST_Frame;
+	A2:ST_Frame;
+	S2:ST_Frame;
+	TA1RelA2:ST_Frame;
+	tmpFrame,tmpFrame_1 : ST_Frame;	
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//data copy
+S1:=i_setupArmPose_InstrumentArm;
+A1:=i_slaveArmPose_InstrumentArm;
+S2:=i_setupArmPose_endoscopeArm;
+A2:=i_slaveArmPose_endoscopeArm;
+
+
+//T_A1_A2=INV(S2*A2)*S1*A1=INV(A2)*INV(S2)*S1*A1
+tmpFrame_1 :=invFrame(A2); //INV(A2)
+tmpFrame :=invFrame(S2); //INV(S2)
+tmpFrame := transform(tmpFrame_1, tmpFrame); //INV(A2)*INV(S2)
+tmpFrame := transform(tmpFrame, S1); //INV(A2)*INV(S2)*S1
+TA1RelA2 := transform(tmpFrame, A1); //INV(A2)*INV(S2)*S1*A1
+o_slaveArmPoseRelToEndoscope:=TA1RelA2;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="armRotatePos" Id="{93c7d42d-d6ba-444f-92b8-39dcd2108004}">
+      <Declaration><![CDATA[METHOD armRotatePos : BOOL
+VAR_INPUT
+	i_leftArmRelEndoscope:ST_Frame;
+	i_rightArmRelEndoscope:ST_Frame;		
+	i_leftMasterPose:ST_Frame;
+	i_rightMasterPose:ST_Frame;
+END_VAR
+
+VAR_OUTPUT
+	o_leftArmRelEndoscopeAddRot:ST_Frame;
+	o_rightArmRelEndoscopeAddRot:ST_Frame;
+END_VAR
+
+VAR
+	masterA1:ST_Frame;
+	masterA3:ST_Frame;
+	A1RelEndoscope:ST_Frame;
+	A3RelEndoscope:ST_Frame;			
+	A1RelEndoscopeAddRot:ST_Frame;
+	A3RelEndoscopeAddRot:ST_Frame;
+	
+	x0,y0:LREAL;
+	x1,y1:LREAL;
+	x3,y3:LREAL;
+	radius:LREAL;
+	
+	x32,y32:LREAL;
+	x12,y12:LREAL;
+	
+	relAngle:LREAL;
+	angle:LREAL;
+	angle1:LREAL;
+	
+	subPos:ARRAY[1..3] OF LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF isFinished THEN
+        <ST><![CDATA[
+//data copy
+masterA1:=i_leftMasterPose; masterA3:=i_rightMasterPose;
+A1RelEndoscope:=i_leftArmRelEndoscope; A3RelEndoscope:=i_rightArmRelEndoscope;
+
+//calculating relative angle
+vecSub(masterA3.m_pos,masterA1.m_pos,subPos);
+relAngle:=atan2(subPos[2],subPos[1]);
+angle:=relAngle;
+
+//collect data
+x1:=A1RelEndoscope.m_pos[1];
+y1:=A1RelEndoscope.m_pos[2];
+x3:=A3RelEndoscope.m_pos[1];
+y3:=A3RelEndoscope.m_pos[2];
+
+//radius calculation
+x0:=(x1+x3)/2;
+y0:=(y1+y3)/2;
+radius:=SQRT((x1-x0)*(x1-x0)+(y1-y0)*(y1-y0));
+
+//arm3 position
+x32:=x0+radius*COS(angle);
+y32:=y0+radius*SIN(angle);
+
+//arm1 position
+angle1:=angle-pi;
+x12:=x0+radius*COS(angle1);
+y12:=y0+radius*SIN(angle1);
+
+//output the result
+A1RelEndoscopeAddRot:=A1RelEndoscope;
+A1RelEndoscopeAddRot.m_pos[1]:=x12;
+A1RelEndoscopeAddRot.m_pos[2]:=y12;
+
+A3RelEndoscopeAddRot:=A3RelEndoscope;
+A3RelEndoscopeAddRot.m_pos[1]:=x32;
+A3RelEndoscopeAddRot.m_pos[2]:=y32;
+
+o_leftArmRelEndoscopeAddRot:=A1RelEndoscopeAddRot;
+o_rightArmRelEndoscopeAddRot:=A3RelEndoscopeAddRot;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntPos" Id="{7a4f9b81-8f1c-47b7-9285-eb5c96eda7bc}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// endoscope pose in cart coordinate
+	i_endoscopePose : ST_Frame;
+	
+	// master arm data
+	i_masterStatus :ST_MasterStatus;
+	
+	// setup arm data
+	i_setupStatus: ST_SetupStatus;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	//arm position incresement and rotation angle incresement
+	centerPoint:Vec3d;
+	posInc,posIncInBase:Vec3d;		
+	relAngleInit,relAngle:LREAL;
+	angleInc:LREAL;		
+	targetPosInBase:ST_Frame; //endoscope position in base 
+	
+	//arm pose variables
+	leftSlaveArmIdx,rightSlaveArmIdx: INT;
+	tmpFrame,tmpFrame_1 : ST_Frame;
+	A2RealTime:ST_Frame;
+	TA1RelA2RealTime,TA3RelA2RealTime:ST_Frame;
+	TA1RelA2Exp,TA3RelA2Exp:ST_Frame;
+	A1ImagineAddRot,A3ImagineAddRot:ST_Frame;
+	imagineArmPosErr:ARRAY[1..2] OF ST_Frame;
+	
+	//arm inverse kinematic variables
+	i,j:INT;
+	oriJaco,invJaco :Mat3d;	
+	cmdVelScale :LREAL;
+	armDHJntVel :Vec3d;
+	m_reachMacroJntLimit :BOOL;	// flag if reach joint limit
+	DHJntCmdDeltaPos :Vec3d;
+	slaveSimDHJntPos :Vec6d;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//function exit
+IF isFinished THEN
 	RETURN;
 END_IF
 
-motionScale(i_slaveArm);
 
-cmdVelCalc(i_masterStatus);
 
-// filt command velocity
-m_cmdVelLocal[1] := m_cmdVelLpf[1].run(m_cmdVelLocal[1]);
-m_cmdVelLocal[2] := m_cmdVelLpf[2].run(m_cmdVelLocal[2]);
-m_cmdVelLocal[3] := m_cmdVelLpf[3].run(m_cmdVelLocal[3]);
-m_cmdWVelLocal := m_cmdVelLpf[4].run(m_cmdWVelLocal);
+//calculating master arm center point and relative angle
+masterArmRelPos(i_masterStatus:= i_masterStatus, o_centerPoint=> centerPoint, o_relAngle=> relAngleInit);
 
-// get linear velocity in base
-matMultiVec(i_slaveArm.simCartPose.m_rot, m_cmdVelLocal, m_cmdVel);
+//system parameters initial
+IF (m_firstIn=TRUE) THEN
+	m_firstIn:=FALSE;
+	m_relAngleLast:=relAngleInit;  m_relAngleStart:=relAngleInit;  m_startPosJ4:=i_slaveArm.simDHJntPos[4];
+	m_centerPntStart:=centerPoint;
+	
+	//slave arm position initial
+	leftSlaveArmIdx:=SlaveArmControl.m_masterRobotData.m_teleSlaveArmIdx[1];
+	rightSlaveArmIdx:=SlaveArmControl.m_masterRobotData.m_teleSlaveArmIdx[2];	
+	m_S1:=i_setupStatus.m_curEndPose[leftSlaveArmIdx];
+	m_A1:=SlaveArmControl.m_slaveRobot.m_slaveArms[leftSlaveArmIdx].curCartPose;
+	m_S2:=i_setupStatus.m_curEndPose[i_slaveArm.armIdx];
+	m_A2:=i_slaveArm.simCartPose;
+	m_S3:=i_setupStatus.m_curEndPose[rightSlaveArmIdx];
+	m_A3:=SlaveArmControl.m_slaveRobot.m_slaveArms[rightSlaveArmIdx].curCartPose;
+	
+	//T_A1_A2=INV(S2*A2)*S1*A1=INV(A2)*INV(S2)*S1*A1
+	armRelToEndoscope(i_setupArmPose_InstrumentArm:= m_S1, i_slaveArmPose_InstrumentArm:= m_A1, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= m_A2, o_slaveArmPoseRelToEndoscope=> m_TA1RelA2Real);
+	
+	//T_A3_A2=INV(S2*A2)*S3*A3=INV(A2)*INV(S2)*S3*A3
+	armRelToEndoscope(i_setupArmPose_InstrumentArm:= m_S3, i_slaveArmPose_InstrumentArm:= m_A3, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= m_A2, o_slaveArmPoseRelToEndoscope=> m_TA3RelA2Real);
+	
+	//A1=INV(S1)*S2*A2*T_A1_A2-----A1Imagine	
+	m_TA1RelA2Init:=i_masterStatus.m_curArmPose[1];
+	m_TA1RelA2Init.m_rot:=m_TA1RelA2Real.m_rot; //only change space posotion,reserve the pose
+	armAbsPosCal(i_setupArmPose_InstrumentArm:= m_S1, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= m_A2, i_slaveArmPoseRelToEndoscope:= m_TA1RelA2Init, o_slaveArmPose_InstrumentArm=> m_A1Imagine);
+	
+	//A1=INV(S1)*S2*A2*T_A1_A2-----A1Imagine_ForPose
+	m_TA1RelA2Init_ForPose:=m_TA1RelA2Real;
+	m_TA1RelA2Init_ForPose.m_rot:=g_eye3d;
+	armAbsPosCal(i_setupArmPose_InstrumentArm:= m_S1, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= m_A2, i_slaveArmPoseRelToEndoscope:= m_TA1RelA2Init_ForPose, o_slaveArmPose_InstrumentArm=> m_A1Imagine_ForPose);
+	
+	//A3=INV(S3)*S2*A2*T_A3_A2-----A3Imagine
+	m_TA3RelA2Init:=i_masterStatus.m_curArmPose[2];
+	m_TA3RelA2Init.m_rot:=m_TA3RelA2Real.m_rot; //only change space posotion,reserve the pose
+	armAbsPosCal(i_setupArmPose_InstrumentArm:= m_S3, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= m_A2, i_slaveArmPoseRelToEndoscope:= m_TA3RelA2Init, o_slaveArmPose_InstrumentArm=> m_A3Imagine);
+	
+	//T_A1_A2=INV(S2*A2)*S1*A1=INV(A2)*INV(S2)**S1*A1------A2=INV(S2)*S1*A1*INV(T_A1_A2)
+	tmpFrame :=invFrame(m_S2); //INV(S2)
+	tmpFrame := transform(tmpFrame, m_S1); //INV(S2)*S1
+	tmpFrame := transform(tmpFrame, m_A1Imagine); //INV(S2)*S1*A1
+	m_frontTransform:=tmpFrame; // front transform matrix=INV(S2)*S1*A1
+	
+	//T_A1_A2=INV(S2*A2)*S1*A1=INV(A2)*INV(S2)**S1*A1------A2=INV(S2)*S1*A1*INV(T_A1_A2)
+	tmpFrame :=invFrame(m_S2); //INV(S2)
+	tmpFrame := transform(tmpFrame, m_S1); //INV(S2)*S1
+	tmpFrame := transform(tmpFrame, m_A1); //INV(S2)*S1*A1
+	m_frontTransformActual:=tmpFrame; // front transform matrix=INV(S2)*S1*A1
+	
+	//T_A1_A2=INV(S2*A2)*S1*A1=INV(A2)*INV(S2)**S1*A1------A2=INV(S2)*S1*A1*INV(T_A1_A2)
+	tmpFrame :=invFrame(m_S2); //INV(S2)
+	tmpFrame := transform(tmpFrame, m_S1); //INV(S2)*S1
+	tmpFrame := transform(tmpFrame, m_A1Imagine_ForPose); //INV(S2)*S1*A1
+	m_frontTransform_ForPose:=tmpFrame; // front transform matrix=INV(S2)*S1*A1
+	
+	//other variables
+	m_endoPoseInitial:=m_A2;	
+	m_t:=0;
+END_IF
+m_t:=m_t+g_slaveArmCtrlCycleTime;
 
-// position jacobian and its inverse
+
+
+//for the relative angle，look for minimum motion
+relAngle:=MinDistSigCircle(m_relAngleLast,relAngleInit);
+m_relAngleLast:=relAngle;
+
+//J4 joint position incresement，master arm center position incresement
+angleInc:=relAngle-m_relAngleStart;
+vecSub(centerPoint,m_centerPntStart,posInc);
+
+
+
+
+//calculate imagine surgical instruments rotation transform----imagine that there is only rotation, no offset
+A2RealTime:=i_slaveArm.simCartPose;
+A2RealTime.m_rot:=m_A2.m_rot;
+armRelToEndoscope(i_setupArmPose_InstrumentArm:= m_S1, i_slaveArmPose_InstrumentArm:= m_A1Imagine, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= A2RealTime, o_slaveArmPoseRelToEndoscope=> TA1RelA2RealTime);
+armRelToEndoscope(i_setupArmPose_InstrumentArm:= m_S3, i_slaveArmPose_InstrumentArm:= m_A3Imagine, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= A2RealTime, o_slaveArmPoseRelToEndoscope=> TA3RelA2RealTime);
+
+//imagine that there is a rotation
+armRotatePos(i_leftArmRelEndoscope:= TA1RelA2RealTime, i_rightArmRelEndoscope:= TA3RelA2RealTime, i_leftMasterPose:= i_masterStatus.m_curArmPose[1], i_rightMasterPose:= i_masterStatus.m_curArmPose[2], o_leftArmRelEndoscopeAddRot=> TA1RelA2Exp, o_rightArmRelEndoscopeAddRot=> TA3RelA2Exp);
+
+//compare the master arm position and slave arm position---imagineArmPosErr
+vecSub(TA1RelA2Exp.m_pos,i_masterStatus.m_curArmPose[1].m_pos,imagineArmPosErr[1].m_pos);
+vecSub(TA3RelA2Exp.m_pos,i_masterStatus.m_curArmPose[2].m_pos,imagineArmPosErr[2].m_pos);	
+
+//calculate the A1ImagineAddRot and A3ImagineAddRot
+armAbsPosCal(i_setupArmPose_InstrumentArm:= m_S1, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= A2RealTime, i_slaveArmPoseRelToEndoscope:= TA1RelA2Exp, o_slaveArmPose_InstrumentArm=> A1ImagineAddRot);
+armAbsPosCal(i_setupArmPose_InstrumentArm:= m_S3, i_setupArmPose_endoscopeArm:= m_S2, i_slaveArmPose_endoscopeArm:= A2RealTime, i_slaveArmPoseRelToEndoscope:= TA3RelA2Exp, o_slaveArmPose_InstrumentArm=> A3ImagineAddRot);
+gvl_plot.A1ImagineAddRot:=A1ImagineAddRot;
+gvl_plot.A3ImagineAddRot:=A3ImagineAddRot;
+
+
+
+
+//simulation endoscope space position
+vecAdd(m_TA1RelA2Init.m_pos,posInc,m_TA1RelA2.m_pos);
+m_TA1RelA2.m_rot:=m_TA1RelA2Init.m_rot; //initial posture
+tmpFrame :=invFrame(m_TA1RelA2); //INV(T_A1_A2)
+targetPosInBase:=transform(m_frontTransform, tmpFrame); //INV(S2)*S1*A1*INV(T_A1_A2)
+gvl_Plot.endoPose.m_rot:=m_endoPoseInitial.m_rot;
+gvl_Plot.endoPose.m_pos:=targetPosInBase.m_pos;
+
+
+
+
+//T_A1_A2=INV(S2*A2)*S1*A1=INV(A2)*INV(S2)*S1*A1------A2=INV(S2)*S1*A1*INV(T_A1_A2)
+vecSelfMultiNum(posInc,m_endoMotionScale);
+vecAdd(m_TA1RelA2Init_ForPose.m_pos,posInc,m_TA1RelA2.m_pos);
+m_TA1RelA2.m_rot:=m_TA1RelA2Init_ForPose.m_rot; //initial posture, TA1RelA2Init.m_rot--->TA1RelA2Real.m_rot--->TA1RelA2Init_ForPose.m_rot
+tmpFrame :=invFrame(m_TA1RelA2); //INV(T_A1_A2)
+targetPosInBase:=transform(m_frontTransform_ForPose, tmpFrame); //INV(S2)*S1*A1*INV(T_A1_A2)
+
+
+
+//compute position error and safety check
+vecSub(targetPosInBase.m_pos,i_slaveArm.simCartPose.m_pos,armPosErr);
+IF norm(armPosErr) > m_maxPosTrackErr THEN
+	m_isFinished := TRUE;
+END_IF 
+
+//command space velocity value---m_slaveCmdVel=kp*armPosErr
+vecMultiNum(armPosErr,kp,m_slaveCmdVel);
+
+//transform to joint velocity---V=J*qd--->qd=inv(J)*V
 FOR i:=1 TO 3 DO
 	FOR j:=1 TO 3 DO
-		posJaco[i,j]:=i_slaveArm.simJaco[i,j];
-	END_FOR 
+		oriJaco[i,j]:=i_slaveArm.simJaco[i,j];
+	END_FOR
 END_FOR
-invMat3(posJaco, posJacoInv);
+invMat3(oriJaco, invJaco);
+matMultiVec(invJaco, m_slaveCmdVel, armDHJntVel);
 
-// command joint velocity of joint 1-3
-matMultiVec(posJacoInv, m_cmdVel, armDHJntVel);
+
+
 
 // limit DH joints velocity 
 cmdVelScale := 1;
@@ -94,85 +432,57 @@ END_FOR
 vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
 
 // limit arm joint position
+m_reachMacroJntLimit :=FALSE;
 FOR i:=1 TO 3 DO
 	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
 		(armDHJntVel[i] <0 and	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
 		armDHJntVel[i]:=0;
+		m_reachMacroJntLimit:=TRUE;
 	END_IF
 END_FOR
 
-// joint 3 up limit to remote center
-jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis;
-IF (armDHJntVel[3] > 0 AND  i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
-	armDHJntVel[3]:=0;
-END_IF
+// integrate command DH joint position
+FOR i:=1 TO 6 DO
+	IF (i<=3) THEN
+		m_simDHJointVel[i]:=armDHJntVel[i];
+	ELSE
+		m_simDHJointVel[i]:=0;
+	END_IF	
+END_FOR
+vecMultiNum(m_simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
+slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
+vecAdd(slaveSimDHJntPos, DHJntCmdDeltaPos, m_simDHJntPos);
 
-// limit rotate joint veloicyt
-m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLocal, GVL_SlaveMotorParameters.g_maxJntVel[8]);
+//Joint 4 needed to be handled specially
+m_simDHJntPos[4]:=m_startPosJ4+angleInc;
+m_simDHJntPos[5]:=i_slaveArm.curDHJntPos[5];
+m_simDHJntPos[6]:=i_slaveArm.curDHJntPos[6];
 
-// set command joint velocity
-m_cmdJntVel[1]:= armDHJntVel[1];
-m_cmdJntVel[2]:= armDHJntVel[2];
-m_cmdJntVel[3]:= armDHJntVel[3];
-m_cmdJntVel[8]:= -m_cmdWVelLocal/i_slaveArm.instrument.m_endoscopeRotateReduction;
 
-// integral to command joint position
-m_cmdJntPos[1]:=m_simJntPos[1]+m_cmdJntVel[1]*g_slaveArmCtrlCycleTime;
-m_cmdJntPos[2]:=m_simJntPos[2]+m_cmdJntVel[2]*g_slaveArmCtrlCycleTime;
-m_cmdJntPos[3]:=m_simJntPos[3]+m_cmdJntVel[3]*g_slaveArmCtrlCycleTime;
-m_cmdJntPos[8]:=m_simJntPos[8]+m_cmdJntVel[8]*g_slaveArmCtrlCycleTime;
 
-m_simJntPos := m_cmdJntPos;
 
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="cmdVelCalc" Id="{8dff4bd5-a9d3-4558-a30c-87d4912e2ece}">
-      <Declaration><![CDATA[METHOD PROTECTED cmdVelCalc : BOOL
-VAR_IN_OUT CONSTANT
-	i_masterStatus :ST_MasterStatus;
-END_VAR
+// calculate target motor joint position/velocity from DH joint position
+i_slaveArm.instrument.instruIK(m_simDHJntPos,0, o_jntPos=>m_simJntPos);
 
-VAR
-	leftVel, rightVel :Vec3d;
-	i:INT;
-	radiusVec :Vec3d;
-	radiusLength :LREAL;
-	leftWVel, rightWVel :Vec3d;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[FOR i :=1 TO 3 DO 
-	leftVel[i] := i_masterStatus.m_curArmTwist[1][i];
-	rightVel[i] := i_masterStatus.m_curArmTwist[2][i];
+// filt command joint position
+FOR i:=1 TO g_sJntNum DO 
+	m_cmdJntPos[i] := m_cmdJntPosLpf[i].run(m_simJntPos[i]);
 END_FOR
 
-// master linear velocity
-vecAdd(leftVel, rightVel , m_cmdVelLocal);
-vecSelfMultiNum(m_cmdVelLocal, 0.5);
-
-// motion scale
-vecSelfMultiNum(m_cmdVelLocal, m_MSMotionScale* m_singMotionScale);
+// compute command joint velocity
+vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+m_lastCmdJntPos:=m_cmdJntPos;
 
 
-// radius vector from right arm to left arm
-vecSub(i_masterStatus.m_curArmPose[1].m_pos, i_masterStatus.m_curArmPose[2].m_pos, radiusVec);
-vecSelfMultiNum(radiusVec, 0.5);
-radiusVec[3]:=0;
-radiusLength := norm(radiusVec);
-normalize(radiusVec);
 
-// left rotate velocity
-leftVel[3]:= 0;
-leftWVel := cross(radiusVec, leftVel);
 
-// right rotate velocity
-// radius vector from left arm to right arm
-vecSelfMultiNum(radiusVec, -1.0);
-rightVel[3]:= 0;
-rightWVel := cross(radiusVec, rightVel);
-
-m_cmdWVelLocal:= (leftWVel[3] + rightWVel[3])/(2.0*radiusLength);
-
+//Error output
+FOR i:=1 TO 2 BY 1 DO
+	FOR j:=1 TO 3 BY 1 DO
+		gvl_plot.masterSlaveErr[i,j]:=imagineArmPosErr[i].m_pos[j];
+	END_FOR
+END_FOR
 
 
 ]]></ST>
@@ -192,13 +502,19 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+
 m_simJntPos :=m_cmdJntPos;
 m_lastCmdJntPos :=m_cmdJntPos;
-m_jntOPMode := g_slaveAllPosTrqMode;
+m_jntOPMode[1] := DriverOPMode_PosTrq;
+m_jntOPMode[2] := DriverOPMode_PosTrq;
+m_jntOPMode[3] := DriverOPMode_PosTrq;
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+
+m_firstIn :=TRUE;
 
 // init filter
-FOR i:=1 TO 4 DO
-	m_cmdVelLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+FOR i:=1 TO g_sJntNum DO
+	m_cmdJntPosLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 END_FOR
 
 // update commands to arm
@@ -207,112 +523,167 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="motionScale" Id="{57c57b39-44ad-430e-93ea-c178c23fdca0}">
-      <Declaration><![CDATA[METHOD PROTECTED motionScale : LREAL
-VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
+    <Method Name="masterArmRelPos" Id="{ed05a9f0-be5d-4730-a9b8-2448aa3855f1}">
+      <Declaration><![CDATA[METHOD masterArmRelPos : BOOL
+VAR_INPUT CONSTANT
+	i_masterStatus :ST_MasterStatus;
 END_VAR
+
+VAR_OUTPUT
+	o_centerPoint:Vec3d;
+	o_relAngle:LREAL;
+END_VAR
+
 VAR
-	RCDis :LREAL;
+	leftArmPos,rightArmPos,sumPos,subPos:Vec3d;	
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[RCDis := ABS(i_slaveArm.curJntPos[3] - i_slaveArm.instrument.kinematicParameters.m_rodLength);
+        <ST><![CDATA[
+//update master arm space position
+leftArmPos:=i_masterStatus.m_curArmPose[1].m_pos;
+rightArmPos:=i_masterStatus.m_curArmPose[2].m_pos;
 
-IF RCDis < GVL_SlaveArmKinematic.g_minScopeRCDis THEN
-	motionScale := m_minSingMotionScale;
-ELSIF RCDis > m_RCDisThres THEN
-	motionScale :=1 ;
-ELSE
-	motionScale := m_minSingMotionScale + (1- m_minSingMotionScale) * (RCDis - GVL_SlaveArmKinematic.g_minScopeRCDis)/(m_RCDisThres - GVL_SlaveArmKinematic.g_minScopeRCDis);
-END_IF]]></ST>
+//calculating center point
+vecAdd(leftArmPos,rightArmPos,sumPos);
+vecMultiNum(sumPos,0.5,o_centerPoint);
+
+//calculating relative angle
+vecSub(rightArmPos,leftArmPos,subPos);
+o_relAngle:=atan2(-subPos[2],subPos[1]);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveCtrlEndoscope">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
-      <LineId Id="459" Count="2" />
-      <LineId Id="1062" Count="0" />
-      <LineId Id="462" Count="0" />
-      <LineId Id="1064" Count="0" />
-      <LineId Id="1063" Count="0" />
-      <LineId Id="1085" Count="0" />
-      <LineId Id="1084" Count="0" />
-      <LineId Id="1086" Count="3" />
-      <LineId Id="1070" Count="0" />
-      <LineId Id="1069" Count="0" />
-      <LineId Id="1071" Count="0" />
-      <LineId Id="1073" Count="0" />
-      <LineId Id="1072" Count="0" />
-      <LineId Id="1074" Count="1" />
-      <LineId Id="1081" Count="0" />
-      <LineId Id="1080" Count="0" />
-      <LineId Id="1076" Count="0" />
-      <LineId Id="1082" Count="0" />
-      <LineId Id="1092" Count="0" />
-      <LineId Id="1091" Count="0" />
-      <LineId Id="1093" Count="0" />
-      <LineId Id="1095" Count="0" />
-      <LineId Id="1119" Count="7" />
-      <LineId Id="1128" Count="3" />
-      <LineId Id="1133" Count="4" />
-      <LineId Id="1139" Count="1" />
-      <LineId Id="1142" Count="0" />
-      <LineId Id="1151" Count="0" />
-      <LineId Id="1150" Count="0" />
-      <LineId Id="1153" Count="1" />
-      <LineId Id="1083" Count="0" />
-      <LineId Id="1155" Count="2" />
-      <LineId Id="1159" Count="0" />
-      <LineId Id="1161" Count="0" />
-      <LineId Id="1160" Count="0" />
-      <LineId Id="1162" Count="3" />
-      <LineId Id="1167" Count="0" />
-      <LineId Id="1166" Count="0" />
-      <LineId Id="1066" Count="0" />
-      <LineId Id="206" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveCtrlEndoscope.cmdVelCalc">
-      <LineId Id="5" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="18" Count="0" />
+    <LineIds Name="FB_SlaveCtrlEndoscope.armAbsPosCal">
       <LineId Id="17" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="54" Count="0" />
+      <LineId Id="49" Count="0" />
       <LineId Id="51" Count="0" />
       <LineId Id="50" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="40" Count="2" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="33" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="27" Count="2" />
       <LineId Id="19" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.armRelToEndoscope">
+      <LineId Id="9" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="51" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.armRotatePos">
+      <LineId Id="110" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="11" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="33" Count="2" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="61" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="31" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
+      <LineId Id="1576" Count="16" />
+      <LineId Id="1600" Count="9" />
+      <LineId Id="1611" Count="0" />
+      <LineId Id="2030" Count="1" />
+      <LineId Id="1619" Count="0" />
+      <LineId Id="2032" Count="0" />
+      <LineId Id="1626" Count="3" />
+      <LineId Id="2033" Count="0" />
+      <LineId Id="1954" Count="0" />
+      <LineId Id="1948" Count="2" />
+      <LineId Id="2034" Count="0" />
+      <LineId Id="1635" Count="3" />
+      <LineId Id="2035" Count="0" />
+      <LineId Id="1644" Count="6" />
+      <LineId Id="1886" Count="3" />
+      <LineId Id="1885" Count="0" />
+      <LineId Id="1890" Count="0" />
+      <LineId Id="1971" Count="4" />
+      <LineId Id="1969" Count="0" />
+      <LineId Id="1652" Count="0" />
+      <LineId Id="1655" Count="0" />
+      <LineId Id="1659" Count="8" />
+      <LineId Id="1670" Count="2" />
+      <LineId Id="1675" Count="0" />
+      <LineId Id="1677" Count="0" />
+      <LineId Id="1826" Count="0" />
+      <LineId Id="1825" Count="0" />
+      <LineId Id="1678" Count="3" />
+      <LineId Id="2025" Count="0" />
+      <LineId Id="2027" Count="0" />
+      <LineId Id="1684" Count="1" />
+      <LineId Id="2029" Count="0" />
+      <LineId Id="1820" Count="0" />
+      <LineId Id="1823" Count="1" />
+      <LineId Id="1689" Count="0" />
+      <LineId Id="1822" Count="0" />
+      <LineId Id="1690" Count="0" />
+      <LineId Id="2023" Count="0" />
+      <LineId Id="2022" Count="0" />
+      <LineId Id="1693" Count="1" />
+      <LineId Id="1833" Count="0" />
+      <LineId Id="1827" Count="0" />
+      <LineId Id="1696" Count="10" />
+      <LineId Id="2049" Count="0" />
+      <LineId Id="1955" Count="0" />
+      <LineId Id="1960" Count="5" />
+      <LineId Id="1956" Count="1" />
+      <LineId Id="1716" Count="5" />
+      <LineId Id="1725" Count="54" />
+      <LineId Id="1783" Count="10" />
+      <LineId Id="2050" Count="1" />
+      <LineId Id="1818" Count="0" />
+      <LineId Id="1877" Count="4" />
+      <LineId Id="1819" Count="0" />
+      <LineId Id="1882" Count="1" />
+      <LineId Id="399" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.init">
       <LineId Id="13" Count="0" />
+      <LineId Id="161" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="114" Count="0" />
       <LineId Id="19" Count="0" />
-      <LineId Id="165" Count="0" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="77" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="74" Count="1" />
@@ -321,14 +692,11 @@ END_IF]]></ST>
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlEndoscope.motionScale">
-      <LineId Id="5" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="22" Count="1" />
-      <LineId Id="18" Count="0" />
+    <LineIds Name="FB_SlaveCtrlEndoscope.masterArmRelPos">
+      <LineId Id="21" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="35" Count="3" />
     </LineIds>
   </POU>
 </TcPlcObject>

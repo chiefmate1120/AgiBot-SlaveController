@@ -115,6 +115,9 @@
     <Compile Include="AgiMaths\MatrixLib\vecSub.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MinDistSigCircle.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -379,6 +382,9 @@
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlDisable.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlEndoscope.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInstruInvasion.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -395,9 +401,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlPackage.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlEndoscope.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlCart.TcPOU">
@@ -557,6 +560,10 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\GVL_MathDefine.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\GVL_Plot.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

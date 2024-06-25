@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="SlaveArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SlaveArmControl
 VAR
@@ -112,6 +112,8 @@ VAR
 	slavePoseInCart, slavePoseInScope:ST_Frame;
 	tmpFrame :ST_Frame;
 	i :INT;
+	endoFlag:BOOL;
+	slaveFrame :ST_Frame;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -142,6 +144,30 @@ FOR i:= 1 TO g_sArmNum DO
 END_FOR
 
 
+endoFlag:=FALSE;
+FOR i:= 1 TO g_sArmNum DO
+	IF ( slaveStatus.m_armState[i]=SlaveArmState_EndoScope) THEN
+		endoFlag:=TRUE;
+	END_IF
+END_FOR
+
+IF (endoFlag=TRUE) THEN
+	FOR i:= 1 TO g_sArmNum DO
+		
+		IF (i=SlaveArmControl.m_masterRobotData.m_teleSlaveArmIdx[1]) THEN			
+			slaveFrame:=gvl_Plot.A1ImagineAddRot;
+		ELSIF (i=SlaveArmControl.m_masterRobotData.m_teleSlaveArmIdx[2]) THEN			
+			slaveFrame:=gvl_Plot.A3ImagineAddRot;
+		ELSE
+			slaveFrame:=slaveStatus.m_curArmPose[i];
+		END_IF
+		slavePoseInCart := transform(setupStatus.m_curEndPose[i], slaveFrame);		
+				
+		tmpFrame :=invFrame(gvl_Plot.endoRelCar);
+		slavePoseInScope := transform(tmpFrame, slavePoseInCart);
+		slaveOutputData.m_curArmPose[i].m_pos :=slavePoseInScope.m_pos;		
+	END_FOR		
+END_IF
 
 ]]></ST>
       </Implementation>
@@ -247,7 +273,7 @@ END_IF
       <LineId Id="50" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="17" Count="0" />
-      <LineId Id="13" Count="0" />
+      <LineId Id="146" Count="24" />
       <LineId Id="10" Count="0" />
       <LineId Id="8" Count="0" />
     </LineIds>

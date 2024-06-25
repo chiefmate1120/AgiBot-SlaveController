@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -240,6 +240,10 @@ FOR i:=1 TO g_sArmNum DO
 		m_endoscopeMounted := TRUE;
 		m_endoscopePose := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], m_slaveArms[i].curCartPose);
 		m_endoScopeType := m_slaveArms[i].instrument.curScopeType;
+		
+		IF (m_slaveArmState[i]=SlaveArmState_EndoScope) THEN			
+			gvl_Plot.endoRelCar := transform(i_slaveInputDataPool.m_setupStatus.m_curEndPose[i], gvl_Plot.endoPose);
+		END_IF
 		
 		//set endoscope  posture from UI data
 		updateScopeUIInfo();
@@ -729,6 +733,8 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="127" Count="0" />
       <LineId Id="130" Count="2" />
       <LineId Id="180" Count="1" />
+      <LineId Id="191" Count="1" />
+      <LineId Id="188" Count="1" />
       <LineId Id="171" Count="0" />
       <LineId Id="173" Count="0" />
       <LineId Id="128" Count="1" />
