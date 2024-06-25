@@ -6,7 +6,7 @@
     <Node>
       <Title>cartData</Title>
       <Expanded>True</Expanded>
-      <FileName>D:\资料\TwinCAT程序\NewSofeWare\AgiBot-SlaveController-Modify6.22\Scope-SlaveController\cartData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\AgiBot-SlaveController\Scope-SlaveController\cartData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1441,7 +1441,7 @@
     <Node>
       <Title>SetupGravityCaliData</Title>
       <Expanded>True</Expanded>
-      <FileName>D:\资料\TwinCAT程序\NewSofeWare\AgiBot-SlaveController-Modify6.22\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1949,7 +1949,7 @@
     <Node>
       <Title>SlaveGravityCaliData</Title>
       <Expanded>True</Expanded>
-      <FileName>D:\资料\TwinCAT程序\NewSofeWare\AgiBot-SlaveController-Modify6.22\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -2457,7 +2457,7 @@
     <Node>
       <Title>SlaveJointData</Title>
       <Expanded>True</Expanded>
-      <FileName>D:\资料\TwinCAT程序\NewSofeWare\AgiBot-SlaveController-Modify6.22\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
