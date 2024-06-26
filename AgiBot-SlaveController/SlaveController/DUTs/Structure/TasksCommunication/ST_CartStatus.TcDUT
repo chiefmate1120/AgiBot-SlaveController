@@ -5,6 +5,9 @@
 // Input to slave arm control task  
 TYPE ST_CartStatus :
 STRUCT
+	m_CartState :ARRAY[1..g_cartJntNum] OF E_CartJointState:=[g_cartJntNum(CartJointState_Error)];
+	
+	m_asepticDeployCompletedFlag : BOOL;
 	m_inMotion : BOOL := false;
 END_STRUCT
 END_TYPE

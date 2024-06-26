@@ -5,7 +5,8 @@
 (
 	DriverCtrlWord_INIT := 6,
 	DriverCtrlWord_PREOP := 7,
-	DriverCtrlWord_OP := 15
+	DriverCtrlWord_OP := 15,
+	DriverCtrlWord_FaultReset := 16#8F
 );
 END_TYPE
 ]]></Declaration>

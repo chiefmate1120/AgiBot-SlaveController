@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SystemParameters" Id="{6ebbff17-e303-4344-870e-d2871229e24f}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
 	
@@ -9,6 +9,7 @@
 	g_sJntNum :INT := 8;
 	g_setupJntNum :INT :=5;
 	g_cartDofs :INT :=6;
+	g_cartJntNum:INT :=8;
 	
 	
 	

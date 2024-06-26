@@ -226,15 +226,130 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{BE347C9B-50A4-E901-71DE-2E1334C83CC4}" AutoDeleteType="true">E_CartJointState</Name>
+			<BitSize>16</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_Error]]></Text>
+				<Enum>1</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_Init]]></Text>
+				<Enum>2</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_SelfCheck]]></Text>
+				<Enum>3</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_Standby]]></Text>
+				<Enum>4</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_Ready]]></Text>
+				<Enum>5</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_InSurgery]]></Text>
+				<Enum>6</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_SteadyFootDeployment]]></Text>
+				<Enum>7</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_Movement]]></Text>
+				<Enum>8</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_HangAdjust]]></Text>
+				<Enum>9</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_AsepticDeployment]]></Text>
+				<Enum>10</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_RotaOverhang]]></Text>
+				<Enum>11</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_SlowStop]]></Text>
+				<Enum>12</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[CartJointState_totalNum]]></Text>
+				<Enum>12</Enum>
+			</EnumInfo>
+			<Properties>
+				<Property>
+					<Name>textlistenumeration</Name>
+				</Property>
+				<Property>
+					<Name>generate_implicit_init_function</Name>
+				</Property>
+			</Properties>
+		</DataType>
+		<DataType>
+			<Name GUID="{A490577C-E5E4-E6D0-819A-E0CD778B3AC4}" AutoDeleteType="true">ST_CartStatus</Name>
 			<Comment><![CDATA[ Output from cart control task
  Input to slave arm control task  ]]></Comment>
-			<BitSize>8</BitSize>
+			<BitSize>144</BitSize>
+			<SubItem>
+				<Name>m_CartState</Name>
+				<Type GUID="{BE347C9B-50A4-E901-71DE-2E1334C83CC4}">E_CartJointState</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>8</Elements>
+				</ArrayInfo>
+				<BitSize>128</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<SubItem>
+						<Name>[1]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[2]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[3]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[4]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[5]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[6]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[7]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[8]</Name>
+						<EnumText>E_CartJointState.CartJointState_Error</EnumText>
+					</SubItem>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_asepticDeployCompletedFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
 			<SubItem>
 				<Name>m_inMotion</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>0</BitOffs>
+				<BitOffs>136</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -1331,6 +1446,65 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
+			<Name GUID="{A3BA11EF-A6AB-4436-B70D-BEFDA0EC6E7A}" AutoDeleteType="true">Vec2i</Name>
+			<BitSize>32</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>2</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{7EBDD008-A9A8-B259-6DF4-ACAC21313C21}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..4] OF UDINT</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000008}">UDINT</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>4</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{3D778266-9CB6-A2BC-B908-FC747FC8D738}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..2] OF BOOL</Name>
+			<BitSize>16</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>2</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}" AutoDeleteType="true">ST_CartMotorOutput</Name>
+			<BitSize>96</BitSize>
+			<SubItem>
+				<Name>m_cmdVelMz</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<Comment><![CDATA[MingZhi drive ues]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdAccMz</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdVelMzVelMode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
+			</SubItem>
+		</DataType>
+		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-00200000000C}" IecBaseType="true" BitType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..11] OF BIT</Name>
 			<BitSize>12</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000010}">BIT</BaseType>
@@ -1619,14 +1793,14 @@
 		</DataType>
 	</DataTypes>
 	<ImageDatas>
-		<ImageData Id="1000">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
-		<ImageData Id="1001">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
-		<ImageData Id="1002">424de6000000000000007600000028000000100000000e000000010004000000000070000000120b0000120b0000100000001000000000000000000080000080000000808000800000008000800080800000c0c0c000808080000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00dddddd88888888dddddddd77777778dddddddd77888778dddddddd77888778dddddddd77888778dddddddd77777778dddddddd77888778dd9b9b9b77888778ddb9b9b977888778dd9b9b9b77777778ddb9b9b9777a7778dd9b9b9b777a7778ddb9b9b9777a7778dd9b9b9b77777778dd</ImageData>
-		<ImageData Id="1003">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff</ImageData>
-		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a002000000000000000000000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c00000ffc0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c00000ffc0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c000ff00c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff</ImageData>
-		<ImageData Id="1005">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
-		<ImageData Id="1006">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
-		<ImageData Id="1007">424dd6020000000000003600000028000000100000000e000000010018000000000000000000c40e0000c40e0000000000000000000000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808000d8ff00d8ff00000000000000000000d8ff00d8ff00000000000000000000d8ff00d8ff80808080808080808080808000000000d8ff00d8ff00000000000000d8ff00d8ff00000000000000d8ff00d8ff00000080808080808080808080808000000000000000d8ff00d8ff00000000d8ff00d8ff00000000d8ff00d8ff00000000000080808080808080808080808000000000000000000000d8ff00d8ff00d8ff00d8ff00d8ff00d8ff0000000000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff00000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808080808080808080808080808080808000d8ff00d8ff80808080808080808080808080808080808080808080808080808080808080808080808080808080808000d8ff00d8ff808080808080808080808080808080808080808080</ImageData>
+		<ImageData Id="1000">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000bfff00bfffc0c0c0808080c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1001">424de6000000000000007600000028000000100000000e000000010004000000000070000000120b0000120b0000100000001000000000000000000080000080000000808000800000008000800080800000c0c0c000808080000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00dddddd88888888dddddddd77777778dddddddd77888778dddddddd77888778dddddddd77888778dddddddd77777778dddddddd77888778dd9b9b9b77888778ddb9b9b977888778dd9b9b9b77777778ddb9b9b9777a7778dd9b9b9b777a7778ddb9b9b9777a7778dd9b9b9b77777778dd</ImageData>
+		<ImageData Id="1002">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1003">424dd6020000000000003600000028000000100000000e0000000100180000000000a002000000000000000000000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080808080808080c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c00000ffc0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c00000ffc0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c000ff00c0c0c0c0c0c0c0c0c0808080ff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ff</ImageData>
+		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ff0000ff0000ff0000ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1005">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1006">424dd6020000000000003600000028000000100000000e000000010018000000000000000000c40e0000c40e0000000000000000000000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808000d8ff00d8ff00000000000000000000d8ff00d8ff00000000000000000000d8ff00d8ff80808080808080808080808000000000d8ff00d8ff00000000000000d8ff00d8ff00000000000000d8ff00d8ff00000080808080808080808080808000000000000000d8ff00d8ff00000000d8ff00d8ff00000000d8ff00d8ff00000000000080808080808080808080808000000000000000000000d8ff00d8ff00d8ff00d8ff00d8ff00d8ff0000000000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff00000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808080808080808080808080808080808000d8ff00d8ff80808080808080808080808080808080808080808080808080808080808080808080808080808080808000d8ff00d8ff808080808080808080808080808080808080808080</ImageData>
+		<ImageData Id="1007">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
 	</ImageDatas>
 	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
@@ -1661,7 +1835,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{E2B7108E-359A-6B68-D6D8-DF9BE690054E}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{B110301D-6997-DC6B-DAE2-B708118E2A81}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1679,7 +1853,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
+							<Type GUID="{A490577C-E5E4-E6D0-819A-E0CD778B3AC4}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
@@ -2207,7 +2381,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
+							<Type GUID="{A490577C-E5E4-E6D0-819A-E0CD778B3AC4}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
@@ -2346,17 +2520,190 @@
 					<Vars VarGrpType="1" ContextId="4" AreaNo="64">
 						<Name>TaskCartControl Inputs</Name>
 						<Var>
-							<Name>CartControl.m_slaveCart.m_testInput</Name>
-							<Comment><![CDATA[  TEST IO , just for IO link to enable ethercat ]]></Comment>
-							<Type>UINT</Type>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_driveForce</Name>
+							<Comment><![CDATA[Driving force of the car io]]></Comment>
+							<Type GUID="{A3BA11EF-A6AB-4436-B70D-BEFDA0EC6E7A}">Vec2i</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_stabilizFootSensorLeft</Name>
+							<Comment><![CDATA[stabilizing foot sensor  (normally-closed contact)]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_stabilizFootSensorRight</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_stabilizFootSensorAuto</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_stabilizFootSensorManual</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_trocarIO</Name>
+							<Comment><![CDATA[Trocar IO check]]></Comment>
+							<Type GUID="{7EBDD008-A9A8-B259-6DF4-ACAC21313C21}">ARRAY [1..4] OF UDINT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO</Name>
+							<Comment><![CDATA[car overhang rotation signal is in the arm]]></Comment>
+							<Type GUID="{7EBDD008-A9A8-B259-6DF4-ACAC21313C21}">ARRAY [1..4] OF UDINT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_carHandChassisDriveUnlock</Name>
+							<Comment><![CDATA[ input arm button ]]></Comment>
+							<Type GUID="{3D778266-9CB6-A2BC-B908-FC747FC8D738}">ARRAY [1..2] OF BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartDataPool.m_cartStatus</Name>
+							<Comment><![CDATA[ cart information, import from other task]]></Comment>
+							<Type GUID="{A490577C-E5E4-E6D0-819A-E0CD778B3AC4}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
+							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
+							<Type GUID="{4E6BEB59-9532-E943-4366-69F44E1C3BB3}">ST_SafetyData</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
+							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
+							<Type GUID="{49EBA7DF-7554-4C35-5C0E-794CBE24B941}">ST_SlaveStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">
 						<Name>TaskCartControl Outputs</Name>
 						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_openHorizonLaser</Name>
+							<Comment><![CDATA[open laser io]]></Comment>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_openCrossLaser</Name>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_screwBreak</Name>
+							<Comment><![CDATA[output screw break IO ]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs</Name>
+							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_cartMotorOutput</Name>
+							<Comment><![CDATA[Cart motor output IO]]></Comment>
+							<Type GUID="{3488FE43-87AD-F9AA-B7C1-5DBA43E52F65}">ST_CartMotorOutput</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{A15A00AE-7ABB-C68A-6E99-3B51914A53DF}">ST_CartStatus</Type>
+							<Type GUID="{A490577C-E5E4-E6D0-819A-E0CD778B3AC4}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<UnrestoredVarLinks ImportTime="2023-12-15T10:38:09">
@@ -2436,6 +2783,13 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-06-25T23:21:05">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
+								<Link VarA="CartControl.m_slaveCart.m_testInput" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="TxPdoMappingCspCsv^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id>0</Id>
@@ -2507,820 +2861,6 @@
 					<Esl SyncSlaveProtocolPort="-1"/>
 				</Ethernet>
 			</Device>
-			<Device Id="6" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="169.254.186.39.7.1" RemoteName="Cart" InfoImageId="7">
-				<Name>Cart</Name>
-				<AddressInfo>
-					<Pnp>
-						<DeviceDesc>? (TwinCAT-Intel PCI Ethernet Adapter (Gigabit</DeviceDesc>
-						<DeviceName>\DEVICE\{BDB016C5-40A5-402A-BDA0-DA850846E886}</DeviceName>
-						<DeviceData>68eda4656515</DeviceData>
-					</Pnp>
-				</AddressInfo>
-				<Image Id="4" AddrType="9" ImageType="3">
-					<Name>Image</Name>
-				</Image>
-				<Box Id="4" BoxType="9099">
-					<Name>Drive 4 (iPOS8015 BZ-CAT)</Name>
-					<ImageId>38</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0480" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="15" EoeType="1" FoeType="1" VendorId="#x000001a3" ProductCode="#x015f5a2d" RevisionNo="#x41303043" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="iPOS8015 BZ-CAT" Desc="iPOS8015 BZ-CAT" PortABoxInfo="#x00ffffff">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>001480002200010002000000000000008000001422010000</SyncMan>
-						<SyncMan>001806006400010003000000000000000600001864010000</SyncMan>
-						<SyncMan>001c10002000010004000000000000001000001c20010000</SyncMan>
-						<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001c00010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
-						<BootStrapData>0010800000148000</BootStrapData>
-						<DcData>3003000000000000000000000000000001000000000000000000000000000000</DcData>
-						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000030030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>467265650000000000000000000000004672656500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="Transmit PDO 1 mapping parameters" Index="#x1a00" Flags="#x0000" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque (current) actual value" Index="#x6077">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 2 mapping parameters" Index="#x1a01" Flags="#x0000" SyncMan="3">
-							<Entry Name="Following error actual value" Index="#x60f4">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Digital inputs" Index="#x60fd">
-								<Type>UDINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 3 mapping parameters" Index="#x1a02" Flags="#x0000">
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 4 mapping parameters" Index="#x1a03" Flags="#x0000">
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 1 mapping parameters" Index="#x1600" InOut="1" Flags="#x0000" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 2 mapping parameters" Index="#x1601" InOut="1" Flags="#x0000">
-							<Entry Name="Digital outputs - Physical outputs" Index="#x60fe" Sub="#x01">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="Digital outputs - Bit mask" Index="#x60fe" Sub="#x02">
-								<Type>UDINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 3 mapping parameters" Index="#x1602" InOut="1" Flags="#x0000">
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 4 mapping parameters" Index="#x1603" InOut="1" Flags="#x0000">
-							<Entry Name="Profile velocity" Index="#x6081">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Profile acceleration" Index="#x6083">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<CoeProfile ProfileNo="402"/>
-					</EtherCAT>
-				</Box>
-				<Box Id="5" BoxType="9099">
-					<Name>Drive 5 (iPOS4850 BX-CAT)</Name>
-					<ImageId>38</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0480" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="15" EoeType="1" FoeType="1" VendorId="#x000001a3" ProductCode="#x01bf1661" RevisionNo="#x41303044" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="iPOS4850 BX-CAT" Desc="iPOS4850 BX-CAT" PortABoxInfo="#x01000004">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>001480002200010002000000000000008000001422010000</SyncMan>
-						<SyncMan>001806006400010003000000000000000600001864010000</SyncMan>
-						<SyncMan>001c10002000010004000000000000001000001c20010000</SyncMan>
-						<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001c00010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
-						<BootStrapData>0010800000148000</BootStrapData>
-						<DcData>3003000000000000000000000000000001000000000000000000000000000000</DcData>
-						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000030030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>467265650000000000000000000000004672656500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="Transmit PDO 1 mapping parameters" Index="#x1a00" Flags="#x0000" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque (current) actual value" Index="#x6077">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 2 mapping parameters" Index="#x1a01" Flags="#x0000" SyncMan="3">
-							<Entry Name="Following error actual value" Index="#x60f4">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Digital inputs" Index="#x60fd">
-								<Type>UDINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 3 mapping parameters" Index="#x1a02" Flags="#x0000">
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 4 mapping parameters" Index="#x1a03" Flags="#x0000">
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 1 mapping parameters" Index="#x1600" InOut="1" Flags="#x0000" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 2 mapping parameters" Index="#x1601" InOut="1" Flags="#x0000">
-							<Entry Name="Digital outputs - Physical outputs" Index="#x60fe" Sub="#x01">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="Digital outputs - Bit mask" Index="#x60fe" Sub="#x02">
-								<Type>UDINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 3 mapping parameters" Index="#x1602" InOut="1" Flags="#x0000">
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 4 mapping parameters" Index="#x1603" InOut="1" Flags="#x0000">
-							<Entry Name="Profile velocity" Index="#x6081">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Profile acceleration" Index="#x6083">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<CoeProfile ProfileNo="402"/>
-					</EtherCAT>
-				</Box>
-				<Box Id="6" BoxType="9099">
-					<Name>Drive 6 (iPOS4850 BX-CAT)</Name>
-					<ImageId>38</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0480" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="15" EoeType="1" FoeType="1" VendorId="#x000001a3" ProductCode="#x01bf1661" RevisionNo="#x41303044" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="iPOS4850 BX-CAT" Desc="iPOS4850 BX-CAT" PortABoxInfo="#x01000005">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>001480002200010002000000000000008000001422010000</SyncMan>
-						<SyncMan>001806006400010003000000000000000600001864010000</SyncMan>
-						<SyncMan>001c10002000010004000000000000001000001c20010000</SyncMan>
-						<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001c00010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
-						<BootStrapData>0010800000148000</BootStrapData>
-						<DcData>3003000000000000000000000000000001000000000000000000000000000000</DcData>
-						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000030030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>467265650000000000000000000000004672656500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="Transmit PDO 1 mapping parameters" Index="#x1a00" Flags="#x0000" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque (current) actual value" Index="#x6077">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 2 mapping parameters" Index="#x1a01" Flags="#x0000" SyncMan="3">
-							<Entry Name="Following error actual value" Index="#x60f4">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Digital inputs" Index="#x60fd">
-								<Type>UDINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 3 mapping parameters" Index="#x1a02" Flags="#x0000">
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO 4 mapping parameters" Index="#x1a03" Flags="#x0000">
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 1 mapping parameters" Index="#x1600" InOut="1" Flags="#x0000" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 2 mapping parameters" Index="#x1601" InOut="1" Flags="#x0000">
-							<Entry Name="Digital outputs - Physical outputs" Index="#x60fe" Sub="#x01">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="Digital outputs - Bit mask" Index="#x60fe" Sub="#x02">
-								<Type>UDINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 3 mapping parameters" Index="#x1602" InOut="1" Flags="#x0000">
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO 4 mapping parameters" Index="#x1603" InOut="1" Flags="#x0000">
-							<Entry Name="Profile velocity" Index="#x6081">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Profile acceleration" Index="#x6083">
-								<Type>DINT</Type>
-							</Entry>
-						</Pdo>
-						<CoeProfile ProfileNo="402"/>
-					</EtherCAT>
-				</Box>
-				<Box Id="7" BoxType="9099">
-					<Name>Box 7 (AX58200_MotorControl)</Name>
-					<ImageId>1000</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000006">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
-						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
-						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
-						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<BootStrapData>0010800080108000</BootStrapData>
-						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque actual value" Index="#x6077">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="analog input" Index="#x6091">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="digital input" Index="#x6092">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-					</EtherCAT>
-				</Box>
-				<Box Id="8" BoxType="9099">
-					<Name>Box 8 (AX58200_MotorControl)</Name>
-					<ImageId>1000</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000007">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
-						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
-						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
-						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<BootStrapData>0010800080108000</BootStrapData>
-						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque actual value" Index="#x6077">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="analog input" Index="#x6091">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="digital input" Index="#x6092">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-					</EtherCAT>
-				</Box>
-				<Box Id="17" BoxType="9099">
-					<Name>Box 17 (AX58200_MotorControl)</Name>
-					<ImageId>1000</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000008">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
-						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
-						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
-						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<BootStrapData>0010800080108000</BootStrapData>
-						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque actual value" Index="#x6077">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="analog input" Index="#x6091">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="digital input" Index="#x6092">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-					</EtherCAT>
-				</Box>
-				<Box Id="18" BoxType="9099">
-					<Name>Box 18 (AX58200_MotorControl)</Name>
-					<ImageId>1000</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000011">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
-						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
-						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
-						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<BootStrapData>0010800080108000</BootStrapData>
-						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque actual value" Index="#x6077">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="analog input" Index="#x6091">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="digital input" Index="#x6092">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-					</EtherCAT>
-				</Box>
-				<Box Id="19" BoxType="9099">
-					<Name>Box 19 (AX58200_MotorControl)</Name>
-					<ImageId>1000</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000012">
-						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
-						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
-						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
-						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
-						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
-						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-						<BootStrapData>0010800080108000</BootStrapData>
-						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Velocity actual value" Index="#x606c">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Torque actual value" Index="#x6077">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="analog input" Index="#x6091">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="digital input" Index="#x6092">
-								<Type>UDINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
-							<Entry Name="Statusword" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Position actual value" Index="#x6064">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Target torque" Index="#x6071">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="ENC2" Index="#x6093">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT24</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target position" Index="#x607a">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
-							<Entry Name="Controlword" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Target velocity" Index="#x60ff">
-								<Type>DINT</Type>
-							</Entry>
-							<Entry Name="E0000:00">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-					</EtherCAT>
-				</Box>
-				<EtherCAT ManualDcSelect="true" DcSyncMode="2" EnableVirtualSwitch="true" MaxSwitchPorts="4" MaxSwitchFrames="160" MaxSwitchMACs="100"/>
-			</Device>
 			<Device Id="1" DevType="111" DevFlags="#x0003" AmsPort="28673" AmsNetId="169.254.186.39.2.1" RemoteName="MSCommunication" InfoImageId="9">
 				<Name>MSCommunication</Name>
 				<AddressInfo>
@@ -3333,13 +2873,16 @@
 				<Image Id="8" AddrType="9" ImageType="3">
 					<Name>Image</Name>
 				</Image>
+				<Image Id="5" AddrType="10" ImageType="3">
+					<Name>Image-2</Name>
+				</Image>
 				<Box Id="20" BoxType="9099">
 					<Name>Term 20 (EK1100)</Name>
-					<ImageId>1001</ImageId>
+					<ImageId>1000</ImageId>
 					<EtherCAT SlaveType="1" PdiType="#x0d00" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x044c2c52" RevisionNo="#x00120000" PortPhys="305" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EK1100 EtherCAT Coupler (2A E-Bus)" Desc="EK1100" PortABoxInfo="#x00ffffff"/>
 					<Box Id="21" BoxType="9099" BoxFlags="#x00000020">
 						<Name>Term 21 (EL6695)</Name>
-						<ImageId>1002</ImageId>
+						<ImageId>1001</ImageId>
 						<EtherCAT SlaveType="3" AdsServerAddress="a9feba270216ea03" PdiType="#x0008" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="63" EoeType="1" FoeType="1" VendorId="#x00000002" ProductCode="#x1a273052" RevisionNo="#x00060000" InfoDataAddr="true" InfoDataNetId="true" InfoDataDcTimes="true" TimeoutMailbox2="2000" GenerateOwnNetId="true" ExternalDcRefClock="true" CheckRevisionNoType="3" PortPhys="51" DcTimeLoopControlOnly="true" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6695 EtherCAT Bridge terminal (Primary)" Desc="EL6695" PortABoxInfo="#x01000014">
 							<SyncMan>0010000426000100010000008000da050004001026010000</SyncMan>
 							<SyncMan>0016000422000100020000008000da050004001622010000</SyncMan>
@@ -3465,17 +3008,17 @@
 					</Box>
 					<Box Id="27" BoxType="9099">
 						<Name>Term 8 (EL9011)</Name>
-						<ImageId>1003</ImageId>
+						<ImageId>1002</ImageId>
 						<EtherCAT CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x23333050" InfoDataState="false" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL9011 End Terminal" Desc="EL9011" PortABoxInfo="#x01000015"/>
 					</Box>
 				</Box>
 				<Box Id="22" BoxType="9099">
 					<Name>Term 22 (EK1100)</Name>
-					<ImageId>1001</ImageId>
+					<ImageId>1000</ImageId>
 					<EtherCAT SlaveType="1" PdiType="#x0d00" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x044c2c52" RevisionNo="#x00120000" PortPhys="305" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EK1100 EtherCAT Coupler (2A E-Bus)" Desc="EK1100" PortABoxInfo="#x02000014"/>
 					<Box Id="23" BoxType="9099" BoxFlags="#x00000020">
 						<Name>Term 23 (EL6070-0033)</Name>
-						<ImageId>1004</ImageId>
+						<ImageId>1003</ImageId>
 						<EtherCAT SlaveType="2" PdiType="#x0005" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="35" FoeType="1" VendorId="#x00000002" ProductCode="#x17b63052" RevisionNo="#x00130021" InfoDataAddr="true" RepeatSupport="true" TimeoutMailbox2="3000" CheckRevisionNoType="3" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6070-0033 1Ch. Licence key terminal, individual licences" Desc="EL6070-0033" PortABoxInfo="#x01000016">
 							<SyncMan>001000012600010001000000300000010001001026010000</SyncMan>
 							<SyncMan>001100012200010002000000300000010001001122010000</SyncMan>
@@ -3534,7 +3077,7 @@
 					</Box>
 					<Box Id="25" BoxType="9099">
 						<Name>Term 25 (EL2008)</Name>
-						<ImageId>1005</ImageId>
+						<ImageId>1004</ImageId>
 						<EtherCAT SlaveType="1" PdiType="#x0104" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x07d83052" RevisionNo="#x00120000" RepeatSupport="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL2008 8Ch. Dig. Output 24V, 0.5A" Desc="EL2008" PortABoxInfo="#x01000018">
 							<SyncMan>000f01004400010003000000000000000000000f44090000</SyncMan>
 							<Fmmu>0000000000000000000f00020100000001000000000000000000000000000000</Fmmu>
@@ -3582,7 +3125,7 @@
 					</Box>
 					<Box Id="26" BoxType="9099">
 						<Name>Term 26 (EL3004)</Name>
-						<ImageId>1006</ImageId>
+						<ImageId>1005</ImageId>
 						<EtherCAT SlaveType="2" PdiType="#x0405" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="7" FoeType="1" VendorId="#x00000002" ProductCode="#x0bbc3052" RevisionNo="#x00160000" InfoDataAddr="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL3004 4Ch. Ana. Input +/-10V" Desc="EL3004" PortABoxInfo="#x01000019">
 							<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 							<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -3743,7 +3286,7 @@
 					</Box>
 					<Box Id="28" BoxType="9099">
 						<Name>Term 9 (EL9011)</Name>
-						<ImageId>1003</ImageId>
+						<ImageId>1002</ImageId>
 						<EtherCAT CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x23333050" InfoDataState="false" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL9011 End Terminal" Desc="EL9011" PortABoxInfo="#x0100001a"/>
 					</Box>
 				</Box>
@@ -3764,12 +3307,12 @@
 				</Image>
 				<Box Id="29" BoxType="9099">
 					<Name>Box 29 (CU2508)</Name>
-					<ImageId>1007</ImageId>
+					<ImageId>1006</ImageId>
 					<EtherCAT SlaveType="1" PdiType="#x0100" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x09cc5432" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="CU2508 Ethernet Port" Desc="CU2508" PortABoxInfo="#x00ffffff"/>
 				</Box>
 				<Box Id="30" BoxType="9099">
 					<Name>SetupJoint12</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100001d">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -3881,7 +3424,7 @@
 				</Box>
 				<Box Id="31" BoxType="9099">
 					<Name>SetupJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100001e">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -3993,7 +3536,7 @@
 				</Box>
 				<Box Id="32" BoxType="9099">
 					<Name>SetupJoint4</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100001f">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4105,7 +3648,7 @@
 				</Box>
 				<Box Id="33" BoxType="9099">
 					<Name>SetupJoint5</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000020">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4217,7 +3760,7 @@
 				</Box>
 				<Box Id="34" BoxType="9099">
 					<Name>SlaveJoint1</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000021">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4329,7 +3872,7 @@
 				</Box>
 				<Box Id="35" BoxType="9099">
 					<Name>SlaveJoint2</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000022">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4441,7 +3984,7 @@
 				</Box>
 				<Box Id="36" BoxType="9099">
 					<Name>SlaveJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x01000023">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4592,7 +4135,7 @@
 				</Box>
 				<Box Id="37" BoxType="9099">
 					<Name>SlaveJoint45</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x01000024">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4743,7 +4286,7 @@
 				</Box>
 				<Box Id="38" BoxType="9099">
 					<Name>SlaveJoint678</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x01000025">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -4909,12 +4452,12 @@
 				</Image>
 				<Box Id="39" BoxType="9099">
 					<Name>Box 39 (CU2508)</Name>
-					<ImageId>1007</ImageId>
+					<ImageId>1006</ImageId>
 					<EtherCAT SlaveType="1" PdiType="#x0100" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x09cc5432" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="CU2508 Ethernet Port" Desc="CU2508" PortABoxInfo="#x00ffffff"/>
 				</Box>
 				<Box Id="40" BoxType="9099">
 					<Name>SetupJoint12</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000027">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5026,7 +4569,7 @@
 				</Box>
 				<Box Id="41" BoxType="9099">
 					<Name>SetupJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000028">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5138,7 +4681,7 @@
 				</Box>
 				<Box Id="42" BoxType="9099">
 					<Name>SetupJoint4</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000029">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5250,7 +4793,7 @@
 				</Box>
 				<Box Id="43" BoxType="9099">
 					<Name>SetupJoint5</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100002a">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5362,7 +4905,7 @@
 				</Box>
 				<Box Id="44" BoxType="9099">
 					<Name>SlaveJoint1</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100002b">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5474,7 +5017,7 @@
 				</Box>
 				<Box Id="45" BoxType="9099">
 					<Name>SlaveJoint2</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100002c">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5586,7 +5129,7 @@
 				</Box>
 				<Box Id="46" BoxType="9099">
 					<Name>SlaveJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x0100002d">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5737,7 +5280,7 @@
 				</Box>
 				<Box Id="47" BoxType="9099">
 					<Name>SlaveJoint45</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x0100002e">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -5888,7 +5431,7 @@
 				</Box>
 				<Box Id="48" BoxType="9099">
 					<Name>SlaveJoint678</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x0100002f">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6054,12 +5597,12 @@
 				</Image>
 				<Box Id="49" BoxType="9099">
 					<Name>Box 49 (CU2508)</Name>
-					<ImageId>1007</ImageId>
+					<ImageId>1006</ImageId>
 					<EtherCAT SlaveType="1" PdiType="#x0100" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x09cc5432" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="CU2508 Ethernet Port" Desc="CU2508" PortABoxInfo="#x00ffffff"/>
 				</Box>
 				<Box Id="50" BoxType="9099">
 					<Name>SetupJoint12</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000031">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6171,7 +5714,7 @@
 				</Box>
 				<Box Id="51" BoxType="9099">
 					<Name>SetupJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000032">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6283,7 +5826,7 @@
 				</Box>
 				<Box Id="52" BoxType="9099">
 					<Name>SetupJoint4</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000033">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6395,7 +5938,7 @@
 				</Box>
 				<Box Id="53" BoxType="9099">
 					<Name>SetupJoint5</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000034">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6507,7 +6050,7 @@
 				</Box>
 				<Box Id="54" BoxType="9099">
 					<Name>SlaveJoint1</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000035">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6619,7 +6162,7 @@
 				</Box>
 				<Box Id="55" BoxType="9099">
 					<Name>SlaveJoint2</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000036">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6731,7 +6274,7 @@
 				</Box>
 				<Box Id="56" BoxType="9099">
 					<Name>SlaveJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x01000037">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -6882,7 +6425,7 @@
 				</Box>
 				<Box Id="57" BoxType="9099">
 					<Name>SlaveJoint45</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x01000038">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7033,7 +6576,7 @@
 				</Box>
 				<Box Id="58" BoxType="9099">
 					<Name>SlaveJoint678</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211916" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl9.16" PortABoxInfo="#x01000039">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7199,12 +6742,12 @@
 				</Image>
 				<Box Id="59" BoxType="9099">
 					<Name>Box 59 (CU2508)</Name>
-					<ImageId>1007</ImageId>
+					<ImageId>1006</ImageId>
 					<EtherCAT SlaveType="1" PdiType="#x0100" CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x09cc5432" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="CU2508 Ethernet Port" Desc="CU2508" PortABoxInfo="#x00ffffff"/>
 				</Box>
 				<Box Id="60" BoxType="9099">
 					<Name>SetupJoint12</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100003b">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7316,7 +6859,7 @@
 				</Box>
 				<Box Id="61" BoxType="9099">
 					<Name>SetupJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100003c">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7428,7 +6971,7 @@
 				</Box>
 				<Box Id="62" BoxType="9099">
 					<Name>SetupJoint4</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100003d">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7540,7 +7083,7 @@
 				</Box>
 				<Box Id="63" BoxType="9099">
 					<Name>SetupJoint5</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100003e">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7652,7 +7195,7 @@
 				</Box>
 				<Box Id="64" BoxType="9099">
 					<Name>SlaveJoint1</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100003f">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7764,7 +7307,7 @@
 				</Box>
 				<Box Id="65" BoxType="9099">
 					<Name>SlaveJoint2</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000040">
 						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
@@ -7876,7 +7419,7 @@
 				</Box>
 				<Box Id="66" BoxType="9099" BoxFlags="#x00000020">
 					<Name>SlaveJoint3</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211020" InfoDataAddr="true" InfoDataSoeDS401="true" TimeoutStateChange1="2000" TimeoutStateChange2="9000" TimeoutMailbox2="2000" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl_3AxiS" Desc="AX58200_MotorControl for 3 aix" PortABoxInfo="#x01000041">
 						<SyncMan>001080002600010001000000240080008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000240080008000801022010000</SyncMan>
@@ -8028,7 +7571,7 @@
 				</Box>
 				<Box Id="67" BoxType="9099" BoxFlags="#x00000020">
 					<Name>SlaveJoint45</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211020" InfoDataAddr="true" InfoDataSoeDS401="true" TimeoutStateChange1="2000" TimeoutStateChange2="9000" TimeoutMailbox2="2000" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl_3AxiS" Desc="AX58200_MotorControl for 3 aix" PortABoxInfo="#x01000042">
 						<SyncMan>001080002600010001000000240080008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000240080008000801022010000</SyncMan>
@@ -8180,7 +7723,7 @@
 				</Box>
 				<Box Id="68" BoxType="9099" BoxFlags="#x00000020">
 					<Name>SlaveJoint678</Name>
-					<ImageId>1000</ImageId>
+					<ImageId>1007</ImageId>
 					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211020" InfoDataAddr="true" InfoDataSoeDS401="true" TimeoutStateChange1="2000" TimeoutStateChange2="9000" TimeoutMailbox2="2000" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl_3AxiS" Desc="AX58200_MotorControl for 3 aix" PortABoxInfo="#x01000043">
 						<SyncMan>001080002600010001000000240080008000001026010000</SyncMan>
 						<SyncMan>801080002200010002000000240080008000801022010000</SyncMan>
@@ -8332,6 +7875,829 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
+			<Device Id="3" DevType="111" DevFlags="#x0003" AmsPort="28675" AmsNetId="169.254.186.39.4.1" RemoteName="Cart" InfoImageId="19">
+				<Name>Cart</Name>
+				<AddressInfo>
+					<Pnp>
+						<DeviceDesc>Cart (TwinCAT-Intel PCI Ethernet Adapter (Gigabit) </DeviceDesc>
+						<DeviceName>\DEVICE\{E7A3E882-E75B-4182-BBB5-46A914031714}</DeviceName>
+						<DeviceData>68eda4622df7</DeviceData>
+					</Pnp>
+				</AddressInfo>
+				<Image Id="6" AddrType="9" ImageType="3">
+					<Name>Image</Name>
+				</Image>
+				<Box Id="1" BoxType="9099">
+					<Name>CartJnt5</Name>
+					<ImageId>38</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0480" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="15" EoeType="1" FoeType="1" VendorId="#x000001a3" ProductCode="#x015f5a2d" RevisionNo="#x41303043" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="iPOS8015 BZ-CAT" Desc="iPOS8015 BZ-CAT" PortABoxInfo="#x00ffffff">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>001480002200010002000000000000008000001422010000</SyncMan>
+						<SyncMan>001815006400010003000000000000000600001864010000</SyncMan>
+						<SyncMan>001c10002000010004000000000000001000001c20010000</SyncMan>
+						<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001c00010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
+						<BootStrapData>0010800000148000</BootStrapData>
+						<DcData>30030000000000006079feff0000000001000000000100000000000000000000</DcData>
+						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000030030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>467265650000000000000000000000004672656500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Transmit PDO 1 mapping parameters" Index="#x1a00" Flags="#x0000" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque (current) actual value" Index="#x6077">
+								<Type>INT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 2 mapping parameters" Index="#x1a01" Flags="#x0000" SyncMan="3">
+							<Entry Name="Following error actual value" Index="#x60f4">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Digital inputs" Index="#x60fd">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 3 mapping parameters" Index="#x1a02" Flags="#x0000">
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 4 mapping parameters" Index="#x1a03" Flags="#x0000">
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 1 mapping parameters" Index="#x1600" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 2 mapping parameters" Index="#x1601" InOut="1" Flags="#x0000">
+							<Entry Name="Digital outputs - Physical outputs" Index="#x60fe" Sub="#x01">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="Digital outputs - Bit mask" Index="#x60fe" Sub="#x02">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 3 mapping parameters" Index="#x1602" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Target Velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 4 mapping parameters" Index="#x1603" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Profile velocity" Index="#x6081">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Profile acceleration" Index="#x6083">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="402"/>
+					</EtherCAT>
+				</Box>
+				<Box Id="2" BoxType="9099">
+					<Name>CartJnt3</Name>
+					<ImageId>38</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0480" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="15" EoeType="1" FoeType="1" VendorId="#x000001a3" ProductCode="#x01bf1661" RevisionNo="#x41303044" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="iPOS4850 BX-CAT" Desc="iPOS4850 BX-CAT" PortABoxInfo="#x01000001">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>001480002200010002000000000000008000001422010000</SyncMan>
+						<SyncMan>001815006400010003000000000000000600001864010000</SyncMan>
+						<SyncMan>001c10002000010004000000000000001000001c20010000</SyncMan>
+						<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001c00010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
+						<BootStrapData>0010800000148000</BootStrapData>
+						<DcData>3003000000000000000000000000000001000000000000000000000000000000</DcData>
+						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000030030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>467265650000000000000000000000004672656500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Transmit PDO 1 mapping parameters" Index="#x1a00" Flags="#x0000" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque (current) actual value" Index="#x6077">
+								<Type>INT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 2 mapping parameters" Index="#x1a01" Flags="#x0000" SyncMan="3">
+							<Entry Name="Following error actual value" Index="#x60f4">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Digital inputs" Index="#x60fd">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 3 mapping parameters" Index="#x1a02" Flags="#x0000">
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 4 mapping parameters" Index="#x1a03" Flags="#x0000">
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 1 mapping parameters" Index="#x1600" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 2 mapping parameters" Index="#x1601" InOut="1" Flags="#x0000">
+							<Entry Name="Digital outputs - Physical outputs" Index="#x60fe" Sub="#x01">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="Digital outputs - Bit mask" Index="#x60fe" Sub="#x02">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 3 mapping parameters" Index="#x1602" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Target Velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 4 mapping parameters" Index="#x1603" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Profile velocity" Index="#x6081">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Profile acceleration" Index="#x6083">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="402"/>
+					</EtherCAT>
+				</Box>
+				<Box Id="3" BoxType="9099">
+					<Name>CartJnt4</Name>
+					<ImageId>38</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0480" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="15" EoeType="1" FoeType="1" VendorId="#x000001a3" ProductCode="#x01bf1661" RevisionNo="#x41303044" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="iPOS4850 BX-CAT" Desc="iPOS4850 BX-CAT" PortABoxInfo="#x01000002">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>001480002200010002000000000000008000001422010000</SyncMan>
+						<SyncMan>001815006400010003000000000000000600001864010000</SyncMan>
+						<SyncMan>001c10002000010004000000000000001000001c20010000</SyncMan>
+						<Fmmu>0000000000000000001800020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001c00010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<SwitchPortData>00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</SwitchPortData>
+						<BootStrapData>0010800000148000</BootStrapData>
+						<DcData>3003000000000000000000000000000001000000000000000000000000000000</DcData>
+						<DcMode>446353796e6300000000000000000000446353796e630000000000000000000000000000000000000000000000000000000000000000000000000000000030030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>467265650000000000000000000000004672656500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="Transmit PDO 1 mapping parameters" Index="#x1a00" Flags="#x0000" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque (current) actual value" Index="#x6077">
+								<Type>INT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 2 mapping parameters" Index="#x1a01" Flags="#x0000" SyncMan="3">
+							<Entry Name="Following error actual value" Index="#x60f4">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Digital inputs" Index="#x60fd">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 3 mapping parameters" Index="#x1a02" Flags="#x0000">
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Transmit PDO 4 mapping parameters" Index="#x1a03" Flags="#x0000">
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 1 mapping parameters" Index="#x1600" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 2 mapping parameters" Index="#x1601" InOut="1" Flags="#x0000">
+							<Entry Name="Digital outputs - Physical outputs" Index="#x60fe" Sub="#x01">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="Digital outputs - Bit mask" Index="#x60fe" Sub="#x02">
+								<Type>UDINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 3 mapping parameters" Index="#x1602" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>INT</Type>
+							</Entry>
+							<Entry Name="Target  Velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="Receive PDO 4 mapping parameters" Index="#x1603" InOut="1" Flags="#x0000" SyncMan="2">
+							<Entry Name="Profile velocity" Index="#x6081">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Profile acceleration" Index="#x6083">
+								<Type>DINT</Type>
+							</Entry>
+						</Pdo>
+						<CoeProfile ProfileNo="402"/>
+					</EtherCAT>
+				</Box>
+				<Box Id="9" BoxType="9099">
+					<Name>CartJnt1</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000003">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
+						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
+						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010800080108000</BootStrapData>
+						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="analog input" Index="#x6091">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="digital input" Index="#x6092">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="10" BoxType="9099">
+					<Name>CartJnt2</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x01000009">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
+						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
+						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010800080108000</BootStrapData>
+						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="analog input" Index="#x6091">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="digital input" Index="#x6092">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="11" BoxType="9099">
+					<Name>CartJnt6</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100000a">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
+						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
+						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010800080108000</BootStrapData>
+						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="analog input" Index="#x6091">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="digital input" Index="#x6092">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="12" BoxType="9099">
+					<Name>CartJnt7</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100000b">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
+						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
+						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010800080108000</BootStrapData>
+						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="analog input" Index="#x6091">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="digital input" Index="#x6092">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<Box Id="13" BoxType="9099">
+					<Name>CartJnt8</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0e05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x80000300" RevisionNo="#x00211000" InfoDataAddr="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="AX58200_MotorControl" Desc="AX58200_MotorControl" PortABoxInfo="#x0100000c">
+						<SyncMan>001080002600010001000000000000008000001026010000</SyncMan>
+						<SyncMan>801080002200010002000000000000008000801022010000</SyncMan>
+						<SyncMan>001116006400010003000000000000001600001164010000</SyncMan>
+						<SyncMan>00141e002000010004000000000000001e00001420010000</SyncMan>
+						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
+						<Fmmu>0000000000000000001400010100000002000000000000000000000000000000</Fmmu>
+						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+						<BootStrapData>0010800080108000</BootStrapData>
+						<DcMode>53796e6368726f6e000000000000000053796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<DcMode>444300000000000000000000000000004443000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
+						<Pdo Name="TxPdoMappingCspCsv" Index="#x1a00" Flags="#x0010" SyncMan="3">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Velocity actual value" Index="#x606c">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Torque actual value" Index="#x6077">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="analog input" Index="#x6091">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="digital input" Index="#x6092">
+								<Type>UDINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation display" Index="#x6061">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsp" Index="#x1a01" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="TxPdoMappingCsv" Index="#x1a02" Flags="#x0010">
+							<Entry Name="Statusword" Index="#x6041">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Position actual value" Index="#x6064">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCspCsv" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Target torque" Index="#x6071">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="ENC2" Index="#x6093">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="Modes of operation" Index="#x6060">
+								<Type>SINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT24</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsp" Index="#x1601" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target position" Index="#x607a">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+						<Pdo Name="RxPdoMappingCsv" Index="#x1602" InOut="1" Flags="#x0010">
+							<Entry Name="Controlword" Index="#x6040">
+								<Type>UINT</Type>
+							</Entry>
+							<Entry Name="Target velocity" Index="#x60ff">
+								<Type>DINT</Type>
+							</Entry>
+							<Entry Name="E0000:00">
+								<Type>UINT</Type>
+							</Entry>
+						</Pdo>
+					</EtherCAT>
+				</Box>
+				<EtherCAT ManualDcSelect="true" DcSyncMode="2" EnableVirtualSwitch="true" MaxSwitchPorts="4" MaxSwitchFrames="160" MaxSwitchMACs="100"/>
+			</Device>
 		</Io>
 	</Project>
 	<Mappings>
@@ -8344,7 +8710,8 @@
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500821000403}" Id="#x02030110"/>
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500821010403}" Id="#x020300b0"/>
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500831000403}" Id="#x020300f0"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0420-500840000403}" Id="#x020300a0"/>
+		<MappingInfo Identifier="{00000000-2005-0850-0420-500840000403}" Id="#x02030140"/>
+		<MappingInfo Identifier="{00000000-2005-0850-0420-500851000403}" Id="#x02030170"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030090" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030050" Watchdog="10000000040000000400000004000000"/>
@@ -8354,13 +8721,109 @@
 		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030070" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00E0-0304-0020-5008E0000403}" Id="#x02030130" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-0100-0304-0020-500800010403}" Id="#x02030160" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-00A0-0304-0020-5008A0000403}" Id="#x02030150" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-00C0-0304-0020-5008C0000403}" Id="#x020300a0" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-00E0-0304-0020-5008E0000403}" Id="#x02030180" Watchdog="00000000000000000000000000000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
-			<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_slaveCart.m_testInput" VarB="TxPdoMappingCspCsv^Statusword"/>
+			<OwnerB Name="TIID^Cart^CartJnt1">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt2">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt3">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs^m_motorEncoder" VarB="Transmit PDO 1 mapping parameters^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorInputs^m_statusWord" VarB="Transmit PDO 1 mapping parameters^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput^m_cmdAccMz" VarB="Receive PDO 4 mapping parameters^Profile acceleration"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput^m_cmdVelMz" VarB="Receive PDO 4 mapping parameters^Profile velocity"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_cartMotorOutput^m_cmdVelMzVelMode" VarB="Receive PDO 3 mapping parameters^Target Velocity"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="Receive PDO 1 mapping parameters^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_controlWord" VarB="Receive PDO 1 mapping parameters^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[3].m_motorOutputs^m_opMode" VarB="Receive PDO 3 mapping parameters^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt4">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs^m_motorEncoder" VarB="Transmit PDO 1 mapping parameters^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorInputs^m_statusWord" VarB="Transmit PDO 1 mapping parameters^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput^m_cmdAccMz" VarB="Receive PDO 4 mapping parameters^Profile acceleration"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput^m_cmdVelMz" VarB="Receive PDO 4 mapping parameters^Profile velocity"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_cartMotorOutput^m_cmdVelMzVelMode" VarB="Receive PDO 3 mapping parameters^Target  Velocity"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_cmdMotorEncoder" VarB="Receive PDO 1 mapping parameters^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_controlWord" VarB="Receive PDO 1 mapping parameters^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[4].m_motorOutputs^m_opMode" VarB="Receive PDO 3 mapping parameters^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt5">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_motorEncoder" VarB="Transmit PDO 1 mapping parameters^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorInputs^m_statusWord" VarB="Transmit PDO 1 mapping parameters^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorOutput^m_cmdAccMz" VarB="Receive PDO 4 mapping parameters^Profile acceleration"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorOutput^m_cmdVelMz" VarB="Receive PDO 4 mapping parameters^Profile velocity"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_cartMotorOutput^m_cmdVelMzVelMode" VarB="Receive PDO 3 mapping parameters^Target Velocity"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_cmdMotorEncoder" VarB="Receive PDO 1 mapping parameters^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_controlWord" VarB="Receive PDO 1 mapping parameters^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[5].m_motorOutputs^m_opMode" VarB="Receive PDO 3 mapping parameters^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt6">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[6].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt7">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[7].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Cart^CartJnt8">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^MSCommunication^Term 20 (EK1100)^Term 21 (EL6695)">
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_masterRobotData" VarB="IO Inputs^MasterRobotData"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobotData" VarB="IO Outputs^SlaveRobotData"/>
+			</OwnerB>
+			<OwnerB Name="TIID^MSCommunication^Term 22 (EK1100)^Term 24 (EL1008)">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_carHandChassisDriveUnlock[1]" VarB="Channel 5^Input"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_carHandChassisDriveUnlock[2]" VarB="Channel 6^Input"/>
+			</OwnerB>
+			<OwnerB Name="TIID^MSCommunication^Term 22 (EK1100)^Term 25 (EL2008)">
+				<Link VarA="TaskCartControl Outputs^CartControl.m_cartRobot.m_slaveCart.m_screwBreak" VarB="Channel 5^Output"/>
+			</OwnerB>
+			<OwnerB Name="TIID^MSCommunication^Term 22 (EK1100)^Term 26 (EL3004)">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_driveForce[1]" VarB="AI Standard Channel 2^Value"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_driveForce[2]" VarB="AI Standard Channel 1^Value"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SetupJoint12">
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_joints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
@@ -8410,6 +8873,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SlaveJoint2">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[1]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -8420,6 +8884,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SlaveJoint3">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[1]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
@@ -8518,6 +8983,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SlaveJoint2">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[2]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -8528,6 +8994,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SlaveJoint3">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[2]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
@@ -8626,6 +9093,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint2">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[3]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -8636,6 +9104,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint3">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[3]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
@@ -8734,6 +9203,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SlaveJoint2">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[4]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -8744,6 +9214,7 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SlaveJoint3">
+				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[4]" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_adjustIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>

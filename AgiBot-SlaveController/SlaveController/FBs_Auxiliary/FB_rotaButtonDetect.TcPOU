@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_rotaButtonDetect" Id="{30693b56-bccc-471c-9eb1-da466ba07a53}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_rotaButtonDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_rotaButtonUpOnCounts :INT :=0;
+	m_rotaButtonUpOnCountThres :INT :=50;
+	m_rotaButtonDownOnCounts :INT :=0;
+	m_rotaButtonDownOnCountThres :INT :=-50;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{c6d6ce7b-49be-4d76-8341-ace7fb023bb6}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : UDINT
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// 
+IF 1=(IOValue AND 16#01) OR 2=(IOValue AND 16#02) THEN
+	m_rotaButtonUpOnCounts :=MIN(m_rotaButtonUpOnCounts +1,m_rotaButtonUpOnCountThres);
+ELSE
+	m_rotaButtonUpOnCounts :=0;
+END_IF
+
+IF m_rotaButtonUpOnCounts >= m_rotaButtonUpOnCountThres THEN
+	run := IOValue;
+ELSE
+	run := 0;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_rotaButtonDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_rotaButtonDetect.run">
+      <LineId Id="42" Count="5" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

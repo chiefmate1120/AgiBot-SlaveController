@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_CartJointCtrl" Id="{61bf6462-ad6f-42ce-aa92-46f13907cfac}">
+    <Declaration><![CDATA[INTERFACE I_CartJointCtrl
+]]></Declaration>
+    <Method Name="init" Id="{1693a98b-fe9d-42a2-b149-ec812d1d9731}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="isFinished" Id="{f68f056f-8ca4-4772-b8d9-7f98d2c32a35}">
+      <Declaration><![CDATA[PROPERTY isFinished : BOOL]]></Declaration>
+      <Get Name="Get" Id="{1574e3fb-b57c-409a-98cc-cb892f12816d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="reset" Id="{506eb79b-0ccb-4c06-a8ad-fa471c121160}">
+      <Declaration><![CDATA[METHOD reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="run" Id="{46391ded-60b4-4ac5-aef6-6809a77b8de7}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

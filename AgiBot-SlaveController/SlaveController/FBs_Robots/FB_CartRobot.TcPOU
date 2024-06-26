@@ -1,0 +1,351 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_CartRobot" Id="{1219119a-c34a-4efb-a0e2-076d2e563cc0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartRobot
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+
+	m_slaveCart: FB_SlaveCart;		
+	
+	// input arm button 
+	m_carHandChassisDriveUnlock AT%I* :ARRAY [1..2] OF BOOL;
+
+	m_joystickData:Vec8d;
+
+	//m_cartDrapingState : UINT;
+	//m_cartDockingState : UINT;
+	// all cart controller instance 
+	m_cartCtrlFactory :ARRAY[1..CartJointState_totalNum] OF I_CartJointCtrl;
+	
+	m_cartState:E_CartJointState:=CartJointState_Init;
+	m_lastCartState:E_CartJointState:=CartJointState_Init;
+	m_nextCartState:E_CartJointState:=CartJointState_Init;
+	
+	// flag if cart joint self-check passed
+	m_selfCheckPass:  BOOL :=FALSE;
+	
+	// all cart controller instance 
+	m_cartError :FB_CartCtrlError;
+	m_cartInit :FB_CartCtrlInit;
+	m_cartReady :FB_CartCtrlReady;
+	m_cartInSurgery :FB_CartCtrlInSurgery;
+	m_cartMotionCar :FB_CartCtrlMotionCar;
+	m_cartAsepticDeploy :FB_CartCtrlAsepticDeploy;
+	m_cartAdjust :FB_CartCtrlAdjust;
+	m_cartRotaOverhang :FB_CartCtrlRotaOverhang;
+	m_cartSlowStop : FB_CartCtrlSlowDown;
+	
+	// cart controller interface
+	m_cartCtrl : I_CartJointCtrl;
+	m_cartCtrlCmds : ST_SlaveArmCtrlCmds;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="getStatus" Id="{3a75a7ab-dab2-4f14-a4cf-7bc1351f901a}">
+      <Declaration><![CDATA[METHOD getStatus : BOOL
+VAR_IN_OUT
+	
+	r_cartStatus :ST_CartStatus;	
+
+	// cart joint data
+	r_cartJointsData :ST_CartJointData;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//r_cartStatus.m_CartState:=m_cartState;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{dac0d65c-106c-4eed-932d-303e798c1acc}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+m_slaveCart.init();
+m_cartState := CartJointState_Init;
+m_lastCartState := CartJointState_Init;
+m_nextCartState := CartJointState_Init;
+m_selfCheckPass := FALSE;
+
+//command init
+m_cartCtrlCmds.m_jntEnableFlag := g_zeroVec8i;
+m_cartCtrlCmds.m_jntOPMode := g_slaveAllPosMode;
+m_cartCtrlCmds.m_cmdJntPos := m_slaveCart.m_curJntPos;
+m_cartCtrlCmds.m_cmdJntVel := g_zeroVec8d;
+m_cartCtrlCmds.m_cmdJntAcc := g_zeroVec8d;
+m_cartCtrlCmds.m_cmdJntTrq := g_zeroVec8d;
+
+
+// generate controller factory
+//m_cartCtrlFactory[CartJointState_Error] := m_cartError;
+m_cartCtrlFactory[CartJointState_Init] := m_cartInit;
+m_cartCtrlFactory[CartJointState_Ready] := m_cartReady;
+m_cartCtrlFactory[CartJointState_InSurgery] := m_cartInSurgery;
+m_cartCtrlFactory[CartJointState_Movement] := m_cartMotionCar;
+m_cartCtrlFactory[CartJointState_HangAdjust] := m_cartAdjust;
+m_cartCtrlFactory[CartJointState_AsepticDeployment] := m_cartAsepticDeploy;
+m_cartCtrlFactory[CartJointState_RotaOverhang] := m_cartRotaOverhang;
+m_cartCtrlFactory[CartJointState_SlowStop] := m_cartSlowStop;
+
+// assign controller
+m_cartCtrl:=m_cartCtrlFactory[m_cartState];
+m_cartCtrl.Init(m_slaveCart,m_cartCtrlCmds);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{a2c569bc-04e6-4881-bf0d-89b31bc10fd5}">
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartDataPool: ST_CartInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// state machine transition
+stateMachine(i_cartDataPool);	
+
+//update ui data
+m_slaveCart.ProcessingUIData(i_cartDataPool.m_UIData);
+
+//update cart joint status
+m_slaveCart.updateStatus();
+
+
+// null ptr check
+IF 0 = m_cartCtrl THEN
+	RETURN;
+END_IF
+
+// run controller
+m_cartCtrl.run(m_slaveCart,m_cartCtrlCmds);
+
+
+m_slaveCart.updateCmds(m_cartCtrlCmds);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stateMachine" Id="{b5b8be07-918e-41ec-9d55-8af52c43f215}">
+      <Declaration><![CDATA[METHOD PROTECTED stateMachine : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartDataPool: ST_CartInputDataPool;
+END_VAR
+VAR
+	i,j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// state machine transit
+CASE m_cartState OF
+	//cart joint error
+	CartJointState_Error:
+		//IF FALSE = i_cartDataPool.m_safetyData.m_slaveErrFlag THEN
+		//	// to standby
+		//	IF m_selfCheckPass THEN
+		//		m_nextCartState :=CartJointState_Standby;
+		//	ELSE
+		//		m_nextCartState :=CartJointState_Init;
+		//	END_IF
+		//END_IF
+
+	CartJointState_Init:
+		IF m_cartCtrl.isFinished THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+		
+	CartJointState_Ready:
+		IF m_cartCtrl.isFinished  THEN
+			m_nextCartState := CartJointState_InSurgery;
+			
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable) THEN
+			m_nextCartState := CartJointState_HangAdjust;
+			
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable) THEN
+			m_nextCartState := CartJointState_AsepticDeployment;
+			
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_carHandChassisDriveUnlock[1] AND m_carHandChassisDriveUnlock[2] THEN
+			m_nextCartState := CartJointState_Movement;
+			
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 0 THEN
+			m_nextCartState := CartJointState_RotaOverhang;
+		END_IF
+		
+	
+	CartJointState_InSurgery:
+		IF m_cartCtrl.isFinished  THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+		
+	CartJointState_Movement:
+		IF m_slaveCart.m_trocarOnFlag<>0 OR (NOT m_carHandChassisDriveUnlock[1] AND NOT m_carHandChassisDriveUnlock[2])  THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+		
+		
+	CartJointState_HangAdjust:
+		IF  m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable ) THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF
+		
+		
+	CartJointState_AsepticDeployment:
+		IF m_cartCtrl.isFinished  THEN
+			IF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable THEN
+				m_slaveCart.cartDockingState := 1;
+			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable THEN
+				m_slaveCart.cartDrapingState := 1;
+			END_IF
+			m_nextCartState :=CartJointState_Ready;
+		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable) THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF
+		
+		
+	CartJointState_RotaOverhang:
+		IF m_slaveCart.m_rotaOverhangOnFlag = 0 OR  m_slaveCart.m_trocarOnFlag<>0 THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF
+		
+		
+	CartJointState_SlowStop:
+		IF m_cartCtrl.isFinished  THEN
+			m_nextCartState :=CartJointState_Ready;
+		END_IF
+END_CASE
+
+// Controller transit
+IF m_nextCartState<> m_cartState THEN
+	//reset current controller
+	m_cartCtrl.reset();
+	
+	// transit to new controller
+	m_lastCartState:=m_cartState;
+	m_cartState:=m_nextCartState;
+	m_cartCtrl:=m_cartCtrlFactory[m_cartState];
+	
+	//init next controller
+	m_cartCtrl.Init(m_slaveCart, m_cartCtrlCmds);
+	m_slaveCart.updateCmds(m_cartCtrlCmds);
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartRobot">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.getStatus">
+      <LineId Id="14" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.init">
+      <LineId Id="121" Count="0" />
+      <LineId Id="85" Count="16" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="115" Count="1" />
+      <LineId Id="118" Count="2" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="102" Count="3" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.run">
+      <LineId Id="37" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="42" Count="6" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="51" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.stateMachine">
+      <LineId Id="19" Count="2" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="35" Count="4" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="57" Count="2" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="121" Count="1" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="123" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="64" Count="2" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="105" Count="2" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="151" Count="1" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="129" Count="2" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="141" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="87" Count="3" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="94" Count="2" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

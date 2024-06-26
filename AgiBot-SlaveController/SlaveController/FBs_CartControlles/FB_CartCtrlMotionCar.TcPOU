@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_CartCtrlMotionCar" Id="{d05e52e3-1460-4326-9432-80246d34dd7a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlMotionCar EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_driveForce: ARRAY [1..2] OF LREAL;
+	
+	// input drive force filter
+	m_driveVelLpf : ARRAY [1..2] OF FB_LowPassFilter;
+	m_driveForceFilter: Vec2i;
+	
+	//cart motion trajectory velocity
+	m_trajVel : ARRAY [1..2] OF LREAL;
+	m_motorDir :ARRAY [1..2] OF INT := [1,-1];
+	
+	m_tarJntPos : ARRAY [1..2] OF LREAL;
+	m_incJntPos : ARRAY [1..2] OF LREAL;
+	m_initJntPos : ARRAY [1..2] OF LREAL;
+	// time threshold to drive wheel after it's enabled
+	m_cartWheelDriveWaitTime :LREAL := 0.2;
+	
+	//wheel motion  time 
+	m_wheelMotionTime:ARRAY [1..2] OF LREAL;
+	
+	// filter cut-off frequency for cart drive force 
+	m_cmdJntVelLpfCutoffFreq : LREAL :=5;
+END_VAR
+
+VAR CONSTANT
+	//Proportionality constant of force sensor
+	m_driveForceProConstant : LREAL := 5/15000;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{764cdcc2-44fc-4de0-8a50-0d1f87c1ea9c}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO 2 BY 1 DO
+	m_driveForce[i] :=LIMIT(-5, i_slaveCart.m_driveForce[i]/3000, 5);
+	m_wheelMotionTime[i] := LIMIT(0, m_wheelMotionTime[i] + g_cartCtrlCycleTime, 1);
+	
+	IF m_wheelMotionTime[i] > m_cartWheelDriveWaitTime THEN
+		m_trajVel[i] := m_driveVelLpf[i].run(i_rawData:=m_motorDir[i] * m_driveForce[i]/2);
+		m_incJntPos[i] := m_incJntPos[i] + m_trajVel[i] * g_cartCtrlCycleTime;
+		
+		m_cmdJntPos[i+2] := m_initJntPos[i] + m_incJntPos[i];
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{940ec1c0-b19a-4580-a204-bbc4e9c523a4}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+m_jntEnableFlag[3] :=1;
+m_jntEnableFlag[4] :=1;
+
+m_jntOPMode[3]:= DriverOPMode_cspMZ;
+m_jntOPMode[4]:= DriverOPMode_cspMZ;
+
+m_tarJntPos[1] := 0;
+m_tarJntPos[2] := 0;
+
+m_incJntPos[1] := 0;
+m_incJntPos[2] := 0;
+
+m_initJntPos[1] := i_slaveCart.curJntPos[3];
+m_initJntPos[2] := i_slaveCart.curJntPos[4];
+
+m_driveVelLpf[1].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJntVelLpfCutoffFreq, i_sampleFreq:= 8000);
+m_driveVelLpf[2].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJntVelLpfCutoffFreq, i_sampleFreq:= 8000);
+
+m_driveVelLpf[1].run(i_rawData:=0);
+m_driveVelLpf[2].run(i_rawData:=0);
+
+
+m_wheelMotionTime[1]:=0;
+m_wheelMotionTime[2]:=0;
+
+// update commands to arm
+copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlMotionCar">
+      <LineId Id="52" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.calcCmdJntPos">
+      <LineId Id="16" Count="6" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlMotionCar.init">
+      <LineId Id="11" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

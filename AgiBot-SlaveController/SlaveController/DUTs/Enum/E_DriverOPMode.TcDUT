@@ -5,7 +5,11 @@
 (
 	DriverOPMode_Pos := 0, // driver position control
 	DriverOPMode_Trq :=1, // driver torque control, robot force control
-	DriverOPMode_PosTrq :=2 // driver torque control, robot position contorl
+	DriverOPMode_PosTrq :=2, // driver torque control, robot position contorl
+	DriverOPMode_Vel :=3, // driver Velocity control
+	DriverOPMode_MZPos :=4, //mingzhi driver Position control
+	DriverOPMode_cspMZ :=8, //mingzhi driver Sync cycle position mode control
+	DriverOPMode_csvMZ :=9 //mingzhi driver Sync cycle position mode control
 );
 END_TYPE
 ]]></Declaration>

@@ -5,7 +5,13 @@
 (
 	DriverStatusWord_INIT := 4641,
 	DriverStatusWord_PREOP := 4659,
-	DriverStatusWord_OP := 4663
+	DriverStatusWord_OP := 4663,
+	
+	MZDriverStatusWord_SwitchOnDisable := 16#40,
+	MZDriverStatusWord_ReadyToSwitchOn := 16#21,
+	MZDriverStatusWord_SwitchOn := 16#33,
+	MZDriverStatusWord_OperationEnbale := 16#37,
+	MZDriverStatusWord_Fault := 16#08
 );
 END_TYPE
 ]]></Declaration>
