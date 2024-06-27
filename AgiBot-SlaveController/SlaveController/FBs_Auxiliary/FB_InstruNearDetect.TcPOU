@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_InstruNearDetect" Id="{e4e1dacc-521a-469b-84a8-012afab50104}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_InstruNearDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_instruNearCounts :INT :=0;
+	m_InstruNearCountThres :INT :=50;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{1d951b0c-1d83-4922-a321-3e4bfb66656a}">
+      <Declaration><![CDATA[// check if instrument is near
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Instrument single   At installation--2#0*0*   not installation --2#1*1*  And Hall single --2#100 0000
+IF (IOValue AND 10#64) = 64  THEN
+	m_instruNearCounts := MIN( m_instruNearCounts +1,m_InstruNearCountThres);
+ELSE
+	m_instruNearCounts := 0;
+END_IF
+
+run := m_instruNearCounts >= m_InstruNearCountThres;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_InstruNearDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruNearDetect.run">
+      <LineId Id="35" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="65" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

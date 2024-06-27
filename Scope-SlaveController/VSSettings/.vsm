@@ -5,7 +5,7 @@
   <Children>
     <Node>
       <Title>SetupGravityCaliData</Title>
-      <Expanded>True</Expanded>
+      <Expanded>False</Expanded>
       <FileName>C:\Users\NFJ\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
@@ -513,7 +513,7 @@
     </Node>
     <Node>
       <Title>SlaveGravityCaliData</Title>
-      <Expanded>True</Expanded>
+      <Expanded>False</Expanded>
       <FileName>C:\Users\NFJ\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
@@ -1030,6 +1030,30 @@
           <FileName></FileName>
           <Children>
             <Node>
+              <Title>m_cmdJntPos[3]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_cmdJntPos[3] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntPos[3]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntPos[3] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
               <Title>m_errAngle</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
@@ -1066,7 +1090,37 @@
               <Children />
             </Node>
             <Node>
+              <Title>m_instruInvasionEnableFlag[4]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_instrumentMountedFlag[1]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_instruOnFlag</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
               <Title>m_IOOnCounts</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_nextSlaveArmState[1]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_nextSlaveArmState[4]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -1115,6 +1169,12 @@
             </Node>
             <Node>
               <Title>m_slaveArmState[3]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_trocarOnFlag</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -1212,13 +1272,25 @@
               <FileName></FileName>
               <Children>
                 <Node>
-                  <Title>m_panelInstrumentOnIO</Title>
+                  <Title>m_cmdJntPos[3] (1)</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_slaveArmState[3]</Title>
+                  <Title>m_curJntPos[3] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_trocarOnFlag</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_instruOnFlag</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
@@ -1232,6 +1304,37 @@
               <Children>
                 <Node>
                   <Title>m_IOOnCounts</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_nextSlaveArmState[4]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_nextSlaveArmState[1]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+              </Children>
+            </Node>
+            <Node>
+              <Title>Axis Group (2)</Title>
+              <Expanded>True</Expanded>
+              <FileName></FileName>
+              <Children>
+                <Node>
+                  <Title>m_instruInvasionEnableFlag[4]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_instrumentMountedFlag[1]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />

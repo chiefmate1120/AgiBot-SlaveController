@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -402,10 +402,10 @@ r_DHJntPos[6]:=-r_DHJntPos[6];
 gripAngle:=(jntPosL1+jntPosL2)/(m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
 
 //################### gripper angle handle #################
-IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
+IF (InstruType_ProGraspForceps=m_instruType) THEN//细齿无创抓钳
 	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> r_gripAngle);
 
-ELSIF (16 =onChipData.m_InstruID) THEN//单级电钩
+ELSIF (InstruType_CauteryHook = m_instruType) THEN//单级电钩
 	r_gripAngle:=0;
 	
 ELSE
@@ -1203,7 +1203,8 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="2" />
       <LineId Id="11" Count="1" />
       <LineId Id="16" Count="0" />
-      <LineId Id="58" Count="1" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="79" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />

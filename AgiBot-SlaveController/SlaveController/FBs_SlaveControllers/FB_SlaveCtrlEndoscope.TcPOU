@@ -9,7 +9,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// scope motion master-salve scale
-	m_MSMotionScale :LREAL :=0.5;
+	m_MSMotionScale :LREAL :=-0.5;
 	
 	// scope motion singularity scale
 	m_singMotionScale :LREAL :=1;

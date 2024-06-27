@@ -63,7 +63,7 @@ FOR i:=1 TO g_sArmNum DO
 	
 	// only check cartesion pose error in master-slave mode and within joint limit
 	m_cartPoseErrFlag[i]:=FALSE;
-	IF  SlaveArmState_MasterSlave = i_slaveStatus.m_armState[i] AND norm(i_slaveStatus.m_masterSlavePoseError[i])<g_smallNum THEN 
+	IF  SlaveArmState_MasterSlave = i_slaveStatus.m_armState[i] THEN 
 		m_cartPoseErrFlag[i]:=poseErrCheck(i_slaveStatus.m_cmdArmPose[i],  i_slaveStatus.m_curArmPose[i],
 											m_cartPoseErrCounts[i], m_cartPosErr[i], m_cartOriErr[i]);
 	END_IF

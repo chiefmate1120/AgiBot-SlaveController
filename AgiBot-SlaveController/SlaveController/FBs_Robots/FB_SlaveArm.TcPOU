@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -17,8 +17,10 @@ VAR
 	m_panelInstrumentOnIO AT%I*	:UDINT;
 	m_panelDetect :FB_PanelDetect;
 	m_instruDetect :FB_InstrumentDetect;
+	m_instruNearDetect :FB_InstruNearDetect;
 	m_panelOnFlag :BOOL:=FALSE;
 	m_instruOnFlag :BOOL:=FALSE;
+	m_instruNearFlag :BOOL:=FALSE;
 
 	
 	// trocar and  adjust detect
@@ -218,6 +220,7 @@ m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
 // check panel and instrument
 m_panelOnFlag := m_panelDetect.run(m_panelInstrumentOnIO);
 m_instruOnFlag := m_instruDetect.run(m_panelInstrumentOnIO);
+m_instruNearFlag := m_instruNearDetect.run(m_panelInstrumentOnIO);
 
 //read instrument information
 IF FALSE = m_instruOnFlag THEN
@@ -467,6 +470,8 @@ VAR
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
 	DHRot :Mat3d;
+	
+	tmpRot1,tmpRot2 : Mat3d;
 
 END_VAR
 ]]></Declaration>
@@ -511,6 +516,14 @@ DHRot[3,3]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
 // convert to tcp rotation
 matMultiply(DHRot, GVL_SlaveArmKinematic.g_tcpRotation, r_cartPOSE.m_rot);
 
+//TODO: need verify
+// rotate tcp coordinate 180 degree about z axis if instrument is a head-up 30deg endoscope
+IF m_instrument.instruType = InstruType_Endoscope AND m_instrument.curScopeType = EndoScopeType_30 AND m_instrument.curScopePosture = EndoscopePosture_HeadUp THEN
+	tmpRot2 := rotZ(pi);
+	tmpRot1 := r_cartPOSE.m_rot;
+	matMultiply(tmpRot1, tmpRot2, r_cartPOSE.m_rot);
+END_IF
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -553,8 +566,8 @@ END_FOR
 m_instrument.init(i_armIdx);
 
 // endosocpe toggle button check
-m_endoscopeTypeSwitch.init(0, 1000);
-m_endoscopePostureSwitch.init(0,1000);
+m_endoscopeTypeSwitch.init(0, 500);
+m_endoscopePostureSwitch.init(0,500);
 
 ]]></ST>
       </Implementation>
@@ -584,6 +597,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[instrument REF=m_instrument;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="instruNear" Id="{29bf66f9-822d-4749-92c9-ee092b53b459}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruNear : BOOL]]></Declaration>
+      <Get Name="Get" Id="{6b30ea9b-f7b2-4aff-9934-1c8f2b6bc1de}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruNear := m_instruNearFlag;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -817,7 +841,7 @@ END_VAR
 
 VAR
 	// check buffer
-	checkBuffer :LREAL := 0.005;
+	checkBuffer :LREAL := 0.01;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -1062,6 +1086,7 @@ END_FOR
       <LineId Id="56" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="6" Count="2" />
+      <LineId Id="112" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="41" Count="0" />
@@ -1153,6 +1178,11 @@ END_FOR
       <LineId Id="240" Count="0" />
       <LineId Id="239" Count="0" />
       <LineId Id="243" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="263" Count="2" />
+      <LineId Id="269" Count="1" />
+      <LineId Id="266" Count="0" />
       <LineId Id="241" Count="0" />
       <LineId Id="29" Count="0" />
     </LineIds>
@@ -1181,6 +1211,9 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.instrument.Get">
       <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.instruNear.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instruOn.Get">
       <LineId Id="2" Count="0" />

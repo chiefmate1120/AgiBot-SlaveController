@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlSelfCheck" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheck EXTENDS FB_SlaveArmCtrlBase
@@ -16,9 +16,8 @@ VAR
 	m_selfCheckTrajIdx: INT := 1;
 	m_slefCheckPlanner: ARRAY[1..m_selfCheckMotionNum] OF FB_TrajMoveJ;
 	
-	// collision and safety check threshold
-	m_jntCtrlErr:Vec8d;
-	m_jntCtrlErrThres :Vec8d:=[2(5.0*g_deg2rad), 0.02, 5(5.0*g_deg2rad)];
+	// wait time
+	m_waitTime :LREAL := 1.0;
 	
 END_VAR
 ]]></Declaration>
@@ -46,8 +45,12 @@ IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
 	RETURN;
 END_IF
 
+IF m_timePeriod < m_waitTime THEN
+	RETURN;
+END_IF
+
 // traj plan
-calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod-m_waitTime, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
 
 // check if to transit to next segment
 curJntVel :=i_slaveArm.curJntVel;
@@ -55,15 +58,6 @@ IF(m_timePeriod > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(curJ
 	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
 	m_timePeriod:=0;
 END_IF
-
-// safety check
-vecSub(m_cmdJntPos, i_slaveArm.m_curJntPos, m_jntCtrlErr);
-FOR i:=1 TO g_sJntNum DO 
-	IF ABS(m_jntCtrlErr[i])> m_jntCtrlErrThres[i] THEN
-		m_isFinished:=TRUE;
-		RETURN;
-	END_IF
-END_FOR
 
 // check if to terminated
 IF(m_selfCheckTrajIdx > m_selfCheckMotionNum) THEN
@@ -122,6 +116,10 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="37" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="39" Count="1" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="152" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="14" Count="0" />
@@ -132,13 +130,6 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="91" Count="0" />
       <LineId Id="93" Count="0" />
       <LineId Id="92" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="95" Count="0" />
-      <LineId Id="129" Count="2" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="132" Count="0" />
       <LineId Id="136" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="96" Count="2" />

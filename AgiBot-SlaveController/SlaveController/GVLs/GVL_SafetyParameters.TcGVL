@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 //TODO: safety check parameters need to be reviewd
@@ -12,7 +12,7 @@ VAR_GLOBAL CONSTANT
 	
 	// slave arm cartesion control safety error 
 	g_maxCartPosErr :LREAL := 0.01;
-	g_maxCartOriErr :LREAL := 10.0*g_deg2Rad; 
+	g_maxCartOriErr :LREAL := 90.0*g_deg2Rad; 
 	
 	// slave joint safety error
 	g_slaveMaxJntCtrlErr :Vec8d := [2(5.0*g_deg2Rad), 0.005, 5(5.0*g_deg2Rad)];

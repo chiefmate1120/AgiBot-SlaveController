@@ -35,8 +35,10 @@ run := m_instruOnCounts >= m_InstruOnCountThres;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_InstrumentDetect.run">
-      <LineId Id="35" Count="5" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="65" Count="1" />
     </LineIds>
   </POU>
 </TcPlcObject>
