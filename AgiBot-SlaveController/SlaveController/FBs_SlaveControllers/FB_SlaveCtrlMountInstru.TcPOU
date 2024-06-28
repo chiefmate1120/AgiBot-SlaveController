@@ -57,11 +57,15 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR 
+	i:int;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// return directly if instrument/endoscope is not readed
 IF i_slaveArm.instrument.onChipData.m_Error THEN
-	return;
+	FOR i:= 4 TO 8 DO
+		m_jntOPMode[i] := DriverOPMode_Pos;
+	END_FOR
+	RETURN;
 END_IF
 
 IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND InstruType_endoscope = i_slaveArm.instrument.m_instruType THEN
@@ -280,7 +284,9 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntPos">
       <LineId Id="491" Count="0" />
-      <LineId Id="493" Count="2" />
+      <LineId Id="493" Count="0" />
+      <LineId Id="508" Count="2" />
+      <LineId Id="494" Count="1" />
       <LineId Id="492" Count="0" />
       <LineId Id="150" Count="0" />
       <LineId Id="477" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -848,8 +848,17 @@ END_VAR
         <ST><![CDATA[readyForInstruMount := (m_curJntPos[3]> GVL_SlaveMotorParameters.g_maxDHJntPos[3]-checkBuffer AND m_panelOnFlag);]]></ST>
       </Implementation>
     </Method>
-    <Method Name="recordInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
-      <Declaration><![CDATA[METHOD PUBLIC recordInstruDepth : BOOL
+    <Method Name="resetInstruDepth" Id="{442cf664-eb0b-4d84-a453-ceda2815dd97}">
+      <Declaration><![CDATA[METHOD PUBLIC resetInstruDepth : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_instruInvasionDepth :=GVL_SlaveMotorParameters.g_maxJntPos[3];]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
+      <Declaration><![CDATA[METHOD PUBLIC setInstruDepth : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -1266,7 +1275,10 @@ END_FOR
     <LineIds Name="FB_SlaveArm.readyForInstruMount">
       <LineId Id="49" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.recordInstruDepth">
+    <LineIds Name="FB_SlaveArm.resetInstruDepth">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.setInstruDepth">
       <LineId Id="5" Count="1" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">

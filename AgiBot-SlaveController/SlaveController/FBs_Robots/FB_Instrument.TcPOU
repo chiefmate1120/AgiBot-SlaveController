@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -106,26 +106,10 @@ m_kinematicParameters.kx:=kx[paramIdx];
 m_kinematicParameters.ky:=ky[paramIdx];
 m_kinematicParameters.kz:=kz[paramIdx];
 		
-// rod length
-IF InstruType_Endoscope =  m_instruType THEN
-	m_kinematicParameters.m_rodLength := 0.48;
-ELSE 
-	m_kinematicParameters.m_fingerLength := 0.5392;
-END_IF
-
-// head length
-IF InstruType_Endoscope =  m_instruType THEN
-	m_kinematicParameters.m_headLength := 0.0;
-ELSE 
-	m_kinematicParameters.m_fingerLength := 0.01;
-END_IF
-
-// finger length
-IF InstruType_NeedleDriver =  m_instruType THEN
-	m_kinematicParameters.m_fingerLength := 0.01;
-ELSE 
-	m_kinematicParameters.m_fingerLength := 0.0;
-END_IF
+// kinematic parameters
+m_kinematicParameters.m_rodLength := GVL_InstruCtrlParams.Len_Rod[m_instruType];
+m_kinematicParameters.m_headLength := GVL_InstruCtrlParams.a3[m_instruType];
+m_kinematicParameters.m_fingerLength := GVL_InstruCtrlParams.Head_Len[m_instruType];
 
 //TODO: update instrument joint motion range
 IF m_isSingleFinger THEN
@@ -939,11 +923,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="104" Count="4" />
       <LineId Id="103" Count="0" />
       <LineId Id="109" Count="0" />
-      <LineId Id="52" Count="5" />
-      <LineId Id="64" Count="5" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="71" Count="5" />
-      <LineId Id="70" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="144" Count="1" />
+      <LineId Id="57" Count="0" />
       <LineId Id="88" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="89" Count="0" />
