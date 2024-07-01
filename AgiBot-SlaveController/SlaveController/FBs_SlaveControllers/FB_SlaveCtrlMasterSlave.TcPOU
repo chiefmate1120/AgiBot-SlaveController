@@ -22,7 +22,8 @@ VAR
 	m_maxOriTrackErr :LREAL :=g_deg2Rad * 5;
 	
 	// filter cut-off frequency for master-slave control
-	m_cmdJntPosLpfCutoffFreq : LREAL :=5;
+	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;
+	m_microCmdJntPosLpfCutoffFreq : LREAL :=15;
 	
 	// last command joint position
 	m_lastCmdJntPos :Vec8d;
@@ -462,12 +463,15 @@ m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
 m_slaveCmdGripForceLevel:=0;
 
 // init filter
-FOR i:=1 TO g_sJntNum DO
-	m_cmdJntPosLpf[i].init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+FOR i:=1 TO 3 DO
+	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 END_FOR
-m_cmdYawAngLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
-m_cmdYawVelLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
-m_masterGripAngleVelLpf.init(1, m_cmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+FOR i:=4 TO g_sJntNum DO
+	m_cmdJntPosLpf[i].init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+m_cmdYawAngLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_masterGripAngleVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 
 // init controller
 m_instruController.init(i_slaveArm);
@@ -683,6 +687,8 @@ END_VAR
       <LineId Id="170" Count="0" />
       <LineId Id="77" Count="0" />
       <LineId Id="76" Count="0" />
+      <LineId Id="182" Count="1" />
+      <LineId Id="181" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="74" Count="1" />
       <LineId Id="138" Count="1" />

@@ -9,7 +9,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// invasion buffer
-	m_instruInvasionDepthSafetyBuffer :LREAL:= 0.02;
+	m_instruInvasionDepthSafetyBuffer :LREAL:= 0.01;
 		
 	// max damping when reaching invasion depth
 	m_maxDamp :LREAL :=500;

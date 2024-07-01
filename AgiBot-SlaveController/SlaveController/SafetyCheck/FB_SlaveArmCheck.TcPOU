@@ -7,8 +7,9 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// final arm error flag
+	// final arm/joint error flag
 	m_armErrFlag :ARRAY[1..g_sArmNum] OF BOOL:=[4(FALSE)];
+	m_jntErrFlag :ARRAY[1..g_sArmNum] OF Vec8b;
 	
 	// cartesian pose error flag
 	m_cartPoseErrFlag :ARRAY[1..g_sArmNum] OF BOOL;
@@ -86,9 +87,10 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 	
 	FOR j:=1 TO g_sJntNum DO 
+		m_jntErrFlag[i] := g_zeroVec8b;
 		IF m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j] THEN
+			m_jntErrFlag[i][j] := TRUE;
 			m_armErrFlag[i]:=TRUE;
-			EXIT;
 		END_IF
 	END_FOR
 	
@@ -125,7 +127,7 @@ FOR i:=1 TO 3 DO
 	ELSE
 		r_errCount[i] :=0;	
 	END_IF
-	jntCtrlErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+	jntCtrlErrCheck[i]:= r_errCount[i]>=g_faultTriggerCountsForJntCtrl;
 END_FOR
 	]]></ST>
       </Implementation>
@@ -249,7 +251,12 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
       <LineId Id="144" Count="2" />
       <LineId Id="113" Count="0" />
       <LineId Id="115" Count="0" />
-      <LineId Id="119" Count="11" />
+      <LineId Id="119" Count="5" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="128" Count="2" />
       <LineId Id="114" Count="0" />
       <LineId Id="131" Count="0" />
       <LineId Id="67" Count="0" />

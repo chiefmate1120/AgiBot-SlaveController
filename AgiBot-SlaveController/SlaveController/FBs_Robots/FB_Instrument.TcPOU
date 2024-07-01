@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -749,6 +749,7 @@ CASE m_Step OF
 		
 	110://处理当器械使用次数达到上限后、在同一场手术中还能使用
 		IF m_onChipData.m_InstruusageCounts=m_onChipData.m_InstrumaxUsageCounts THEN
+			//TODO(Yang Xuezun): i_NewValue shouble be serie number?
 			m_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_onChipData.m_InstruusageCounts, i_ArrayData:= m_InstruSeriesRecord);
 			m_Step:=120;
 		ELSE
@@ -761,6 +762,10 @@ CASE m_Step OF
 		IF NOT(m_onChipData.m_InstruReadSucceed) THEN
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=1;
+		ELSIF SlaveArmControl.m_slaveRobot.m_endoscopeMounted AND m_instruType = InstruType_Endoscope THEN
+			m_onChipData.m_InstruReadSucceed := FALSE;
+			m_onChipData.m_Error:=TRUE;
+			m_onChipData.m_ErrorID:=3;
 (*		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
 			IF m_HaveRecord THEN
@@ -1160,6 +1165,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="154" Count="0" />
       <LineId Id="151" Count="1" />
       <LineId Id="162" Count="0" />
+      <LineId Id="418" Count="0" />
       <LineId Id="167" Count="0" />
       <LineId Id="164" Count="2" />
       <LineId Id="161" Count="0" />
@@ -1168,7 +1174,11 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="387" Count="0" />
       <LineId Id="172" Count="0" />
       <LineId Id="174" Count="0" />
-      <LineId Id="176" Count="1" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="415" Count="1" />
+      <LineId Id="177" Count="0" />
       <LineId Id="180" Count="1" />
       <LineId Id="249" Count="0" />
       <LineId Id="182" Count="0" />
