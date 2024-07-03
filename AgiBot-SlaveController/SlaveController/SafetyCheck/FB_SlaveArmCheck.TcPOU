@@ -62,10 +62,10 @@ FOR i:=1 TO g_sArmNum DO
 		CONTINUE;
 	END_IF
 	
-	// only check cartesion pose error in master-slave mode and within joint limit
+	// only check cartesion pose error in master-slave mode 
 	m_cartPoseErrFlag[i]:=FALSE;
 	IF  SlaveArmState_MasterSlave = i_slaveStatus.m_armState[i] THEN 
-		m_cartPoseErrFlag[i]:=poseErrCheck(i_slaveStatus.m_cmdArmPose[i],  i_slaveStatus.m_curArmPose[i],
+		m_cartPoseErrFlag[i]:=poseErrCheck(i_slaveStatus.m_cmdArmPose[i],  i_slaveStatus.m_simArmPose[i],
 											m_cartPoseErrCounts[i], m_cartPosErr[i], m_cartOriErr[i]);
 	END_IF
 	
@@ -127,7 +127,7 @@ FOR i:=1 TO 3 DO
 	ELSE
 		r_errCount[i] :=0;	
 	END_IF
-	jntCtrlErrCheck[i]:= r_errCount[i]>=g_faultTriggerCountsForJntCtrl;
+	jntCtrlErrCheck[i]:= r_errCount[i]>=g_faultTriggerCountsLarge;
 END_FOR
 	]]></ST>
       </Implementation>
@@ -231,7 +231,7 @@ IF  norm(posErr)>g_maxCartPosErr OR norm(oriErr)> g_maxCartOriErr THEN
 ELSE 
 	r_errCount:=0;
 END_IF
-poseErrCheck:= r_errCount >= g_faultTriggerCounts;
+poseErrCheck:= r_errCount >= g_faultTriggerCountsLarge;
 	]]></ST>
       </Implementation>
     </Method>

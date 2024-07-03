@@ -140,6 +140,7 @@ FOR i:=1 TO g_sArmNum DO
 	
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
+	r_slaveStatus.m_simArmPose[i]:=m_slaveArms[i].simCartPose;
 	r_slaveStatus.m_curArmTwist[i]:=m_slaveArms[i].curCartTwist;
 	r_slaveStatus.m_masterSlavePoseError[i] := m_armMasterSlave[i].masterSlavePoseErr;
 	// joint
@@ -399,7 +400,7 @@ FOR i:=1 TO g_sArmNum DO
 								m_slaveArms[i].instrument.curScopeType <> m_slaveArms[i].instrument.nextScopeType) THEN
 						m_nextSlaveArmState[i] := SlaveArmState_ScopeToggle;
 					// to instrument ready
-					ELSIF  m_slaveArms[i].instruReady() THEN
+					ELSIF  m_slaveArms[i].instruReady() AND m_slaveArms[i].trocarOn THEN
 						m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
 					END_IF
 				// to mount instrument/endoscope
@@ -681,6 +682,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="100" Count="0" />
       <LineId Id="64" Count="0" />
       <LineId Id="26" Count="0" />
+      <LineId Id="172" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="144" Count="0" />
       <LineId Id="57" Count="5" />

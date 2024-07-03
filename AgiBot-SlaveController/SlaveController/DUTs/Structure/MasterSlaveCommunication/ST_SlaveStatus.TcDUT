@@ -27,6 +27,9 @@ STRUCT
 	// current arm pose in slave arm coordinate
 	m_curArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	
+	// simulation arm pose in slave arm coordinate
+	m_simArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
 	// command arm twist[linear velocity; angular veloicty] in  slave arm coordinate
 	m_cmdArmTwist:ARRAY[1..g_sArmNum] OF Vec6d;
 	

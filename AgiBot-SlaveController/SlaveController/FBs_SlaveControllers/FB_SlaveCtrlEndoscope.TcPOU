@@ -62,9 +62,8 @@ END_VAR
 	RETURN;
 END_IF
 
-motionScale(i_slaveArm);
-
-cmdVelCalc(i_masterStatus);
+// compute desired view velocity
+cmdVelCalc(i_masterStatus, i_slaveArm);
 
 // filt command velocity
 m_cmdVelLocal[1] := m_cmdVelLpf[1].run(m_cmdVelLocal[1]);
@@ -96,13 +95,13 @@ vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
 // limit arm joint position
 FOR i:=1 TO 3 DO
 	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
-		(armDHJntVel[i] <0 and	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
+		(armDHJntVel[i] <0 AND	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
 		armDHJntVel[i]:=0;
 	END_IF
 END_FOR
 
 // joint 3 up limit to remote center
-jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis;
+jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
 IF (armDHJntVel[3] > 0 AND  i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
 	armDHJntVel[3]:=0;
 END_IF
@@ -131,6 +130,7 @@ m_simJntPos := m_cmdJntPos;
       <Declaration><![CDATA[METHOD PROTECTED cmdVelCalc : BOOL
 VAR_IN_OUT CONSTANT
 	i_masterStatus :ST_MasterStatus;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 
 VAR
@@ -151,8 +151,8 @@ vecAdd(leftVel, rightVel , m_cmdVelLocal);
 vecSelfMultiNum(m_cmdVelLocal, 0.5);
 
 // motion scale
+m_singMotionScale := motionScale(i_slaveArm);
 vecSelfMultiNum(m_cmdVelLocal, m_MSMotionScale* m_singMotionScale);
-
 
 // radius vector from right arm to left arm
 vecSub(i_masterStatus.m_curArmPose[1].m_pos, i_masterStatus.m_curArmPose[2].m_pos, radiusVec);
@@ -219,12 +219,13 @@ END_VAR
       <Implementation>
         <ST><![CDATA[RCDis := ABS(i_slaveArm.curJntPos[3] - i_slaveArm.instrument.kinematicParameters.m_rodLength);
 
-IF RCDis < GVL_SlaveArmKinematic.g_minScopeRCDis THEN
+IF RCDis < GVL_SlaveArmKinematic.g_minInstruRCDis THEN
 	motionScale := m_minSingMotionScale;
 ELSIF RCDis > m_RCDisThres THEN
 	motionScale :=1 ;
 ELSE
-	motionScale := m_minSingMotionScale + (1- m_minSingMotionScale) * (RCDis - GVL_SlaveArmKinematic.g_minScopeRCDis)/(m_RCDisThres - GVL_SlaveArmKinematic.g_minScopeRCDis);
+	motionScale := m_minSingMotionScale + (1- m_minSingMotionScale) * (RCDis - GVL_SlaveArmKinematic.g_minInstruRCDis)/(m_RCDisThres - GVL_SlaveArmKinematic.g_minInstruRCDis);
+	motionScale := LIMIT(0, motionScale, 1.0);
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -232,9 +233,7 @@ END_IF]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
-      <LineId Id="459" Count="2" />
-      <LineId Id="1062" Count="0" />
-      <LineId Id="462" Count="0" />
+      <LineId Id="459" Count="3" />
       <LineId Id="1064" Count="0" />
       <LineId Id="1063" Count="0" />
       <LineId Id="1085" Count="0" />
@@ -284,8 +283,8 @@ END_IF]]></ST>
       <LineId Id="22" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="24" Count="0" />
+      <LineId Id="66" Count="0" />
       <LineId Id="23" Count="0" />
-      <LineId Id="28" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="30" Count="0" />
@@ -328,6 +327,7 @@ END_IF]]></ST>
       <LineId Id="17" Count="0" />
       <LineId Id="19" Count="1" />
       <LineId Id="22" Count="1" />
+      <LineId Id="31" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
   </POU>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -639,12 +639,8 @@ END_VAR
 	RETURN;
 END_IF
 
-IF m_instrument.m_instruType = InstruType_Endoscope THEN
-	instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis+checkBuffer);
-ELSE
-	instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
-										+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
-END_IF
+instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
+									+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
 ]]></ST>
       </Implementation>
     </Method>
@@ -728,24 +724,30 @@ END_VAR
 VAR_IN_OUT
 	r_jaco :Mat6d;
 END_VAR
-VAR_INPUT
+
+VAR CONSTANT
+	// modify joint2/3 position to avoid jacobian singularity
+	m_Jnt2PosThres :LREAL := -165 * g_deg2Rad;
+	m_Jnt3PosThres :LREAL := -0.05;
 END_VAR
 
 VAR
 	d1, L, a, b :LREAL;
-	q3:LREAL;
+	q2, q3:LREAL;
 
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
-	
-	// modify joint3 position to avoid jacobian singularity
-	m_Jnt3PosThres :LREAL := -0.03;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
 b:=m_instrument.kinematicParameters.m_fingerLength;
+
+q2 := i_DHJntPos[2];
+IF q2 < m_Jnt2PosThres THEN
+	q2 := m_Jnt2PosThres;
+END_IF
 
 q3:=i_DHJntPos[3];
 IF q3 - L > m_Jnt3PosThres THEN
@@ -1228,7 +1230,8 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instruReady">
-      <LineId Id="38" Count="10" />
+      <LineId Id="38" Count="3" />
+      <LineId Id="45" Count="2" />
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.isEnabled">
@@ -1255,6 +1258,10 @@ END_FOR
       <LineId Id="248" Count="0" />
       <LineId Id="338" Count="1" />
       <LineId Id="253" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="402" Count="0" />
+      <LineId Id="404" Count="0" />
+      <LineId Id="414" Count="1" />
       <LineId Id="340" Count="0" />
       <LineId Id="254" Count="0" />
       <LineId Id="379" Count="3" />

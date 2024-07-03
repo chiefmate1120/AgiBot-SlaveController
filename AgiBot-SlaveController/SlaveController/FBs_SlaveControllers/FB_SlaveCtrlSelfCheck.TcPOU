@@ -16,8 +16,12 @@ VAR
 	m_selfCheckTrajIdx: INT := 1;
 	m_slefCheckPlanner: ARRAY[1..m_selfCheckMotionNum] OF FB_TrajMoveJ;
 	
-	// wait time
-	m_waitTime :LREAL := 1.0;
+   // wait time for joint enable
+   m_enableWaitTime :LREAL := 1.0;
+
+   // time gap between enable and motion
+   m_jntMotionTimeGap :LREAL := 0.5;
+
 	
 END_VAR
 ]]></Declaration>
@@ -45,16 +49,21 @@ IF m_slefCheckPlanner[m_selfCheckTrajIdx].isGene = FALSE THEN
 	RETURN;
 END_IF
 
-IF m_timePeriod < m_waitTime THEN
+// arms enable successively
+IF m_timePeriod > m_enableWaitTime THEN
+       m_jntEnableFlag :=g_onesVec8i;
+END_IF
+
+IF m_timePeriod < m_enableWaitTime + m_jntMotionTimeGap THEN
 	RETURN;
 END_IF
 
 // traj plan
-calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod-m_waitTime, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+calcCmdJntPos :=m_slefCheckPlanner[m_selfCheckTrajIdx].evaluate(m_timePeriod-m_enableWaitTime-m_jntMotionTimeGap, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
 
 // check if to transit to next segment
 curJntVel :=i_slaveArm.curJntVel;
-IF(m_timePeriod > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
+IF(m_timePeriod - m_enableWaitTime - m_jntMotionTimeGap > m_slefCheckPlanner[m_selfCheckTrajIdx].duration  AND norm(curJntVel)<7*GVL_SlaveControlParameters.g_jntStaticVelThres) THEN
 	m_selfCheckTrajIdx:=m_selfCheckTrajIdx+1;
 	m_timePeriod:=0;
 END_IF
@@ -81,17 +90,18 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
-m_selfCheckTrajIdx :=1;
+m_jntEnableFlag :=g_zeroVec8i;
 
 //set different wait time for each arm, so the arms would run self-check successively
-m_waitTime := i_slaveArm.armIdx;
+m_enableWaitTime := i_slaveArm.armIdx-1;
 
 // traj plan
 // fisrt segment
 // TODO: joint1/2 stay still in case arms collision
+m_selfCheckTrajIdx :=1;
 startJntPos:=i_slaveArm.curJntPos;
 endJntPos:=startJntPos;
-FOR j:=3 TO 7 DO 
+FOR j:=3 TO g_sJntNum DO 
 	endJntPos[j]:=m_selfCheckPosture[1,j];
 END_FOR
 m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
@@ -119,8 +129,8 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="37" Count="0" />
       <LineId Id="67" Count="0" />
       <LineId Id="39" Count="1" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="149" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="167" Count="5" />
       <LineId Id="153" Count="0" />
       <LineId Id="152" Count="0" />
       <LineId Id="42" Count="0" />
@@ -139,12 +149,13 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCtrlSelfCheck.init">
       <LineId Id="57" Count="0" />
-      <LineId Id="72" Count="0" />
+      <LineId Id="218" Count="0" />
       <LineId Id="199" Count="2" />
       <LineId Id="121" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="138" Count="0" />
       <LineId Id="172" Count="0" />
+      <LineId Id="217" Count="0" />
       <LineId Id="82" Count="0" />
       <LineId Id="185" Count="0" />
       <LineId Id="98" Count="0" />

@@ -107,9 +107,9 @@ m_kinematicParameters.ky:=ky[paramIdx];
 m_kinematicParameters.kz:=kz[paramIdx];
 		
 // kinematic parameters
-m_kinematicParameters.m_rodLength := GVL_InstruCtrlParams.Len_Rod[m_instruType];
+m_kinematicParameters.m_rodLength := GVL_InstruCtrlParams.Len_Rod[m_instruType] - g_panelHeight;
 m_kinematicParameters.m_headLength := GVL_InstruCtrlParams.a3[m_instruType];
-m_kinematicParameters.m_fingerLength := GVL_InstruCtrlParams.Head_Len[m_instruType];
+m_kinematicParameters.m_fingerLength := GVL_InstruCtrlParams.Head_Len_1[m_instruType];
 
 //TODO: update instrument joint motion range
 IF m_isSingleFinger THEN

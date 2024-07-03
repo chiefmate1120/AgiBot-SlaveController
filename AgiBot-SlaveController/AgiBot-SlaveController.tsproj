@@ -969,10 +969,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{49EBA7DF-7554-4C35-5C0E-794CBE24B941}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{84195EC6-E610-F3C1-0707-CF3B1B7C3FCC}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
-			<BitSize>12224</BitSize>
+			<BitSize>15296</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{89EEE9AC-51D2-771C-E483-68DF69652F1A}">E_SlaveArmState</Type>
@@ -1082,6 +1082,17 @@
 				<BitOffs>4544</BitOffs>
 			</SubItem>
 			<SubItem>
+				<Name>m_simArmPose</Name>
+				<Type GUID="{A41C2452-5720-3408-E222-D9CF54E07AAF}">ST_Frame</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ simulation arm pose in slave arm coordinate]]></Comment>
+				<BitSize>3072</BitSize>
+				<BitOffs>7616</BitOffs>
+			</SubItem>
+			<SubItem>
 				<Name>m_cmdArmTwist</Name>
 				<Type GUID="{831F75E9-C113-0166-8F86-6AA81377C84E}">Vec6d</Type>
 				<ArrayInfo>
@@ -1090,7 +1101,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in  slave arm coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>7616</BitOffs>
+				<BitOffs>10688</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmTwist</Name>
@@ -1101,7 +1112,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in  slave arm coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>9152</BitOffs>
+				<BitOffs>12224</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_masterSlavePoseError</Name>
@@ -1112,7 +1123,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ master slave pose error [position, angle*axis] in endoscope coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>10688</BitOffs>
+				<BitOffs>13760</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1835,7 +1846,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{609D34BB-8D3F-E0F3-BF55-BB756A705DF6}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{7F0231CD-A3FD-FB06-3A4A-ECF3B1CF7425}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2076,7 +2087,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{49EBA7DF-7554-4C35-5C0E-794CBE24B941}">ST_SlaveStatus</Type>
+							<Type GUID="{84195EC6-E610-F3C1-0707-CF3B1B7C3FCC}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2371,7 +2382,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{49EBA7DF-7554-4C35-5C0E-794CBE24B941}">ST_SlaveStatus</Type>
+							<Type GUID="{84195EC6-E610-F3C1-0707-CF3B1B7C3FCC}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2491,7 +2502,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{49EBA7DF-7554-4C35-5C0E-794CBE24B941}">ST_SlaveStatus</Type>
+							<Type GUID="{84195EC6-E610-F3C1-0707-CF3B1B7C3FCC}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -2609,7 +2620,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{49EBA7DF-7554-4C35-5C0E-794CBE24B941}">ST_SlaveStatus</Type>
+							<Type GUID="{84195EC6-E610-F3C1-0707-CF3B1B7C3FCC}">ST_SlaveStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">

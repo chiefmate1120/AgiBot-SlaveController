@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SlaveMotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
@@ -28,7 +28,7 @@ VAR_GLOBAL CONSTANT
 	g_maxDHJntPos : ARRAY[1..6] OF LREAL :=[2.7,	1.13-pi/2, 	0.575, 5.5, -PI/2 + 75*g_deg2Rad, PI/2];
 	
 	// joint velocity limit
-	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[2.0, 2.0, 0.5, 5(4*pi)];
+	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.3, 1.3, 0.5, 5(4*pi)];
 		
 END_VAR
 ]]></Declaration>
