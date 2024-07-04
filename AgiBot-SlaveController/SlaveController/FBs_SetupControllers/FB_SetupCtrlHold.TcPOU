@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SetupCtrlHold" Id="{acc6ed82-034a-420c-8162-3225c33c4b38}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Init
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlHold EXTENDS FB_SetupArmCtrlBase
@@ -12,9 +12,29 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-]]></ST>
+      <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="calcCmdJntPos" Id="{0a1ec31f-6a67-4d62-bdf8-9fb476d6f874}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupArm	:FB_SetupArm;
+END_VAR
+
+
+VAR 
+	i :INT;
+	curJntVel :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set command joint position to current joint position, it's ok as all the joints is disabled.
+// And by doing so, can avoid some fault triggers, like joint control error if joint enter disable too fast and brake can not stop joint immediately. 
+IF m_timePeriod < 1.0 THEN
+	m_cmdJntPos:=i_setupArm.curJntPos;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{19914e93-fefd-4af6-8135-c232cbfbf440}">
       <Declaration><![CDATA[// override this function in each exact controller
 // NOTICE: set joint control mode here, and do some initialization if needed
@@ -35,8 +55,13 @@ m_jntOPMode[3] := DriverOPMode_Trq;
       </Implementation>
     </Method>
     <LineIds Name="FB_SetupCtrlHold">
-      <LineId Id="18" Count="0" />
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupCtrlHold.calcCmdJntPos">
+      <LineId Id="143" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="188" Count="2" />
+      <LineId Id="98" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlHold.init">
       <LineId Id="104" Count="0" />

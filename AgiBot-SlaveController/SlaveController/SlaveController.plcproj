@@ -295,6 +295,9 @@
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_InstruNearDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>

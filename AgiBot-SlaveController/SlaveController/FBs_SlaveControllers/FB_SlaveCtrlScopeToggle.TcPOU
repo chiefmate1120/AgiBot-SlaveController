@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlScopeToggle" Id="{7f91246f-ffc7-4fcd-9845-791ccec5d233}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlScopeToggle EXTENDS FB_SlaveArmCtrlBase
@@ -41,7 +41,7 @@ m_jntOTG.run(m_targetRotJntPos, 0.0, o_cmdAcc=>m_cmdJntAcc[8],o_cmdVel=>m_cmdJnt
 
 // reach target check
 trackErr := ABS(i_slaveArm.curJntPos[8] - m_targetRotJntPos);
-m_isFinished := trackErr <g_jntCtrlAngTolHigh AND i_slaveArm.curJntVel[8]<g_jntStaticVelThres;
+m_isFinished := trackErr <2*g_jntCtrlAngTolHigh AND i_slaveArm.curJntVel[8]<g_jntStaticVelThres;
 
 IF m_isFinished THEN
 	// update endoscope type/posture
@@ -70,6 +70,9 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
+m_jntOPMode[8] := DriverOPMode_PosTrq;
 
 // endoscope posture toggle
 IF i_slaveArm.instrument.nextScopePosture <> i_slaveArm.instrument.curScopePosture AND i_slaveArm.instrument.curScopeType = EndoScopeType_30 THEN
@@ -107,6 +110,8 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCtrlScopeToggle.init">
       <LineId Id="152" Count="3" />
+      <LineId Id="270" Count="1" />
+      <LineId Id="269" Count="0" />
       <LineId Id="242" Count="0" />
       <LineId Id="241" Count="0" />
       <LineId Id="243" Count="1" />

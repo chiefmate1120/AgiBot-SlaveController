@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlError" Id="{78b2e60d-537e-446e-8b3b-6db63d5ab02c}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Error Hold
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlError EXTENDS FB_SlaveArmCtrlBase
@@ -54,8 +54,19 @@ END_VAR
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 
-// disable all joints
- m_jntEnableFlag :=g_zeroVec8i;
+// disable first three joints
+m_jntEnableFlag[1]:= 0;
+m_jntEnableFlag[2]:= 0;
+m_jntEnableFlag[3]:= 0;
+
+// disable instrument joints which is in error 
+FOR i:=4 TO g_sJntNum DO
+	IF SafetyCheck.m_slaveArmCheck.m_jntErrFlag[i_slaveArm.armIdx][i] THEN
+		m_jntEnableFlag[i] := 0;
+	ELSE
+		m_jntEnableFlag[i] := 1;
+	END_IF
+END_FOR
  
  // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -73,7 +84,13 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="67" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="36" Count="0" />
-      <LineId Id="59" Count="0" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="3" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="104" Count="0" />
       <LineId Id="82" Count="2" />
       <LineId Id="12" Count="0" />
     </LineIds>
