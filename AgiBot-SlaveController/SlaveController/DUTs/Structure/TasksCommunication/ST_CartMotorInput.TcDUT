@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_CartMotorInput" Id="{590fb6f1-3bf5-4592-b6e1-ec7843cbfee6}">
+    <Declaration><![CDATA[TYPE ST_CartMotorInput EXTENDS ST_MotorInputs :
+STRUCT
+	//
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

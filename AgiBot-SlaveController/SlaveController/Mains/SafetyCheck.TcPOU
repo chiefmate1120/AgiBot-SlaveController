@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SafetyCheck
+VAR
+	// slave robot information, including arm status and cartesian data
+	m_slaveStatus AT %I* :ST_slaveStatus;
+	
+	// slave robot joint data
+	m_slaveJointData AT %I* :ST_slaveJointData;
+	
+	// setup robot information
+	m_setupStatus AT %I* :ST_SetupStatus;
+	
+	// setup robot joint data
+	m_setupJointsData AT %I* :ST_SetupJointData;
+	
+	// error check result
+	m_safetyCheckData AT %Q* :ST_SafetyData;
+	
+	//emergency stop and stop botton
+	m_stopButton AT %I*: BOOL;
+	m_emergencyStopButton AT %I*: BOOL;
+	
+	//warning tone
+	m_warningTone AT %Q*:ARRAY [1..4] OF BOOL;
+	
+	m_initFlag:bool;
+	m_cartCheck :FB_CartCheck;
+	m_setupArmCheck:FB_SetupArmCheck;
+	m_slaveArmCheck:FB_SlaveArmCheck;
+	
+	i: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// reset data
+IF FALSE = m_initFlag  THEN
+	FOR i:=1  TO g_sArmNum DO 
+		m_safetyCheckData.m_slaveErrFlag[i]:=FALSE;
+		m_safetyCheckData.m_setupErrFlag[i]:=FALSE;
+		m_safetyCheckData.m_cartErrFlag:=FALSE;
+	END_FOR
+	m_initFlag:=TRUE;
+END_IF
+
+m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheckData.m_slaveErrFlag);
+m_setupArmCheck.check(m_setupStatus,m_setupJointsData, o_errorFlag=>m_safetyCheckData.m_setupErrFlag);]]></ST>
+    </Implementation>
+    <LineIds Name="SafetyCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="37" Count="3" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="66" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

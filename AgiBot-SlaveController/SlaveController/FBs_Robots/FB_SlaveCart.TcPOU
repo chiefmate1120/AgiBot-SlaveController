@@ -1,0 +1,621 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
+VAR
+	//open laser io
+	m_openHorizonLaser AT  %Q* :DINT;
+	m_openCrossLaser AT  %Q* :DINT;
+	
+	//Driving force of the car io
+	m_driveForce AT %I* :Vec2i;
+	
+	//stabilizing foot sensor  (normally-closed contact)
+	m_stabilizFootSensorLeft AT%I* :BOOL;
+	m_stabilizFootSensorRight AT%I* :BOOL;
+	m_stabilizFootSensorAuto AT%I* :BOOL;
+	m_stabilizFootSensorManual AT%I* :BOOL;
+	
+	//Trocar IO check
+	m_trocarIO AT %I* : ARRAY [1..4] OF UDINT;
+	m_trocarCheck : ARRAY [1..4] OF FB_trocarDetect;
+	m_trocarFlag : ARRAY [1..4] OF BOOL;
+	m_trocarOnFlag : INT:=0;
+	
+	//output screw break IO 
+	m_screwBreak AT %Q* : BOOL;
+	m_screwBreakSR : SR;
+	
+	//car overhang rotation signal is in the arm
+	m_carRotaOverhangIO AT%I* : ARRAY [1..4] OF UDINT;
+	m_rotaButtonDetect : ARRAY [1..4] OF FB_rotaButtonDetect;
+	m_rotaOverhangOnFlag : UDINT :=0;
+	
+	//cart joint
+	m_cartJoints: ARRAY [1..g_cartJntNum] OF FB_CartJoint;
+	
+	// cart status
+	m_cartStatus  : ST_CartStatus;
+	
+
+		// arm joint data
+	m_curMotorPos :Vec8d;
+	m_curLinkPos :Vec8d;
+	m_curLinkSingle :Vec8d;
+	m_curJntPos :Vec8d;
+	m_curDHJntPos :Vec6d;
+	m_curGripAngle :LREAL;
+	m_curJntVel :Vec8d;
+	m_curDHJntVel :Vec6d;
+	m_curJntTrq :Vec8d;
+	m_rawJntCurrent :Vec8d;
+	m_filtJntCurrent :Vec8d;
+	m_cmdJntTrq :Vec8d;
+	m_cmdJntCurrent : Vec8d;
+	m_cmdJntPos :Vec8d;
+	m_cmdJntVel :Vec8d;
+
+	//SDO Writer
+	m_CommunicationCycleInitMZSub1:ARRAY [1..3] OF FB_EcCoESdoWrite;
+	m_CommunicationCycleInitMZSub2:ARRAY [1..3] OF FB_EcCoESdoWrite;
+	m_CommunicationCycleSub1:INT:=1;
+	m_CommunicationCycleSub2:INT:=-3;
+	
+	//update ui information
+	m_joystickSignal:Vec8d;
+	m_cartDataFromUI : ST_CartUIData;
+	m_ctrlEnable : ST_UI_control;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{37b9f91a-fbe1-4cae-807d-574d49e247d7}" />
+    <Property Name="cartDockingState" Id="{86905c60-a5d0-40a0-947e-e9a92fd9b4c8}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cartDockingState : UINT]]></Declaration>
+      <Get Name="Get" Id="{3efac307-74e7-471b-94d7-c9501d69aa9a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{bf6dd221-7fd9-4ea6-9329-7f9485725c41}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_cartDataFromUI.m_cartDockingState := cartDockingState;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="cartDrapingState" Id="{392660e0-52e3-4ef4-92d3-ba7eba8dd842}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cartDrapingState : UINT]]></Declaration>
+      <Get Name="Get" Id="{53a9b4f0-7c5c-465f-b7e2-ee69519178b0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{daf76773-35cc-41c7-b97d-fe69cd27cb90}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_cartDataFromUI.m_cartDrapingState := cartDrapingState;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="checkIO" Id="{52184f86-1fa7-432c-a16c-6b035dc3943c}">
+      <Declaration><![CDATA[METHOD checkIO : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
+IF (m_curJntPos[5] * 1000 + 1850) > 1950 THEN
+	//
+END_IF
+
+//check overhang rotation button
+m_rotaOverhangOnFlag := MAX( m_rotaButtonDetect[1].run(m_carRotaOverhangIO[1]), m_rotaButtonDetect[2].run(m_carRotaOverhangIO[2]),m_rotaButtonDetect[3].run(m_carRotaOverhangIO[3]),m_rotaButtonDetect[4].run(m_carRotaOverhangIO[4]));
+
+FOR i := 1 TO 4 BY 1 DO
+	//trocar in place monitor
+	m_trocarFlag[i] := m_trocarCheck[i].run(m_trocarIO[i] );
+END_FOR
+
+m_trocarOnFlag := BOOL_TO_INT(m_trocarFlag[1]) + BOOL_TO_INT(m_trocarFlag[2]) + BOOL_TO_INT(m_trocarFlag[3]) + BOOL_TO_INT(m_trocarFlag[4]);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="cmdJntPos" Id="{488d680a-8342-457b-a395-401f6b755b10}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntPos : REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{68835cd8-1473-432f-b232-4a0619dd88bf}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntPos REF= m_cmdJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="cmdJntVel" Id="{7d24481c-3787-4c6e-8b42-03fddb05fef4}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntVel : REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{05aa5687-796c-4a75-92d5-951df467cfd7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntVel REF= m_cmdJntVel;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ctrlEnable" Id="{a3baaf86-b572-478d-828a-8abd1832149b}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY ctrlEnable : REFERENCE TO ST_UI_control]]></Declaration>
+      <Get Name="Get" Id="{088e36f0-64b1-4fec-9db7-8ed59d586fe5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ctrlEnable REF= m_ctrlEnable;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{3a6445f6-98f8-4080-a3fd-ced7b89e6f2e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="curDHJntPos" Id="{ba1ee581-e55e-41ad-87dc-7b501fc90eb2}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curDHJntPos :REFERENCE TO Vec6d]]></Declaration>
+      <Get Name="Get" Id="{3d3679c2-ef2a-4f6d-a4df-07b6a1b00143}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curDHJntPos ref= m_curDHJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curDHJntVel" Id="{51c1a699-c808-4814-84f2-b43538048e3e}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curDHJntVel :REFERENCE TO Vec6d]]></Declaration>
+      <Get Name="Get" Id="{d647fd51-76de-4dd3-b960-cf5d1f37cc4f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curDHJntVel REF= m_curDHJntVel;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curJntPos" Id="{099d6b43-b820-44e6-bf10-79fd50adb0cd}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntPos : REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{e95536de-e76f-49e9-afca-f73fdd1cbab0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntPos ref=m_curJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curJntVel" Id="{4d944a37-47d9-4fd3-a0c1-6a8e3ecf8054}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntVel :REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{fe80b852-647f-4f4f-8f1d-7e8c0086b108}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntVel ref=m_curJntVel;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curLinkPos" Id="{dd6e8dac-cec3-48df-b41e-0a55e5f7b25c}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curLinkPos :REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{68094696-79da-4c76-8f41-c8adfd451a61}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curLinkPos ref=m_curLinkPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curMotorPos" Id="{4d7df53d-6ac0-4195-b87b-e20244051d14}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curMotorPos : REFERENCE TO  Vec8d]]></Declaration>
+      <Get Name="Get" Id="{61be3c14-3c98-4743-b66a-f89744318c7b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curMotorPos ref=m_curMotorPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="enable" Id="{b1f8fb89-f8ac-43fc-a9cf-b5c213a4b36e}">
+      <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntIdx :Vec8i;
+END_VAR
+VAR
+	i :INT ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_cartJntNum DO
+	IF 3<=i AND i<5 THEN
+		IF 1= i_jntIdx[i] THEN
+			m_cartJoints[i].enableMZ();
+		ELSE
+			m_cartJoints[i].disable();
+		END_IF
+	ELSIF i = 5 THEN
+		IF 1= i_jntIdx[i] THEN
+			m_screwBreak := m_cartJoints[i].enableMZ();
+		ELSE
+			m_screwBreak :=  NOT m_cartJoints[i].disable();
+		END_IF
+	ELSE
+		IF 1= i_jntIdx[i] THEN
+			m_cartJoints[i].enable();
+		ELSE
+			m_cartJoints[i].disable();
+		END_IF
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{a9830b95-e937-4a29-b70e-785e20452d37}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+// cart joint init
+FOR i:= 1 TO g_cartJntNum BY 1 DO
+	m_cartJoints[i].init(i, g_cartCtrlCycleTime);
+END_FOR
+
+
+// joint init
+FOR i:=1 TO g_cartJntNum DO
+	m_cartJoints[i].initJntPos();
+END_FOR
+
+
+// update cart status if joint position is re-init
+updateStatus();
+
+
+
+//MingZhi drive example Initialize the communication period
+FOR i := 1 TO 3 BY 1 DO
+	m_CommunicationCycleInitMZSub1[i](sNetID:= GVL_CartJointEncoderCaliData.g_slaveCartNetID,
+				nSlaveAddr := GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[i+2],
+				nSubIndex:=1,nIndex:=16#60C2,pSrcBuf:=ADR(m_CommunicationCycleSub1),cbBufLen:=SIZEOF(m_CommunicationCycleSub1),bExecute:=TRUE);
+	
+	IF NOT m_CommunicationCycleInitMZSub1[i].bBusy THEN
+		m_CommunicationCycleInitMZSub1[i](bExecute:=FALSE);
+	END_IF
+					
+	m_CommunicationCycleInitMZSub2[i](sNetID:= GVL_CartJointEncoderCaliData.g_slaveCartNetID,
+					nSlaveAddr := GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[i+2],
+					nSubIndex:=2,nIndex:=16#60C2,pSrcBuf:=ADR(m_CommunicationCycleSub2),cbBufLen:=SIZEOF(m_CommunicationCycleSub2),bExecute:=TRUE);
+	
+	IF NOT m_CommunicationCycleInitMZSub2[i].bBusy THEN
+		m_CommunicationCycleInitMZSub2[i](bExecute:=FALSE);
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="joystickSignalAnalysis" Id="{15b803f9-93d6-4377-9b18-7562f2015d41}">
+      <Declaration><![CDATA[METHOD  joystickSignalAnalysis : Vec8d 
+VAR_INPUT
+	i_joystickDataFromUI:ARRAY [0..21] OF USINT;
+END_VAR
+
+VAR_STAT
+	i:INT;
+	m_handData:ARRAY [0..21] OF USINT;
+	m_outHandData : Vec8d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF i_joystickDataFromUI[0] = 16#FF THEN
+	m_handData := i_joystickDataFromUI;
+	m_outHandData[1] :=m_handData[7]*256 + m_handData[8]; // car  joint5 pillar
+	m_outHandData[2] :=m_handData[3]*256 + m_handData[4]; //car joint7 beamStretch
+	m_outHandData[3] :=m_handData[1]*256 + m_handData[2]; // car joint6  beamRot
+	m_outHandData[4] :=m_handData[5]*256 + m_handData[6]; // joint8 overhang 
+	m_outHandData[5] :=m_handData[9]*256 + m_handData[10];
+	m_outHandData[6] :=m_handData[11]*256 + m_handData[12];
+	m_outHandData[7] :=m_handData[13]*256 + m_handData[14];
+	m_outHandData[8] :=m_handData[15]*256 + m_handData[16];
+END_IF
+joystickSignalAnalysis:=m_outHandData;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ProcessingUIData" Id="{217a26c8-8c06-4704-8681-3cd189d05dd8}">
+      <Declaration><![CDATA[METHOD ProcessingUIData : BOOL
+VAR_IN_OUT CONSTANT
+	//UI information, import from UI controller
+	i_UIData :ST_CartUIData;
+END_VAR
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+m_joystickSignal := joystickSignalAnalysis(i_UIData.m_joystickDataFromUI);
+
+m_ctrlEnable:=i_UIData.m_ctrlEnableFromUI;
+
+m_cartDataFromUI.m_standColumnHightLimit := i_UIData.m_standColumnHightLimit;
+
+
+m_cartDataFromUI.m_cartSpecificPosDraping := GVL_CartControlParameters.g_surgicalDrapingPos;
+
+FOR i := 1 TO 4 BY 1 DO
+	IF i_UIData.m_surgicalSite > 0 AND i_UIData.m_surgicalLocation > 0 THEN
+		m_cartDataFromUI.m_cartSpecificPosDocking[i + 4] := GVL_CartControlParameters.g_surgicalOrientPos[i_UIData.m_surgicalSite, i_UIData.m_surgicalLocation,i];
+	END_IF
+END_FOR
+
+IF NOT m_cartDataFromUI.m_surgicalSite = i_UIData.m_surgicalSite OR NOT m_cartDataFromUI.m_surgicalLocation = i_UIData.m_surgicalLocation THEN
+	m_cartDataFromUI.m_cartDockingState := 0;
+END_IF
+
+m_cartDataFromUI.m_surgicalSite := i_UIData.m_surgicalSite;
+m_cartDataFromUI.m_surgicalLocation := i_UIData.m_surgicalLocation;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="status" Id="{cd2a750f-147a-42a5-85cd-a7d5a815c963}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY status : ST_CartStatus]]></Declaration>
+      <Get Name="Get" Id="{c1788322-40e1-4e3e-a26b-a8239c1e1e6d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[status := m_cartStatus;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="updateCmds" Id="{a083537e-6f52-4b88-8b83-3c9a5d0db87a}">
+      <Declaration><![CDATA[METHOD PUBLIC updateCmds : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartCtrlCmd : ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntTrq:=i_cartCtrlCmd.m_cmdJntTrq;
+m_cmdJntPos :=i_cartCtrlCmd.m_cmdJntPos;
+m_cmdJntVel :=i_cartCtrlCmd.m_cmdJntVel;
+
+
+// enable/disable joints
+enable(i_cartCtrlCmd.m_jntEnableFlag);
+
+// position/Velocity control
+FOR i:=1 TO g_sJntNum DO 
+	IF i_cartCtrlCmd.m_jntOPMode[i]=DriverOPMode_Pos THEN
+		m_cmdJntTrq[i]:=0;
+		m_cmdJntVel[i]:=0;
+		m_cartJoints[i].updateCmd(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
+	ELSIF i_cartCtrlCmd.m_jntOPMode[i]=DriverOPMode_Vel THEN
+		m_cmdJntTrq[i]:=0;
+		m_cmdJntPos[i]:=0;
+		m_cartJoints[i].updateCmd(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
+	ELSIF i_cartCtrlCmd.m_jntOPMode[i]=DriverOPMode_MZPos  THEN
+		m_cmdJntTrq[i]:=0;
+		m_cmdJntVel[i]:=0;
+		//Input torque mode because the operating mode word for the contour position mode of the MingZhi driver is 1
+		m_cartJoints[i].updateCmd(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
+	ELSIF i_cartCtrlCmd.m_jntOPMode[i]=DriverOPMode_cspMZ  THEN
+		 m_cartJoints[i].updateCmd(DriverOPMode_cspMZ,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
+	ELSIF DriverOPMode_csvMZ = i_cartCtrlCmd.m_jntOPMode[i] THEN
+		m_cartJoints[i].updateCmd(DriverOPMode_csvMZ,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
+      <Declaration><![CDATA[METHOD PUBLIC updateStatus : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// update joint data
+FOR i:=1 TO g_sJntNum DO
+	m_cartJoints[i].updateStatus();
+END_FOR
+
+//IO output   Horizontal laser IO output   Cross laser IO output
+checkIO();
+
+
+// get joint data
+FOR i:=1 TO g_cartJntNum DO
+	m_curMotorPos[i]:=m_cartJoints[i].motorPos;
+	m_curLinkPos[i]:=m_cartJoints[i].linkPos;
+	m_curLinkSingle[i]:=m_cartJoints[i].linkSingle;
+	m_curJntPos[i]:=m_cartJoints[i].jntPos;
+	m_curJntVel[i]:=m_cartJoints[i].jntVel;
+	m_curJntTrq[i]:=m_cartJoints[i].jntTrq;
+	m_rawJntCurrent[i]:=m_cartJoints[i].rawCurrent;
+	m_filtJntCurrent[i]:=m_cartJoints[i].filtCurrent;
+	m_cmdJntCurrent[i]:=m_cartJoints[i].cmdCurrent;
+END_FOR ]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveCart">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.cartDockingState.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.cartDockingState.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.cartDrapingState.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.cartDrapingState.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.checkIO">
+      <LineId Id="6" Count="1" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.cmdJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.cmdJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.ctrlEnable.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.ctrlEnable.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curDHJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curDHJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curLinkPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curMotorPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.enable">
+      <LineId Id="15" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="58" Count="3" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="38" Count="3" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="3" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="48" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.init">
+      <LineId Id="32" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="40" Count="2" />
+      <LineId Id="44" Count="4" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="87" Count="13" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.joystickSignalAnalysis">
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="4" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.ProcessingUIData">
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="43" Count="2" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.status.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.updateCmds">
+      <LineId Id="26" Count="2" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="67" Count="1" />
+      <LineId Id="40" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.updateStatus">
+      <LineId Id="24" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="31" Count="12" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

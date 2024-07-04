@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_MathDefine" Id="{7eb77e09-e6c3-483f-ae23-6f0bf731cf6b}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	g_smallNum :LREAL := 1E-8;
+	g_smallAng :LREAL := 0.01*PI/180;
+	g_largeNum: LREAL :=1E16;
+	g_deg2Rad :LREAL := pi/180.0;
+	g_rad2Deg :LREAL := 180.0/pi;
+	g_2pi :LREAL :=2*PI;
+	
+	g_eye3d :Mat3d:=[1, 0, 0,
+					 0, 1, 0,
+					 0, 0, 1];
+	g_eye4d :Mat4d:=[1, 0, 0, 0,
+					 0, 1, 0, 0,
+					 0, 0, 1, 0,
+					 0, 0, 0, 1];
+	g_zeorMat3d :Mat3d:=[9(0)];
+	
+	g_zeroMat6d :Mat6d:=[36(0)];
+	g_zeroMat7d :Mat7d:=[49(0)];
+	g_eye7d :Mat7d:=[1, 0, 0, 0, 0, 0, 0, 
+					 0, 1, 0, 0, 0, 0, 0, 
+					 0, 0, 1, 0, 0, 0, 0, 
+					 0, 0, 0, 1, 0, 0, 0,
+					 0, 0, 0, 0, 1, 0, 0,
+					 0, 0, 0, 0, 0, 1, 0,
+					 0, 0, 0, 0, 0, 0, 1];
+	
+	g_zeroVec3d :Vec3d:= [3(0)];
+	g_onesVec3d: Vec3d:=[3(1)];
+	
+	g_zeroVec4b :Vec4b := [4(FALSE)];
+	
+	g_zeroVec6d: Vec6d:=[6(0)];
+	g_onesVec6d: Vec6d:=[6(1)];
+	
+	g_zeroVec5d: Vec5d:=[5(0)];
+	g_onesVec5d: Vec5d:=[5(1.0)];
+	g_zeroVec5i: Vec5i:=[5(0)];
+	g_onesVec5i: Vec5i:=[5(1)];
+	
+	g_zeroVec7d: Vec7d:=[7(0)];
+	g_onesVec7d: Vec7d:=[7(1.0)];
+	g_zeroVec7i: Vec7i:=[7(0)];
+	g_onesVec7i: Vec7i:=[7(1)];
+	g_zeroVec8b: Vec8b:=[8(FALSE)];
+	g_onesVec8b: Vec8b:=[8(TRUE)];
+	g_zeroVec8d: Vec8d:=[8(0)];
+	g_onesVec8d: Vec8d:=[8(1.0)];
+	g_zeroVec8i: Vec8i:=[8(0)];
+	g_onesVec8i: Vec8i:=[8(1)];
+	g_initCurVec8d :Vec8d:=[8(250)];
+	
+	g_setupAllPosMode:Vec5i:=[5(DriverOPMode_Pos)];
+	g_setupAllTrqMode:Vec5i:=[5(DriverOPMode_Trq)];
+	g_slaveAllPosMode:Vec8i:=[8(DriverOPMode_Pos)];
+	g_slaveAllTrqMode:Vec8i:=[8(DriverOPMode_Trq)];
+	g_slaveAllPosTrqMode:Vec8i:=[8(DriverOPMode_PosTrq)];
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

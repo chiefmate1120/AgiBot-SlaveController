@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_CartCtrlError" Id="{db84fc08-89f8-4253-aa87-78ae1ca00fa7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlError EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{260a1163-8b1d-4452-8b92-3579319119d7}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntPos := i_slaveCart.curJntPos;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{3087e107-56ef-47f7-a346-a3307b112821}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+// update commands to arm
+copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartCtrlError">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlError.calcCmdJntPos">
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlError.init">
+      <LineId Id="11" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

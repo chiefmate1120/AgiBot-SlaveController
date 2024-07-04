@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_InstrumentType" Id="{d0857a03-19bb-4ed9-915e-05d1b2d79b50}">
+    <Declaration><![CDATA[TYPE E_InstrumentType :
+(
+	InstruType_UNKNOWM := 0,
+	InstruType_CadiereForceps :=7,
+	InstruType_NeedleDriver :=8,
+	InstruType_MegaSCNeedleDriver :=9,// mega suture-cut needle driver
+	InstruType_SCNeedleDriver :=10, // suture-cut needle driver
+	InstruType_RoundTipScissors :=11,
+	InstruType_ProGraspForceps :=12,
+	InstruType_MarylandForceps :=13, // Maryland bipolar forceps
+	InstruType_FenestratedForceps :=14, // Fnestrated bipolar forceps
+	InstruType_CurvedScissors :=15, // monopolar curved scissors
+	InstruType_CauteryHook :=16,
+	InstruType_CauterySpatula :=17,
+	InstruType_Endoscope := 20,
+	InstruType_UltrasoundKnifeS :=42,
+	InstruType_UltrasoundKnifeU :=43,
+	InstruType_First := InstruType_CadiereForceps,
+	InstruType_Last := InstruType_UltrasoundKnifeU
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

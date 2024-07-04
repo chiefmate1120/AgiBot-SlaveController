@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_trocarDetect" Id="{c8d72a25-6879-4464-949d-51ce00faba6c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_trocarDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_trocarOnCounts :INT :=0;
+	m_trocarOnCountThres :INT :=50;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{32b3fb7f-9cf2-40b4-b5e6-38652230a51d}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// trocar io is 5th bit 
+IF 32=(IOValue AND 10#32) THEN
+	m_trocarOnCounts :=MIN(m_trocarOnCounts +1,m_trocarOnCountThres);
+ELSE
+	m_trocarOnCounts :=0;
+END_IF
+
+run := m_trocarOnCounts >= m_trocarOnCountThres;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_trocarDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_trocarDetect.run">
+      <LineId Id="42" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
