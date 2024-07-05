@@ -58,7 +58,7 @@ END_VAR
         <ST><![CDATA[// calculate error
 FOR i:=1 TO g_sArmNum DO 
 	// stop check if arm is already in error state
-	IF m_armErrFlag[i] OR i_slaveStatus.m_armState[i]=SlaveArmState_Error THEN 
+	IF m_armErrFlag[i] OR i_slaveStatus.m_armState[i]=SlaveArmState_Error OR i_slaveStatus.m_armState[i]=SlaveArmState_Disable THEN 
 		CONTINUE;
 	END_IF
 	

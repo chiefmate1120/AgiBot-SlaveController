@@ -120,7 +120,9 @@ IF GVL_com_upper_PC.surgical_status = 1 THEN
 	IF m_cartDataPool.m_cartStatus.m_asepticDeployCompletedFlag =FALSE THEN
 		m_slaveArmDisableFlag := g_zeroVec4b;
 	END_IF
+	GVL_com_upper_PC.Cart_operation.setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[1]) OR BOOL_TO_UINT(m_asepticInstalledFlag[2]) OR BOOL_TO_UINT(m_asepticInstalledFlag[3]) OR BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
 ELSE
+	GVL_com_upper_PC.Cart_operation.setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[1]) AND BOOL_TO_UINT(m_asepticInstalledFlag[2]) AND BOOL_TO_UINT(m_asepticInstalledFlag[3]) AND BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
 	m_slaveArmDisableFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag;	
 END_IF
 
@@ -133,12 +135,10 @@ GVL_com_upper_PC.Cart_operation.Arm2_setup_sterile_state := BOOL_TO_UINT(m_asept
 GVL_com_upper_PC.Cart_operation.Arm3_setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[3]); 
 GVL_com_upper_PC.Cart_operation.Arm4_setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[4]); 
 
-GVL_com_upper_PC.Cart_operation.setup_sterile_state := BOOL_TO_UINT(m_asepticInstalledFlag[1]) AND BOOL_TO_UINT(m_asepticInstalledFlag[2]) AND BOOL_TO_UINT(m_asepticInstalledFlag[3]) AND BOOL_TO_UINT(m_asepticInstalledFlag[4]) ;
-
 GVL_com_upper_PC.Cart_operation.scope_install_state := BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_endoscopeMounted);
 
 FOR i := 1 TO 4 BY 1 DO
-	IF NOT SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.onChipData.m_Instrutype=InstruType_endoscope THEN
+	IF SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.Instrutype<>InstruType_endoscope THEN
 		IF SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i] AND SlaveArmControl.m_slaveRobot.m_endoscopeMounted THEN
 			GVL_com_upper_PC.Cart_operation.all_fixed_point_confirm := 1;
 			EXIT;
@@ -212,12 +212,13 @@ GVL_com_upper_PC.manual_mode := NOT m_cartRobot.m_slaveCart.m_stabilizFootSensor
       <LineId Id="81" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="116" Count="2" />
-      <LineId Id="84" Count="1" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="85" Count="0" />
       <LineId Id="83" Count="0" />
       <LineId Id="39" Count="7" />
       <LineId Id="37" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="51" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="66" Count="0" />

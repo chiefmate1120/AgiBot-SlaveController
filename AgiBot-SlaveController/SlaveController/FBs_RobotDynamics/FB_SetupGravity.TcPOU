@@ -95,10 +95,10 @@ VAR
 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[setupPos:=i_setupJntPos[5];
-q1 := i_slaveJntPos[1];
-q2 := i_slaveJntPos[2];
-q3 := i_slaveJntPos[3];
+        <ST><![CDATA[setupPos:=LIMIT(GVL_SetupMotorParameters.g_minJntPos[m_armIdx,5], i_setupJntPos[5], GVL_SetupMotorParameters.g_maxJntPos[m_armIdx,5]);
+q1 :=LIMIT (GVL_SlaveMotorParameters.g_minJntPos[1], i_slaveJntPos[1], GVL_SlaveMotorParameters.g_maxJntPos[1]);
+q2 := LIMIT (GVL_SlaveMotorParameters.g_minJntPos[2], i_slaveJntPos[2], GVL_SlaveMotorParameters.g_maxJntPos[2]);
+q3 := LIMIT (GVL_SlaveMotorParameters.g_minJntPos[3], i_slaveJntPos[3], GVL_SlaveMotorParameters.g_maxJntPos[3]);
 
 // get regression matrx
 getRegMat(setupPos, q1, q2, q3, o_regMat=>regMat);
@@ -173,7 +173,8 @@ setupJnt3Gravity:=GVL_SetupArmDynamics.g_setupJnt3GravityParams[m_armIdx,1]*EXPT
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupGravity.run">
-      <LineId Id="137" Count="3" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="284" Count="2" />
       <LineId Id="142" Count="3" />
       <LineId Id="182" Count="0" />
       <LineId Id="201" Count="1" />

@@ -208,7 +208,7 @@ rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
 matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);
 
 // calculate pose error in endoscope
-calcMSErrInScope(i_endoscopePose, i_setupStatus.m_curEndPose[i_slaveArm.armIdx]);
+calcMSErrInScope(i_endoscopePose, i_setupStatus.m_curEndPose[i_slaveArm.armIdx], i_slaveArm);
 
 // safety check
 (*IF norm(m_slavePosErr) > m_maxPosTrackErr OR ABS(m_errAngle)>m_maxOriTrackErr THEN
@@ -237,12 +237,15 @@ vecSelfMultiNum(m_slaveTrackTwist, 1.0/cmdVelScale);
 vecSelfMultiNum(m_slaveCmdVel, 1.0/cmdVelScale);
 vecSelfMultiNum(m_slaveCmdWVel, 1.0/cmdVelScale);
 
-// limit instrument wrist joint position
 FOR i:=1 TO 3 DO
 	armDHJntVel[i]:=m_simDHJointVel[i];
 	wristDHJntVel[i]:=m_simDHJointVel[i+3];
 END_FOR
 
+// limit instrument wrist dofs
+limitInstruDofs(i_slaveArm, wristDHJntVel);
+
+// limit instrument wrist joint position
 IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_maxOriTrackErr) THEN
 	wristDHJntVel:=g_zeroVec3d;
 	m_reachWristJntLimit:=TRUE;
@@ -257,7 +260,6 @@ ELSE
 		END_IF
 	END_FOR
 END_IF
-
 
 // modify arm joints velocity to compensate wrist joint motion
 FOR i:=1 TO 3 DO
@@ -366,36 +368,53 @@ END_FOR]]></ST>
 VAR_IN_OUT CONSTANT
 	i_endoscopePose : ST_Frame;
 	i_setupPose :ST_Frame;
+	i_slaveArm :FB_SlaveArm;
 END_VAR
 VAR
 	posErrInCart,oriErrInCart :Vec3d;
 	invRot :Mat3d;
 	posErrInScope,oriErrInScope :Vec3d;
 	i:INT;
+	
+	oriErrInTcp, oriErrInArm :Vec3d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_masterSlavePoseError := g_zeroVec6d;
+posErrInCart :=g_zeroVec3d;
+oriErrInCart :=g_zeroVec3d;
 
-// pose error in cart coordinate
-matMultiVec(i_setupPose.m_rot, m_slavePosErr, posErrInCart);
-matMultiVec(i_setupPose.m_rot, m_errAxis, oriErrInCart);
-vecSelfMultiNum(oriErrInCart, m_errAngle);
+// pose error caused by joints limits
+IF m_reachMacroJntLimit OR m_reachWristJntLimit THEN
+	// pose error in cart coordinate
+	matMultiVec(i_setupPose.m_rot, m_slavePosErr, posErrInCart);
+	matMultiVec(i_setupPose.m_rot, m_errAxis, oriErrInCart);
+	vecSelfMultiNum(oriErrInCart, m_errAngle);
+	
+// pose error caused by limited instrument dofs
+ELSIF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	matTranspose(i_slaveArm.simCartPose.m_rot, invRot);
+	matMultiVec(invRot, m_errAxis, oriErrInTcp);
+	vecSelfMultiNum(oriErrInTcp, m_errAngle);
+	oriErrInTcp[3] :=0;
+	
+	matMultiVec(i_slaveArm.simCartPose.m_rot, oriErrInTcp, oriErrInArm);
+	matMultiVec(i_setupPose.m_rot, oriErrInArm, oriErrInCart);
+END_IF
 
 // pose err in endoscope coordinate
 matTranspose(i_endoscopePose.m_rot, invRot);
 matMultiVec(invRot, posErrInCart, posErrInScope);
 matMultiVec(invRot, oriErrInCart, oriErrInScope);
 
-IF m_reachMacroJntLimit THEN
-	FOR i:=1 TO 3 DO 
-		m_masterSlavePoseError[i]:=posErrInScope[i];
-	END_FOR
-END_IF
-IF m_reachWristJntLimit THEN
-	FOR i:=1 TO 3 DO 
-		m_masterSlavePoseError[i+3]:=oriErrInScope[i];
-	END_FOR
-END_IF]]></ST>
+
+FOR i:=1 TO 3 DO 
+	m_masterSlavePoseError[i]:=posErrInScope[i];
+END_FOR
+
+FOR i:=1 TO 3 DO 
+	m_masterSlavePoseError[i+3]:=oriErrInScope[i];
+END_FOR
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
@@ -481,6 +500,24 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="limitInstruDofs" Id="{87cb5679-565b-4d30-9ae7-60a574a7b888}">
+      <Declaration><![CDATA[// limit specific joint dofs based on instrument types
+METHOD PRIVATE limitInstruDofs : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR_IN_OUT
+	r_wristDHJntVel :Vec3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	r_wristDHJntVel[2] :=0;
+	r_wristDHJntVel[3] :=0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="masterSlavePoseErr" Id="{87b704e0-4215-4360-b95f-fd5590f5f115}">
       <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
       <Get Name="Get" Id="{1ddbef06-84f8-4aa0-a258-43dd88acef2a}">
@@ -564,10 +601,12 @@ END_VAR
       <LineId Id="216" Count="2" />
       <LineId Id="225" Count="0" />
       <LineId Id="261" Count="2" />
+      <LineId Id="1154" Count="3" />
       <LineId Id="233" Count="0" />
+      <LineId Id="1161" Count="0" />
+      <LineId Id="1159" Count="1" />
+      <LineId Id="1158" Count="0" />
       <LineId Id="232" Count="0" />
-      <LineId Id="333" Count="3" />
-      <LineId Id="1088" Count="0" />
       <LineId Id="796" Count="0" />
       <LineId Id="1089" Count="0" />
       <LineId Id="1127" Count="0" />
@@ -575,7 +614,6 @@ END_VAR
       <LineId Id="1120" Count="6" />
       <LineId Id="1119" Count="0" />
       <LineId Id="1090" Count="0" />
-      <LineId Id="236" Count="0" />
       <LineId Id="242" Count="0" />
       <LineId Id="228" Count="0" />
       <LineId Id="245" Count="0" />
@@ -639,19 +677,25 @@ END_VAR
       <LineId Id="54" Count="1" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
-      <LineId Id="41" Count="1" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="43" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="107" Count="4" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="101" Count="2" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="117" Count="3" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="42" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="46" Count="1" />
-      <LineId Id="44" Count="1" />
+      <LineId Id="44" Count="0" />
       <LineId Id="49" Count="1" />
       <LineId Id="52" Count="1" />
       <LineId Id="28" Count="0" />
@@ -699,6 +743,12 @@ END_VAR
       <LineId Id="151" Count="1" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.limitInstruDofs">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />

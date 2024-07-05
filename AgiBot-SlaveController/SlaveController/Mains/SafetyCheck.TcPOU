@@ -18,6 +18,13 @@ VAR
 	// error check result
 	m_safetyCheckData AT %Q* :ST_SafetyData;
 	
+	//emergency stop and stop botton
+	m_stopButton AT %I*: BOOL;
+	m_emergencyStopButton AT %I*: BOOL;
+	
+	//warning tone
+	m_warningTone AT %Q*:ARRAY [1..4] OF BOOL;
+	
 	m_initFlag:bool;
 	m_cartCheck :FB_CartCheck;
 	m_setupArmCheck:FB_SetupArmCheck;
@@ -32,7 +39,7 @@ IF FALSE = m_initFlag  THEN
 	FOR i:=1  TO g_sArmNum DO 
 		m_safetyCheckData.m_slaveErrFlag[i]:=FALSE;
 		m_safetyCheckData.m_setupErrFlag[i]:=FALSE;
-		m_safetyCheckData.m_cartErrFlag:=false;
+		m_safetyCheckData.m_cartErrFlag:=FALSE;
 	END_FOR
 	m_initFlag:=TRUE;
 END_IF

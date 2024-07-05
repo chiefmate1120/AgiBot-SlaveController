@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_ArmLightCtrlWord" Id="{d72c912c-85aa-40de-a4ff-f664aa81f042}">
+    <Declaration><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
+//不可恢复性故障-----红色常亮
+//可恢复故障----琥珀色-先闪烁5s、再进行常亮
+//正处于器械控制或者端口控制状态-----蓝色闪烁
+//该手术臂正在执行一项需要用户短时间等待的活动、例如器械卡接----蓝色-脉动闪烁
+//工具更换引导正在进行中-----绿色闪烁
+//未通电、已禁用、已收起----------关
+//系统正常运行-----蓝色常亮
+//灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁
+TYPE E_ArmLightCtrlWord :
+(
+	ArmLight_Off := 0,
+	ArmLight_BlueOn :=1,
+	ArmLight_BlueBlink :=2,
+	ArmLight_AmberBlink :=3,
+	ArmLight_RedBlink :=4,
+	ArmLight_GreenOn :=5,
+	ArmLight_GreenBlink :=6,
+	ArmLight_redOn :=7,
+	ArmLight_AmberOn :=8,
+	ArmLight_BluePulse :=9
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

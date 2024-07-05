@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_MasterStatus" Id="{3ac2ae6d-6666-445a-980a-7914313359ec}">
     <Declaration><![CDATA[// Input from master arm control task, including arm status and cartesian data
 TYPE ST_MasterStatus :
@@ -28,6 +28,11 @@ STRUCT
 	// current arm twist[linear velocity; angular veloicty] in monitor coordinate
 	m_curArmTwist:ARRAY[1..g_mArmNum] OF Vec6d;
 	
+	//master pedal hover 
+	m_pedalHover : ARRAY [1..2] OF BOOL;
+	
+	// electric Knife Pedal Trigger 
+	m_electricKnifePedalTrigger : ARRAY [1..2] OF UINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

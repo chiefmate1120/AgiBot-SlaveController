@@ -30,6 +30,12 @@ VAR
 	m_adjustOnFlag :BOOL;
 	m_trocarOnFlag :BOOL :=FALSE;
 	
+	//arm light out to drive
+	m_lightIO AT %Q* :DINT;
+	
+	// last light control word
+	m_lightCtrlWordLast :UDINT:=0;
+	
 	//endoscope type and posture switch
 	m_endoscopeTypeSwitch : FB_IOToggleCheck;
 	m_endoscopePostureSwitch : FB_IOToggleCheck;
@@ -88,6 +94,15 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 
+	// output arm light
+	m_SdoWrite:ARRAY [1..2] OF FB_EcCoESdoWrite;
+	
+	//IP of operating arm
+	m_armNetId:T_AmsNetId; 	
+	
+	//Joint port number
+	m_jointAddrJ8:UINT;	
+	m_jointAddrPbox:UINT;	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -229,7 +244,8 @@ END_IF
 m_ReadLDP(CLK:= m_instruOnFlag, Q=>startFlag );
 // try to read again if instrument ID is undefined
 startFlag := startFlag OR m_instrument.onChipData.m_ErrorID = 1;
-m_instrument.readParameters(startFlag );
+m_instrument.readParameters(startFlag);
+
 
 // check endoscope type and posture 
 IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
@@ -247,6 +263,37 @@ IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) THEN
 	END_IF
 END_IF
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkLight" Id="{f01081ee-1e3d-4082-9296-257b5773b0af}">
+      <Declaration><![CDATA[METHOD checkLight : BOOL
+VAR_INPUT
+	i_lightCtrlWord : UDINT;
+END_VAR
+
+VAR
+	lightCtrlWord : UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// to PDO
+m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
+
+// disable sdo write
+IF NOT m_SdoWrite[1].bBusy THEN
+	m_SdoWrite[1](bExecute:=FALSE);
+END_IF
+IF NOT m_SdoWrite[2].bBusy THEN
+	m_SdoWrite[2](bExecute:=FALSE);
+END_IF
+
+// trig sdo write
+lightCtrlWord := SHL(i_lightCtrlWord,16);
+IF lightCtrlWord <> m_lightCtrlWordLast THEN
+	m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+	m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+	m_lightCtrlWordLast := lightCtrlWord;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Property Name="cmdCartPose" Id="{72bf034f-e694-478b-8fc6-77f6ebb37ccd}" FolderPath="property\">
@@ -564,6 +611,11 @@ END_FOR
 
 // instrument init
 m_instrument.init(i_armIdx);
+
+//init arm netID and adrr
+m_armNetId := GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
+m_jointAddrJ8 := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,3];
+m_jointAddrPbox := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];
 
 // endosocpe toggle button check
 m_endoscopeTypeSwitch.init(0, 500);
@@ -1107,8 +1159,10 @@ END_FOR
       <LineId Id="85" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="39" Count="0" />
+      <LineId Id="114" Count="0" />
       <LineId Id="70" Count="0" />
-      <LineId Id="72" Count="1" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="73" Count="0" />
       <LineId Id="93" Count="1" />
       <LineId Id="96" Count="1" />
       <LineId Id="95" Count="0" />
@@ -1116,6 +1170,17 @@ END_FOR
       <LineId Id="98" Count="5" />
       <LineId Id="74" Count="0" />
       <LineId Id="45" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.checkLight">
+      <LineId Id="38" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="48" Count="6" />
+      <LineId Id="47" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
       <LineId Id="2" Count="0" />
@@ -1208,6 +1273,11 @@ END_FOR
       <LineId Id="208" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="209" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="231" Count="0" />
       <LineId Id="220" Count="0" />
       <LineId Id="218" Count="0" />
       <LineId Id="217" Count="0" />

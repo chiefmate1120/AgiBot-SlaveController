@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_InstrumentControl" Id="{133d07e3-99c5-4338-ad65-0a5f3241047e}" SpecialFunc="None">
     <Declaration><![CDATA[// instrument joints control
 FUNCTION_BLOCK FB_InstrumentControl
@@ -145,24 +145,32 @@ END_FOR
 m_instruCurYawVel :=i_slaveArm.curDHJntVel[6];
 m_yawAngErr:=g_rad2Deg*(i_cmdYawPos-i_slaveArm.curDHJntPos[6]);
 
-// motion/force share control for yaw control while grip finger closed
-IF m_graspForceLevel >0  THEN
-	// varialbe PID control based on different gripper force level
-	FOR i:=1 TO 3 DO 
-		IF m_graspForceLevel < m_forceLevelThres[i] THEN
-			m_instruYawCtrl.setPIDParam(m_yawKp[i],m_yawKd[i],m_yawKi[i]);
-			EXIT;
-		END_IF
-	END_FOR
-	
-	// compute yaw control torque
-	m_instruYawCtrlTrq:=m_instruYawCtrl.run(i_cmdYawPos,i_slaveArm.curDHJntPos[6],i_cmdYawVel, m_instruCurYawVel);
 
-	// add feed forward grasp force
-	m_instruJntCtrlTrq[1]:= m_maxGripForce*m_graspForceLevel/100.0 + m_instruYawCtrlTrq;
-	m_instruJntCtrlTrq[2]:= m_maxGripForce*m_graspForceLevel/100.0 - m_instruYawCtrlTrq;
-	m_instruJntCtrlTrq[1]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[1], m_maxGripCtrlForce);
-	m_instruJntCtrlTrq[2]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[2], m_maxGripCtrlForce);
+// exert grip force 
+IF m_graspForceLevel >0  THEN
+	// gripper force control for ultrosonic knife
+	IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+		m_instruJntCtrlTrq[3]:= -m_maxGripForce*m_graspForceLevel/100.0;
+
+	// motion/force share control for yaw control while grip finger closed
+	ELSE
+		// varialbe PID control based on different gripper force level
+		FOR i:=1 TO 3 DO 
+			IF m_graspForceLevel < m_forceLevelThres[i] THEN
+				m_instruYawCtrl.setPIDParam(m_yawKp[i],m_yawKd[i],m_yawKi[i]);
+				EXIT;
+			END_IF
+		END_FOR
+		
+		// compute yaw control torque
+		m_instruYawCtrlTrq:=m_instruYawCtrl.run(i_cmdYawPos,i_slaveArm.curDHJntPos[6],i_cmdYawVel, m_instruCurYawVel);
+	
+		// add feed forward grasp force
+		m_instruJntCtrlTrq[1]:= m_maxGripForce*m_graspForceLevel/100.0 + m_instruYawCtrlTrq;
+		m_instruJntCtrlTrq[2]:= m_maxGripForce*m_graspForceLevel/100.0 - m_instruYawCtrlTrq;
+		m_instruJntCtrlTrq[1]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[1], m_maxGripCtrlForce);
+		m_instruJntCtrlTrq[2]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[2], m_maxGripCtrlForce);
+	end_if
 END_IF
 
 o_cmdJntTrq := m_instruJntCtrlTrq;
@@ -192,9 +200,13 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
       <LineId Id="96" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="117" Count="0" />
-      <LineId Id="180" Count="0" />
+      <LineId Id="361" Count="1" />
       <LineId Id="179" Count="0" />
       <LineId Id="55" Count="0" />
+      <LineId Id="363" Count="2" />
+      <LineId Id="368" Count="0" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="366" Count="0" />
       <LineId Id="285" Count="2" />
       <LineId Id="289" Count="0" />
       <LineId Id="291" Count="0" />
@@ -202,10 +214,11 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
       <LineId Id="288" Count="0" />
       <LineId Id="292" Count="0" />
       <LineId Id="111" Count="0" />
-      <LineId Id="113" Count="1" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="57" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="370" Count="1" />
+      <LineId Id="329" Count="2" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="372" Count="0" />
       <LineId Id="64" Count="0" />
       <LineId Id="255" Count="0" />
       <LineId Id="109" Count="0" />

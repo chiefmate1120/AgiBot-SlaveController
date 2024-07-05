@@ -11,7 +11,7 @@ STRUCT
 	m_headLength:LREAL :=0.01;
 	m_fingerLength:LREAL :=0;
 	m_maxGripAngle :LREAL := 50.0 * g_deg2Rad;
-	m_minGripAngle :LREAL := -25 * g_deg2Rad; // make sure fingers are fully closed
+	m_minGripAngle :LREAL := -20 * g_deg2Rad; // make sure fingers are fully closed
 	
 	// instrument kinematic parameters for joint/DH space transformation
 	kx:lreal:=1;

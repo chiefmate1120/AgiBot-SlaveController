@@ -118,6 +118,9 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Enum\E_ArmLightCtrlWord.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Enum\E_CartJointState.TcTLEO">
       <SubType>Code</SubType>
     </Compile>
@@ -590,6 +593,10 @@
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\configs\robot3\GVL_SlaveJointEncoderCaliData_3.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot5\GVL_CartJointEncoderCaliData_5.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

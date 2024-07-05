@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartRobot" Id="{1219119a-c34a-4efb-a0e2-076d2e563cc0}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartRobot
 VAR_INPUT
@@ -175,7 +175,7 @@ CASE m_cartState OF
 		ELSIF m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable) THEN
 			m_nextCartState := CartJointState_HangAdjust;
 			
-		ELSIF m_slaveCart.m_trocarOnFlag=0 AND (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable) THEN
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND m_slaveCart.cartDockingState=0) OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable AND m_slaveCart.cartDrapingState=0)) THEN//AND m_lastCartState <>CartJointState_AsepticDeployment THEN
 			m_nextCartState := CartJointState_AsepticDeployment;
 			
 		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_carHandChassisDriveUnlock[1] AND m_carHandChassisDriveUnlock[2] THEN
@@ -211,7 +211,7 @@ CASE m_cartState OF
 			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable THEN
 				m_slaveCart.cartDrapingState := 1;
 			END_IF
-			m_nextCartState :=CartJointState_Ready;
+			m_nextCartState :=CartJointState_SlowStop;
 		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable) THEN
 			m_nextCartState :=CartJointState_SlowStop;
 		END_IF

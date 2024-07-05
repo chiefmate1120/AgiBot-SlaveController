@@ -95,9 +95,9 @@ VAR
 	regMat:ARRAY[1..3,1..5] OF LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[q1 := i_slaveJntPos[1];
-q2 := i_slaveJntPos[2];
-q3 := i_slaveJntPos[3];
+        <ST><![CDATA[q1 :=LIMIT (GVL_SlaveMotorParameters.g_minJntPos[1], i_slaveJntPos[1], GVL_SlaveMotorParameters.g_maxJntPos[1]);
+q2 := LIMIT (GVL_SlaveMotorParameters.g_minJntPos[2], i_slaveJntPos[2], GVL_SlaveMotorParameters.g_maxJntPos[2]);
+q3 := LIMIT (GVL_SlaveMotorParameters.g_minJntPos[3], i_slaveJntPos[3], GVL_SlaveMotorParameters.g_maxJntPos[3]);
 
 
 // get regression matrx
