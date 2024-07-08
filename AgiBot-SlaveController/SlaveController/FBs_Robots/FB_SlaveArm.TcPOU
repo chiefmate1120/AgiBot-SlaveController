@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -279,21 +279,20 @@ END_VAR
         <ST><![CDATA[// to PDO
 m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
 
-// disable sdo write
-IF NOT m_SdoWrite[1].bBusy THEN
-	m_SdoWrite[1](bExecute:=FALSE);
-END_IF
-IF NOT m_SdoWrite[2].bBusy THEN
-	m_SdoWrite[2](bExecute:=FALSE);
-END_IF
-
 // trig sdo write
 lightCtrlWord := SHL(i_lightCtrlWord,16);
 IF lightCtrlWord <> m_lightCtrlWordLast THEN
 	m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 	m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+END_IF
+
+// disable sdo write
+IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
+	m_SdoWrite[1](bExecute:=FALSE);
+	m_SdoWrite[2](bExecute:=FALSE);
 	m_lightCtrlWordLast := lightCtrlWord;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="cmdCartPose" Id="{72bf034f-e694-478b-8fc6-77f6ebb37ccd}" FolderPath="property\">
@@ -807,13 +806,13 @@ IF q3 - L > m_Jnt3PosThres THEN
 END_IF
 
 c1:=COS(i_DHJntPos[1]);
-c2:=COS(i_DHJntPos[2]);
+c2:=COS(q2);
 c4:=COS(i_DHJntPos[4]);
 c5:=COS(i_DHJntPos[5]);
 c6:=COS(i_DHJntPos[6]);
 
 s1:=SIN(i_DHJntPos[1]);
-s2:=SIN(i_DHJntPos[2]);
+s2:=SIN(q2);
 s4:=SIN(i_DHJntPos[4]);
 s5:=SIN(i_DHJntPos[5]);
 s6:=SIN(i_DHJntPos[6]);
@@ -1174,13 +1173,10 @@ END_FOR
     <LineIds Name="FB_SlaveArm.checkLight">
       <LineId Id="38" Count="0" />
       <LineId Id="21" Count="0" />
-      <LineId Id="9" Count="1" />
-      <LineId Id="25" Count="1" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="29" Count="1" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="48" Count="6" />
+      <LineId Id="48" Count="5" />
       <LineId Id="47" Count="0" />
+      <LineId Id="64" Count="6" />
+      <LineId Id="63" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
       <LineId Id="2" Count="0" />

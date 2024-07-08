@@ -75,7 +75,8 @@ VAR
 	m_slavePoseInCart : ST_Frame;
 	
 	// instrument controller
-	m_instruController : FB_InstrumentControl;
+	m_basicInstruController : FB_BasicInstruControl;
+	m_usKnifeController : FB_UltrosonicKnifeControl;
 	
 	// slave command grip angle and grip force level
 	m_slaveCmdGripAngle :LREAL;
@@ -356,7 +357,12 @@ FOR i:=1 TO 5 DO
 END_FOR
 m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
 m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
-m_instruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+
+IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+ELSE
+	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+END_IF
 
 FOR i:=1 TO 5 DO
 	m_cmdJntTrq[i+3]:=instruJntCtrlTrq[i];
@@ -375,13 +381,9 @@ VAR
 	invRot :Mat3d;
 	posErrInScope,oriErrInScope :Vec3d;
 	i:INT;
-	
-	oriErrInTcp, oriErrInArm :Vec3d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_masterSlavePoseError := g_zeroVec6d;
-posErrInCart :=g_zeroVec3d;
-oriErrInCart :=g_zeroVec3d;
 
 // pose error caused by joints limits
 IF m_reachMacroJntLimit OR m_reachWristJntLimit THEN
@@ -390,30 +392,24 @@ IF m_reachMacroJntLimit OR m_reachWristJntLimit THEN
 	matMultiVec(i_setupPose.m_rot, m_errAxis, oriErrInCart);
 	vecSelfMultiNum(oriErrInCart, m_errAngle);
 	
-// pose error caused by limited instrument dofs
-ELSIF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
-	matTranspose(i_slaveArm.simCartPose.m_rot, invRot);
-	matMultiVec(invRot, m_errAxis, oriErrInTcp);
-	vecSelfMultiNum(oriErrInTcp, m_errAngle);
-	oriErrInTcp[3] :=0;
+	// pose err in endoscope coordinate
+	matTranspose(i_endoscopePose.m_rot, invRot);
+	matMultiVec(invRot, posErrInCart, posErrInScope);
+	matMultiVec(invRot, oriErrInCart, oriErrInScope);
 	
-	matMultiVec(i_slaveArm.simCartPose.m_rot, oriErrInTcp, oriErrInArm);
-	matMultiVec(i_setupPose.m_rot, oriErrInArm, oriErrInCart);
+	FOR i:=1 TO 3 DO 
+		m_masterSlavePoseError[i]:=posErrInScope[i];
+	END_FOR
+	
+	FOR i:=1 TO 3 DO 
+		m_masterSlavePoseError[i+3]:=oriErrInScope[i];
+	END_FOR
+
 END_IF
 
-// pose err in endoscope coordinate
-matTranspose(i_endoscopePose.m_rot, invRot);
-matMultiVec(invRot, posErrInCart, posErrInScope);
-matMultiVec(invRot, oriErrInCart, oriErrInScope);
 
 
-FOR i:=1 TO 3 DO 
-	m_masterSlavePoseError[i]:=posErrInScope[i];
-END_FOR
 
-FOR i:=1 TO 3 DO 
-	m_masterSlavePoseError[i+3]:=oriErrInScope[i];
-END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -493,7 +489,8 @@ m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 m_masterGripAngleVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 
 // init controller
-m_instruController.init(i_slaveArm);
+m_basicInstruController.init(i_slaveArm);
+m_usKnifeController.init(i_slaveArm);
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -671,33 +668,32 @@ END_VAR
       <LineId Id="87" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="101" Count="1" />
-      <LineId Id="40" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="119" Count="0" />
       <LineId Id="53" Count="0" />
       <LineId Id="52" Count="0" />
       <LineId Id="54" Count="1" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
       <LineId Id="41" Count="0" />
-      <LineId Id="99" Count="1" />
       <LineId Id="115" Count="0" />
       <LineId Id="104" Count="0" />
       <LineId Id="88" Count="0" />
-      <LineId Id="107" Count="4" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="94" Count="1" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="101" Count="2" />
+      <LineId Id="107" Count="3" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="136" Count="2" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="140" Count="6" />
+      <LineId Id="139" Count="0" />
       <LineId Id="89" Count="0" />
-      <LineId Id="117" Count="3" />
+      <LineId Id="117" Count="0" />
       <LineId Id="116" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="26" Count="0" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="49" Count="1" />
-      <LineId Id="52" Count="1" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
@@ -740,6 +736,7 @@ END_VAR
       <LineId Id="79" Count="0" />
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
+      <LineId Id="194" Count="0" />
       <LineId Id="151" Count="1" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -156,8 +156,8 @@ IF m_instruTypeIdx > 0 THEN
 	m_kinematicParameters.m_headLength := GVL_InstruCtrlParams.g_instruHeadLength[m_instruTypeIdx];
 	m_kinematicParameters.m_fingerLength := GVL_InstruCtrlParams.g_instruFingerLength[m_instruTypeIdx];
 
-	m_kinematicParameters.m_wristMinDHJntPos[2]:=-GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx];
-	m_kinematicParameters.m_wristMaxDHJntPos[2]:=GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx];
+	m_kinematicParameters.m_wristMinDHJntPos[2]:=-GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx]-pi/2;
+	m_kinematicParameters.m_wristMaxDHJntPos[2]:=GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx]-pi/2;
 	m_kinematicParameters.m_wristMinDHJntPos[3]:=-GVL_InstruCtrlParams.g_instruMaxYawAngle[m_instruTypeIdx];
 	m_kinematicParameters.m_wristMaxDHJntPos[3]:=GVL_InstruCtrlParams.g_instruMaxYawAngle[m_instruTypeIdx];
 
@@ -242,89 +242,6 @@ ELSE
 	o_instruGripAngle :=m_kinematicParameters.m_maxGripAngle - o_instruGripAngle * (m_kinematicParameters.m_maxGripAngle - m_kinematicParameters.m_minGripAngle);
 	o_instruGripForceLevel:=0;
 END_IF]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="gripperAngleForwardTransform_ID12" Id="{d3dda96d-7b55-4cf3-9ffe-c8cf53ace77d}">
-      <Declaration><![CDATA[METHOD PROTECTED gripperAngleForwardTransform_ID12 : BOOL
-VAR_INPUT
-	frontAngle:LREAL;
-END_VAR
-VAR_OUTPUT
-	endAngle:LREAL;
-	Succeed:BOOL;
-END_VAR
-VAR
-	minFrontAng :LREAL  := 16.6*2*g_deg2Rad;
-	maxFrontAng :LREAL := 49.18*2*g_deg2Rad;
-	AB :LREAL := 2.8;
-	BC:LREAL := 5.26;
-	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
-	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-//**************已知：器械前端开合角，求解：末端开合角***************//
-
-//输入合法性判断，物理极限是[16.6*2，49.18*2]度
-frontAngle := LIMIT(minFrontAng, frontAngle, maxFrontAng);
-
-
-SIN_C:=AB*SIN(Angle_Initial_A)/BC;
-Angle_Initial_C:=ASIN(SIN_C);
-
-Angle_Inc_A:=frontAngle/2;
-Angle_A:=Angle_Initial_A+Angle_Inc_A;
-
-SIN_C:=AB*SIN(Angle_A)/BC;
-Angle_C:=ASIN(SIN_C);
-
-Angle_Inc_C:=Angle_C-Angle_Initial_C;
-endAngle:=Angle_Inc_C*2;
-
-
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="gripperAngleInverseTransform_ID12" Id="{d41bf91a-0d5c-464e-b520-ee71cb3a1637}">
-      <Declaration><![CDATA[METHOD PROTECTED gripperAngleInverseTransform_ID12 : BOOL
-VAR_INPUT
-	endAngle:LREAL;
-END_VAR
-VAR_OUTPUT
-	frontAngle:LREAL;
-	Succeed:BOOL;
-END_VAR
-VAR
-	minEndAng :LREAL  := 0;
-	maxEndAng :LREAL := 38*g_deg2Rad;
-	AB :LREAL := 2.8;
-	BC:LREAL := 5.26;
-	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
-	
-	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-//***************已知：器械末端开合角，求解：前端开合角********************//
-
-//输入合法性判断，物理极限是[0,30]度
-endAngle:= LIMIT(minEndAng, endAngle, maxEndAng);
-
-SIN_C:=AB*SIN(Angle_Initial_A)/BC;
-Angle_Initial_C:=ASIN(SIN_C);
-
-End_Angle_Single:=endAngle/2;
-Angle_Inc_C:=End_Angle_Single;
-Angle_C:=Angle_Initial_C+Angle_Inc_C;
-
-SIN_A:=BC*SIN(Angle_C)/AB;
-Angle_A:=ASIN(SIN_A);
-
-Angle_Inc_A:=Angle_A-Angle_Initial_A;
-frontAngle:=Angle_Inc_A*2;
-
-]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{b6799ae1-8e52-4442-8aea-44a9f33a3afc}">
@@ -439,7 +356,7 @@ gripAngle:=(jntPosL1+jntPosL2)/(m_kinematicParameters.m_openAngleDir*m_kinematic
 
 //################### gripper angle handle #################
 IF (InstruType_ProGraspForceps=m_instruType) THEN//细齿无创抓钳
-	gripperAngleForwardTransform_ID12(frontAngle:= gripAngle, endAngle=> r_gripAngle);
+	proGrsapForcepsGripAngleFK(frontAngle:= gripAngle, endAngle=> r_gripAngle);
 
 ELSIF (InstruType_CauteryHook = m_instruType) THEN//单级电钩
 	r_gripAngle:=0;
@@ -535,7 +452,7 @@ END_IF
 
 //################### gripper angle handle #################
 IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
-	gripperAngleInverseTransform_ID12(endAngle:= i_gripAngle, frontAngle=> gripAngle);
+	proGrsapForcepsGripAngleIK(endAngle:= i_gripAngle, frontAngle=> gripAngle);
 	
 ELSIF 16 = onChipData.m_InstruID THEN//单级电钩\电铲
 	gripAngle:=0;
@@ -732,6 +649,89 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="proGrsapForcepsGripAngleFK" Id="{d3dda96d-7b55-4cf3-9ffe-c8cf53ace77d}">
+      <Declaration><![CDATA[METHOD PROTECTED proGrsapForcepsGripAngleFK : BOOL
+VAR_INPUT
+	frontAngle:LREAL;
+END_VAR
+VAR_OUTPUT
+	endAngle:LREAL;
+	Succeed:BOOL;
+END_VAR
+VAR
+	minFrontAng :LREAL  := 16.6*2*g_deg2Rad;
+	maxFrontAng :LREAL := 49.18*2*g_deg2Rad;
+	AB :LREAL := 2.8;
+	BC:LREAL := 5.26;
+	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
+	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//**************已知：器械前端开合角，求解：末端开合角***************//
+
+//输入合法性判断，物理极限是[16.6*2，49.18*2]度
+frontAngle := LIMIT(minFrontAng, frontAngle, maxFrontAng);
+
+
+SIN_C:=AB*SIN(Angle_Initial_A)/BC;
+Angle_Initial_C:=ASIN(SIN_C);
+
+Angle_Inc_A:=frontAngle/2;
+Angle_A:=Angle_Initial_A+Angle_Inc_A;
+
+SIN_C:=AB*SIN(Angle_A)/BC;
+Angle_C:=ASIN(SIN_C);
+
+Angle_Inc_C:=Angle_C-Angle_Initial_C;
+endAngle:=Angle_Inc_C*2;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="proGrsapForcepsGripAngleIK" Id="{d41bf91a-0d5c-464e-b520-ee71cb3a1637}">
+      <Declaration><![CDATA[METHOD PROTECTED proGrsapForcepsGripAngleIK : BOOL
+VAR_INPUT
+	endAngle:LREAL;
+END_VAR
+VAR_OUTPUT
+	frontAngle:LREAL;
+	Succeed:BOOL;
+END_VAR
+VAR
+	minEndAng :LREAL  := 0;
+	maxEndAng :LREAL := 38*g_deg2Rad;
+	AB :LREAL := 2.8;
+	BC:LREAL := 5.26;
+	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
+	
+	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//***************已知：器械末端开合角，求解：前端开合角********************//
+
+//输入合法性判断，物理极限是[0,30]度
+endAngle:= LIMIT(minEndAng, endAngle, maxEndAng);
+
+SIN_C:=AB*SIN(Angle_Initial_A)/BC;
+Angle_Initial_C:=ASIN(SIN_C);
+
+End_Angle_Single:=endAngle/2;
+Angle_Inc_C:=End_Angle_Single;
+Angle_C:=Angle_Initial_C+Angle_Inc_C;
+
+SIN_A:=BC*SIN(Angle_C)/AB;
+Angle_A:=ASIN(SIN_A);
+
+Angle_Inc_A:=Angle_A-Angle_Initial_A;
+frontAngle:=Angle_Inc_A*2;
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="readParameters" Id="{fafb5a79-7caf-47d4-9d2f-b3dbd95048cf}">
       <Declaration><![CDATA[METHOD PUBLIC readParameters : BOOL
 VAR_INPUT
@@ -911,10 +911,10 @@ m_nextEndoscopePosture :=EndoscopePosture_HeadDown;
 IF m_resetArmLEDFlag THEN
 	m_Value:=0 ;
 	m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= 1004, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-	m_resetArmLEDFlag := FALSE;
 END_IF
 IF NOT m_SdoWrite.bBusy THEN
 	m_SdoWrite(bExecute:=FALSE);
+	m_resetArmLEDFlag := FALSE;
 END_IF
 
 ]]></ST>
@@ -1165,20 +1165,6 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="26" Count="3" />
       <LineId Id="24" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.gripperAngleForwardTransform_ID12">
-      <LineId Id="6" Count="3" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="20" Count="12" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.gripperAngleInverseTransform_ID12">
-      <LineId Id="12" Count="3" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="24" Count="13" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Instrument.init">
       <LineId Id="7" Count="1" />
       <LineId Id="5" Count="0" />
@@ -1249,6 +1235,20 @@ o_q1 := g_2pi *  posCode/16#3FF;
     </LineIds>
     <LineIds Name="FB_Instrument.onChipData.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.proGrsapForcepsGripAngleFK">
+      <LineId Id="6" Count="3" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="20" Count="12" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.proGrsapForcepsGripAngleIK">
+      <LineId Id="12" Count="3" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="24" Count="13" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
       <LineId Id="5" Count="0" />
@@ -1365,8 +1365,8 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="85" Count="0" />
       <LineId Id="93" Count="0" />
       <LineId Id="102" Count="1" />
-      <LineId Id="112" Count="0" />
       <LineId Id="121" Count="2" />
+      <LineId Id="131" Count="0" />
       <LineId Id="113" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="17" Count="0" />

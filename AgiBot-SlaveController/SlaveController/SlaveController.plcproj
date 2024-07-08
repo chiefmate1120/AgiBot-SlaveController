@@ -340,6 +340,9 @@
     <Compile Include="FBs_BasicControllers\FBMacroJntControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_BasicControllers\FB_UltrosonicKnifeControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_BasicControllers\FB_PID.TcPOU">
       <SubType>Code</SubType>
     </Compile>

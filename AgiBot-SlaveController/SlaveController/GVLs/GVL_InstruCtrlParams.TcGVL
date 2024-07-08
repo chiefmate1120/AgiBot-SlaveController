@@ -27,7 +27,7 @@ VAR_GLOBAL CONSTANT
 	ky:ARRAY[1..g_instruTypesNum] OF LREAL:=[0.931034483, 0.931034483, 0.931034483, 0.931034483, 0.947368421, 0.931034483, 0.931034483, 0.931034483, 0.931034483, 0.877192982, 0.877192982, 1, 1, 1];
 	kz:ARRAY[1..g_instruTypesNum] OF LREAL:=[0.844827586, 0.810344828, 1.051724138, 1.017241379, 0.842105263, 1.310344828, 1.051724138, 1.051724138, 0.827586207, 0.859649123, 0.859649123, 1, 1, 1];
 	
-	g_instruMaxGripAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[45*g_deg2Rad, 40*g_deg2Rad, 48*g_deg2Rad, 48*g_deg2Rad, 40*g_deg2Rad, PI/2, 55*g_deg2Rad, 55*g_deg2Rad, PI/3, PI/6, PI/6,0,0,0];
+	g_instruMaxGripAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[45*g_deg2Rad, 40*g_deg2Rad, 48*g_deg2Rad, 48*g_deg2Rad, 40*g_deg2Rad, PI/2, 55*g_deg2Rad, 55*g_deg2Rad, PI/3, PI/6, PI/6,0,PI/4,PI/4];
 	
 	g_instruMaxPitchAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[11(80*g_deg2Rad), 3(pi)];
 	g_instruMaxYawAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[9(PI/2), 110*g_deg2Rad, 110*g_deg2Rad, 3(pi)];

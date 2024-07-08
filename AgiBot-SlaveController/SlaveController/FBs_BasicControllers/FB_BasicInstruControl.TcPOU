@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_BasicInstruControl" Id="{133d07e3-99c5-4338-ad65-0a5f3241047e}" SpecialFunc="None">
+    <Declaration><![CDATA[// instrument joints control
+FUNCTION_BLOCK FB_BasicInstruControl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// instrument PID control paramters
+	m_instruKp:ARRAY[1..5] OF LREAL:=[4(5),0.0];
+	m_instruKd:ARRAY[1..5] OF LREAL:=[4(0.25), 0];
+	m_instruKi:ARRAY[1..5] OF LREAL:=[4(10.0),0];
+	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(200.0)];
+	
+	// gripper force level threshold for variable PID parameter
+	m_forceLevelThres : ARRAY[1..3] OF LREAL := [40, 70, 101];
+	
+	// yaw PID control (when fingers grasp with force)
+	m_yawKp:ARRAY[1..3] OF LREAL:=[5, 8, 10];
+	m_yawKd:ARRAY[1..3] OF LREAL:=[0.25, 0.4, 0.6];
+	m_yawKi:ARRAY[1..3] OF LREAL:=[10.0, 15.0, 20.0];
+	m_yawKiLimit:LREAL:=100.0;
+	m_yawCtrlLimit:LREAL:=200.0;
+	
+	// max grip force/current(mA)
+	m_maxGripForce:LREAL;
+	m_maxGripCurrent:LREAL:=180.0;
+	
+	// max gripper finger control force/current(mA)
+	m_maxGripCtrlForce:LREAL;
+	m_maxGripCtrlCurrent:LREAL:=220.0;
+	
+	// PID for instrument joint position
+	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
+
+	// PID for instrument yaw angle 
+	m_instruYawCtrl : FB_PID;
+	
+	// command instrument joint position and velocity
+	m_instruCmdJntPos:Vec5d;
+	m_instruLastCmdJntPos:Vec5d;
+	m_instruCmdJntVel:Vec5d;
+	
+	// current instrument joint position and velocity
+	m_instruCurJntPos: Vec5d;
+	m_instruCurJntVel:Vec5d;
+	
+	// grasp force level
+	m_graspForceLevel:Lreal :=0;
+	
+	// instrument joint control torque(when gripper is open)
+	m_instruJntCtrlTrq:Vec5d:=[5(0.0)];
+
+	// instrument yaw control torque(when gripper is closed)
+	m_instruYawCtrlTrq:LREAL;
+		
+	// current gripper yaw velocity
+	m_instruCurYawVel:LREAL;
+	
+	// yaw angle error(deg)
+	m_yawAngErr : LREAL;
+	
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+	]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{ad68ad31-14f3-42f4-bf27-26d385743fba}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm:FB_SlaveArm;
+END_VAR
+
+VAR
+	i,j:INT;
+	currentRatioMotor2Jnt:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=0;
+
+// init controller
+currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
+m_maxGripForce := m_maxGripCurrent * currentRatioMotor2Jnt;
+m_maxGripCtrlForce := m_maxGripCtrlCurrent * currentRatioMotor2Jnt;
+FOR i:=1 TO 4 DO
+	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
+	m_instruCmdJntVel[i]:=0;
+	
+	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
+		m_instruKiLimit[i]* currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*currentRatioMotor2Jnt);
+END_FOR
+m_instruYawCtrl.init(g_slaveArmCtrlCycleTime,m_yawKp[1],m_yawKd[1],m_yawKi[1],m_yawKiLimit*currentRatioMotor2Jnt, m_yawCtrlLimit*currentRatioMotor2Jnt);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{7565c7b3-97d9-43dd-bc18-57a80d3fc9eb}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// instrument joint command velocity
+	i_cmdInstruJntVel :Vec5d;
+	
+	// command yaw position
+	i_cmdYawPos : LREAL;
+	
+	// command yaw velocity
+	i_cmdYawVel :LREAL;
+	
+	// command grip force level
+	i_cmdGripForceLevel:LREAL;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR_OUTPUT
+	// joint control torque
+	o_cmdJntTrq:Vec5d;
+END_VAR
+
+VAR
+	i: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel ,  100)	;
+
+// joint position control
+FOR i:=1 TO 4 DO	
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
+	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
+	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
+	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
+	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
+END_FOR
+m_instruJntCtrlTrq[5]:=0;
+
+m_instruCurYawVel :=i_slaveArm.curDHJntVel[6];
+m_yawAngErr:=g_rad2Deg*(i_cmdYawPos-i_slaveArm.curDHJntPos[6]);
+
+// exert grip force 
+IF m_graspForceLevel >0  THEN
+	// varialbe PID control based on different gripper force level
+	FOR i:=1 TO 3 DO 
+		IF m_graspForceLevel < m_forceLevelThres[i] THEN
+			m_instruYawCtrl.setPIDParam(m_yawKp[i],m_yawKd[i],m_yawKi[i]);
+			EXIT;
+		END_IF
+	END_FOR
+	
+	// compute yaw control torque
+	m_instruYawCtrlTrq:=m_instruYawCtrl.run(i_cmdYawPos,i_slaveArm.curDHJntPos[6],i_cmdYawVel, m_instruCurYawVel);
+
+	// add feed forward grasp force
+	m_instruJntCtrlTrq[1]:= m_maxGripForce*m_graspForceLevel/100.0 + m_instruYawCtrlTrq;
+	m_instruJntCtrlTrq[2]:= m_maxGripForce*m_graspForceLevel/100.0 - m_instruYawCtrlTrq;
+	m_instruJntCtrlTrq[1]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[1], m_maxGripCtrlForce);
+	m_instruJntCtrlTrq[2]:=LIMIT(-m_maxGripCtrlForce,m_instruJntCtrlTrq[2], m_maxGripCtrlForce);
+END_IF
+
+o_cmdJntTrq := m_instruJntCtrlTrq;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_BasicInstruControl">
+      <LineId Id="53" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.init">
+      <LineId Id="102" Count="2" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="107" Count="5" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="113" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.run">
+      <LineId Id="77" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="223" Count="1" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="285" Count="2" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="290" Count="0" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="370" Count="1" />
+      <LineId Id="329" Count="2" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="70" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
