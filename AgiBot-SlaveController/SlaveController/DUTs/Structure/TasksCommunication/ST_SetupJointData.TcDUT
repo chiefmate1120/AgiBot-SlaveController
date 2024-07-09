@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_SetupJointData" Id="{14e5c752-fbf5-4c7b-bc0c-14e543ad721e}">
     <Declaration><![CDATA[TYPE ST_SetupJointData :
 STRUCT
@@ -35,6 +35,12 @@ STRUCT
 	
 	// command joint current 
 	m_cmdJntCurrent :ARRAY[1..g_setupJntNum] OF Vec5d;
+	
+	//drive Input data
+	m_driveInput :ARRAY [1..g_sArmNum] OF ARRAY [1..g_setupJntNum] OF ST_MotorInputs;
+	
+	//drive output data
+	m_driveOutput :ARRAY [1..g_sArmNum] OF ARRAY [1..g_setupJntNum] OF  ST_MotorOutputs;
 	
 END_STRUCT
 END_TYPE

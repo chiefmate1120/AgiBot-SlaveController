@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="gvl_SafetyPara" Id="{70a1f141-c810-412d-a017-14633aa37305}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL 
+
+END_VAR
+
+VAR_GLOBAL CONSTANT
+	MaxArmNum:UDINT:=5;
+	MaxArm:UDINT:=4;
+	MaxJoint:UDINT:=13; MaxCarJoint:UDINT:=8;
+	Arm1:UDINT:=1;
+	Arm2:UDINT:=2;
+	Arm3:UDINT:=3;
+	Arm4:UDINT:=4;
+	Car:UDINT:=5;
+END_VAR
+
+VAR_GLOBAL
+	iZeroRowsData:ARRAY[0..MAX_CSV_ROWS] OF  ARRAY [0..MAX_CSV_COLUMNS] OF STRING(MAX_CSV_FIELD_LENGTH);
+	iZeroErrCode:ARRAY [1..MaxArmNum] OF ARRAY[0..100] OF UDINT;
+	o_ArrayErrCodeArm:ARRAY [1..MaxArmNum] OF ARRAY [0..100] OF UDINT;
+END_VAR
+ 
+
+VAR_GLOBAL
+	gCSV_Buffer: ARRAY[1..MAX_CSV_RING_BUFFER] OF ST_Buffer;
+	mErrNameLocation: ARRAY [1..MAX_CSV_RING_BUFFER,0..MAX_CSV_COLUMNS] OF STRING(MAX_CSV_FIELD_LENGTH);
+END_VAR
+
+VAR_GLOBAL CONSTANT
+	MAX_CSV_ROWS 			: UDINT := 10000;(*最大行数(任务周期为20ms)即10分钟的buffer*)
+	MAX_CSV_COLUMNS 		: UDINT := 130;(*最大列数*)
+	MAX_CSV_FIELD_LENGTH	: UDINT := 35;(*每个字段的字符长度*)
+	MAX_CSV_RING_BUFFER		: UDINT := 5;
+	g_ArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.186.39.3.1','169.254.186.39.8.1','169.254.186.39.9.1','169.254.186.39.10.1'];
+	g_JointNetPort:ARRAY[1..MaxJoint] OF UINT :=[
+		1002,    1002,	1003,	1004,	1005,	1006,	1007,	1008,	2(1009),	3(1010)];
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ErrInputVariable" Id="{f641bcc5-1597-4d0c-903e-ba4da9cf7cc3}">
+    <Declaration><![CDATA[TYPE ErrInputVariable :
+STRUCT
+	EmergencyStop:BOOL;
+	ActJntSecPos:ARRAY [1..MaxJoint] OF LREAL; //绝对值编码器转换弧度后的
+	ActJntPos:ARRAY [1..MaxJoint] OF LREAL;		//电机编码器转换弧度后的
+	DriveErrWord:ARRAY [1..MaxJoint] OF UDINT; //驱动器错误字0开始第5位
+	ActJntSecIO:ARRAY [1..MaxJoint] OF DINT;		//绝对值编码器数据PDO直接读取
+	JntStatus:ARRAY [1..MaxJoint] OF UDINT;			//驱动器状态字
+	ActJntTorqueIO,ActJntTorqueIOlast:ARRAY [1..MaxJoint] OF DINT; //驱动器电流PDO直接读取
+	MotPhieErr:ARRAY [1..MaxJoint] OF LREAL;			//电角度偏差
+	curJntPos:ARRAY [1..MaxJoint] OF LREAL;			//电机实际角度PDO转换
+	cmdJntPos,cmdJntPosLast:ARRAY [1..MaxJoint] OF LREAL;			//电机目标位置PDO转换
+	ActJntVel:ARRAY [1..MaxJoint] OF LREAL;				//实际关节速度滤波后
+	filtJntCurrent:ARRAY [1..MaxJoint] OF LREAL;		//电流电流滤波后
+	EtherCATState:ARRAY [1..MaxJoint] OF ST_EtherCATState;		//通讯状态
+	FixedPointErrLength: LREAL;											//不动点偏差长度
+	CmdSaltaValue:ARRAY [1..MaxJoint] OF LREAL;			//1ms指令数值
+	SpacePoseErr : vec6d;															//空间位置偏差
+	InstruPitch:LREAL;																//器械俯仰角
+	InstruOpenAngle:LREAL;													//器械开合角
+	
+	PromptStatus:ARRAY [1..20] OF BOOL;
+	ErrLocation:ARRAY [1..20] OF UDINT;
+	
+	
+	SlaveStopButton:BOOL;
+	PCStopButton :UINT;
+	MasterStopButton :BOOL;
+	
+	
+	CarActJntSecPos:ARRAY [1..8] OF LREAL; //绝对值编码器转换弧度后的
+	CarActJntPos:ARRAY [1..8] OF LREAL;		//电机编码器转换弧度后的
+	CarDriveErrWord:ARRAY [1..8] OF UDINT; //驱动器错误字0开始第5位
+	CarActJntSecIO:ARRAY [1..8] OF DINT;		//绝对值编码器数据PDO直接读取
+	CarJntStatus:ARRAY [1..8] OF UDINT;			//驱动器状态字
+	CarActJntTorqueIO,CarActJntTorqueIOlast:ARRAY [1..8] OF DINT; //驱动器电流PDO直接读取
+	CarActJntPosDH:ARRAY [1..8] OF LREAL;  //实际关节角度、使用的电机编码器
+	CarcurJntPos:ARRAY [1..8] OF LREAL;		//电机实际角度PDO转换
+	CarcmdJntPos:ARRAY [1..8] OF LREAL;		//电机目标位置PDO转换
+	CarActJntVel:ARRAY [1..8] OF LREAL;		//实际关节速度滤波后
+	CarMorCurrentFilter:ARRAY [1..8] OF LREAL;		//电流电流滤波后
+	CarEtherCATState:ARRAY [1..8] OF BOOL;		//通讯状态
+	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

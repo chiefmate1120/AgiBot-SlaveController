@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_MotorInputs" Id="{e44e69b4-1010-4dc2-83a5-4bfdea7e970d}">
     <Declaration><![CDATA[TYPE ST_MotorInputs:
 STRUCT
@@ -15,6 +15,8 @@ STRUCT
 	// motor current from IO
 	m_current : DINT;
 	
+	//motor electrical angle deviation
+	m_electriAngleDev : DINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
