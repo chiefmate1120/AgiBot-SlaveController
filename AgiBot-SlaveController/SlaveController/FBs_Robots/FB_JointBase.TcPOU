@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_JointBase" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR_INPUT
@@ -111,6 +111,28 @@ END_VAR
 disable:=true;]]></ST>
       </Implementation>
     </Method>
+    <Property Name="driveInput" Id="{c779a0f6-3846-4139-8129-0fa170e7aee7}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY driveInput : ST_MotorInputs]]></Declaration>
+      <Get Name="Get" Id="{99f7cdc7-1dc9-44af-93e8-e7473eefd549}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[driveInput := m_motorInputs;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="driveOutput" Id="{feda501e-5d33-4225-80d6-d41ecb548ae6}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY driveOutput : ST_MotorOutputs]]></Declaration>
+      <Get Name="Get" Id="{40f33505-6993-431e-a3df-f09d80806a1c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[driveOutput := m_motorOutputs;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="enable" Id="{cf1e8549-8fbc-49c1-a41e-ead1f2db1255}">
       <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
 VAR_INPUT
@@ -401,6 +423,12 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
     </LineIds>
     <LineIds Name="FB_JointBase.disable">
       <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_JointBase.driveInput.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_JointBase.driveOutput.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.enable">
       <LineId Id="5" Count="1" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -68,6 +68,8 @@ VAR
 	m_cmdJntCurrent : Vec8d;
 	m_cmdJntPos :Vec8d;
 	m_cmdJntVel :Vec8d;
+	m_driveInput :ARRAY [1..g_sJntNum] OF ST_MotorInputs;
+	m_driveOutput :ARRAY [1..g_sJntNum] OF  ST_MotorOutputs;
 		
 	// arm dynamic data
 	m_jntGravity : Vec8d:=g_zeroVec8d;
@@ -1097,6 +1099,8 @@ FOR i:=1 TO g_sJntNum DO
 	m_rawJntCurrent[i]:=m_joints[i].rawCurrent;
 	m_filtJntCurrent[i]:=m_joints[i].filtCurrent;
 	m_cmdJntCurrent[i]:=m_joints[i].cmdCurrent;
+	m_driveInput[i] := m_joints[i].driveInput;
+	m_driveOutput[i] := m_joints[i].driveOutput;
 END_FOR 
 
 // only update carteisn data when instrument is ready
@@ -1438,6 +1442,7 @@ END_FOR
       <LineId Id="13" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="81" Count="3" />
+      <LineId Id="159" Count="1" />
       <LineId Id="12" Count="0" />
       <LineId Id="85" Count="0" />
       <LineId Id="34" Count="0" />

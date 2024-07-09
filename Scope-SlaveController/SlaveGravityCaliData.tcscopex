@@ -3023,10 +3023,10 @@
       <Comment />
       <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-986896</DisplayColor>
+      <DisplayColor>-13816528</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
       <DurationLength>0</DurationLength>
-      <ForeColor>-16777216</ForeColor>
+      <ForeColor>-921103</ForeColor>
       <Guid>b87dc113-b1d2-4c94-b4b7-1306c278bde6</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>Arm1</Name>
@@ -3036,7 +3036,7 @@
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-14342874</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>e744050c-9c22-4913-8f1a-2b98d5f4ed1c</Guid>
           <Name>Axis Group</Name>
@@ -3060,9 +3060,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>b4d3fcec-8dc3-4928-b2bc-ff3d859eab61</Guid>
@@ -3097,9 +3097,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>d8fc32ee-b2aa-43a5-8363-aa17ab63dbbe</Guid>
@@ -4103,8 +4103,8 @@
         </AxisGroup>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-1</DisplayColor>
-          <ForeColor>-16777216</ForeColor>
+          <DisplayColor>-14342874</DisplayColor>
+          <ForeColor>-921103</ForeColor>
           <Guid>1017e907-5b53-44c5-8a66-5ee629bd3196</Guid>
           <Name>Overview Chart</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -4186,10 +4186,10 @@
       <Comment />
       <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-986896</DisplayColor>
+      <DisplayColor>-13816528</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
       <DurationLength>0</DurationLength>
-      <ForeColor>-16777216</ForeColor>
+      <ForeColor>-921103</ForeColor>
       <Guid>1176bb82-6a88-4113-9cfe-8fd153d16865</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>Arm2</Name>
@@ -4198,8 +4198,8 @@
       <SubMember>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-1</DisplayColor>
-          <ForeColor>-16777216</ForeColor>
+          <DisplayColor>-14342874</DisplayColor>
+          <ForeColor>-921103</ForeColor>
           <Guid>dd93bcca-1c3a-42b3-a96a-4b791281e262</Guid>
           <Name>Overview Chart (1)</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -4262,7 +4262,7 @@
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-14342874</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>a44808b5-6659-40f8-9631-473169fcb175</Guid>
           <Name>Axis Group (1)</Name>
@@ -4610,9 +4610,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>ea171456-1372-48b5-83c8-fae90b999901</Guid>
@@ -4647,9 +4647,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>2fa2057e-cc12-42c1-bddb-605d919a244f</Guid>
@@ -5340,10 +5340,10 @@
       <Comment />
       <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-986896</DisplayColor>
+      <DisplayColor>-13816528</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
       <DurationLength>0</DurationLength>
-      <ForeColor>-16777216</ForeColor>
+      <ForeColor>-921103</ForeColor>
       <Guid>2d0532ae-32d8-4879-9056-dbef0847739d</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>Arm3</Name>
@@ -5352,8 +5352,8 @@
       <SubMember>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-1</DisplayColor>
-          <ForeColor>-16777216</ForeColor>
+          <DisplayColor>-14342874</DisplayColor>
+          <ForeColor>-921103</ForeColor>
           <Guid>195d38d3-0067-42f4-b1c6-fc8dcc717e5c</Guid>
           <Name>Overview Chart (2)</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -5416,7 +5416,7 @@
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-14342874</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>9427e134-be00-4bf4-bdee-304ef1ba9cb3</Guid>
           <Name>Axis Group (2)</Name>
@@ -5764,9 +5764,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>ba795790-d3c5-46c6-adce-9e7285b25baa</Guid>
@@ -5801,9 +5801,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>4c89aa6b-3da8-481f-9af1-dabb7b81c6af</Guid>
@@ -6494,10 +6494,10 @@
       <Comment />
       <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-986896</DisplayColor>
+      <DisplayColor>-13816528</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
       <DurationLength>0</DurationLength>
-      <ForeColor>-16777216</ForeColor>
+      <ForeColor>-921103</ForeColor>
       <Guid>a7f99b91-a6ac-4a23-81b9-f74378db4bb4</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>Arm4</Name>
@@ -6506,8 +6506,8 @@
       <SubMember>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-1</DisplayColor>
-          <ForeColor>-16777216</ForeColor>
+          <DisplayColor>-14342874</DisplayColor>
+          <ForeColor>-921103</ForeColor>
           <Guid>6d74c79f-b112-4529-b631-af2d4c87dabf</Guid>
           <Name>Overview Chart (3)</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -6570,7 +6570,7 @@
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-14342874</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>af66d19a-818f-4aae-a606-e702ee4103d5</Guid>
           <Name>Axis Group (3)</Name>
@@ -6918,9 +6918,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>6adbe542-7af0-47aa-806c-fb0c7da051b0</Guid>
@@ -6955,9 +6955,9 @@
                   <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
                   <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-921103</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-921103</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>75babfaa-cd34-4808-995b-568cb9cd36a4</Guid>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -161,6 +161,9 @@ FOR i:=1 TO g_sArmNum DO
 	r_slaveJointsData.m_cmdJntPos[i]:=m_slaveArms[i].cmdJntPos;
 	r_slaveJointsData.m_cmdJntVel[i]:=m_slaveArms[i].cmdJntVel;
 	r_slaveJointsData.m_cmdJntTrq[i]:=m_slaveArms[i].cmdJntTrq;
+	//drive IO
+	r_slaveJointsData.m_driveInput[i] := m_slaveArms[i].m_driveInput;
+	r_slaveJointsData.m_driveOutput[i] := m_slaveArms[i].m_driveOutput;
 	
 END_FOR]]></ST>
       </Implementation>
@@ -740,7 +743,10 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="31" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="187" Count="1" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">

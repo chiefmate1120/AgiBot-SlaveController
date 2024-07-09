@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -78,7 +78,9 @@ FOR i:=1 TO g_sArmNum DO
 	r_setupJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
 	r_setupJointsData.m_cmdJntVel[i]:=m_armCtrlCmds[i].m_cmdJntVel;
 	r_setupJointsData.m_cmdJntTrq[i]:=m_armCtrlCmds[i].m_cmdJntTrq;
-	
+	//drive IO
+	r_setupJointsData.m_driveInput[i] := m_setupArms[i].m_driveInput;
+	r_setupJointsData.m_driveOutput[i] := m_setupArms[i].m_driveOutput;
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -282,7 +284,9 @@ END_FOR]]></ST>
       <LineId Id="31" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">

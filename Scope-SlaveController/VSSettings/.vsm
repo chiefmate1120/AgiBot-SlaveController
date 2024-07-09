@@ -6,11 +6,11 @@
     <Node>
       <Title>SetupGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <FileName>D:\Agibot_git\Agibot_errDebug\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -233,12 +233,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -301,12 +301,12 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -369,12 +369,12 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -437,12 +437,12 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -514,11 +514,11 @@
     <Node>
       <Title>SlaveGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <FileName>D:\Agibot_git\Agibot_errDebug\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -741,12 +741,12 @@
         </Node>
         <Node>
           <Title>Arm1</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -809,12 +809,12 @@
         </Node>
         <Node>
           <Title>Arm2</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -877,12 +877,12 @@
         </Node>
         <Node>
           <Title>Arm3</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -945,12 +945,12 @@
         </Node>
         <Node>
           <Title>Arm4</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1021,12 +1021,12 @@
     </Node>
     <Node>
       <Title>SlaveJointData</Title>
-      <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <Expanded>True</Expanded>
+      <FileName>D:\Agibot_git\Agibot_errDebug\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -1273,12 +1273,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1339,7 +1339,7 @@
             </Node>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1378,12 +1378,12 @@
         </Node>
         <Node>
           <Title>YT Chart (1)</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1414,7 +1414,7 @@
             </Node>
             <Node>
               <Title>Axis Group (4)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1439,7 +1439,7 @@
             </Node>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>

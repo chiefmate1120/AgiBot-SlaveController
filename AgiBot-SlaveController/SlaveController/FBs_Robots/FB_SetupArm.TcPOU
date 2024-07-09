@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupArm" Id="{5c9438f2-768b-4fff-9bfc-3693d995bd67}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupArm
 VAR_INPUT
@@ -38,6 +38,8 @@ VAR
 	m_cmdJntPos :Vec5d;
 	m_cmdJntVel :Vec5d;
 	m_cmdJntTrq :Vec5d;
+	m_driveInput :ARRAY [1..g_setupJntNum] OF ST_MotorInputs;
+	m_driveOutput :ARRAY [1..g_setupJntNum] OF  ST_MotorOutputs;
 		
 	// arm gravity
 	m_jntGravity : Vec5d:=g_zeroVec5d;
