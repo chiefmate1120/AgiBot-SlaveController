@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlMasterSlave_backup" Id="{a24fb4ec-8c26-4821-8801-f7179d004e59}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
-FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_backup EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR
 VAR_OUTPUT
@@ -18,10 +18,8 @@ VAR
 	m_gripperMatchAngThres :LREAL := 2*g_deg2Rad;
 	
 	// control error thershold from joint limit back to free space
-	m_jntLimitOriErr :LREAL :=g_deg2Rad * 5;
-	
-	// master-slave error thershold to halt control 
-	m_safetyOriErr :LREAL :=g_deg2Rad * 45;
+	m_maxPosTrackErr :LREAL := 0.05;
+	m_maxOriTrackErr :LREAL :=g_deg2Rad * 5;
 	
 	// filter cut-off frequency for master-slave control
 	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;
@@ -113,7 +111,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="calcCmdJntPos" Id="{b549ed00-ec1a-412a-94d0-63a741bf9608}">
+    <Method Name="calcCmdJntPos" Id="{f235d240-da08-40c0-b75e-f61f99732fb2}">
       <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
 VAR_IN_OUT CONSTANT
 	i_endoscopePose : ST_Frame;
@@ -175,11 +173,26 @@ IF TRUE = m_firstIn THEN
 	m_MSMotionScale := 1.0/ MAX(1,  i_masterStatus.m_motionScale);
 END_IF
 
-// compute slave command pose in scope
-FOR i:=1 TO 3 DO
-	masterVelInScope[i] := m_masterTwist[i]*m_MSMotionScale;
-	m_slaveCmdPoseInScope.m_pos[i]:=m_slavePoseInScope.m_pos[i] + masterVelInScope[i] * g_slaveArmCtrlCycleTime;
+// compute master twist in slave arm coordinate
+(*FOR i:=1 TO 3 DO
+	masterVelInScope[i] := m_masterTwist[i]*i_masterStatus.m_motionScale;
+	masterWVelInScope[i] := m_masterTwist[i+3];
 END_FOR
+matMultiVec(i_endoScopePose.m_rot, masterVelInScope, masterVelInCart);
+matMultiVec(i_endoScopePose.m_rot, masterWVelInScope, masterWVelInCart);
+matTranspose(i_setupStatus.m_curEndPose[i_slaveArm.armIdx].m_rot, tmpMat3d);
+matMultiVec(tmpMat3d,masterVelInCart, m_masterFFVel);
+matMultiVec(tmpMat3d,masterWVelInCart, m_masterFFWVel);
+FOR i:=1 TO 3 DO
+	m_cmdCartTwist[i] := m_masterFFVel[i];
+	m_cmdCartTwist[i+3] := m_masterFFWVel[i];
+END_FOR*)
+
+// compute slave command pose in scope
+vecSub(m_masterPose.m_pos, m_masterOriginPose.m_pos, masterMotionRange);
+
+vecSelfMultiNum(masterMotionRange, m_MSMotionScale);
+vecAdd(m_slaveOriginPose.m_pos, masterMotionRange, m_slaveCmdPoseInScope.m_pos);
 matMultiply(m_masterPose.m_rot, m_MSOriDeviation, m_slaveCmdPoseInScope.m_rot);
 
 // compute slave command pose in slave arm coordinate
@@ -189,6 +202,7 @@ m_cmdCartPose := transform(tmpFrame, m_slaveCmdPoseInCart);
 
 // compute pose error
 vecSub(m_cmdCartPose.m_pos, i_slaveArm.simCartPose.m_pos, m_slavePosErr);
+
 matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
 matMultiply(tmpMat3d, m_cmdCartPose.m_rot, m_slaveRotErr);
 rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
@@ -197,11 +211,10 @@ matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);
 // calculate pose error in endoscope
 calcMSErrInScope(i_endoscopePose, i_setupStatus.m_curEndPose[i_slaveArm.armIdx], i_slaveArm);
 
-//safety check
-IF ABS(m_errAngle)>m_safetyOriErr THEN
+// safety check
+(*IF norm(m_slavePosErr) > m_maxPosTrackErr OR ABS(m_errAngle)>m_maxOriTrackErr THEN
 	m_isFinished := TRUE;
-	RETURN;
-END_IF
+END_IF*) 
 
 // pose track control
 vecMultiNum(m_slavePosErr, g_slaveArmCtrlFreq, m_slaveCmdVel);
@@ -234,7 +247,7 @@ END_FOR
 limitInstruDofs(i_slaveArm, wristDHJntVel);
 
 // limit instrument wrist joint position
-IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_jntLimitOriErr) THEN
+IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_maxOriTrackErr) THEN
 	wristDHJntVel:=g_zeroVec3d;
 	m_reachWristJntLimit:=TRUE;
 ELSE
@@ -314,7 +327,7 @@ m_lastCmdJntPos:=m_cmdJntPos;
 m_codeTime(START:=FALSE);]]></ST>
       </Implementation>
     </Method>
-    <Method Name="calcCmdJntTrq" Id="{7e4ee3d4-b523-42da-85be-6cc39e889508}">
+    <Method Name="calcCmdJntTrq" Id="{258512d8-205b-4651-b342-64b408b1c9b1}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntTrq : BOOL
 VAR_IN_OUT CONSTANT
@@ -356,7 +369,7 @@ FOR i:=1 TO 5 DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
-    <Method Name="calcMSErrInScope" Id="{8aa5791b-55f8-4144-9eaf-602bf102631f}">
+    <Method Name="calcMSErrInScope" Id="{09069ac7-e023-46bd-91c8-6fcf555ee9c4}">
       <Declaration><![CDATA[METHOD calcMSErrInScope : BOOL
 VAR_IN_OUT CONSTANT
 	i_endoscopePose : ST_Frame;
@@ -400,7 +413,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
+    <Method Name="gripperControl" Id="{7226a20f-eea0-42f4-a9bc-432dc70e728f}">
       <Declaration><![CDATA[METHOD gripperControl : BOOL
 VAR_IN_OUT CONSTANT
 	i_slaveArm :FB_SlaveArm;
@@ -433,7 +446,7 @@ ELSE
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Method Name="init" Id="{1bea1de4-0538-46fc-be44-e671d6da03c3}">
+    <Method Name="init" Id="{f96122a6-2622-45d2-a340-f0a40e84eba1}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
 	i_slaveArm	:FB_SlaveArm;
@@ -484,7 +497,7 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="limitInstruDofs" Id="{87cb5679-565b-4d30-9ae7-60a574a7b888}">
+    <Method Name="limitInstruDofs" Id="{ecfa1f56-3f64-404f-8405-488dd18b27f5}">
       <Declaration><![CDATA[// limit specific joint dofs based on instrument types
 METHOD PRIVATE limitInstruDofs : BOOL
 VAR_IN_OUT CONSTANT
@@ -502,9 +515,9 @@ END_VAR
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Property Name="masterSlavePoseErr" Id="{87b704e0-4215-4360-b95f-fd5590f5f115}">
+    <Property Name="masterSlavePoseErr" Id="{238982ac-a648-4f9d-8863-7da2b9592e5d}">
       <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
-      <Get Name="Get" Id="{1ddbef06-84f8-4aa0-a258-43dd88acef2a}">
+      <Get Name="Get" Id="{bd0d94bc-dce7-47e4-bf50-f2f75973e661}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -513,10 +526,10 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <LineIds Name="FB_SlaveCtrlMasterSlave">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcCmdJntPos">
       <LineId Id="380" Count="0" />
       <LineId Id="463" Count="0" />
       <LineId Id="459" Count="3" />
@@ -541,9 +554,15 @@ END_VAR
       <LineId Id="1024" Count="1" />
       <LineId Id="1023" Count="0" />
       <LineId Id="153" Count="0" />
-      <LineId Id="321" Count="3" />
-      <LineId Id="1188" Count="0" />
-      <LineId Id="326" Count="0" />
+      <LineId Id="321" Count="9" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="565" Count="2" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="568" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="1020" Count="0" />
+      <LineId Id="317" Count="1" />
       <LineId Id="166" Count="0" />
       <LineId Id="320" Count="0" />
       <LineId Id="319" Count="0" />
@@ -553,16 +572,17 @@ END_VAR
       <LineId Id="447" Count="0" />
       <LineId Id="183" Count="0" />
       <LineId Id="448" Count="0" />
+      <LineId Id="453" Count="0" />
       <LineId Id="450" Count="2" />
       <LineId Id="449" Count="0" />
       <LineId Id="681" Count="0" />
       <LineId Id="680" Count="0" />
       <LineId Id="682" Count="0" />
-      <LineId Id="1190" Count="0" />
-      <LineId Id="1189" Count="0" />
-      <LineId Id="1192" Count="1" />
-      <LineId Id="1195" Count="0" />
-      <LineId Id="1194" Count="0" />
+      <LineId Id="455" Count="0" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="456" Count="0" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="457" Count="0" />
       <LineId Id="639" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="754" Count="1" />
@@ -640,7 +660,7 @@ END_VAR
       <LineId Id="519" Count="0" />
       <LineId Id="206" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcCmdJntTrq">
       <LineId Id="70" Count="3" />
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
@@ -657,7 +677,7 @@ END_VAR
       <LineId Id="52" Count="0" />
       <LineId Id="54" Count="1" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcMSErrInScope">
       <LineId Id="41" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="104" Count="0" />
@@ -676,7 +696,7 @@ END_VAR
       <LineId Id="26" Count="0" />
       <LineId Id="28" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.gripperControl">
       <LineId Id="25" Count="0" />
       <LineId Id="15" Count="1" />
       <LineId Id="30" Count="0" />
@@ -692,7 +712,7 @@ END_VAR
       <LineId Id="42" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.init">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.init">
       <LineId Id="13" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="114" Count="0" />
@@ -721,13 +741,13 @@ END_VAR
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.limitInstruDofs">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.limitInstruDofs">
       <LineId Id="5" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />
     </LineIds>
   </POU>

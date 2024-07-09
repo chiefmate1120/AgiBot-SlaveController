@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -460,7 +460,7 @@ FOR i:=1 TO g_sArmNum DO
 			IF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to standby
-			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] THEN
+			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] OR m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
@@ -633,6 +633,7 @@ END_VAR
 
 VAR
 	i : INT;
+	keepWriting :BOOL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
@@ -660,7 +661,8 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 		m_lightCrlWord[i] := ArmLight_BlueOn;
 	END_IF
 
-	m_slaveArms[i].checkLight(m_lightCrlWord[i]);
+	keepWriting := (m_slaveArmState[i] = SlaveArmState_Init);
+	m_slaveArms[i].checkLight(m_lightCrlWord[i],keepWriting);
 END_FOR
 ]]></ST>
       </Implementation>
@@ -1014,6 +1016,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="68" Count="0" />
       <LineId Id="70" Count="9" />
       <LineId Id="69" Count="0" />
+      <LineId Id="87" Count="0" />
       <LineId Id="60" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="17" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -269,6 +269,7 @@ END_IF
       <Declaration><![CDATA[METHOD checkLight : BOOL
 VAR_INPUT
 	i_lightCtrlWord : UDINT;
+	i_keepWriting :BOOL;
 END_VAR
 
 VAR
@@ -290,7 +291,9 @@ END_IF
 IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
 	m_SdoWrite[1](bExecute:=FALSE);
 	m_SdoWrite[2](bExecute:=FALSE);
-	m_lightCtrlWordLast := lightCtrlWord;
+	IF NOT(i_keepWriting) THEN
+		m_lightCtrlWordLast := lightCtrlWord;
+	END_IF
 END_IF
 ]]></ST>
       </Implementation>
@@ -1175,7 +1178,9 @@ END_FOR
       <LineId Id="21" Count="0" />
       <LineId Id="48" Count="5" />
       <LineId Id="47" Count="0" />
-      <LineId Id="64" Count="6" />
+      <LineId Id="64" Count="4" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="70" Count="0" />
       <LineId Id="63" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">

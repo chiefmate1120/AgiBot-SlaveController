@@ -334,7 +334,7 @@
     <Compile Include="FBs_BasicControllers\FB_dither.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FB_InstrumentControl.TcPOU">
+    <Compile Include="FBs_BasicControllers\FB_BasicInstruControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FBMacroJntControl.TcPOU">
@@ -747,6 +747,9 @@
     <Compile Include="SafetyCheck\FB_SlaveArmCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_backup.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TaskCartControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
@@ -792,6 +795,7 @@
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="FBs_Auxiliary" />
+    <Folder Include="Sandbox" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />
