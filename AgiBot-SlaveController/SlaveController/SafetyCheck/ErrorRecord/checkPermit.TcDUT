@@ -4,18 +4,17 @@
     <Declaration><![CDATA[TYPE checkPermit :
 STRUCT
 	JntStatus:ARRAY [1..13] OF BOOL;
-	TorMotor:ARRAY [1..13] OF BOOL;
-	ActSec:ARRAY [1..13] OF BOOL;
+	currentIsNotUpdate:ARRAY [1..13] OF BOOL;
+	linkEncoder:ARRAY [1..13] OF BOOL;
 	DriveErr:ARRAY [1..13] OF BOOL;
 	DualEncoderDev:ARRAY [1..13] OF BOOL;
 	outofLimit:ARRAY [1..13] OF BOOL;
-	FollowDev:ARRAY [1..13] OF BOOL;
+	followErr:ARRAY [1..13] OF BOOL;
 	JntVel:ARRAY [1..13] OF BOOL;
 	JntCurrent:ARRAY [1..13] OF BOOL;
 	EtherCATState:ARRAY [1..13] OF BOOL;
 	FixedPointErr:BOOL;
 	CmdJntSaltation:ARRAY [1..13] OF BOOL;
-	IKSaltation:ARRAY [1..6] OF BOOL;
 	SpacePosErr:ARRAY [1..6] OF BOOL;
 	InstruSingularity:BOOL;
 	InstruOpenAngle:BOOL;

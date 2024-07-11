@@ -57,20 +57,32 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO MaxArm DO
-	FOR j := 1 TO MaxJoint DO
+FOR i := 1 TO g_maxArmNum DO
+	FOR j := 1 TO g_maxArmJoint DO
 		IF j >= 5 THEN
-			m_SafetyCheck.checkPermit[i].ActSec[j] := m_setupJointsData.m_driveInput[i][j].m_statusWord<>0;
+			//fault code 16#3003 
+			m_SafetyCheck.checkPermit[i].linkEncoder[j] := m_setupJointsData.m_driveInput[i][j].m_statusWord<>0;
+			//fault code 16#3002
+			m_SafetyCheck.checkPermit[i].currentIsNotUpdate[j] := m_setupJointsData.m_driveInput[i][j].m_statusWord<>0 AND j > 2;
+			//fault code 16#2002
+			m_SafetyCheck.checkPermit[i].followErr[j] := m_setupJointsData.m_driveInput[i][j].m_statusWord = DriverStatusWord_OP AND j > 2;
 		ELSE
-			m_SafetyCheck.checkPermit[i].ActSec[j] := m_slaveJointData.m_driveInput[i][j-g_setupJntNum].m_statusWord<>0;
+			//fault code 16#3003 
+			m_SafetyCheck.checkPermit[i].linkEncoder[j] := m_slaveJointData.m_driveInput[i][j-g_setupJntNum].m_statusWord<>0;
+			//fault code 16#3002 
+			m_SafetyCheck.checkPermit[i].currentIsNotUpdate[j] := m_slaveJointData.m_driveInput[i][j].m_statusWord<>0 AND j > 2;
+			//fault code 16#2002
+			m_SafetyCheck.checkPermit[i].followErr[j] := m_slaveJointData.m_driveInput[i][j].m_statusWord = DriverStatusWord_OP AND j > 2;
 		END_IF
-		
+		//fault code 16#3002
 		m_SafetyCheck.checkPermit[i].JntStatus[j] := TRUE;
+		//fault code 16#3004
+		m_SafetyCheck.checkPermit[i].DriveErr[j] := TRUE;
 		
 		m_SafetyCheck.checkPermit[i].JntVel[j] := TRUE;
-		m_SafetyCheck.checkPermit[i].TorMotor[j] := TRUE;
+		
 		m_SafetyCheck.checkPermit[i].DualEncoderDev[j] := TRUE;
-		m_SafetyCheck.checkPermit[i].DriveErr[j] := TRUE;
+		
 		m_SafetyCheck.checkPermit[i].JntCurrent[j] := TRUE;
 		m_SafetyCheck.checkPermit[i].FixedPointErr := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
 		
@@ -89,48 +101,47 @@ VAR
 	j : INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i := 1 TO MaxArm DO
+        <ST><![CDATA[FOR i := 1 TO g_maxArmNum DO
 	//emergency stop 、stop button and ui stop 
-	//m_SafetyCheck.AlarmVar[i].
+	m_SafetyCheck.checkVariable[i].EmergencyStop := m_emergencyStopButton;
 	m_SafetyCheck.checkVariable[i].PCStopButton := GVL_com_upper_PC.stop_button;
 	m_SafetyCheck.checkVariable[i].SlaveStopButton := m_stopButton;
 	//m_SafetyCheck.AlarmVar[i].MasterStopButton
 	
 	//setup arm safety check data input mapping
 	FOR j := 1 TO g_setupJntNum DO
-		m_SafetyCheck.checkVariable[i].ActJntSecPos[j] := m_setupJointsData.m_curLinkPos[i][j];
-		m_SafetyCheck.checkVariable[i].ActJntPos[j] := m_setupJointsData.m_curJntPos[i][j];
-		m_SafetyCheck.checkVariable[i].DriveErrWord[j] := m_setupJointsData.m_driveInput[i][j].m_driverError;
-		m_SafetyCheck.checkVariable[i].ActJntSecIO[j] := m_setupJointsData.m_driveInput[i][j].m_linkEncoder;
-		m_SafetyCheck.checkVariable[i].JntStatus[j] := m_setupJointsData.m_driveInput[i][j].m_statusWord;
-		m_SafetyCheck.checkVariable[i].ActJntTorqueIO[j] := m_setupJointsData.m_driveInput[i][j].m_current;
-		m_SafetyCheck.checkVariable[i].MotPhieErr[j] := m_SafetyCheck.electriAngleDev(m_setupJointsData.m_driveInput[i][j].m_electriAngleDev);
-		m_SafetyCheck.checkVariable[i].cmdJntPos[j] := m_setupJointsData.m_cmdJntPos[i][j];
-		m_SafetyCheck.checkVariable[i].ActJntVel[j] := m_setupJointsData.m_curJntVel[i][j];
-		m_SafetyCheck.checkVariable[i].filtJntCurrent[j] := m_setupJointsData.m_filtJntCurrent[i][j];
-		m_SafetyCheck.checkVariable[i].EtherCATState[j] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j]);
+		m_SafetyCheck.checkVariable[i].m_curLinkPos[j] := m_setupJointsData.m_curLinkPos[i][j];
+		m_SafetyCheck.checkVariable[i].m_curJntPos[j] := m_setupJointsData.m_curJntPos[i][j];
+		m_SafetyCheck.checkVariable[i].m_driverErrorWordIO[j] := m_setupJointsData.m_driveInput[i][j].m_driverError;
+		m_SafetyCheck.checkVariable[i].m_linkEncoderIO[j] := m_setupJointsData.m_driveInput[i][j].m_linkEncoder;
+		m_SafetyCheck.checkVariable[i].m_jntStatusWordIO[j] := m_setupJointsData.m_driveInput[i][j].m_statusWord;
+		m_SafetyCheck.checkVariable[i].m_curJntTorqueIO[j] := m_setupJointsData.m_driveInput[i][j].m_current;
+		m_SafetyCheck.checkVariable[i].m_motPhieErr[j] := m_SafetyCheck.electriAngleDev(m_setupJointsData.m_driveInput[i][j].m_electriAngleDev);
+		m_SafetyCheck.checkVariable[i].m_cmdJntPos[j] := m_setupJointsData.m_cmdJntPos[i][j];
+		m_SafetyCheck.checkVariable[i].m_curJntVel[j] := m_setupJointsData.m_curJntVel[i][j];
+		m_SafetyCheck.checkVariable[i].m_filtJntCurrent[j] := m_setupJointsData.m_filtJntCurrent[i][j];
+		m_SafetyCheck.checkVariable[i].m_EtherCATState[j] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j]);
+
 	END_FOR
 	
 	//slave arm safety check data input mapping
 	FOR j := 1 TO g_sJntNum DO
-		m_SafetyCheck.checkVariable[i].ActJntPos[j+g_setupJntNum] := m_slaveJointData.m_curJntPos[i][j];
-		m_SafetyCheck.checkVariable[i].ActJntSecPos[j+g_setupJntNum] := m_slaveJointData.m_curLinkPos[i][j];
-		m_SafetyCheck.checkVariable[i].ActJntPos[j+g_setupJntNum] := m_slaveJointData.m_curJntPos[i][j];
-		m_SafetyCheck.checkVariable[i].DriveErrWord[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_driverError;
-		m_SafetyCheck.checkVariable[i].ActJntSecIO[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_linkEncoder;
-		m_SafetyCheck.checkVariable[i].JntStatus[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_statusWord;
-		m_SafetyCheck.checkVariable[i].ActJntTorqueIO[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_current;
-		m_SafetyCheck.checkVariable[i].MotPhieErr[j+g_setupJntNum] := m_SafetyCheck.electriAngleDev(m_slaveJointData.m_driveInput[i][j].m_electriAngleDev);
-		
-		m_SafetyCheck.checkVariable[i].cmdJntPos[j+g_setupJntNum] := m_slaveJointData.m_cmdJntPos[i][j];
-		m_SafetyCheck.checkVariable[i].ActJntVel[j+g_setupJntNum] := m_slaveJointData.m_curJntVel[i][j];
-		m_SafetyCheck.checkVariable[i].filtJntCurrent[j+g_setupJntNum] := m_slaveJointData.m_filtJntCurrent[i][j];
-		m_SafetyCheck.checkVariable[i].EtherCATState[j+g_setupJntNum] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
+		m_SafetyCheck.checkVariable[i].m_curLinkPos[j+g_setupJntNum] := m_slaveJointData.m_curLinkPos[i][j];
+		m_SafetyCheck.checkVariable[i].m_curJntPos[j+g_setupJntNum] := m_slaveJointData.m_curJntPos[i][j];
+		m_SafetyCheck.checkVariable[i].m_driverErrorWordIO[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_driverError;
+		m_SafetyCheck.checkVariable[i].m_linkEncoderIO[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_linkEncoder;
+		m_SafetyCheck.checkVariable[i].m_jntStatusWordIO[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_statusWord;
+		m_SafetyCheck.checkVariable[i].m_curJntTorqueIO[j+g_setupJntNum] := m_slaveJointData.m_driveInput[i][j].m_current;
+		m_SafetyCheck.checkVariable[i].m_motPhieErr[j+g_setupJntNum] := m_SafetyCheck.electriAngleDev(m_slaveJointData.m_driveInput[i][j].m_electriAngleDev);
+		m_SafetyCheck.checkVariable[i].m_cmdJntPos[j+g_setupJntNum] := m_slaveJointData.m_cmdJntPos[i][j];
+		m_SafetyCheck.checkVariable[i].m_curJntVel[j+g_setupJntNum] := m_slaveJointData.m_curJntVel[i][j];
+		m_SafetyCheck.checkVariable[i].m_filtJntCurrent[j+g_setupJntNum] := m_slaveJointData.m_filtJntCurrent[i][j];
+		m_SafetyCheck.checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
 		
 		//m_SafetyCheck.AlarmVar[i].FixedPointErrLength := 
-		m_SafetyCheck.checkVariable[i].SpacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_curArmPose[i] );
-		m_SafetyCheck.checkVariable[i].cmdSaltaValue[j+g_setupJntNum] := m_SafetyCheck.checkVariable[i].cmdJntPos[j+g_setupJntNum] - m_SafetyCheck.checkVariable[i].cmdJntPosLast[j+g_setupJntNum];
-		m_SafetyCheck.checkVariable[i].cmdJntPosLast[j+g_setupJntNum] := m_SafetyCheck.checkVariable[i].cmdJntPos[j+g_setupJntNum];
+		m_SafetyCheck.checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_curArmPose[i] );
+		m_SafetyCheck.checkVariable[i].m_cmdSaltaValue[j+g_setupJntNum] := m_SafetyCheck.checkVariable[i].m_cmdJntPos[j+g_setupJntNum] - m_SafetyCheck.checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum];
+		m_SafetyCheck.checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum] := m_SafetyCheck.checkVariable[i].m_cmdJntPos[j+g_setupJntNum];
 		//m_SafetyCheck.AlarmVar[i].InstruPitch := m_slaveStatus.m_curArmPose[i].m_rot
 	END_FOR
 
@@ -152,12 +163,24 @@ END_FOR]]></ST>
       <LineId Id="6" Count="1" />
       <LineId Id="16" Count="0" />
       <LineId Id="26" Count="0" />
+      <LineId Id="43" Count="0" />
       <LineId Id="30" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="44" Count="0" />
       <LineId Id="29" Count="0" />
-      <LineId Id="27" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="28" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="32" Count="0" />
+      <LineId Id="52" Count="1" />
       <LineId Id="25" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="24" Count="0" />
@@ -168,7 +191,13 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckInputCast">
-      <LineId Id="95" Count="44" />
+      <LineId Id="95" Count="19" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="115" Count="3" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="122" Count="4" />
+      <LineId Id="128" Count="11" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

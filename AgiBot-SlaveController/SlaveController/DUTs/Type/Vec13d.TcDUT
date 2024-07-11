@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="Vec13d" Id="{67e576c4-46e8-40ba-bc0d-b9106bf65d63}">
+    <Declaration><![CDATA[TYPE Vec13d : ARRAY[1..13] OF LREAL; END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

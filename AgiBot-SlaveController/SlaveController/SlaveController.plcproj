@@ -268,6 +268,9 @@
     <Compile Include="DUTs\Type\Mat7d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec13di.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec2i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -298,7 +301,13 @@
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec13d.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Vec8di.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_InstruNearDetect.TcPOU">
@@ -635,7 +644,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\gvl_SafetyPara.TcGVL">
+    <Compile Include="GVLs\GVL_SafetyPara.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -742,10 +751,10 @@
     <Compile Include="Mains\RobotDynamics.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\ErrorRecord\AlarmDelay.TcDUT">
+    <Compile Include="SafetyCheck\ErrorRecord\checkDelay.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\ErrorRecord\AlarmDelayTime.TcDUT">
+    <Compile Include="SafetyCheck\ErrorRecord\checkDelayTime.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\ErrorRecord\CarErrInputVariable.TcDUT">
@@ -754,10 +763,13 @@
     <Compile Include="SafetyCheck\ErrorRecord\checkPermit.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\ErrorRecord\ErrInputVariable.TcDUT">
+    <Compile Include="SafetyCheck\ErrorRecord\checkInputVariable.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\ErrorRecord\MonitorThreshold.TcDUT">
+    <Compile Include="SafetyCheck\ErrorRecord\monitorThreshold.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrorRecord\monitorThreshold_1.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\ErrorRecord\PromptMessage.TcDUT">
