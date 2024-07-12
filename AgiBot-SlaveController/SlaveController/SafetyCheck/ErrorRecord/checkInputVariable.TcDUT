@@ -10,7 +10,6 @@ STRUCT
 	m_linkEncoderIO :vec13di;			//绝对值编码器数据PDO直接读取
 	m_jntStatusWordIO :vec13di;				//驱动器状态字
 	m_curJntTorqueIO :vec13di;		//驱动器电流PDO直接读取
-	m_curJntTorqueIOlast :vec13di;  //驱动器电流PDO直接读取
 	m_motPhieErr :vec13d;					//电角度偏差
 	m_cmdJntPos :vec13d;					//电机目标位置PDO转换
 	m_cmdJntPosLast :vec13d;			//电机目标位置PDO转换

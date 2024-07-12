@@ -3,23 +3,22 @@
   <DUT Name="checkPermit" Id="{596a4f78-9ed2-462f-bcbc-6fb090f26916}">
     <Declaration><![CDATA[TYPE checkPermit :
 STRUCT
-	JntStatus:ARRAY [1..13] OF BOOL;
-	currentIsNotUpdate:ARRAY [1..13] OF BOOL;
-	linkEncoder:ARRAY [1..13] OF BOOL;
-	DriveErr:ARRAY [1..13] OF BOOL;
-	DualEncoderDev:ARRAY [1..13] OF BOOL;
-	outofLimit:ARRAY [1..13] OF BOOL;
-	followErr:ARRAY [1..13] OF BOOL;
-	JntVel:ARRAY [1..13] OF BOOL;
-	JntCurrent:ARRAY [1..13] OF BOOL;
-	EtherCATState:ARRAY [1..13] OF BOOL;
-	FixedPointErr:BOOL;
-	CmdJntSaltation:ARRAY [1..13] OF BOOL;
-	SpacePosErr:ARRAY [1..6] OF BOOL;
-	InstruSingularity:BOOL;
-	InstruOpenAngle:BOOL;
-	SpaceVelFilterM3:ARRAY [1..6] OF BOOL;
-	MotPhieErr:ARRAY [1..13] OF BOOL;
+	m_armJntEncErr :ARRAY [1..13] OF BOOL;
+	m_driveErr :ARRAY [1..13] OF BOOL;
+	m_jntStatusErr :ARRAY [1..13] OF BOOL;
+	m_currentIsNotUpdate :ARRAY [1..13] OF BOOL;
+	m_linkEncErr :ARRAY [1..13] OF BOOL;
+	m_motPhieErr:ARRAY [1..13] OF BOOL;
+	m_outOfLimit :ARRAY [1..13] OF BOOL;
+	m_armJntFollowErr :ARRAY [1..13] OF BOOL;
+	m_jntVelErr :ARRAY [1..13] OF BOOL;
+	m_jntCurrentErr :ARRAY [1..13] OF BOOL;
+	m_fixedPointErr :BOOL;
+	m_cmdJntSaltation:ARRAY [1..13] OF BOOL;
+	m_spacePoseErr:ARRAY [1..6] OF BOOL;
+	m_instruSingularity:BOOL;
+	m_instruOpenAngle:BOOL;
+	
 
 	CarJntStatus:ARRAY [1..8] OF BOOL:=[8(TRUE)];
 	CarTorMotor:ARRAY [1..8] OF BOOL:=[8(TRUE)];

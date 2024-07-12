@@ -57,7 +57,7 @@ VAR_GLOBAL
 	g_cartMaxJntVel :Vec8d:=[0.0025*2,0.0025*2,2.3*2,2.3*2, 0.032, 10*g_deg2Rad, 0.10, 10*g_deg2Rad];
 	g_cartMaxJntCurrent :Vec8d:=[1080*2,1080*2,19800*2,19800*2, 10000*2,3800*2,3800*2,3800*2];
 
-	o_ArrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
+	g_arrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
 END_VAR
  
 

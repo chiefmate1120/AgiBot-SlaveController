@@ -8,26 +8,29 @@ VAR_OUTPUT
 END_VAR
 VAR
 	i, j:UDINT;
-	i_Var :ARRAY[1..g_maxNum] OF checkInputVariable;
 	m_checkDelay :ARRAY[1..g_maxNum] OF checkDelay;
 	m_checkDelayTime :checkDelayTime;
 	m_checkPermit:ARRAY[1..g_maxNum] OF  checkPermit;
 	
-	m_ErrFlag:ARRAY[1..g_maxNum,0..g_maxArmJoint,1..3] OF BOOL;
-	m_ErrCode:UDINT;
-	m_ErrType:ARRAY [1..g_maxNum,1..3] OF BOOL;
+	m_jntErrFlag:ARRAY[1..g_maxNum,0..g_maxArmJoint,1..3] OF BOOL;
+	m_armErrFlag:ARRAY [1..g_maxNum,1..3] OF BOOL;
+	m_errCode:UDINT;
 	
-	m_ErrNumType3,m_ErrNumType2,m_ErrNumType1:INT;
-	o_ArrayErrCodeType:ARRAY [1..3] OF ARRAY [0..100] OF UDINT;
-	m_ErrCodeUpdateAllowedType3,m_ErrCodeUpdateAllowedType2,m_ErrCodeUpdateAllowedType1:BOOL;
-	m_ErrCodeUpdateDelayType3,m_ErrCodeUpdateDelayType2,m_ErrCodeUpdateDelayType1:TON;//延时接通
 	
+	m_errNumType: ARRAY [1..3] OF INT;
+	m_ArrayErrCodeType:ARRAY [1..3] OF ARRAY [0..100] OF UDINT;
+	
+	//The fault is sent to the UI at the frequency of 0.1S
+	m_errCodeUpdateFlag: ARRAY [1..3] OF BOOL;
+	m_errCodeUpdateTon: ARRAY [1..3] OF TON;
+	m_curJntTorqueIOlast :ARRAY [1..g_maxArmNum] OF vec13di;  //驱动器电流PDO直接读取
 	o_ErrCode:ARRAY [1..3] OF UDINT;
 		
 	m_PromptMassBusy:BOOL;
 	m_PromptFlag:ARRAY[1..g_maxNum,1..20] OF UINT;
 	m_deleteCode:UDINT;
 	
+	//drive EtherCAT communition detection
 	m_commuEtherCATState:FB_EcGetSlaveState;
 	m_EcSlaveState : ST_EcSlaveState;
 	
@@ -42,8 +45,8 @@ VAR CONSTANT
 	
 	//Fault level: 1 indicates  prompt message, 2 indicates a recoverable fault and 3 indicates an unrecoverable fault
 	m_promptMessageLevel : UINT :=1;
-	m_recoverableLevel : UINT :=2;
-	m_unrecoverableLevel : UINT :=3;
+	m_rcvLevel : UINT :=2;
+	m_unrcvLevel : UINT :=3;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -81,6 +84,7 @@ AlarmInit:=TRUE;
       <Declaration><![CDATA[METHOD armsSafetyCheck : BOOL
 VAR_INPUT
 	i_ArmId:UDINT;
+	i_safetyCheckVar :ARRAY[1..g_maxNum] OF checkInputVariable;
 END_VAR
 
 VAR
@@ -89,153 +93,149 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
 //EmergencyStopButton
-IF NOT i_Var[i_ArmId].EmergencyStop OR m_ErrFlag[i_armId,0,3] THEN
-	errCodeAssign(i_ArmId, 16#0C, 0, 0, 16#3001, m_unrecoverableLevel);
+IF NOT i_safetyCheckVar[i_ArmId].EmergencyStop OR m_jntErrFlag[i_armId,0,3] THEN
+	errCodeAssign(i_ArmId, 16#0C, 0, 0, 16#3001, m_unrcvLevel);
 	RETURN;
 END_IF
 
 
 //驱动器状态监测、驱动器未连接
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_JntStatus[i](IN:= (i_Var[i_ArmId].JntStatus[i]=0 AND m_checkPermit[i_ArmId].JntStatus[i]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
-	m_checkDelay[i_ArmId].T_TorMotor[i](IN:= (i_Var[i_ArmId].ActJntTorqueIO[i]=i_Var[i_ArmId].ActJntTorqueIOlast[i] AND m_checkPermit[i_ArmId].currentIsNotUpdate[i]), PT:=m_checkDelayTime.Ti_currentIsNotUpdate , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_JntStatus[i].Q OR m_checkDelay[i_ArmId].T_TorMotor[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3,  i, 0, 16#3002 ,m_unrecoverableLevel );
+	m_checkDelay[i_ArmId].T_jntStatusErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_jntStatusWordIO[i]=0 AND m_checkPermit[i_ArmId].m_jntStatusErr[i]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_currentIsNotUpdate[i](IN:= (i_safetyCheckVar[i_ArmId].m_curJntTorqueIO[i]=m_curJntTorqueIOlast[i_ArmId][i] AND m_checkPermit[i_ArmId].m_currentIsNotUpdate[i]), PT:=m_checkDelayTime.Ti_currentIsNotUpdate , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_jntStatusErr[i].Q OR m_checkDelay[i_ArmId].T_currentIsNotUpdate[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3,  i, 0, 16#3002 ,m_unrcvLevel );
 	END_IF
 END_FOR
-i_Var[i_ArmId].ActJntTorqueIOlast:=i_Var[i_ArmId].ActJntTorqueIO;
+m_curJntTorqueIOlast[i_ArmId]:=i_safetyCheckVar[i_ArmId].m_curJntTorqueIO;
 
 
 //关节编码器监测
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_ActSec[i](IN:= (i_Var[i_ArmId].ActJntSecIO[i]=g_maxLinkEnc[i] OR i_Var[i_ArmId].ActJntSecIO[i]=g_minLinkEnc[i]) AND m_checkPermit[i_ArmId].linkEncoder[i], PT:=m_checkDelayTime.Ti_linkEncErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_ActSec[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0,  16#3003 ,m_unrecoverableLevel );
+	m_checkDelay[i_ArmId].T_linkEncErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_linkEncoderIO[i]=g_maxLinkEnc[i] OR i_safetyCheckVar[i_ArmId].m_linkEncoderIO[i]=g_minLinkEnc[i]) AND m_checkPermit[i_ArmId].m_linkEncErr[i], PT:=m_checkDelayTime.Ti_linkEncErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_linkEncErr[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0,  16#3003 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //驱动器错误检测
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_DriveErr[i](IN:= (i_Var[i_ArmId].DriveErrWord[i] AND 16#20)=g_driveErrWord AND m_checkPermit[i_ArmId].DriveErr[i] , PT:=m_checkDelayTime.Ti_driveErr , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_DriveErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_driverErrorWordIO[i] AND 16#20)=g_driveErrWord AND m_checkPermit[i_ArmId].m_driveErr[i] , PT:=m_checkDelayTime.Ti_driveErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_DriveErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3004 ,m_unrecoverableLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3004 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //双编码器偏差过大检测
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_DualEncoderDev[i](IN:= ABS(i_Var[i_ArmId].ActJntSecPos[i]-i_Var[i_ArmId].ActJntPos[i])>=g_armMaxJntEncErr[i] AND m_checkPermit[i_ArmId].DualEncoderDev[i], PT:=m_checkDelayTime.Ti_armJntEncErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_DualEncoderDev[i].Q THEN
-		errCodeAssign( i_ArmId, i_ArmId+3, i, 0, 16#3005, m_unrecoverableLevel );
+	m_checkDelay[i_ArmId].T_armJntEncErr[i](IN:= ABS(i_safetyCheckVar[i_ArmId].m_curLinkPos[i]-i_safetyCheckVar[i_ArmId].m_curJntPos[i])>=g_armMaxJntEncErr[i] AND m_checkPermit[i_ArmId].m_armJntEncErr[i], PT:=m_checkDelayTime.Ti_armJntEncErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_armJntEncErr[i].Q THEN
+		errCodeAssign( i_ArmId, i_ArmId+3, i, 0, 16#3005, m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //关节运动超限位
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_outofLimit[i](IN:= (i_Var[i_ArmId].ActJntPos[i]>=g_maxJntPos[i_ArmId,i] OR i_Var[i_ArmId].ActJntPos[i]<=g_minJntPos[i_ArmId,i]) AND m_checkPermit[i_ArmId].outofLimit[i] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_outofLimit[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3006, m_unrecoverableLevel );
+	m_checkDelay[i_ArmId].T_outOfLimit[i](IN:= (i_safetyCheckVar[i_ArmId].m_curJntPos[i]>=g_maxJntPos[i_ArmId,i] OR i_safetyCheckVar[i_ArmId].m_curJntPos[i]<=g_minJntPos[i_ArmId,i]) AND m_checkPermit[i_ArmId].m_outOfLimit[i] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_outOfLimit[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3006, m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //电机电角度偏差
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	IF ABS(i_Var[i_ArmId].MotPhieErr[i])> g_motPhieErrLimit  AND m_checkPermit[i_ArmId].MotPhieErr[i] THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3008, m_unrecoverableLevel );
+	IF ABS(i_safetyCheckVar[i_ArmId].m_motPhieErr[i])> g_motPhieErrLimit  AND m_checkPermit[i_ArmId].m_motPhieErr[i] THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3008, m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //StopButton
-IF NOT i_Var[i_ArmId].SlaveStopButton OR i_Var[i_ArmId].PCStopButton=0 OR i_Var[i_ArmId].MasterStopButton THEN
-	errCodeAssign(i_ArmId, 16#0C, 0, 0, 16#2001, m_recoverableLevel );
+IF NOT i_safetyCheckVar[i_ArmId].SlaveStopButton OR i_safetyCheckVar[i_ArmId].PCStopButton=0 OR i_safetyCheckVar[i_ArmId].MasterStopButton THEN
+	errCodeAssign(i_ArmId, 16#0C, 0, 0, 16#2001, m_rcvLevel );
 END_IF
 
 
 //关节跟随误差过大
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_FollowDev[i](IN:= ABS(i_Var[i_ArmId].cmdJntPos[i]- i_Var[i_ArmId].curJntPos[i])>g_armMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].followErr[i], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_FollowDev[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2002, m_recoverableLevel );
+	m_checkDelay[i_ArmId].T_armJntFollowErr[i](IN:= ABS(i_safetyCheckVar[i_ArmId].m_cmdJntPos[i]- i_safetyCheckVar[i_ArmId].m_curJntPos[i])>g_armMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2002, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //关节速度监控
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_JntVel[i](IN:= ABS (i_Var[i_ArmId].ActJntVel[i])>g_safetyJntVel[i] AND m_checkPermit[i_ArmId].JntVel[i], PT:=m_checkDelayTime.Ti_jntVelErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_JntVel[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2003, m_recoverableLevel );
+	m_checkDelay[i_ArmId].T_jntVelErr[i](IN:= ABS (i_safetyCheckVar[i_ArmId].m_curJntVel[i])>g_safetyJntVel[i] AND m_checkPermit[i_ArmId].m_jntVelErr[i], PT:=m_checkDelayTime.Ti_jntVelErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_jntVelErr[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2003, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //笛卡尔空间指令与位置偏差检测
 FOR i:=1 TO 6 BY 1 DO
-	m_checkDelay[i_ArmId].T_SpacePosErr[i](IN:= i_Var[i_ArmId].SpacePoseErr[i]> g_maxCartPoseErr[i] AND m_checkPermit[i_ArmId].SpacePosErr[i], PT:=m_checkDelayTime.Ti_spacePoseErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_SpacePosErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 1, 16#2004, m_recoverableLevel );
+	m_checkDelay[i_ArmId].T_spacePoseErr[i](IN:= i_safetyCheckVar[i_ArmId].m_spacePoseErr[i]> g_maxCartPoseErr[i] AND m_checkPermit[i_ArmId].m_spacePoseErr[i], PT:=m_checkDelayTime.Ti_spacePoseErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_spacePoseErr[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 1, 16#2004, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //电流超限监测
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	m_checkDelay[i_ArmId].T_JntCurrent[i](IN:= ABS(i_Var[i_ArmId].filtJntCurrent[i])>g_maxJntCurrent[i] AND m_checkPermit[i_ArmId].JntCurrent[i], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_JntCurrent[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2005, m_recoverableLevel );
+	m_checkDelay[i_ArmId].T_jntCurrentErr[i](IN:= ABS(i_safetyCheckVar[i_ArmId].m_filtJntCurrent[i])>g_maxJntCurrent[i] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_jntCurrentErr[i].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2005, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //Ethercat通讯检测
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	IF NOT i_Var[i_ArmId].EtherCATState[i].EtherCATState THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2006, m_recoverableLevel );
+	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2006, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //不动点发生变化监控
-m_checkDelay[i_ArmId].T_FixedPointErr(IN:=  i_Var[i_ArmId].FixedPointErrLength>g_maxFixedPointErr AND m_checkPermit[i_ArmId].FixedPointErr, PT:=m_checkDelayTime.Ti_FixedPointErr , Q=> , ET=> );
+m_checkDelay[i_ArmId].T_FixedPointErr(IN:=  i_safetyCheckVar[i_ArmId].m_fixedPointErrLength>g_maxFixedPointErr AND m_checkPermit[i_ArmId].m_fixedPointErr, PT:=m_checkDelayTime.Ti_FixedPointErr , Q=> , ET=> );
 IF m_checkDelay[i_ArmId].T_FixedPointErr.Q THEN
-	errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2007, m_recoverableLevel );
+	errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2007, m_rcvLevel );
 END_IF
 
 
 //目标位置指令突变检测
 FOR i:=1 TO g_maxArmNum BY 1 DO
-	IF i_Var[i_ArmId].CmdSaltaValue[i]>g_maxJntCmdSalta[i] AND m_checkPermit[i_ArmId].CmdJntSaltation[i] THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2008, m_recoverableLevel );
+	IF i_safetyCheckVar[i_ArmId].m_cmdSaltaValue[i]>g_maxJntCmdSalta[i] AND m_checkPermit[i_ArmId].m_cmdJntSaltation[i] THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2008, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //器械在奇异区域内
-IF (i_Var[i_ArmId].InstruPitch> g_maxInstruPitch OR i_Var[i_ArmId].InstruPitch< g_minInstruPitch) AND m_checkPermit[i_ArmId].InstruSingularity THEN
-	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200E, m_recoverableLevel );
+IF (i_safetyCheckVar[i_ArmId].m_instruPitch> g_maxInstruPitch OR i_safetyCheckVar[i_ArmId].m_instruPitch< g_minInstruPitch) AND m_checkPermit[i_ArmId].m_instruSingularity THEN
+	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200E, m_rcvLevel );
 END_IF
 
 
 //器械张开角度过大或过小
-IF (i_Var[i_ArmId].InstruOpenAngle> g_maxInstruOpen OR i_Var[i_ArmId].InstruOpenAngle< g_minInstruOpen) AND m_checkPermit[i_ArmId].InstruOpenAngle THEN
-	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200F, m_recoverableLevel );
+IF (i_safetyCheckVar[i_ArmId].m_instruOpenAngle> g_maxInstruOpen OR i_safetyCheckVar[i_ArmId].m_instruOpenAngle< g_minInstruOpen) AND m_checkPermit[i_ArmId].m_instruOpenAngle THEN
+	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200F, m_rcvLevel );
 END_IF
 
 
 
 
-//提示信息
+//prompt message
 FOR i:=1 TO 20 BY 1 DO
-	PromptMassCode(
-		i_PromptStatus:= i_Var[i_ArmId].PromptStatus[k], 
-		i_ArmId:= i_ArmId, 
-		i_ErrID:= i, 
-		i_ErrLocation:=i_Var[i_ArmId].ErrLocation[k] );
+	PromptMassCode( i_safetyCheckVar[i_ArmId].PromptStatus[i], i_ArmId,  i,  i_safetyCheckVar[i_ArmId].ErrLocation[i]);
 END_FOR
 
 
@@ -244,10 +244,10 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ArrayDeleteFrist" Id="{00e49c9f-cbe8-4b26-b05a-c4b6acb31969}">
-      <Declaration><![CDATA[METHOD ArrayDeleteFrist : ARRAY [0..100] OF UDINT;
+    <Method Name="arrayDeleteFrist" Id="{00e49c9f-cbe8-4b26-b05a-c4b6acb31969}">
+      <Declaration><![CDATA[METHOD arrayDeleteFrist : ARRAY [0..100] OF UDINT;
 VAR_INPUT
-	i_Array:ARRAY [0..100] OF UDINT;
+	i_array:ARRAY [0..100] OF UDINT;
 END_VAR
 
 VAR
@@ -255,15 +255,15 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-ArrayDeleteFrist[100]:=0;
+arrayDeleteFrist[100]:=0;
 
 FOR k:=0 TO 99 BY 1 DO
-	ArrayDeleteFrist[k]:=i_Array[k+1];
+	arrayDeleteFrist[k]:=i_array[k+1];
 END_FOR]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ArrayDeleteInput" Id="{980f1673-9d6d-4af2-a068-78f386b10642}">
-      <Declaration><![CDATA[METHOD ArrayDeleteInput : BOOL
+    <Method Name="arrayDeleteInput" Id="{980f1673-9d6d-4af2-a068-78f386b10642}">
+      <Declaration><![CDATA[METHOD arrayDeleteInput : BOOL
 VAR_INPUT
 	i_Array:ARRAY[0..100] OF UDINT;
 	i_DeleteCode:UDINT;
@@ -294,41 +294,41 @@ END_FOR
 o_Array[20]:=0;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ArrayFIFO" Id="{655e2224-db9d-4b4a-8461-cda6c8a0a0dc}">
-      <Declaration><![CDATA[METHOD ArrayFIFO : ARRAY [0..100] OF  UDINT
+    <Method Name="arrayFIFO" Id="{655e2224-db9d-4b4a-8461-cda6c8a0a0dc}">
+      <Declaration><![CDATA[METHOD arrayFIFO : ARRAY [0..100] OF  UDINT
 VAR_INPUT
-	i_Array:ARRAY[0..100] OF UDINT;
-	i_NewData:UDINT;
+	i_array:ARRAY[0..100] OF UDINT;
+	i_newData:UDINT;
 END_VAR
 
 VAR
-	k:INT;
+	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR k:=0 TO 20 BY 1 DO
-	ArrayFIFO[k+1]:=i_Array[k];
+FOR i:=0 TO 20 BY 1 DO
+	arrayFIFO[i+1]:=i_array[i];
 END_FOR
 
-ArrayFIFO[0]:=i_NewData;]]></ST>
+arrayFIFO[0]:=i_newData;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ArrayFILO" Id="{26262d95-ef1c-497d-b548-c28fcd1771c9}">
-      <Declaration><![CDATA[METHOD ArrayFILO : ARRAY [0..100] OF  UDINT
+    <Method Name="arrayFILO" Id="{26262d95-ef1c-497d-b548-c28fcd1771c9}">
+      <Declaration><![CDATA[METHOD arrayFILO : ARRAY [0..100] OF  UDINT
 VAR_INPUT
-	i_Array:ARRAY[0..100] OF UDINT;
-	i_NewData:UDINT;
+	i_array:ARRAY[0..100] OF UDINT;
+	i_newData:UDINT;
 END_VAR
 
 VAR
-	k:INT;
+	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR k:=0 TO 20 BY 1 DO
-	ArrayFILO[k]:=i_Array[k];
-	IF i_Array[k]=0 THEN
-		ArrayFILO[k]:=i_NewData;
+FOR i:=0 TO 20 BY 1 DO
+	arrayFILO[i]:=i_array[i];
+	IF i_array[i]=0 THEN
+		arrayFILO[i]:=i_newData;
 		EXIT;
 	END_IF
 END_FOR
@@ -480,27 +480,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="checkVariable" Id="{fee27663-f720-414f-979b-75dceea68ef2}" FolderPath="interface\">
-      <Declaration><![CDATA[PROPERTY checkVariable :REFERENCE TO ARRAY [1..g_maxNum] OF checkInputVariable
-	]]></Declaration>
-      <Get Name="Get" Id="{f4a1b44b-c2b7-41f0-90aa-7b296efd3880}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[checkVariable REF= i_Var;
-]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{32092c75-bd9e-424f-b894-0aaf1428bc3e}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
     <Method Name="electriAngleDev" Id="{8c2ea40a-ba18-4d9e-8d1f-4ea5c9f320b3}">
       <Declaration><![CDATA[METHOD electriAngleDev : DINT
 VAR_INPUT
@@ -530,26 +509,22 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF m_errFlag[i_armId,i_errJoint,i_errFlagID]=FALSE THEN
-	m_errFlag[i_armId,i_errJoint,i_errFlagID]:=TRUE;
+        <ST><![CDATA[IF m_jntErrFlag[i_armId,i_errJoint,i_errFlagID]=FALSE THEN
+	m_jntErrFlag[i_armId,i_errJoint,i_errFlagID]:=TRUE;
 	m_errCode:=SHL(i_errLocation,24)+SHL(i_errCodeMode,20)+SHL(i_errJoint,16)+i_errID;
 	
 	
-	IF i_ErrID>=16#3000 THEN
-		m_ErrNumType3:=LIMIT(0,m_ErrNumType3+1,100);
-		o_ArrayErrCodeType[3][m_ErrNumType3]:=m_ErrCode;
-		o_ArrayErrCodeArm[i_ArmId]:=ArrayFILO(i_Array:= o_ArrayErrCodeArm[i_ArmId], i_NewData:=m_ErrCode );
-		m_ErrType[i_ArmId,3]:=TRUE;
+	IF i_errID>=16#3000 THEN
+		m_errNumType[m_unrcvLevel]:=LIMIT(0,m_errNumType[m_unrcvLevel]+1,100);
+		m_arrayErrCodeType[m_unrcvLevel][m_errNumType[m_unrcvLevel]]:=m_errCode;
+		g_arrayErrCodeArm[i_ArmId]:=arrayFILO(i_Array:= g_arrayErrCodeArm[i_ArmId], i_NewData:=m_errCode );
+		m_armErrFlag[i_ArmId,m_unrcvLevel]:=TRUE;
 		
-	ELSIF i_ErrID>=16#2000 THEN
-		m_ErrNumType2:=LIMIT(0,m_ErrNumType2+1,100);
-		o_ArrayErrCodeType[2][m_ErrNumType2]:=m_ErrCode;
-		o_ArrayErrCodeArm[i_ArmId]:=ArrayFILO(i_Array:= o_ArrayErrCodeArm[i_ArmId], i_NewData:=m_ErrCode );
-		m_ErrType[i_ArmId,2]:=TRUE;
-		
-	ELSE
-		//m_ErrNumType1:=LIMIT(0,m_ErrNumType1+1,100);
-		//o_ArrayErrCodeType[1][m_ErrNumType1]:=m_ErrCode;
+	ELSIF i_errID>=16#2000 THEN
+		m_errNumType[m_rcvLevel]:=LIMIT(0,m_errNumType[m_rcvLevel]+1,100);
+		m_arrayErrCodeType[m_rcvLevel][m_errNumType[m_rcvLevel]]:=m_errCode;
+		g_arrayErrCodeArm[i_ArmId]:=arrayFILO(i_Array:= g_arrayErrCodeArm[i_ArmId], i_NewData:=m_errCode );
+		m_armErrFlag[i_ArmId,m_rcvLevel]:=TRUE;
 		
 	END_IF
 END_IF
@@ -557,61 +532,48 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="ErrCodeUpdating" Id="{0b3c9bb2-9217-4fc9-b998-e4a685172889}">
-      <Declaration><![CDATA[METHOD ErrCodeUpdating : BOOL
+    <Method Name="errCodeUpdating" Id="{0b3c9bb2-9217-4fc9-b998-e4a685172889}">
+      <Declaration><![CDATA[METHOD errCodeUpdating :ARRAY [1..3] OF UDINT;
 VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-m_ErrCodeUpdateDelayType3(IN:= NOT m_ErrCodeUpdateAllowedType3, PT:=m_codeUpdateDelay , Q=> m_ErrCodeUpdateAllowedType3, ET=> );
-IF m_ErrCodeUpdateAllowedType3 THEN
-	IF m_ErrNumType3>=1 THEN
-		//m_ErrCodeUpdateAllowedType3:=FALSE;
-		o_ArrayErrCodeType[3]:=ArrayDeleteFrist(i_Array:=o_ArrayErrCodeType[3]) ;
-		o_ErrCode[3]:=o_ArrayErrCodeType[3][0] ;
-		m_ErrNumType3:=m_ErrNumType3-1;
+m_errCodeUpdateTon[m_unrcvLevel](IN:= NOT m_errCodeUpdateFlag[3], PT:=m_codeUpdateDelay , Q=> m_errCodeUpdateFlag[3], ET=> );
+IF m_errCodeUpdateFlag[m_unrcvLevel] THEN
+	IF m_errNumType[m_unrcvLevel]>=1 THEN
+		m_ArrayErrCodeType[m_unrcvLevel]:=ArrayDeleteFrist(i_Array:=m_ArrayErrCodeType[3]) ;
+		o_ErrCode[m_unrcvLevel]:=m_ArrayErrCodeType[m_unrcvLevel][0] ;
+		m_errNumType[m_unrcvLevel]:=m_errNumType[m_unrcvLevel]-1;
 	END_IF
 END_IF
 
 
-m_ErrCodeUpdateDelayType2(IN:= NOT m_ErrCodeUpdateAllowedType2, PT:=m_codeUpdateDelay , Q=> m_ErrCodeUpdateAllowedType2, ET=> );
-IF m_ErrCodeUpdateAllowedType2 THEN
-	IF m_ErrNumType2>=1 THEN
-		//m_ErrCodeUpdateAllowedType2:=FALSE;
-		o_ArrayErrCodeType[2]:=ArrayDeleteFrist(i_Array:=o_ArrayErrCodeType[2]) ;
-		o_ErrCode[2]:=o_ArrayErrCodeType[2][0] ;
-		m_ErrNumType2:=m_ErrNumType2-1;
+m_errCodeUpdateTon[m_rcvLevel](IN:= NOT m_errCodeUpdateFlag[2], PT:=m_codeUpdateDelay , Q=> m_errCodeUpdateFlag[2], ET=> );
+IF m_errCodeUpdateFlag[m_rcvLevel] THEN
+	IF m_errNumType[m_rcvLevel]>=1 THEN
+		m_ArrayErrCodeType[m_rcvLevel]:=ArrayDeleteFrist(i_Array:=m_ArrayErrCodeType[m_rcvLevel]) ;
+		o_ErrCode[m_rcvLevel]:=m_ArrayErrCodeType[m_rcvLevel][0] ;
+		m_errNumType[m_rcvLevel]:=m_errNumType[m_rcvLevel]-1;
 	END_IF
 END_IF
-
-
-(*
-IF m_ErrCodeUpdateAllowedType1 THEN
-	IF m_ErrNumType1>=1 THEN
-		m_ErrCodeUpdateAllowedType1:=FALSE;
-		o_ArrayErrCodeType[1]:=ArrayDeleteFrist(i_Array:=o_ArrayErrCodeType[1]) ;
-		o_ErrCode[1]:=o_ArrayErrCodeType[1][1] ;
-		m_ErrNumType1:=m_ErrNumType1-1;
-	END_IF
-END_IF
-m_ErrCodeUpdateDelayType1(IN:= NOT m_ErrCodeUpdateAllowedType1, PT:=CodeUpdateDelay , Q=> m_ErrCodeUpdateAllowedType1, ET=> );
-*)]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="errFlagReset" Id="{2f8c115b-de2b-4c35-92d2-fdbed32dcf1f}">
       <Declaration><![CDATA[METHOD errFlagReset : BOOL
 VAR_INPUT
-	i_ArmId:UDINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-
-FOR i :=0 TO g_maxArmJoint BY 1 DO
-	m_ErrFlag[i_ArmId,i,2]:=FALSE;
+FOR i := 1 TO g_maxArmNum DO
+	FOR j :=0 TO g_maxArmJoint DO
+		m_jntErrFlag[i, j, 2]:=FALSE;
+	END_FOR
+	m_armErrFlag[i, 2]:=FALSE;
 END_FOR
-m_ErrType[i_ArmId,2]:=FALSE;
+
 o_ErrCode[2]:=0;]]></ST>
       </Implementation>
     </Method>
@@ -678,8 +640,8 @@ FOR i := 1 TO 6 DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
-    <Method Name="PromptMassCode" Id="{97898266-aa01-4d86-bccd-f23152d91670}">
-      <Declaration><![CDATA[METHOD PromptMassCode : BOOL
+    <Method Name="promptMassCode" Id="{97898266-aa01-4d86-bccd-f23152d91670}">
+      <Declaration><![CDATA[METHOD promptMassCode : BOOL
 VAR_INPUT
 	i_PromptStatus:BOOL;
 	i_ArmId:UDINT;
@@ -700,18 +662,18 @@ END_IF
 IF m_PromptFlag[i_ArmId,i_ErrID]=1 THEN
 	m_ErrCode:=SHL(i_ErrLocation,24)+SHL(0,20)+SHL(0,16)+i_ErrID+16#1020;
 	//m_ErrNumType1:=LIMIT(0,m_ErrNumType1+1,100);
-	o_ArrayErrCodeType[1]:=ArrayFIFO(i_Array:= o_ArrayErrCodeType[1], i_NewData:=m_ErrCode );//m_ErrCode;
+	m_ArrayErrCodeType[1]:=ArrayFIFO(i_Array:= m_ArrayErrCodeType[1], i_NewData:=m_ErrCode );//m_ErrCode;
 	m_PromptFlag[i_ArmId,i_ErrID]:=2;
 END_IF
 
 //清除提示故障码
 IF m_PromptFlag[i_ArmId,i_ErrID]=2 AND i_PromptStatus=FALSE THEN
 	m_deleteCode:=SHL(i_ErrLocation,24)+SHL(0,20)+SHL(0,16)+i_ErrID+16#1020;
-	ArrayDeleteInput(i_Array:= o_ArrayErrCodeType[1], i_DeleteCode:=m_deleteCode , o_Array=> o_ArrayErrCodeType[1]);
+	ArrayDeleteInput(i_Array:= m_ArrayErrCodeType[1], i_DeleteCode:=m_deleteCode , o_Array=> m_ArrayErrCodeType[1]);
 	//m_ErrNumType1:=m_ErrNumType1-1;
 	m_PromptFlag[i_ArmId,i_ErrID]:=0;
 END_IF
-o_ErrCode[1]:=o_ArrayErrCodeType[1][0];
+o_ErrCode[1]:=m_ArrayErrCodeType[1][0];
 m_PromptMassBusy:=FALSE;
 
 ]]></ST>
@@ -809,19 +771,18 @@ m_PromptMassBusy:=FALSE;
       <LineId Id="266" Count="0" />
       <LineId Id="268" Count="0" />
       <LineId Id="289" Count="0" />
-      <LineId Id="294" Count="3" />
-      <LineId Id="293" Count="0" />
+      <LineId Id="294" Count="0" />
       <LineId Id="291" Count="0" />
       <LineId Id="288" Count="0" />
       <LineId Id="279" Count="0" />
       <LineId Id="275" Count="1" />
       <LineId Id="145" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.ArrayDeleteFrist">
+    <LineIds Name="Fb_SafetyCheck.arrayDeleteFrist">
       <LineId Id="7" Count="4" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.ArrayDeleteInput">
+    <LineIds Name="Fb_SafetyCheck.arrayDeleteInput">
       <LineId Id="8" Count="1" />
       <LineId Id="18" Count="0" />
       <LineId Id="29" Count="0" />
@@ -833,12 +794,12 @@ m_PromptMassBusy:=FALSE;
       <LineId Id="19" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.ArrayFIFO">
+    <LineIds Name="Fb_SafetyCheck.arrayFIFO">
       <LineId Id="7" Count="1" />
       <LineId Id="13" Count="2" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.ArrayFILO">
+    <LineIds Name="Fb_SafetyCheck.arrayFILO">
       <LineId Id="14" Count="2" />
       <LineId Id="19" Count="1" />
       <LineId Id="22" Count="0" />
@@ -898,13 +859,6 @@ m_PromptMassBusy:=FALSE;
     <LineIds Name="Fb_SafetyCheck.checkPermit.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.checkVariable.Get">
-      <LineId Id="2" Count="0" />
-      <LineId Id="6" Count="0" />
-    </LineIds>
-    <LineIds Name="Fb_SafetyCheck.checkVariable.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="Fb_SafetyCheck.electriAngleDev">
       <LineId Id="7" Count="0" />
       <LineId Id="5" Count="0" />
@@ -913,33 +867,28 @@ m_PromptMassBusy:=FALSE;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.errCodeAssign">
-      <LineId Id="69" Count="23" />
+      <LineId Id="69" Count="15" />
+      <LineId Id="89" Count="3" />
       <LineId Id="49" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.ErrCodeUpdating">
+    <LineIds Name="Fb_SafetyCheck.errCodeUpdating">
       <LineId Id="7" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="5" Count="0" />
-      <LineId Id="11" Count="1" />
+      <LineId Id="11" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="14" Count="1" />
       <LineId Id="13" Count="0" />
       <LineId Id="9" Count="1" />
-      <LineId Id="17" Count="4" />
+      <LineId Id="17" Count="3" />
       <LineId Id="39" Count="0" />
-      <LineId Id="22" Count="3" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="28" Count="4" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="33" Count="3" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="26" Count="0" />
+      <LineId Id="22" Count="4" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.errFlagReset">
       <LineId Id="8" Count="0" />
       <LineId Id="10" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="11" Count="1" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -973,7 +922,7 @@ m_PromptMassBusy:=FALSE;
       <LineId Id="74" Count="0" />
       <LineId Id="71" Count="0" />
     </LineIds>
-    <LineIds Name="Fb_SafetyCheck.PromptMassCode">
+    <LineIds Name="Fb_SafetyCheck.promptMassCode">
       <LineId Id="57" Count="2" />
       <LineId Id="40" Count="0" />
       <LineId Id="43" Count="0" />
