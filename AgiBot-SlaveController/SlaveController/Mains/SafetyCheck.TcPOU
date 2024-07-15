@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SafetyCheck
 VAR
@@ -30,7 +30,17 @@ VAR
 	m_setupArmCheck:FB_SetupArmCheck;
 	m_slaveArmCheck:FB_SlaveArmCheck;
 	
-	i: INT;
+	m_SafetyCheck : Fb_SafetyCheck;
+	m_checkVariable : ARRAY[1..g_maxNum] OF checkInputVariable;
+	m_errCode :ARRAY [1..3] OF UDINT;
+	i , j: INT;
+	
+	//TODO(Yang Xueyun)
+	m_slaveDriverInput :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF ST_MotorInputs; 
+	m_slaveDriverOutput :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF ST_MotorOutputs;
+	m_setupDriverInput :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF ST_MotorInputs; 
+	m_setupDriverOutput :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF ST_MotorOutputs;
+ 
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -44,11 +54,186 @@ IF FALSE = m_initFlag  THEN
 	m_initFlag:=TRUE;
 END_IF
 
-m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheckData.m_slaveErrFlag);
-m_setupArmCheck.check(m_setupStatus,m_setupJointsData, o_errorFlag=>m_safetyCheckData.m_setupErrFlag);]]></ST>
+// copy driver data
+FOR i:=1 TO g_sArmNum DO 
+	FOR j:=1 TO  g_sJntNum DO 
+		m_slaveDriverInput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs;
+		m_slaveDriverOutput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorOutputs;
+	END_FOR
+	
+	FOR j:=1 TO  g_setupJntNum DO 
+		m_setupDriverInput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs;
+		m_setupDriverOutput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorOutputs;
+	END_FOR
+END_FOR
+
+armSafetyCheckInputCast();
+
+armSafetyCheckAllowed();
+
+FOR i:=1  TO g_sArmNum DO
+	m_SafetyCheck.armsSafetyCheck(i,m_checkVariable);
+	
+	m_safetyCheckData.m_slaveErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
+	m_safetyCheckData.m_setupErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
+END_FOR
+
+m_SafetyCheck.errCodeUpdating();
+GVL_com_upper_PC.error_ID_type3:=m_SafetyCheck.o_ErrCode[3];
+GVL_com_upper_PC.error_ID_type2:=m_SafetyCheck.o_ErrCode[2];
+GVL_com_upper_PC.error_ID_type1:=m_SafetyCheck.o_ErrCode[1];
+
+IF GVL_com_upper_PC.clear_Cart_fault=1 THEN
+	m_SafetyCheck.errFlagReset();
+	GVL_com_upper_PC.clear_Cart_fault := 0;
+END_IF
+
+
+//IF FALSE = m_initFlag  THEN
+//	FOR i:=1  TO g_sArmNum DO 
+//		m_safetyCheckData.m_slaveErrFlag[i]:=FALSE;
+//		m_safetyCheckData.m_setupErrFlag[i]:=FALSE;
+//		m_safetyCheckData.m_cartErrFlag:=FALSE;
+//	END_FOR
+//	m_initFlag:=TRUE;
+//END_IF
+//
+//m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheckData.m_slaveErrFlag);
+//m_setupArmCheck.check(m_setupStatus,m_setupJointsData, o_errorFlag=>m_safetyCheckData.m_setupErrFlag);]]></ST>
     </Implementation>
+    <Method Name="armSafetyCheckAllowed" Id="{c2ebef6f-e712-49e3-9955-377a0083e93a}">
+      <Declaration><![CDATA[METHOD armSafetyCheckAllowed : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i , j : UDINT; 
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO g_maxArmNum DO
+	FOR j := 1 TO g_maxArmJoint DO
+		IF j > 5 THEN
+			//fault code 16#3003 
+			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_slaveDriverInput[i,j-g_setupJntNum].m_statusWord<>0;
+			//fault code 16#3002 
+			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] :=m_slaveDriverInput[i, j-g_setupJntNum].m_statusWord<>0 AND j > 2;
+			//fault code 16#2002
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_slaveDriverInput[i, -g_setupJntNum].m_statusWord = DriverStatusWord_OP AND j > 2;
+		ELSE
+			//fault code 16#3003 
+			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_setupDriverInput[i, j].m_statusWord<>0;
+			//fault code 16#3002
+			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] := m_setupDriverInput[i, j].m_statusWord<>0 AND j > 2;
+			//fault code 16#2002
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_setupDriverInput[i, j].m_statusWord = DriverStatusWord_OP AND j > 2;
+			
+		END_IF
+		//fault code 16#3002
+		m_SafetyCheck.checkPermit[i].m_jntStatusErr[j] := TRUE;
+		//fault code 16#3004
+		m_SafetyCheck.checkPermit[i].m_driveErr[j] := TRUE;
+		
+		m_SafetyCheck.checkPermit[i].m_jntVelErr[j] := TRUE;
+		
+		m_SafetyCheck.checkPermit[i].m_armJntEncErr[j] := TRUE;
+		
+		m_SafetyCheck.checkPermit[i].m_jntCurrentErr[j] := TRUE;
+		m_SafetyCheck.checkPermit[i].m_fixedPointErr := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
+		
+	END_FOR
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="armSafetyCheckInputCast" Id="{598e934b-b439-4bef-985d-1ea697c2fcb0}">
+      <Declaration><![CDATA[METHOD armSafetyCheckInputCast : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+	i : UDINT; 
+	j : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO g_maxArmNum DO
+	//emergency stop 、stop button and ui stop 
+	m_checkVariable[i].EmergencyStop := m_emergencyStopButton;
+	m_checkVariable[i].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[i].SlaveStopButton := m_stopButton;
+	//m_SafetyCheck.AlarmVar[i].MasterStopButton
+	
+	//setup arm safety check data input mapping
+	FOR j := 1 TO g_setupJntNum DO
+		m_checkVariable[i].m_curLinkPos[j] := m_setupJointsData.m_curLinkPos[i][j];
+		m_checkVariable[i].m_curJntPos[j] := m_setupJointsData.m_curJntPos[i][j];
+		m_checkVariable[i].m_driverErrorWordIO[j] := m_setupDriverInput[i, j].m_driverError;
+		m_checkVariable[i].m_linkEncoderIO[j] := m_setupDriverInput[i, j].m_linkEncoder;
+		m_checkVariable[i].m_jntStatusWordIO[j] := m_setupDriverInput[i, j].m_statusWord;
+		m_checkVariable[i].m_curJntTorqueIO[j] :=m_setupDriverInput[i, j].m_current;
+		m_checkVariable[i].m_motPhieErr[j] := m_SafetyCheck.electriAngleDev(m_setupDriverInput[i, j].m_electriAngleDev);
+		m_checkVariable[i].m_cmdJntPos[j] := m_setupJointsData.m_cmdJntPos[i][j];
+		m_checkVariable[i].m_curJntVel[j] := m_setupJointsData.m_curJntVel[i][j];
+		m_checkVariable[i].m_JntCurrent[j] := m_setupJointsData.m_rawJntCurrent[i][j];
+		m_checkVariable[i].m_EtherCATState[j] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j]);
+
+	END_FOR
+	
+	//slave arm safety check data input mapping
+	FOR j := 1 TO g_sJntNum DO
+		m_checkVariable[i].m_curLinkPos[j+g_setupJntNum] := m_slaveJointData.m_curLinkPos[i][j];
+		m_checkVariable[i].m_curJntPos[j+g_setupJntNum] := m_slaveJointData.m_curJntPos[i][j];
+		m_checkVariable[i].m_driverErrorWordIO[j+g_setupJntNum] := m_slaveDriverInput[i, j].m_driverError;
+		m_checkVariable[i].m_linkEncoderIO[j+g_setupJntNum] := m_slaveDriverInput[i, j].m_linkEncoder;
+		m_checkVariable[i].m_jntStatusWordIO[j+g_setupJntNum] := m_slaveDriverInput[i, j].m_statusWord;
+		m_checkVariable[i].m_curJntTorqueIO[j+g_setupJntNum] :=m_slaveDriverInput[i, j].m_current;
+		m_checkVariable[i].m_motPhieErr[j+g_setupJntNum] := m_SafetyCheck.electriAngleDev(m_slaveDriverInput[i, j].m_electriAngleDev);
+		m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum] := m_slaveJointData.m_cmdJntPos[i][j];
+		m_checkVariable[i].m_curJntVel[j+g_setupJntNum] := m_slaveJointData.m_curJntVel[i][j];
+		m_checkVariable[i].m_JntCurrent[j+g_setupJntNum] := m_slaveJointData.m_rawJntCurrent[i][j];
+		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
+		
+		//m_SafetyCheck.AlarmVar[i].FixedPointErrLength := 
+		m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_curArmPose[i] );
+		m_checkVariable[i].m_cmdSaltaValue[j+g_setupJntNum] := m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum] - m_checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum];
+		m_checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum] := m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum];
+		//m_SafetyCheck.AlarmVar[i].InstruPitch := m_slaveStatus.m_curArmPose[i].m_rot
+	END_FOR
+
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="SafetyCheck">
       <LineId Id="25" Count="0" />
+      <LineId Id="113" Count="6" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="189" Count="2" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="129" Count="2" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="123" Count="1" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="100" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="37" Count="3" />
       <LineId Id="35" Count="0" />
@@ -57,6 +242,42 @@ m_setupArmCheck.check(m_setupStatus,m_setupJointsData, o_errorFlag=>m_safetyChec
       <LineId Id="26" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="66" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.armSafetyCheckAllowed">
+      <LineId Id="6" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="65" Count="4" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="60" Count="4" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="33" Count="2" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.armSafetyCheckInputCast">
+      <LineId Id="95" Count="19" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="115" Count="3" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="122" Count="4" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="131" Count="8" />
+      <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

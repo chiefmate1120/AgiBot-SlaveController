@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="monitorThreshold_1" Id="{37a7b749-2b42-4e38-94d2-15663e253d84}">
+    <Declaration><![CDATA[TYPE monitorThreshold_1 :
+STRUCT
+	m_armMaxJntEncErr:ARRAY [1..g_maxArmJoint] OF LREAL;
+	FollowDeviationLimit:ARRAY [1..g_maxArmJoint] OF LREAL;
+	MaxSecEnc,MinSecEnc:ARRAY [1..g_maxArmJoint] OF DINT;
+	MaxJntLimit:ARRAY [1..g_maxArmJoint] OF LREAL:=[1,1,0.210,4.5579,1.7284,      5.9157,1.196,          1,1,1,1,1,1];
+	MinJntLimit:ARRAY [1..g_maxArmJoint] OF LREAL:=[1,1,-0.10,-1.2351,-1.7473,    0.3611,-1.57,       -1,1,1,1,1];
+	JntVelLimit:ARRAY [1..g_maxArmJoint] OF LREAL:=[1,1,0.020*2,0.7*2,0.38*2,     1.2*2,1.2*2,     0.200*2,6.28*2,6.28*2,6.28*2,6.28*2,     6.28*2];
+	JntElectricityLimit:ARRAY [1..g_maxArmJoint] OF LREAL:=[1,1,8400,7600,8400,      8400,8400,      1500,800,800,800,800, 800];;
+	FixedPointErrLimit:LREAL:=0.005;//不动点偏差极限
+	CmdSaltaValueLimit:ARRAY [1..g_maxArmJoint] OF LREAL;
+	SpacePosErrLimit:ARRAY [1..6] OF LREAL:=[0.010,0.010,0.010,10*g_deg2Rad,10*g_deg2Rad,10*g_deg2Rad];
+	MaxInstruLimit:LREAL:=-5*g_deg2Rad; 
+	MinInstruLimit:LREAL:=-175*g_deg2Rad;
+	MaxInstruOpen,MinInstruOpen:LREAL;
+	SpaceVelFilterM3Limit:ARRAY [1..6] OF LREAL:=[2,2,2,7,7,7];
+	MotPhieErrLimit:DINT:=20000;
+	
+	Scale_Factor:INT:=2;
+	CarDevSecAndMotorLimit:ARRAY [1..8] OF LREAL:=[0.01,0.01,1*g_deg2Rad,1*g_deg2Rad,0.01,1*g_deg2Rad,0.01,1*g_deg2Rad];
+	CarFollowDeviationLimit:ARRAY [1..8] OF LREAL:=[0.01,0.01,3*g_deg2Rad,3*g_deg2Rad,0.01,3*g_deg2Rad,0.01,3*g_deg2Rad];
+	CarMaxSecEnc:ARRAY [1..8] OF DINT:=[0,0,0,0,67108863,16777215,67108863,16777215] ;
+	CarMinSecEnc:ARRAY [1..8] OF DINT:=[8(0)];
+	CarMinJntLimit:ARRAY [1..8] OF LREAL:=[0,0,1,1,  				0-0.01-35*g_deg2Rad,0-0.01,		-165*g_deg2Rad];
+	CarMaxJntLimit:ARRAY [1..8] OF LREAL:=[0.053,0.053,1,1,  0.68+0.01,35*g_deg2Rad,0.5+0.01,165*g_deg2Rad];
+	CarJntVelLimit:ARRAY [1..13] OF LREAL:=[0.0025*2,0.0025*2,2.3*2,2.3*2,    0.016*Scale_Factor,5*g_deg2Rad*Scale_Factor,0.050*Scale_Factor,5*g_deg2Rad*Scale_Factor];
+	CarJntElectricityLimit:ARRAY [1..13] OF LREAL:=[1080*2,1080*2,19800*2,19800*2,      10000*2,3800*2,3800*2,3800*2];
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
