@@ -30,12 +30,6 @@ STRUCT
 	// simulation arm pose in slave arm coordinate
 	m_simArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	
-	// command arm twist[linear velocity; angular veloicty] in  slave arm coordinate
-	m_cmdArmTwist:ARRAY[1..g_sArmNum] OF Vec6d;
-	
-	// current arm twist[linear velocity; angular veloicty] in  slave arm coordinate
-	m_curArmTwist:ARRAY[1..g_sArmNum] OF vec6d;
-	
 	// master slave pose error [position, angle*axis] in endoscope coordinate
 	m_masterSlavePoseError :ARRAY[1..g_sArmNum] OF Vec6d; 
 

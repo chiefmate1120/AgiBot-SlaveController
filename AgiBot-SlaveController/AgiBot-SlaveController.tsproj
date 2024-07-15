@@ -1028,10 +1028,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{2F3BE2CE-604E-B4C8-D579-AE1A616F285B}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
-			<BitSize>15296</BitSize>
+			<BitSize>12224</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{89EEE9AC-51D2-771C-E483-68DF69652F1A}">E_SlaveArmState</Type>
@@ -1152,28 +1152,6 @@
 				<BitOffs>7616</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdArmTwist</Name>
-				<Type GUID="{831F75E9-C113-0166-8F86-6AA81377C84E}">Vec6d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in  slave arm coordinate]]></Comment>
-				<BitSize>1536</BitSize>
-				<BitOffs>10688</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curArmTwist</Name>
-				<Type GUID="{831F75E9-C113-0166-8F86-6AA81377C84E}">Vec6d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in  slave arm coordinate]]></Comment>
-				<BitSize>1536</BitSize>
-				<BitOffs>12224</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_masterSlavePoseError</Name>
 				<Type GUID="{831F75E9-C113-0166-8F86-6AA81377C84E}">Vec6d</Type>
 				<ArrayInfo>
@@ -1182,7 +1160,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ master slave pose error [position, angle*axis] in endoscope coordinate]]></Comment>
 				<BitSize>1536</BitSize>
-				<BitOffs>13760</BitOffs>
+				<BitOffs>10688</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1195,8 +1173,8 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}" AutoDeleteType="true">ST_SlaveJointData</Name>
-			<BitSize>22528</BitSize>
+			<Name GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}" AutoDeleteType="true">ST_SlaveJointData</Name>
+			<BitSize>14336</BitSize>
 			<SubItem>
 				<Name>m_curMotorPos</Name>
 				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
@@ -1242,17 +1220,6 @@
 				<BitOffs>6144</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdJntVel</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ target joint velocity ]]></Comment>
-				<BitSize>2048</BitSize>
-				<BitOffs>8192</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_curJntVel</Name>
 				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
 				<ArrayInfo>
@@ -1261,29 +1228,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ current joint position ]]></Comment>
 				<BitSize>2048</BitSize>
-				<BitOffs>10240</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdJntTrq</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ command joint torque ]]></Comment>
-				<BitSize>2048</BitSize>
-				<BitOffs>12288</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_curJntTrq</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ current joint torque ]]></Comment>
-				<BitSize>2048</BitSize>
-				<BitOffs>14336</BitOffs>
+				<BitOffs>8192</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_rawJntCurrent</Name>
@@ -1294,18 +1239,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ raw joint current  ]]></Comment>
 				<BitSize>2048</BitSize>
-				<BitOffs>16384</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_filtJntCurrent</Name>
-				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ filtd  joint current  ]]></Comment>
-				<BitSize>2048</BitSize>
-				<BitOffs>18432</BitOffs>
+				<BitOffs>10240</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntCurrent</Name>
@@ -1316,7 +1250,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ command joint current ]]></Comment>
 				<BitSize>2048</BitSize>
-				<BitOffs>20480</BitOffs>
+				<BitOffs>12288</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1715,7 +1649,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{0CB4E48E-185F-141E-F5F3-1159859A9F3A}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{4CB06FEE-42A2-B1EE-1212-C8B1125A8419}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1956,12 +1890,12 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{2F3BE2CE-604E-B4C8-D579-AE1A616F285B}">ST_SlaveStatus</Type>
+							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
 							<Comment><![CDATA[ slave robot joint data, output to other tasks]]></Comment>
-							<Type GUID="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}">ST_SlaveJointData</Type>
+							<Type GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorOutputs</Name>
@@ -2117,7 +2051,7 @@
 						<Var>
 							<Name>RobotDynamics.m_slaveJointsData</Name>
 							<Comment><![CDATA[ slave robot arms joint data]]></Comment>
-							<Type GUID="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}">ST_SlaveJointData</Type>
+							<Type GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>RobotDynamics.m_setupJointData</Name>
@@ -2271,7 +2205,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{2F3BE2CE-604E-B4C8-D579-AE1A616F285B}">ST_SlaveStatus</Type>
+							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2391,12 +2325,12 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{2F3BE2CE-604E-B4C8-D579-AE1A616F285B}">ST_SlaveStatus</Type>
+							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
 							<Comment><![CDATA[ slave robot joint data]]></Comment>
-							<Type GUID="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}">ST_SlaveJointData</Type>
+							<Type GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
@@ -2509,7 +2443,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{2F3BE2CE-604E-B4C8-D579-AE1A616F285B}">ST_SlaveStatus</Type>
+							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_stopButton</Name>
@@ -2694,6 +2628,14 @@
 						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
 							<OwnerB Name="TIID^Cart^Box 7 (AX58200_MotorControl)">
 								<Link VarA="CartControl.m_slaveCart.m_testInput" TypeA="UINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000005}" VarB="TxPdoMappingCspCsv^Statusword" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-07-15T10:24:32">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SlaveArmControl.m_slaveJointsData" TypeA="ST_SlaveJointData" InOutA="1" GuidA="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}" VarB="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" RestoreInfo="TypeMismatch" OldTypeA="ST_SlaveJointData" OldGuidA="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}" NewTypeA="ST_SlaveJointData" NewGuidA="{937F3884-3CE3-429B-D47A-F45A38295C93}"/>
+								<Link VarA="SlaveArmControl.m_slaveJointsData" TypeA="ST_SlaveJointData" InOutA="1" GuidA="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" RestoreInfo="TypeMismatch" OldTypeA="ST_SlaveJointData" OldGuidA="{955B681D-5E8C-3E05-FDF7-B0EBA343869A}" NewTypeA="ST_SlaveJointData" NewGuidA="{937F3884-3CE3-429B-D47A-F45A38295C93}"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -9186,10 +9128,8 @@
 			<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_instruInfo" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus^m_instruStauts"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
-				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveStatus"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_safetyData" VarB="TaskSafetyCheck Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity" VarB="TaskDynamic Outputs^RobotDynamics.m_setupJnt3Gravity"/>

@@ -16,23 +16,11 @@ STRUCT
 	// current joint position 
 	m_curJntPos :ARRAY[1..g_sArmNum] OF Vec8d;
 	
-	// target joint velocity 
-	m_cmdJntVel :ARRAY[1..g_sArmNum] OF Vec8d;
-	
 	// current joint position 
 	m_curJntVel :ARRAY[1..g_sArmNum] OF Vec8d;
 	
-	// command joint torque 
-	m_cmdJntTrq :ARRAY[1..g_sArmNum] OF Vec8d;
-	
-	// current joint torque 
-	m_curJntTrq :ARRAY[1..g_sArmNum] OF Vec8d;
-	
 	// raw joint current  
 	m_rawJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;
-	
-	// filtd  joint current  
-	m_filtJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;
 	
 	// command joint current 
 	m_cmdJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;

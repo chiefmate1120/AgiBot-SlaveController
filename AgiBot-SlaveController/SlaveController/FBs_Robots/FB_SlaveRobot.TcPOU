@@ -144,23 +144,18 @@ FOR i:=1 TO g_sArmNum DO
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
 	r_slaveStatus.m_simArmPose[i]:=m_slaveArms[i].simCartPose;
-	r_slaveStatus.m_curArmTwist[i]:=m_slaveArms[i].curCartTwist;
 	r_slaveStatus.m_masterSlavePoseError[i] := m_armMasterSlave[i].masterSlavePoseErr;
 	// joint
 	r_slaveJointsData.m_curMotorPos[i]:=m_slaveArms[i].curMotorPos;
 	r_slaveJointsData.m_curLinkPos[i]:=m_slaveArms[i].curLinkPos;
 	r_slaveJointsData.m_curJntPos[i]:=m_slaveArms[i].curJntPos;
 	r_slaveJointsData.m_curJntVel[i]:=m_slaveArms[i].curJntVel;
-	r_slaveJointsData.m_curJntTrq[i]:=m_slaveArms[i].curJntTrq;
 	
 	// command info
 	// cartesion
 	r_slaveStatus.m_cmdArmPose[i]:=m_slaveArms[i].cmdCartPose;
-	r_slaveStatus.m_cmdArmTwist[i]:=m_slaveArms[i].cmdCartTwist;
 	// joint info
 	r_slaveJointsData.m_cmdJntPos[i]:=m_slaveArms[i].cmdJntPos;
-	r_slaveJointsData.m_cmdJntVel[i]:=m_slaveArms[i].cmdJntVel;
-	r_slaveJointsData.m_cmdJntTrq[i]:=m_slaveArms[i].cmdJntTrq;
 	
 END_FOR]]></ST>
       </Implementation>
@@ -731,18 +726,15 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="64" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="172" Count="0" />
-      <LineId Id="55" Count="0" />
       <LineId Id="144" Count="0" />
-      <LineId Id="57" Count="5" />
+      <LineId Id="57" Count="4" />
       <LineId Id="56" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="65" Count="0" />
       <LineId Id="54" Count="0" />
-      <LineId Id="27" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="35" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="1" />
+      <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">
