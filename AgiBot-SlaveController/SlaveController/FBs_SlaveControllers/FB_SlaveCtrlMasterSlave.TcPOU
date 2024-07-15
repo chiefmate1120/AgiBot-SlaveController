@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -215,6 +215,9 @@ END_FOR
 invJaco := i_slaveArm.simJacoInv;
 matMultiVec(invJaco, m_slaveTrackTwist, m_simDHJointVel);
 
+// limit instrument wrist dofs
+limitInstruDofs(i_slaveArm, m_simDHJointVel);
+
 // limit DH joints velocity 
 cmdVelScale := 1;
 FOR i:=1 TO g_cartDofs DO 
@@ -229,9 +232,6 @@ FOR i:=1 TO 3 DO
 	armDHJntVel[i]:=m_simDHJointVel[i];
 	wristDHJntVel[i]:=m_simDHJointVel[i+3];
 END_FOR
-
-// limit instrument wrist dofs
-limitInstruDofs(i_slaveArm, wristDHJntVel);
 
 // limit instrument wrist joint position
 IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_jntLimitOriErr) THEN
@@ -492,13 +492,13 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR_IN_OUT
-	r_wristDHJntVel :Vec3d;
+	r_simDHJointVel :Vec6d;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
-	r_wristDHJntVel[2] :=0;
-	r_wristDHJntVel[3] :=0;
+	r_simDHJointVel[5] :=0;
+	r_simDHJointVel[6] :=0;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -572,6 +572,8 @@ END_VAR
       <LineId Id="211" Count="0" />
       <LineId Id="224" Count="0" />
       <LineId Id="213" Count="0" />
+      <LineId Id="1227" Count="1" />
+      <LineId Id="1226" Count="0" />
       <LineId Id="603" Count="0" />
       <LineId Id="220" Count="0" />
       <LineId Id="219" Count="0" />
@@ -580,8 +582,6 @@ END_VAR
       <LineId Id="261" Count="2" />
       <LineId Id="1154" Count="3" />
       <LineId Id="233" Count="0" />
-      <LineId Id="1161" Count="0" />
-      <LineId Id="1159" Count="1" />
       <LineId Id="1158" Count="0" />
       <LineId Id="232" Count="0" />
       <LineId Id="796" Count="0" />

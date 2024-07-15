@@ -118,7 +118,7 @@ FOR i := 1 TO g_maxArmNum DO
 			//fault code 16#3002 
 			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] :=m_slaveDriverInput[i, j-g_setupJntNum].m_statusWord<>0 AND j > 2;
 			//fault code 16#2002
-			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_slaveDriverInput[i, -g_setupJntNum].m_statusWord = DriverStatusWord_OP AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_slaveDriverInput[i, j-g_setupJntNum].m_statusWord = DriverStatusWord_OP AND j > 2;
 		ELSE
 			//fault code 16#3003 
 			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_setupDriverInput[i, j].m_statusWord<>0;
