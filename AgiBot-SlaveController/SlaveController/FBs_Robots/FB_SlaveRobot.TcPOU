@@ -680,7 +680,7 @@ FOR i:=1 TO g_sArmNum DO
 	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
 		
 		// update command endoscope posture from UI
-		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI THEN
+		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
 			IF GVL_com_upper_PC.scope_up_down = 1 THEN
 				m_slaveArms[i].instrument.nextScopePosture := EndoScopePosture_HeadDown;
 			ELSIF  GVL_com_upper_PC.scope_up_down = 2 THEN

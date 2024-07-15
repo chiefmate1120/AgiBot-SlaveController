@@ -255,7 +255,7 @@ IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
 		m_instrument.nextScopeType := EndoscopeType_30;
 	END_IF
 END_IF
-IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) THEN
+IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) AND m_instrument.curScopeType = EndoScopeType_30  THEN
 	IF m_instrument.curScopePosture = EndoScopePosture_HeadDown THEN
 		m_instrument.nextScopePosture := EndoscopePosture_HeadUp;
 	ELSE
