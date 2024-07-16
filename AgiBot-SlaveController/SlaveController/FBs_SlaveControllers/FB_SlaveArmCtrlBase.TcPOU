@@ -36,6 +36,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Folder Name="Porperty" Id="{c6953522-4b77-49b0-9e91-271eecbab135}" />
     <Method Name="calcCmdJntPos" Id="{98ab3239-d030-4534-a55d-1eaac78d6af0}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
@@ -176,7 +177,7 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="isFinished" Id="{d6db4485-2c6d-406e-9b85-5a477e39dd21}">
+    <Property Name="isFinished" Id="{d6db4485-2c6d-406e-9b85-5a477e39dd21}" FolderPath="Porperty\">
       <Declaration><![CDATA[PROPERTY isFinished : BOOL]]></Declaration>
       <Get Name="Get" Id="{438b47e5-c18c-4fc8-a8d2-2d2ca67eaf31}">
         <Declaration><![CDATA[VAR
@@ -236,6 +237,17 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="timePeriod" Id="{44038474-1ba7-4c9c-8c84-72a6505c50bc}" FolderPath="Porperty\">
+      <Declaration><![CDATA[PROPERTY timePeriod : Lreal]]></Declaration>
+      <Get Name="Get" Id="{a96f8ba3-aad3-45c7-b8fb-41d2e22f00f8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[timePeriod := m_timePeriod;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <LineIds Name="FB_SlaveArmCtrlBase">
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -303,6 +315,9 @@ m_timePeriod := m_timePeriod+g_slaveArmCtrlCycleTime;
       <LineId Id="61" Count="0" />
       <LineId Id="84" Count="1" />
       <LineId Id="10" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArmCtrlBase.timePeriod.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

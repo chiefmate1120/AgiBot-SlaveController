@@ -61,7 +61,7 @@ m_jntEnableFlag[3]:= 0;
 
 // disable instrument joints which is in error 
 FOR i:=4 TO g_sJntNum DO
-	IF SafetyCheck.m_slaveArmCheck.m_jntErrFlag[i_slaveArm.armIdx][i] THEN
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, i+g_setupJntNum, 2] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, i+g_setupJntNum, 3] THEN
 		m_jntEnableFlag[i] := 0;
 	ELSE
 		m_jntEnableFlag[i] := 1;

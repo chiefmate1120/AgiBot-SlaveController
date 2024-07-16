@@ -501,7 +501,7 @@ FOR i:=1 TO g_sArmNum DO
 			
 		//arm adjust
 		SlaveArmState_Adjust:
-			IF NOT(m_slaveArms[i].adjustOn) THEN
+			IF m_slaveArms[i].adjustFallEdge AND m_armCtrl[i].timePeriod > 0.1 THEN
 				// to init
 				IF NOT (m_selfCheckPass[i]) THEN
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;

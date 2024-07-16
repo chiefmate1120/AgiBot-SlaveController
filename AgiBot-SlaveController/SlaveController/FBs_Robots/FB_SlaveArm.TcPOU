@@ -29,6 +29,8 @@ VAR
 	m_trocarDetect : FB_TrocarDetect;
 	m_adjustOnFlag :BOOL;
 	m_trocarOnFlag :BOOL :=FALSE;
+	m_adjustFallEdge :BOOL:=false;
+	m_adjustFallEdgeDetect : F_TRIG;
 	
 	//arm light out to drive
 	m_lightIO AT %Q* :DINT;
@@ -109,6 +111,17 @@ END_VAR
       <ST><![CDATA[	]]></ST>
     </Implementation>
     <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
+    <Property Name="adjustFallEdge" Id="{892fbc5d-bccd-475a-836d-3ab99edcd203}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY adjustFallEdge : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e41aaa50-cc49-4924-aa5c-7939e5c2aefd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[adjustFallEdge := m_adjustFallEdge;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="adjustOn" Id="{afc98598-ed29-4176-9f45-d842c4ec164a}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY adjustOn : bool]]></Declaration>
       <Get Name="Get" Id="{d84a6e3e-5b0e-406e-b7c3-ff6a74a84739}">
@@ -228,6 +241,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// check adjust button
 m_adjustOnFlag := m_adjustDetect.run(m_adjustIO);
+m_adjustFallEdgeDetect(CLK:=m_adjustOnFlag, Q=>m_adjustFallEdge);
 
 // check trocar
 m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
@@ -1125,6 +1139,9 @@ END_FOR
     <LineIds Name="FB_SlaveArm">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.adjustFallEdge.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.adjustOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1147,6 +1164,7 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.checkIO">
       <LineId Id="21" Count="1" />
+      <LineId Id="133" Count="0" />
       <LineId Id="58" Count="1" />
       <LineId Id="56" Count="0" />
       <LineId Id="26" Count="0" />

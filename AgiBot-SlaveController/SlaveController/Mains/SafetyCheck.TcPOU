@@ -193,7 +193,7 @@ END_VAR]]></Declaration>
 		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
 		
 		//m_SafetyCheck.AlarmVar[i].FixedPointErrLength := 
-		m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_curArmPose[i] );
+		m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_simArmPose[i] );
 		m_checkVariable[i].m_cmdSaltaValue[j+g_setupJntNum] := m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum] - m_checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum];
 		m_checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum] := m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum];
 		//m_SafetyCheck.AlarmVar[i].InstruPitch := m_slaveStatus.m_curArmPose[i].m_rot

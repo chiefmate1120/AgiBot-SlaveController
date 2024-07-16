@@ -100,56 +100,56 @@ END_IF
 
 
 //驱动器状态监测、驱动器未连接
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_jntStatusErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_jntStatusWordIO[i]=0 AND m_checkPermit[i_ArmId].m_jntStatusErr[i]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
 	m_checkDelay[i_ArmId].T_currentIsNotUpdate[i](IN:= (i_safetyCheckVar[i_ArmId].m_curJntTorqueIO[i]=m_curJntTorqueIOlast[i_ArmId][i] AND m_checkPermit[i_ArmId].m_currentIsNotUpdate[i]), PT:=m_checkDelayTime.Ti_currentIsNotUpdate , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntStatusErr[i].Q OR m_checkDelay[i_ArmId].T_currentIsNotUpdate[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3,  i, 0, 16#3002 ,m_unrcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3002 ,m_unrcvLevel );
 	END_IF
 END_FOR
 m_curJntTorqueIOlast[i_ArmId]:=i_safetyCheckVar[i_ArmId].m_curJntTorqueIO;
 
 
 //关节编码器监测
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_linkEncErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_linkEncoderIO[i]=g_maxLinkEnc[i] OR i_safetyCheckVar[i_ArmId].m_linkEncoderIO[i]=g_minLinkEnc[i]) AND m_checkPermit[i_ArmId].m_linkEncErr[i], PT:=m_checkDelayTime.Ti_linkEncErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_linkEncErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0,  16#3003 ,m_unrcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i,  16#3003 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //驱动器错误检测
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_DriveErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_driverErrorWordIO[i] AND 16#20)=g_driveErrWord AND m_checkPermit[i_ArmId].m_driveErr[i] , PT:=m_checkDelayTime.Ti_driveErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_DriveErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3004 ,m_unrcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3004 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //双编码器偏差过大检测
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_armJntEncErr[i](IN:= ABS(i_safetyCheckVar[i_ArmId].m_curLinkPos[i]-i_safetyCheckVar[i_ArmId].m_curJntPos[i])>=g_armMaxJntEncErr[i] AND m_checkPermit[i_ArmId].m_armJntEncErr[i], PT:=m_checkDelayTime.Ti_armJntEncErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntEncErr[i].Q THEN
-		errCodeAssign( i_ArmId, i_ArmId+3, i, 0, 16#3005, m_unrcvLevel );
+		errCodeAssign( i_ArmId, i_ArmId+3,  0, i, 16#3005, m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //关节运动超限位
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_outOfLimit[i](IN:= (i_safetyCheckVar[i_ArmId].m_curJntPos[i]>=g_maxJntPos[i_ArmId,i] OR i_safetyCheckVar[i_ArmId].m_curJntPos[i]<=g_minJntPos[i_ArmId,i]) AND m_checkPermit[i_ArmId].m_outOfLimit[i] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_outOfLimit[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3006, m_unrcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3006, m_unrcvLevel );
 	END_IF
 END_FOR
 
 
 //电机电角度偏差
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	IF ABS(i_safetyCheckVar[i_ArmId].m_motPhieErr[i])> g_motPhieErrLimit  AND m_checkPermit[i_ArmId].m_motPhieErr[i] THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#3008, m_unrcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3008, m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -161,19 +161,19 @@ END_IF
 
 
 //关节跟随误差过大
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i](IN:= ABS(i_safetyCheckVar[i_ArmId].m_cmdJntPos[i]- i_safetyCheckVar[i_ArmId].m_curJntPos[i])>g_armMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2002, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2002, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //关节速度监控
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_jntVelErr[i](IN:= ABS (i_safetyCheckVar[i_ArmId].m_curJntVel[i])>g_safetyJntVel[i] AND m_checkPermit[i_ArmId].m_jntVelErr[i], PT:=m_checkDelayTime.Ti_jntVelErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntVelErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2003, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2003, m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -182,24 +182,24 @@ END_FOR
 FOR i:=1 TO 6 BY 1 DO
 	m_checkDelay[i_ArmId].T_spacePoseErr[i](IN:= i_safetyCheckVar[i_ArmId].m_spacePoseErr[i]> g_maxCartPoseErr[i] AND m_checkPermit[i_ArmId].m_spacePoseErr[i], PT:=m_checkDelayTime.Ti_spacePoseErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_spacePoseErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 1, 16#2004, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3, 1, i, 16#2004, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //电流超限监测
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	m_checkDelay[i_ArmId].T_jntCurrentErr[i](IN:= ABS(i_safetyCheckVar[i_ArmId].m_JntCurrent[i])>g_maxJntCurrent[i] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntCurrentErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2005, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2005, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //Ethercat通讯检测
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2006, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3, 0, i, 16#2006, m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -207,14 +207,14 @@ END_FOR
 //不动点发生变化监控
 m_checkDelay[i_ArmId].T_FixedPointErr(IN:=  i_safetyCheckVar[i_ArmId].m_fixedPointErrLength>g_maxFixedPointErr AND m_checkPermit[i_ArmId].m_fixedPointErr, PT:=m_checkDelayTime.Ti_FixedPointErr , Q=> , ET=> );
 IF m_checkDelay[i_ArmId].T_FixedPointErr.Q THEN
-	errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2007, m_rcvLevel );
+	errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2007, m_rcvLevel );
 END_IF
 
 
 //目标位置指令突变检测
-FOR i:=1 TO g_maxArmNum BY 1 DO
+FOR i:=1 TO g_maxArmJoint BY 1 DO
 	IF i_safetyCheckVar[i_ArmId].m_cmdSaltaValue[i]>g_maxJntCmdSalta[i] AND m_checkPermit[i_ArmId].m_cmdJntSaltation[i] THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, i, 0, 16#2008, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId+3, 0, i, 16#2008, m_rcvLevel );
 	END_IF
 END_FOR
 
