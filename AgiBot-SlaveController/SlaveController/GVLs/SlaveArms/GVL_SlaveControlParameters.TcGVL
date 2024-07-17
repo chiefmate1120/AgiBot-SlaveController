@@ -5,7 +5,7 @@
 VAR_GLOBAL CONSTANT
 	// slave arm joint position controller parameters
 	g_posKp :ARRAY[1..g_sJntNum] OF LREAL :=[2000.0, 2000.0, 18000.0, 5(5)];
-	g_posKd :ARRAY[1..g_sJntNum] OF LREAL :=[200.0, 200.0, 200.0,5(0.25)];
+	g_posKd :ARRAY[1..g_sJntNum] OF LREAL :=[200.0, 200.0, 1800.0, 5(0.25)];
 	g_posKi :ARRAY[1..g_sJntNum] OF LREAL :=[20000.0, 20000.0, 30000.0, 5(10.0)];
 	g_posKiLimit :ARRAY[1..g_sJntNum] OF LREAL :=[2500,2500,  250, 5(75)];// define in current
 	g_posCtrlLimit :ARRAY[1..g_sJntNum] OF LREAL :=[5600,5600,  500, 5(250)];// define in current

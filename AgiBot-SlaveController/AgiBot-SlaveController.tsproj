@@ -1614,7 +1614,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{11DFBFA1-2C8C-C2BE-33CB-46B12871E02B}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{9F299D5F-0091-8005-59ED-D6A048ED1460}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -9103,7 +9103,6 @@
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_safetyData" VarB="TaskSafetyCheck Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_setupStatus" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus"/>
-				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_slaveDynaData"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>

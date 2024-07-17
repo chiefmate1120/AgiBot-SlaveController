@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -34,9 +34,6 @@ VAR
 	
 	//arm light out to drive
 	m_lightIO AT %Q* :DINT;
-	
-	// last light control word
-	m_lightCtrlWordLast :UDINT:=0;
 	
 	//endoscope type and posture switch
 	m_endoscopeTypeSwitch : FB_IOToggleCheck;
@@ -283,7 +280,6 @@ END_IF
       <Declaration><![CDATA[METHOD checkLight : BOOL
 VAR_INPUT
 	i_lightCtrlWord : UDINT;
-	i_keepWriting :BOOL;
 END_VAR
 
 VAR
@@ -296,18 +292,13 @@ m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
 
 // trig sdo write
 lightCtrlWord := SHL(i_lightCtrlWord,16);
-IF lightCtrlWord <> m_lightCtrlWordLast THEN
-	m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-	m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-END_IF
+m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 
 // disable sdo write
 IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
 	m_SdoWrite[1](bExecute:=FALSE);
 	m_SdoWrite[2](bExecute:=FALSE);
-	IF NOT(i_keepWriting) THEN
-		m_lightCtrlWordLast := lightCtrlWord;
-	END_IF
 END_IF
 ]]></ST>
       </Implementation>
@@ -1194,10 +1185,9 @@ END_FOR
     <LineIds Name="FB_SlaveArm.checkLight">
       <LineId Id="38" Count="0" />
       <LineId Id="21" Count="0" />
-      <LineId Id="48" Count="5" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="52" Count="1" />
       <LineId Id="64" Count="4" />
-      <LineId Id="80" Count="2" />
       <LineId Id="70" Count="0" />
       <LineId Id="63" Count="0" />
     </LineIds>

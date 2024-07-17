@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -21,7 +21,7 @@ VAR
 	m_jntLimitOriErr :LREAL :=g_deg2Rad * 5;
 	
 	// master-slave error thershold to halt control 
-	m_safetyOriErr :LREAL :=g_deg2Rad * 45;
+	m_safetyOriErr :LREAL :=g_deg2Rad * 150;
 	
 	// filter cut-off frequency for master-slave control
 	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;

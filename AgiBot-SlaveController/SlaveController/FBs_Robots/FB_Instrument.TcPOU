@@ -920,6 +920,17 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="resetArmLED" Id="{71d71091-a005-44ba-bc61-7d4e51a8100a}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY resetArmLED : BOOL]]></Declaration>
+      <Set Name="Set" Id="{0e15a6e1-bfbd-4e2e-955b-940522cefd73}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_resetArmLEDFlag := resetArmLED;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Method Name="ultrasoundKnifeGripAngleFK" Id="{1dc50a9a-b451-47d4-9f26-74d3cb81d7ff}">
       <Declaration><![CDATA[METHOD ultrasoundKnifeGripAngleFK : LREAL
 VAR_IN_OUT CONSTANT
@@ -1370,6 +1381,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="113" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.resetArmLED.Set">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.ultrasoundKnifeGripAngleFK">
       <LineId Id="3" Count="4" />

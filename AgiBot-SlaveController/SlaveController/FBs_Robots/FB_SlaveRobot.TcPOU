@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -315,8 +315,9 @@ FOR i:=1 TO g_sArmNum DO
 	    m_slaveArms[i].instrument.instruType = InstruType_Endoscope	 THEN
 		m_instruInvasionEnableFlag[i]:=FALSE;
 		m_slaveArms[i].resetInstruDepth();
-	ELSIF m_instrumentMountedFlag[i] AND m_slaveArms[i].instrument.instruType <> InstruType_Endoscope THEN
+	ELSIF m_instrumentMountedFlag[i] AND m_slaveArms[i].instrument.instruType <> InstruType_Endoscope AND m_slaveArmState[i] <> SlaveArmState_InstruInvasion THEN
 		m_instruInvasionEnableFlag[i]:=TRUE;
+		m_slaveArms[i].setInstruDepth();
 	END_IF
 END_FOR  
 
@@ -338,6 +339,7 @@ FOR i:=1 TO g_sArmNum DO
 		// init
 		SlaveArmState_Init:
 			m_selfCheckPass[i]:=FALSE;
+			m_slaveArms[i].instrument.resetArmLED :=TRUE;
 			// to selfcheck
 			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_slaveSelfCheckFlag  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_SelfCheck;
@@ -416,7 +418,7 @@ FOR i:=1 TO g_sArmNum DO
 		//mount instrument
 		SlaveArmState_MountInstru:
 			// to panel ready
-			IF NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
+			IF NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			ELSIF m_armCtrl[i].isFinished THEN
 				m_instrumentMountedFlag[i] :=TRUE;
@@ -440,7 +442,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF  NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].setInstruDepth();
 			// to Adjust
 			ELSIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
@@ -460,7 +461,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].setInstruDepth();
 			END_IF
 		
 		//endoscope ready
@@ -501,7 +501,7 @@ FOR i:=1 TO g_sArmNum DO
 			
 		//arm adjust
 		SlaveArmState_Adjust:
-			IF m_slaveArms[i].adjustFallEdge AND m_armCtrl[i].timePeriod > 0.1 THEN
+			IF m_slaveArms[i].adjustFallEdge AND m_armCtrl[i].timePeriod > 0.25 THEN
 				// to init
 				IF NOT (m_selfCheckPass[i]) THEN
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
@@ -575,7 +575,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF NOT m_slaveArms[i].instruOn THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].setInstruDepth();
 			// to Adjust
 			elsIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
@@ -628,7 +627,6 @@ END_VAR
 
 VAR
 	i : INT;
-	keepWriting :BOOL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
@@ -656,8 +654,7 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 		m_lightCrlWord[i] := ArmLight_BlueOn;
 	END_IF
 
-	keepWriting := (m_slaveArmState[i] = SlaveArmState_Init);
-	m_slaveArms[i].checkLight(m_lightCrlWord[i],keepWriting);
+	m_slaveArms[i].checkLight(m_lightCrlWord[i]);
 END_FOR
 ]]></ST>
       </Implementation>
@@ -821,7 +818,9 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="742" Count="0" />
       <LineId Id="738" Count="0" />
       <LineId Id="750" Count="0" />
-      <LineId Id="739" Count="2" />
+      <LineId Id="739" Count="1" />
+      <LineId Id="758" Count="0" />
+      <LineId Id="741" Count="0" />
       <LineId Id="370" Count="0" />
       <LineId Id="348" Count="0" />
       <LineId Id="345" Count="0" />
@@ -839,6 +838,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="634" Count="0" />
+      <LineId Id="759" Count="0" />
       <LineId Id="358" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="29" Count="0" />
@@ -910,7 +910,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="360" Count="0" />
       <LineId Id="264" Count="1" />
       <LineId Id="555" Count="0" />
-      <LineId Id="266" Count="2" />
+      <LineId Id="266" Count="1" />
       <LineId Id="361" Count="1" />
       <LineId Id="365" Count="0" />
       <LineId Id="269" Count="3" />
@@ -921,7 +921,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="503" Count="1" />
       <LineId Id="556" Count="0" />
       <LineId Id="276" Count="1" />
-      <LineId Id="402" Count="1" />
+      <LineId Id="403" Count="0" />
       <LineId Id="406" Count="2" />
       <LineId Id="557" Count="0" />
       <LineId Id="409" Count="1" />
@@ -976,7 +976,8 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="519" Count="2" />
       <LineId Id="576" Count="2" />
       <LineId Id="575" Count="0" />
-      <LineId Id="523" Count="4" />
+      <LineId Id="523" Count="1" />
+      <LineId Id="526" Count="1" />
       <LineId Id="546" Count="2" />
       <LineId Id="664" Count="0" />
       <LineId Id="18" Count="0" />
@@ -1008,7 +1009,6 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="68" Count="0" />
       <LineId Id="70" Count="9" />
       <LineId Id="69" Count="0" />
-      <LineId Id="87" Count="0" />
       <LineId Id="60" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="17" Count="0" />
