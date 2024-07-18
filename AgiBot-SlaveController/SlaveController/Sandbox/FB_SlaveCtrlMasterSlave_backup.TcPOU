@@ -1,0 +1,754 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveCtrlMasterSlave_backup" Id="{a24fb4ec-8c26-4821-8801-f7179d004e59}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_backup EXTENDS FB_SlaveArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// minimum distance between instrument tip and remote center
+	m_minInstruRCDis:LREAL := 0.05;
+	
+	// master-slave motion scale
+	m_MSMotionScale :LREAL;
+		
+	// gripper match angle threshold
+	m_gripperMatchAngThres :LREAL := 2*g_deg2Rad;
+	
+	// control error thershold from joint limit back to free space
+	m_maxPosTrackErr :LREAL := 0.05;
+	m_maxOriTrackErr :LREAL :=g_deg2Rad * 5;
+	
+	// filter cut-off frequency for master-slave control
+	m_macroCmdJntPosLpfCutoffFreq : LREAL :=5;
+	m_microCmdJntPosLpfCutoffFreq : LREAL :=15;
+	
+	// last command joint position
+	m_lastCmdJntPos :Vec8d;
+	
+	// simulated DH joint position
+	m_simDHJntPos : Vec6d;
+	
+	// simulated slave twist of DH joint
+	m_simDHJointVel :Vec6d;
+		
+	// enter master-slave control for the first time
+	m_firstIn :BOOL := TRUE;
+	
+	// flag if reach joint limit
+	m_reachMacroJntLimit :BOOL;
+	m_reachWristJntLimit :BOOL;
+	
+	// master/slave origin pose when first enter master-slave control
+	m_masterOriginPose : ST_Frame;
+	m_slaveOriginPose : ST_Frame;
+	
+	// orientation deviation(in master coordinate) between master and slave when first enter control
+	m_MSOriDeviation : Mat3d;
+	
+	// command joint position filter
+	m_cmdJntPosLpf:ARRAY[1..8] OF FB_LowPassFilter;
+	
+	// commmand yaw angle and velocity
+	m_cmdYawAngle :LREAL;
+	m_cmdYawVel :LREAL;
+	
+	// comand yaw angle and velocity filter
+	m_cmdYawAngLpf : FB_LowPassFilter;
+	m_cmdYawVelLpf : FB_LowPassFilter;
+	
+	// master pose/velocity in monitor coordinate
+	m_masterPose :ST_Frame;
+	m_masterTwist : Vec6d;
+	
+	// master grip angle
+	m_masterGripAngle : LREAL;
+	
+	// slave command/current pose in endoscope coordinate
+	m_slaveCmdPoseInScope :ST_Frame;
+	m_slavePoseInScope : ST_Frame;
+	
+	// slave command/current pose in cart
+	m_slaveCmdPoseInCart :ST_Frame;
+	m_slavePoseInCart : ST_Frame;
+	
+	// instrument controller
+	m_basicInstruController : FB_BasicInstruControl;
+	m_usKnifeController : FB_UltrosonicKnifeControl;
+	
+	// slave command grip angle and grip force level
+	m_slaveCmdGripAngle :LREAL;
+	m_slaveCmdGripForceLevel:LREAL;
+	
+	// slave pose error
+	m_slavePosErr :Vec3d;
+	m_slaveRotErr :Mat3d;
+	m_errAngle : LREAL;
+	m_errAxisLocal, m_errAxis :Vec3d;
+	m_masterSlavePoseError :Vec6d;
+	
+	// velocity for slave to track master motion
+	m_slaveTrackTwist :Vec6d;
+	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
+	
+	// last master gripper angle
+	m_lastMasterGripAngle :LREAL;
+	
+	// master gripper angle velocity
+	m_masterGripAngleVel :LREAL;
+	m_masterGripAngleVelLpf :FB_LowPassFilter;
+	
+	// flag to start gripper control
+	m_gripperCtrlFlag :BOOL;
+	
+	// code execute time measure
+	m_codeTime : Profiler;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{f235d240-da08-40c0-b75e-f61f99732fb2}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR 
+	i,j : INT;
+	tmpMat3d : Mat3d;
+	masterMotionRange : Vec3d;
+	
+	masterVelInScope, masterWVelInScope :Vec3d;
+	masterVelInCart, masterWVelInCart :Vec3d;
+
+	cmdVelScale :LREAL;
+	invJaco :Mat6d;
+	DHJntCmdDeltaPos :Vec6d;
+	armJntJaco,armJntJacoInv, wristJntJaco :Mat3d;
+	velByWristJnt,velByArmJnt : Vec3d;
+	armDHJntVel, wristDHJntVel :Vec3d;
+	tmpFrame : ST_Frame;
+	slaveSimDHJntPos :Vec6d;
+	jnt3Limit :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+
+IF isFinished THEN
+	RETURN;
+END_IF
+
+// decide matched master arm index
+FOR i:=1 TO g_mArmNum DO 
+	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
+		m_masterPose := i_masterStatus.m_curArmPose[i];
+		m_masterTwist := i_masterStatus.m_curArmTwist[i];
+		m_masterGripAngle := i_masterStatus.m_gripAngle[i];
+	END_IF
+END_FOR
+
+// compute slave pose in endoscope coordinate
+m_slavePoseInCart := transform(i_setupStatus.m_curEndPose[i_slaveArm.armIdx], i_slaveArm.simCartPose);
+tmpFrame :=invFrame(i_endoscopePose);
+m_slavePoseInScope := transform(tmpFrame, m_slavePoseInCart);
+
+// handle for the first time in
+IF TRUE = m_firstIn THEN
+	m_firstIn := FALSE;
+	m_masterOriginPose :=m_masterPose;
+	m_slaveOriginPose := m_slavePoseInScope;
+	matTranspose(m_masterOriginPose.m_rot, tmpMat3d);
+	matMultiply(tmpMat3d, m_slavePoseInScope.m_rot,m_MSOriDeviation);
+	m_lastMasterGripAngle := m_masterGripAngle;
+	
+	// only update motion scale while entering teleControl 
+	m_MSMotionScale := 1.0/ MAX(1,  i_masterStatus.m_motionScale);
+END_IF
+
+// compute master twist in slave arm coordinate
+(*FOR i:=1 TO 3 DO
+	masterVelInScope[i] := m_masterTwist[i]*i_masterStatus.m_motionScale;
+	masterWVelInScope[i] := m_masterTwist[i+3];
+END_FOR
+matMultiVec(i_endoScopePose.m_rot, masterVelInScope, masterVelInCart);
+matMultiVec(i_endoScopePose.m_rot, masterWVelInScope, masterWVelInCart);
+matTranspose(i_setupStatus.m_curEndPose[i_slaveArm.armIdx].m_rot, tmpMat3d);
+matMultiVec(tmpMat3d,masterVelInCart, m_masterFFVel);
+matMultiVec(tmpMat3d,masterWVelInCart, m_masterFFWVel);
+FOR i:=1 TO 3 DO
+	m_cmdCartTwist[i] := m_masterFFVel[i];
+	m_cmdCartTwist[i+3] := m_masterFFWVel[i];
+END_FOR*)
+
+// compute slave command pose in scope
+vecSub(m_masterPose.m_pos, m_masterOriginPose.m_pos, masterMotionRange);
+
+vecSelfMultiNum(masterMotionRange, m_MSMotionScale);
+vecAdd(m_slaveOriginPose.m_pos, masterMotionRange, m_slaveCmdPoseInScope.m_pos);
+matMultiply(m_masterPose.m_rot, m_MSOriDeviation, m_slaveCmdPoseInScope.m_rot);
+
+// compute slave command pose in slave arm coordinate
+m_slaveCmdPoseInCart := transform(i_endoScopePose, m_slaveCmdPoseInScope);
+tmpFrame := invFrame(i_setupStatus.m_curEndPose[i_slaveArm.armIdx]);
+m_cmdCartPose := transform(tmpFrame, m_slaveCmdPoseInCart);
+
+// compute pose error
+vecSub(m_cmdCartPose.m_pos, i_slaveArm.simCartPose.m_pos, m_slavePosErr);
+
+matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
+matMultiply(tmpMat3d, m_cmdCartPose.m_rot, m_slaveRotErr);
+rot2AngAxis(m_slaveRotErr, angle=>m_errAngle, axis=>m_errAxisLocal);
+matMultiVec(i_slaveArm.simCartPose.m_rot, m_errAxisLocal, m_errAxis);
+
+// calculate pose error in endoscope
+calcMSErrInScope(i_endoscopePose, i_setupStatus.m_curEndPose[i_slaveArm.armIdx], i_slaveArm);
+
+// safety check
+(*IF norm(m_slavePosErr) > m_maxPosTrackErr OR ABS(m_errAngle)>m_maxOriTrackErr THEN
+	m_isFinished := TRUE;
+END_IF*) 
+
+// pose track control
+vecMultiNum(m_slavePosErr, g_slaveArmCtrlFreq, m_slaveCmdVel);
+vecMultiNum(m_errAxis, m_errAngle*g_slaveArmCtrlFreq, m_slaveCmdWVel);
+FOR i:=1 TO 3 DO 
+	m_slaveTrackTwist[i] := m_slaveCmdVel[i];
+	m_slaveTrackTwist[i+3] := m_slaveCmdWVel[i];
+END_FOR
+
+// compute command velocity for DH joints
+invJaco := i_slaveArm.simJacoInv;
+matMultiVec(invJaco, m_slaveTrackTwist, m_simDHJointVel);
+
+// limit DH joints velocity 
+cmdVelScale := 1;
+FOR i:=1 TO g_cartDofs DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
+vecSelfMultiNum(m_slaveTrackTwist, 1.0/cmdVelScale);
+vecSelfMultiNum(m_slaveCmdVel, 1.0/cmdVelScale);
+vecSelfMultiNum(m_slaveCmdWVel, 1.0/cmdVelScale);
+
+FOR i:=1 TO 3 DO
+	armDHJntVel[i]:=m_simDHJointVel[i];
+	wristDHJntVel[i]:=m_simDHJointVel[i+3];
+END_FOR
+
+// limit instrument wrist dofs
+limitInstruDofs(i_slaveArm, wristDHJntVel);
+
+// limit instrument wrist joint position
+IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_maxOriTrackErr) THEN
+	wristDHJntVel:=g_zeroVec3d;
+	m_reachWristJntLimit:=TRUE;
+ELSE
+	m_reachWristJntLimit :=FALSE;
+	FOR i:=1 TO 3 DO
+		IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i]) OR 
+			(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i])  THEN
+			wristDHJntVel:=g_zeroVec3d;
+			m_reachWristJntLimit:=TRUE;
+			CONTINUE;
+		END_IF
+	END_FOR
+END_IF
+
+// modify arm joints velocity to compensate wrist joint motion
+FOR i:=1 TO 3 DO
+	FOR j:=1 TO 3 DO
+		armJntJaco[i,j]:=i_slaveArm.simJaco[i,j];
+		wristJntJaco[i,j]:=i_slaveArm.simJaco[i,j+3];
+	END_FOR
+END_FOR
+invMat3(armJntJaco, armJntJacoInv);
+matMultiVec(wristJntJaco, wristDHJntVel, velByWristJnt);
+vecSub(m_slaveCmdVel, velByWristJnt, velByArmJnt);
+matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
+
+// limit DH joints velocity 
+cmdVelScale := 1;
+FOR i:=1 TO 3 DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(armDHJntVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
+
+// limit arm joint position
+m_reachMacroJntLimit :=FALSE;
+FOR i:=1 TO 3 DO
+	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
+		(armDHJntVel[i] <0 and	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
+		armDHJntVel[i]:=0;
+		m_reachMacroJntLimit:=TRUE;
+	END_IF
+END_FOR
+
+// joint 3 up limit to remote center
+jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength+i_slaveArm.instrument.kinematicParameters.m_headLength
+											+ i_slaveArm.instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
+IF (armDHJntVel[3] > 0 AND i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
+	armDHJntVel[3]:=0;
+	m_reachMacroJntLimit:=TRUE;
+END_IF
+
+// integrate command DH joint position
+FOR i:=1 TO 3 DO
+	m_simDHJointVel[i]:=armDHJntVel[i];
+	m_simDHJointVel[i+3]:=wristDHJntVel[i];
+END_FOR
+vecMultiNum(m_simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
+slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
+vecAdd(slaveSimDHJntPos, DHJntCmdDeltaPos, m_simDHJntPos);
+
+// gripper angle/force control
+gripperControl(i_slaveArm);
+
+// calculate target motor joint position/velocity from DH joint position
+i_slaveArm.instrument.instruIK(m_simDHJntPos,m_slaveCmdGripAngle, o_jntPos=>m_simJntPos);
+
+// filt command joint position
+FOR i:=1 TO g_sJntNum DO 
+	m_cmdJntPos[i] := m_cmdJntPosLpf[i].run(m_simJntPos[i]);
+END_FOR
+
+// compute command joint velocity
+vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
+vecSelfMultiNum(m_cmdJntVel, g_slaveArmCtrlFreq);
+m_lastCmdJntPos:=m_cmdJntPos;
+
+m_codeTime(START:=FALSE);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{258512d8-205b-4651-b342-64b408b1c9b1}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT ;
+	instruCmdGripAngle, instruCmdGripForceLevel :LREAL;
+	instruCmdJntPos, instruCmdJntVel : Vec5d;	
+	instruJntCtrlTrq :Vec5d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF isFinished THEN
+	RETURN;
+END_IF
+
+// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+// instrument joint control
+FOR i:=1 TO 5 DO 
+	instruCmdJntPos[i]:=m_cmdJntPos[i+3];
+	instruCmdJntVel[i]:=m_cmdJntVel[i+3];
+END_FOR
+m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
+m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
+
+IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+ELSE
+	m_basicInstruController.run(instruCmdJntPos,instruCmdJntVel, m_cmdYawAngle, m_cmdYawVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
+END_IF
+
+FOR i:=1 TO 5 DO
+	m_cmdJntTrq[i+3]:=instruJntCtrlTrq[i];
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcMSErrInScope" Id="{09069ac7-e023-46bd-91c8-6fcf555ee9c4}">
+      <Declaration><![CDATA[METHOD calcMSErrInScope : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_setupPose :ST_Frame;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	posErrInCart,oriErrInCart :Vec3d;
+	invRot :Mat3d;
+	posErrInScope,oriErrInScope :Vec3d;
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_masterSlavePoseError := g_zeroVec6d;
+
+// pose error caused by joints limits
+IF m_reachMacroJntLimit OR m_reachWristJntLimit THEN
+	// pose error in cart coordinate
+	matMultiVec(i_setupPose.m_rot, m_slavePosErr, posErrInCart);
+	matMultiVec(i_setupPose.m_rot, m_errAxis, oriErrInCart);
+	vecSelfMultiNum(oriErrInCart, m_errAngle);
+	
+	// pose err in endoscope coordinate
+	matTranspose(i_endoscopePose.m_rot, invRot);
+	matMultiVec(invRot, posErrInCart, posErrInScope);
+	matMultiVec(invRot, oriErrInCart, oriErrInScope);
+	
+	FOR i:=1 TO 3 DO 
+		m_masterSlavePoseError[i]:=posErrInScope[i];
+	END_FOR
+	
+	FOR i:=1 TO 3 DO 
+		m_masterSlavePoseError[i+3]:=oriErrInScope[i];
+	END_FOR
+
+END_IF
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="gripperControl" Id="{7226a20f-eea0-42f4-a9bc-432dc70e728f}">
+      <Declaration><![CDATA[METHOD gripperControl : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	matchedSlaveGripAngle:LREAL;
+	matchedSlaveGripForce:LREAL;
+	masterGripVelThres :LREAL := 5.0 *g_deg2Rad;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute master grip veloicty
+m_masterGripAngleVel:= (m_masterGripAngle - m_lastMasterGripAngle)/g_slaveArmCtrlCycleTime;
+m_masterGripAngleVel := m_masterGripAngleVelLpf.run(m_masterGripAngleVel);
+m_lastMasterGripAngle :=m_masterGripAngle;
+
+// compute matched slave grip angle and force
+i_slaveArm.instrument.gripAngleMap(m_masterGripAngle,o_instruGripAngle=>matchedSlaveGripAngle, o_instruGripForceLevel=>matchedSlaveGripForce);
+
+IF m_gripperCtrlFlag THEN
+	m_slaveCmdGripAngle := matchedSlaveGripAngle;
+	m_slaveCmdGripForceLevel := matchedSlaveGripForce;
+	RETURN;
+ELSE
+	//m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
+	m_gripperCtrlFlag := ABS(matchedSlaveGripAngle-i_slaveArm.curGripAngle)<m_gripperMatchAngThres OR 
+	     (matchedSlaveGripAngle>=i_SlaveArm.instrument.kinematicParameters.m_maxGripAngle - m_gripperMatchAngThres AND i_slaveArm.curGripAngle>=matchedSlaveGripAngle) OR 
+		(matchedSlaveGripAngle<=i_SlaveArm.instrument.kinematicParameters.m_minGripAngle + m_gripperMatchAngThres AND i_slaveArm.curGripAngle<=matchedSlaveGripAngle);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{f96122a6-2622-45d2-a340-f0a40e84eba1}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm	:FB_SlaveArm;
+END_VAR
+VAR_IN_OUT 
+	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR 
+	i :INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_simJntPos :=m_cmdJntPos;
+m_lastCmdJntPos :=m_cmdJntPos;
+m_jntOPMode[1] := DriverOPMode_PosTrq;
+m_jntOPMode[2] := DriverOPMode_PosTrq;
+m_jntOPMode[3] := DriverOPMode_PosTrq;
+m_jntOPMode[4] := DriverOPMode_Trq;
+m_jntOPMode[5] := DriverOPMode_Trq;
+m_jntOPMode[6] := DriverOPMode_Trq;
+m_jntOPMode[7] := DriverOPMode_Trq;
+m_jntOPMode[8] := DriverOPMode_Trq;
+m_firstIn :=TRUE;
+m_gripperCtrlFlag :=false;
+
+// init gripper angle
+m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
+m_slaveCmdGripForceLevel:=0;
+
+// init filter
+FOR i:=1 TO 3 DO
+	m_cmdJntPosLpf[i].init(1, m_macroCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+FOR i:=4 TO g_sJntNum DO
+	m_cmdJntPosLpf[i].init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+END_FOR
+m_cmdYawAngLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_masterGripAngleVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+
+// init controller
+m_basicInstruController.init(i_slaveArm);
+m_usKnifeController.init(i_slaveArm);
+
+// update commands to arm
+copyCmds(r_slaveArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="limitInstruDofs" Id="{ecfa1f56-3f64-404f-8405-488dd18b27f5}">
+      <Declaration><![CDATA[// limit specific joint dofs based on instrument types
+METHOD PRIVATE limitInstruDofs : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR_IN_OUT
+	r_wristDHJntVel :Vec3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
+	r_wristDHJntVel[2] :=0;
+	r_wristDHJntVel[3] :=0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="masterSlavePoseErr" Id="{238982ac-a648-4f9d-8863-7da2b9592e5d}">
+      <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
+      <Get Name="Get" Id="{bd0d94bc-dce7-47e4-bf50-f2f75973e661}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[masterSlavePoseErr REF= m_masterSlavePoseError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcCmdJntPos">
+      <LineId Id="380" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="459" Count="3" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="146" Count="1" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="151" Count="1" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="1022" Count="0" />
+      <LineId Id="1024" Count="1" />
+      <LineId Id="1023" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="321" Count="9" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="565" Count="2" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="568" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="1020" Count="0" />
+      <LineId Id="317" Count="1" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="447" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="448" Count="0" />
+      <LineId Id="453" Count="0" />
+      <LineId Id="450" Count="2" />
+      <LineId Id="449" Count="0" />
+      <LineId Id="681" Count="0" />
+      <LineId Id="680" Count="0" />
+      <LineId Id="682" Count="0" />
+      <LineId Id="455" Count="0" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="456" Count="0" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="457" Count="0" />
+      <LineId Id="639" Count="0" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="754" Count="1" />
+      <LineId Id="835" Count="2" />
+      <LineId Id="834" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="603" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="216" Count="2" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="261" Count="2" />
+      <LineId Id="1154" Count="3" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="1161" Count="0" />
+      <LineId Id="1159" Count="1" />
+      <LineId Id="1158" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="796" Count="0" />
+      <LineId Id="1089" Count="0" />
+      <LineId Id="1127" Count="0" />
+      <LineId Id="1091" Count="1" />
+      <LineId Id="1120" Count="6" />
+      <LineId Id="1119" Count="0" />
+      <LineId Id="1090" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="264" Count="2" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="268" Count="3" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="798" Count="0" />
+      <LineId Id="278" Count="3" />
+      <LineId Id="799" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="1053" Count="0" />
+      <LineId Id="1052" Count="0" />
+      <LineId Id="1060" Count="1" />
+      <LineId Id="1055" Count="0" />
+      <LineId Id="1057" Count="1" />
+      <LineId Id="1054" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="368" Count="2" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="379" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="945" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="946" Count="1" />
+      <LineId Id="309" Count="0" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="758" Count="0" />
+      <LineId Id="757" Count="0" />
+      <LineId Id="759" Count="2" />
+      <LineId Id="872" Count="0" />
+      <LineId Id="520" Count="0" />
+      <LineId Id="517" Count="1" />
+      <LineId Id="516" Count="0" />
+      <LineId Id="519" Count="0" />
+      <LineId Id="206" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcCmdJntTrq">
+      <LineId Id="70" Count="3" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="35" Count="3" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcMSErrInScope">
+      <LineId Id="41" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="107" Count="3" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="136" Count="2" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="140" Count="6" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.gripperControl">
+      <LineId Id="25" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="5" Count="1" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.init">
+      <LineId Id="13" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="96" Count="3" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="182" Count="1" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="138" Count="1" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="151" Count="1" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.limitInstruDofs">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.masterSlavePoseErr.Get">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

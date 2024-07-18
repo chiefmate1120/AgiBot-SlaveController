@@ -215,9 +215,7 @@ FOR i := 1 TO g_sArmNum BY 1 DO
 	GVL_com_upper_PC.instrument_information[i].is_energy := UINT_TO_BOOL(m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType);
 	GVL_com_upper_PC.instrument_information[i].is_bipolar := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType = 2;
 	
-	IF m_slaveRobot.m_slaveArms[i].m_instrument.instruType > 0 THEN
-		GVL_com_upper_PC.instrument_information[i].name := tool_name[m_slaveRobot.m_slaveArms[i].m_instrument.instruType];
-	END_IF
+	GVL_com_upper_PC.instrument_information[i].name := m_slaveRobot.m_slaveArms[i].m_instrument.instruName;
 	
 	GVL_com_upper_PC.instrument_information[i].id := i;
 	
@@ -374,7 +372,8 @@ GVL_com_upper_PC.instrument4:=GVL_com_upper_PC.instrument_information[4];
       <LineId Id="47" Count="0" />
       <LineId Id="54" Count="0" />
       <LineId Id="52" Count="1" />
-      <LineId Id="56" Count="3" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="252" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="60" Count="5" />
       <LineId Id="217" Count="0" />

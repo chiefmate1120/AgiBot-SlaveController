@@ -24,11 +24,12 @@ VAR_GLOBAL CONSTANT
 	g_maxJntPos: ARRAY[1..g_sJntNum] OF LREAL:=[2.7,	1.13-pi/2, 	0.58, 		5(g_largeNum)];
 	
 	// DH joint position limit
+	//NOTE: wrist pitch and yaw angle is reset after instrument is mounted 
 	g_minDHJntPos : ARRAY[1..6] OF LREAL :=[-2.7,	-1.5-pi/2,	0.235, -5.5, -PI/2 - 75*g_deg2Rad , -PI/2];
 	g_maxDHJntPos : ARRAY[1..6] OF LREAL :=[2.7,	1.13-pi/2, 	0.575, 5.5, -PI/2 + 75*g_deg2Rad, PI/2];
 	
 	// joint velocity limit
-	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[2.0, 2.0, 0.5, 5(4*pi)];
+	g_maxJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.3, 1.3, 0.5, 5(4*pi)];
 		
 END_VAR
 ]]></Declaration>

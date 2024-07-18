@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="PromptMessage" Id="{1348e1ca-2063-4044-b3b4-d2898b5fe2e9}">
+    <Declaration><![CDATA[TYPE PromptMessage :
+STRUCT
+	i_PromptStatus:BOOL;
+	i_ArmId:UDINT;
+	i_ErrID:UDINT;
+	i_PromptFlag:UDINT;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

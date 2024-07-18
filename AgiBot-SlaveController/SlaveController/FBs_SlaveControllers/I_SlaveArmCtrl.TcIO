@@ -3,6 +3,7 @@
   <Itf Name="I_SlaveArmCtrl" Id="{f0c76191-353c-4edd-a51a-aab3c6b7f25c}">
     <Declaration><![CDATA[INTERFACE I_SlaveArmCtrl
 ]]></Declaration>
+    <Folder Name="Property" Id="{5e4f5714-1ac7-4021-b7c1-4d316705cd4e}" />
     <Method Name="init" Id="{3d0418a1-7ac7-43e6-948f-ca3e43ef51fd}">
       <Declaration><![CDATA[METHOD init : BOOL
 VAR_IN_OUT CONSTANT
@@ -13,7 +14,7 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
     </Method>
-    <Property Name="isFinished" Id="{4248d833-c6dc-4e42-9d08-141fd83355a1}">
+    <Property Name="isFinished" Id="{4248d833-c6dc-4e42-9d08-141fd83355a1}" FolderPath="Property\">
       <Declaration><![CDATA[PROPERTY isFinished : bool]]></Declaration>
       <Get Name="Get" Id="{7e481075-d3b2-4bb7-a7b6-ff6c734930d2}">
         <Declaration><![CDATA[]]></Declaration>
@@ -39,5 +40,11 @@ VAR_IN_OUT
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
 END_VAR]]></Declaration>
     </Method>
+    <Property Name="timePeriod" Id="{26a0dc45-0be8-473c-9003-6b19e7c08d9c}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY timePeriod : lreal]]></Declaration>
+      <Get Name="Get" Id="{e453cbc5-43cc-45b0-b443-79ef24cb368b}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
   </Itf>
 </TcPlcObject>

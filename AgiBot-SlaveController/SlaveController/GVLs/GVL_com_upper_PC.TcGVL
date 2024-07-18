@@ -59,7 +59,7 @@ VAR_GLOBAL
 	camera_gravity_angle:REAL;
 	scope_angle:INT;
 	current_error_type:UINT;//0无故障、1提示、2可恢复故障、3不可恢复故障
-	scope_up_down:UINT;//30°内窥镜旋转、1为内窥镜斜面向下、2为向上
+	scope_up_down:UINT :=1;//30°内窥镜旋转、1为内窥镜斜面向下、2为向上
 	
 	a8usb_rec_array:ARRAY[0..21] OF USINT;
 	slaver_systemchecking:UINT:=0;//从端自检0未在自检中、1为在自检中

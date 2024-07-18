@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="monitorThreshold" Id="{6a1499a6-149e-46aa-92d7-ecb5eca8a55c}">
+    <Declaration><![CDATA[TYPE monitorThreshold :
+STRUCT
+	// arm joint safety error
+	m_armMaxJntEncErr : vec13d;
+	m_armMaxJntFollowErr : vec13d;
+	
+	//arm joint link encoder maximum and minimum values
+	m_maxLinkEnc : vec13di;
+	m_minLinkEnc : vec13di;
+		
+	//MaxJntLimit : vec13d:=[1,1,0.210,4.5579,1.7284,      5.9157,1.196,          1,1,1,1,1,1];
+	//MinJntLimit : vec13d:=[1,1,-0.10,-1.2351,-1.7473,    0.3611,-1.57,       -1,1,1,1,1];
+	
+	// arm joint safety error
+	m_safetyJntVel : vec13d:=[g_largeNum, 1.0, 1.0, pi, pi, 1.5, 1.5, 0.6, 5(4*pi)];
+	
+	//arm joint max current
+	m_maxJntCurrent : vec13d:=[1,1,8400,7600,8400,      8400,8400,      1500,800,800,800,800, 800];
+	
+	//arm fixed point error
+	m_maxFixedPointErr:LREAL:=0.005;
+	
+	//max joint commend  saltation
+	m_maxJntCmdSalta : vec13d;
+	
+	// slave arm cartesion control safety error 
+	m_maxCartPoseErr :ARRAY [1..6] OF LREAL:=[0.010,0.010,0.010,10*g_deg2Rad,10*g_deg2Rad,10*g_deg2Rad];
+	
+	//instrument pitching joint maximum and minimum values
+	m_maxInstruPitch:LREAL:=-5*g_deg2Rad; 
+	m_minInstruPitch:LREAL:=-175*g_deg2Rad;
+	
+	//instrument open angle maximum and minimum values
+	m_maxInstruOpen:LREAL;
+	m_minInstruOpen:LREAL;
+	
+	m_motPhieErrLimit:DINT:=20000;
+	
+	// cart joint safety check limit
+	m_cartMaxJntEncErr :Vec8d:=[0.01,0.01,1*g_deg2Rad,1*g_deg2Rad,0.01,1*g_deg2Rad,0.01,1*g_deg2Rad];
+	m_cartMaxJntFollowErr :Vec8d:=[0.01,0.01,3*g_deg2Rad,3*g_deg2Rad,0.01,3*g_deg2Rad,0.01,3*g_deg2Rad];
+	m_cartMaxLinkEnc :Vec8di:=[0,0,0,0,67108863,16777215,67108863,16777215] ;
+	m_cartMinLinkEnc :Vec8di:=[8(0)];
+	m_cartMaxJntVel :Vec8d:=[0.0025*2,0.0025*2,2.3*2,2.3*2, 0.032, 10*g_deg2Rad, 0.10, 10*g_deg2Rad];
+	m_cartMaxJntCurrent :Vec8d:=[1080*2,1080*2,19800*2,19800*2, 10000*2,3800*2,3800*2,3800*2];
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

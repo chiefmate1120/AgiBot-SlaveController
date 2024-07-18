@@ -1,13 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlAdjust" Id="{065dc40e-4d51-49bc-8f28-94a80cbbd0fd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlAdjust EXTENDS FB_SlaveArmCtrlBase
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
 VAR
+	// velocity for full damping
+	m_maxAdjustVel :Vec3d := [1.0, 1.0, 0.4];
+	
+	// velocity start to enable damping
+	m_velLBForDamp :Vec3d := [0.5, 0.5, 0.2];
+	
+	// max damp
+	m_maxDamp :Vec3d := [50, 50, 500];
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -46,10 +51,24 @@ VAR_IN_OUT CONSTANT
 	i_setupStatus: ST_SetupStatus;
 	i_slaveArm :FB_SlaveArm;
 END_VAR
+VAR
+	i :INT;
+	dampScale :LREAL;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// set joint torque to zero in default
 m_cmdJntTrq := g_zeroVec8d;
+
+RETURN;
+
+// compute damp
+FOR i:=1 TO 3 DO
+	IF ABS(i_slaveArm.curJntVel[i]) > m_velLBForDamp[i] THEN 
+		dampScale:=LIMIT(0, (ABS(i_slaveArm.curJntVel[i])- m_velLBForDamp[i])/(m_maxAdjustVel[i] - m_velLBForDamp[i]), 1 );
+		m_cmdJntTrq[i] := -i_slaveArm.curJntVel[i] * m_maxDamp[i] * dampScale;
+	END_IF
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -89,7 +108,6 @@ IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
 	END_IF
 END_IF
 
-
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
@@ -110,6 +128,15 @@ copyCmds(r_slaveArmCtrlCmd);
     <LineIds Name="FB_SlaveCtrlAdjust.calcCmdJntTrq">
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="71" Count="0" />
       <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlAdjust.init">
@@ -135,7 +162,6 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="147" Count="1" />
       <LineId Id="146" Count="0" />
       <LineId Id="144" Count="0" />
-      <LineId Id="127" Count="0" />
       <LineId Id="108" Count="1" />
       <LineId Id="68" Count="0" />
       <LineId Id="12" Count="0" />

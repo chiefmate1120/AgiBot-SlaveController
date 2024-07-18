@@ -34,6 +34,9 @@ VAR
 	// slave arms, responsible for arm kinematic and control
 	m_slaveArms :ARRAY[1..g_sArmNum] OF FB_SlaveArm;
 	
+	// arm light control word
+	m_lightCrlWord :ARRAY [1..4] OF UDINT;
+	
 	// arm state
 	m_slaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Error)];
 	m_lastSlaveArmState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[4(E_SlaveArmState.SlaveArmState_Error)];
@@ -140,23 +143,19 @@ FOR i:=1 TO g_sArmNum DO
 	
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
-	r_slaveStatus.m_curArmTwist[i]:=m_slaveArms[i].curCartTwist;
+	r_slaveStatus.m_simArmPose[i]:=m_slaveArms[i].simCartPose;
 	r_slaveStatus.m_masterSlavePoseError[i] := m_armMasterSlave[i].masterSlavePoseErr;
 	// joint
 	r_slaveJointsData.m_curMotorPos[i]:=m_slaveArms[i].curMotorPos;
 	r_slaveJointsData.m_curLinkPos[i]:=m_slaveArms[i].curLinkPos;
 	r_slaveJointsData.m_curJntPos[i]:=m_slaveArms[i].curJntPos;
 	r_slaveJointsData.m_curJntVel[i]:=m_slaveArms[i].curJntVel;
-	r_slaveJointsData.m_curJntTrq[i]:=m_slaveArms[i].curJntTrq;
 	
 	// command info
 	// cartesion
 	r_slaveStatus.m_cmdArmPose[i]:=m_slaveArms[i].cmdCartPose;
-	r_slaveStatus.m_cmdArmTwist[i]:=m_slaveArms[i].cmdCartTwist;
 	// joint info
 	r_slaveJointsData.m_cmdJntPos[i]:=m_slaveArms[i].cmdJntPos;
-	r_slaveJointsData.m_cmdJntVel[i]:=m_slaveArms[i].cmdJntVel;
-	r_slaveJointsData.m_cmdJntTrq[i]:=m_slaveArms[i].cmdJntTrq;
 	
 END_FOR]]></ST>
       </Implementation>
@@ -312,10 +311,13 @@ END_FOR
 
 // check if to enable instrument invasion 
 FOR i:=1 TO g_sArmNum DO
-	IF SlaveArmState_Adjust = m_slaveArmState[i] OR SlaveArmState_Cart = m_slaveArmState[i] THEN
+	IF SlaveArmState_Adjust = m_slaveArmState[i] OR SlaveArmState_Cart = m_slaveArmState[i] OR
+	    m_slaveArms[i].instrument.instruType = InstruType_Endoscope	 THEN
 		m_instruInvasionEnableFlag[i]:=FALSE;
-	ELSIF SlaveArmState_InstruRetract = m_slaveArmState[i] THEN
+		m_slaveArms[i].resetInstruDepth();
+	ELSIF m_instrumentMountedFlag[i] AND m_slaveArms[i].instrument.instruType <> InstruType_Endoscope AND m_slaveArmState[i] <> SlaveArmState_InstruInvasion THEN
 		m_instruInvasionEnableFlag[i]:=TRUE;
+		m_slaveArms[i].setInstruDepth();
 	END_IF
 END_FOR  
 
@@ -337,6 +339,7 @@ FOR i:=1 TO g_sArmNum DO
 		// init
 		SlaveArmState_Init:
 			m_selfCheckPass[i]:=FALSE;
+			m_slaveArms[i].instrument.resetArmLED :=TRUE;
 			// to selfcheck
 			IF m_armCtrl[i].isFinished AND i_slavesInputDataPool.m_masterStatus.m_slaveSelfCheckFlag  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_SelfCheck;
@@ -389,11 +392,16 @@ FOR i:=1 TO g_sArmNum DO
 			// to stand by
 			ELSIF NOT(m_slaveArms[i].panelOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
-			ELSIF m_slaveArms[i].instruOn AND m_slaveArms[i].trocarOn  THEN
+			ELSIF m_slaveArms[i].instruOn   THEN
 				IF m_instrumentMountedFlag[i] THEN
 					// to scope ready
 					IF  InstruType_endoscope = m_slaveArms[i].instrument.m_instruType AND m_slaveArms[i].instruReady() THEN 
 						m_nextSlaveArmState[i]:=SlaveArmState_ScopeReady;
+					// to scope toggle
+					ELSIF  InstruType_endoscope = m_slaveArms[i].instrument.m_instruType AND 
+								(m_slaveArms[i].instrument.curScopePosture <> m_slaveArms[i].instrument.nextScopePosture OR
+								m_slaveArms[i].instrument.curScopeType <> m_slaveArms[i].instrument.nextScopeType) THEN
+						m_nextSlaveArmState[i] := SlaveArmState_ScopeToggle;
 					// to instrument ready
 					ELSIF  m_slaveArms[i].instruReady() THEN
 						m_nextSlaveArmState[i]:=SlaveArmState_InstruReady;
@@ -402,12 +410,15 @@ FOR i:=1 TO g_sArmNum DO
 				ELSIF m_slaveArms[i].readyForInstruMount() THEN
 					m_nextSlaveArmState[i]:=SlaveArmState_MountInstru;
 				END_IF
+			// to instrument retract
+			ELSIF  NOT(m_slaveArms[i].readyForInstruMount())  THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
 			END_IF
 			
 		//mount instrument
 		SlaveArmState_MountInstru:
 			// to panel ready
-			IF NOT(m_slaveArms[i].instruOn) OR NOT (m_slaveArms[i].trocarOn) THEN
+			IF NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			ELSIF m_armCtrl[i].isFinished THEN
 				m_instrumentMountedFlag[i] :=TRUE;
@@ -431,7 +442,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF  NOT(m_slaveArms[i].instruOn)  THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
 			ELSIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
@@ -446,12 +456,11 @@ FOR i:=1 TO g_sArmNum DO
 			IF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to standby
-			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] THEN
+			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] OR m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].recordInstruDepth();
 			END_IF
 		
 		//endoscope ready
@@ -459,7 +468,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
 			ELSIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
@@ -489,18 +497,14 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].recordInstruDepth();
 			END_IF
 			
 		//arm adjust
 		SlaveArmState_Adjust:
-			IF NOT(m_slaveArms[i].adjustOn) THEN
+			IF m_slaveArms[i].adjustFallEdge AND m_armCtrl[i].timePeriod > 0.25 THEN
 				// to init
 				IF NOT (m_selfCheckPass[i]) THEN
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
-				// to retract
-				ELSIF  NOT(m_slaveArms[i].instruOn) THEN
-					m_nextSlaveArmState[i] :=SlaveArmState_InstruRetract;
 				// to standby
 				ELSE
 					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
@@ -512,7 +516,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].recordInstruDepth();
 			// to standby
 			ELSIF m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i] :=SlaveArmState_Standby;
@@ -572,7 +575,6 @@ FOR i:=1 TO g_sArmNum DO
 			// to instrument retract
 			IF NOT m_slaveArms[i].instruOn THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
-				m_slaveArms[i].recordInstruDepth();
 			// to Adjust
 			elsIF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
@@ -623,11 +625,8 @@ VAR_INPUT
 	i_slaveInputDataPool:ST_SlaveInputDataPool;
 END_VAR
 
-VAR_STAT
+VAR
 	i : INT;
-	m_lightCrlWord :ARRAY [1..4] OF UDINT;
-	m_lightCrlWordLast :ARRAY [1..4] OF UDINT;
-	m_lightCrlWrite :ARRAY [1..4] OF BOOL  ;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
@@ -642,31 +641,20 @@ END_VAR]]></Declaration>
 
 FOR i := 1 TO g_sArmNum BY 1 DO
 	IF m_slaveArmState[i] = SlaveArmState_Error OR i_slaveInputDataPool.m_setupStatus.m_armState[i] = SlaveArmState_Error THEN
-		m_lightCrlWord[i] := 3;
+		m_lightCrlWord[i] := ArmLight_AmberBlink;
 	ELSIF m_slaveArmState[i] = SlaveArmState_MountPanel OR m_slaveArmState[i] = SlaveArmState_MountInstru THEN
-		m_lightCrlWord[i] := 9;
+		m_lightCrlWord[i] := ArmLight_BluePulse;
 	ELSIF m_slaveArmState[i] = SlaveArmState_InstruRetract OR m_slaveArmState[i] = SlaveArmState_Adjust OR i_slaveInputDataPool.m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust THEN
-		m_lightCrlWord[i] := 2;
+		m_lightCrlWord[i] := ArmLight_BlueBlink;
 	ELSIF m_slaveArmState[i] = SlaveArmState_InstruInvasion THEN
-		m_lightCrlWord[i] := 6;
+		m_lightCrlWord[i] := ArmLight_GreenBlink;
 	ELSIF m_slaveArmState[i] = SlaveArmState_Disable THEN
-		m_lightCrlWord[i] := 0;
+		m_lightCrlWord[i] := ArmLight_Off;
 	ELSE
-		m_lightCrlWord[i] := 1;
+		m_lightCrlWord[i] := ArmLight_BlueOn;
 	END_IF
-	
-	IF m_lightCrlWord[i] <> m_lightCrlWordLast[i] THEN
-		m_lightCrlWrite[i] := TRUE;
-	END_IF
-	
-	IF m_lightCrlWrite[i] THEN
-		m_lightCrlWrite[i] := m_slaveArms[i].checkLight(m_lightCrlWord[i]);
-	ELSE
-		m_lightCrlWordLast[i] := m_lightCrlWord[i];
-	END_IF
-	
 
-	
+	m_slaveArms[i].checkLight(m_lightCrlWord[i]);
 END_FOR
 ]]></ST>
       </Implementation>
@@ -684,7 +672,7 @@ FOR i:=1 TO g_sArmNum DO
 	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
 		
 		// update command endoscope posture from UI
-		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI THEN
+		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
 			IF GVL_com_upper_PC.scope_up_down = 1 THEN
 				m_slaveArms[i].instrument.nextScopePosture := EndoScopePosture_HeadDown;
 			ELSIF  GVL_com_upper_PC.scope_up_down = 2 THEN
@@ -734,18 +722,16 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="100" Count="0" />
       <LineId Id="64" Count="0" />
       <LineId Id="26" Count="0" />
-      <LineId Id="55" Count="0" />
+      <LineId Id="172" Count="0" />
       <LineId Id="144" Count="0" />
-      <LineId Id="57" Count="5" />
+      <LineId Id="57" Count="4" />
       <LineId Id="56" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="65" Count="0" />
       <LineId Id="54" Count="0" />
-      <LineId Id="27" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="35" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="1" />
+      <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">
@@ -828,14 +814,14 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="377" Count="0" />
       <LineId Id="380" Count="1" />
       <LineId Id="378" Count="1" />
+      <LineId Id="733" Count="4" />
+      <LineId Id="742" Count="0" />
+      <LineId Id="738" Count="0" />
+      <LineId Id="750" Count="0" />
+      <LineId Id="739" Count="1" />
+      <LineId Id="758" Count="0" />
+      <LineId Id="741" Count="0" />
       <LineId Id="370" Count="0" />
-      <LineId Id="537" Count="0" />
-      <LineId Id="536" Count="0" />
-      <LineId Id="538" Count="0" />
-      <LineId Id="540" Count="1" />
-      <LineId Id="566" Count="1" />
-      <LineId Id="542" Count="0" />
-      <LineId Id="539" Count="0" />
       <LineId Id="348" Count="0" />
       <LineId Id="345" Count="0" />
       <LineId Id="5" Count="0" />
@@ -852,6 +838,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="634" Count="0" />
+      <LineId Id="759" Count="0" />
       <LineId Id="358" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="29" Count="0" />
@@ -893,6 +880,10 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="593" Count="0" />
       <LineId Id="591" Count="0" />
       <LineId Id="300" Count="0" />
+      <LineId Id="710" Count="1" />
+      <LineId Id="720" Count="0" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="709" Count="0" />
       <LineId Id="594" Count="0" />
       <LineId Id="589" Count="1" />
       <LineId Id="592" Count="0" />
@@ -900,6 +891,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="487" Count="0" />
       <LineId Id="385" Count="0" />
       <LineId Id="301" Count="0" />
+      <LineId Id="722" Count="2" />
       <LineId Id="251" Count="0" />
       <LineId Id="359" Count="0" />
       <LineId Id="252" Count="1" />
@@ -918,7 +910,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="360" Count="0" />
       <LineId Id="264" Count="1" />
       <LineId Id="555" Count="0" />
-      <LineId Id="266" Count="2" />
+      <LineId Id="266" Count="1" />
       <LineId Id="361" Count="1" />
       <LineId Id="365" Count="0" />
       <LineId Id="269" Count="3" />
@@ -929,10 +921,11 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="503" Count="1" />
       <LineId Id="556" Count="0" />
       <LineId Id="276" Count="1" />
-      <LineId Id="402" Count="1" />
+      <LineId Id="403" Count="0" />
       <LineId Id="406" Count="2" />
       <LineId Id="557" Count="0" />
-      <LineId Id="409" Count="4" />
+      <LineId Id="409" Count="1" />
+      <LineId Id="412" Count="1" />
       <LineId Id="416" Count="0" />
       <LineId Id="683" Count="3" />
       <LineId Id="414" Count="0" />
@@ -951,17 +944,15 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="558" Count="0" />
       <LineId Id="417" Count="0" />
       <LineId Id="424" Count="0" />
-      <LineId Id="278" Count="4" />
+      <LineId Id="279" Count="3" />
       <LineId Id="306" Count="0" />
       <LineId Id="639" Count="1" />
       <LineId Id="672" Count="0" />
-      <LineId Id="642" Count="2" />
       <LineId Id="675" Count="0" />
       <LineId Id="673" Count="1" />
       <LineId Id="451" Count="1" />
       <LineId Id="691" Count="2" />
       <LineId Id="699" Count="2" />
-      <LineId Id="698" Count="0" />
       <LineId Id="697" Count="0" />
       <LineId Id="694" Count="2" />
       <LineId Id="455" Count="1" />
@@ -985,7 +976,8 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="519" Count="2" />
       <LineId Id="576" Count="2" />
       <LineId Id="575" Count="0" />
-      <LineId Id="523" Count="4" />
+      <LineId Id="523" Count="1" />
+      <LineId Id="526" Count="1" />
       <LineId Id="546" Count="2" />
       <LineId Id="664" Count="0" />
       <LineId Id="18" Count="0" />
@@ -1017,16 +1009,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="68" Count="0" />
       <LineId Id="70" Count="9" />
       <LineId Id="69" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="58" Count="1" />
-      <LineId Id="63" Count="0" />
       <LineId Id="60" Count="1" />
-      <LineId Id="91" Count="1" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="57" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="17" Count="0" />
     </LineIds>

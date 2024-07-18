@@ -1,11 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 //TODO: safety check parameters need to be reviewd
 VAR_GLOBAL CONSTANT
+	//TODO: fault trigger counts for joint control error is large currently, as joint max velocity is limited
+	g_faultTriggerCountsLarge :INT :=100;
+	
 	// safety error counts threshold to trigger fault
-	g_faultTriggerCounts :INT :=2;
+	g_faultTriggerCounts :INT :=10;
 	
 	// joint limit buffer(outside of joint limit)
 	g_slaveJntPosLimitBuffer : Vec8d :=[2(10.0*g_deg2Rad), 0.02, 5(10.0*g_deg2Rad)];
@@ -19,7 +22,7 @@ VAR_GLOBAL CONSTANT
 	g_slaveMaxJntEncErr :Vec8d :=  [2(5.0*g_deg2Rad), 0.005, 5(5.0*g_deg2Rad)];
 	
 	// joint velocity limit for safety check
-	g_slaveSafetyJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[2.0, 2.0, 0.6, 5(4*pi)];
+	g_slaveSafetyJntVel :ARRAY[1..g_sJntNum] OF LREAL :=[1.5, 1.5, 0.6, 5(4*pi)];
 	
 	// rcp position deviation for safety check
 	g_rcpDeviationThres :LREAL := 0.05;
@@ -28,7 +31,7 @@ VAR_GLOBAL CONSTANT
 	g_setupJntPosLimitBuffer :Vec5d := [5.0*g_deg2Rad, 0.01, 0.01,  2(5.0*g_deg2Rad)];
 	
 	// joint velocity limit for safety check
-	g_setupSafetyJntVel :Vec5d :=[pi, 1.0, 1.0, PI,pi];
+	g_setupSafetyJntVel :Vec5d :=[pi, 1.0, 1.0, pi, pi];
 	
 	// setup joint safety error
 	g_setupMaxJntCtrlErr :Vec5d := [g_largeNum, g_largeNum, 0.005,  2(5.0*g_deg2Rad)];

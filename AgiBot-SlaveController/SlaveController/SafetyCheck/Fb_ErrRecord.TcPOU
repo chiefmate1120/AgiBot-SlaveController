@@ -1,0 +1,442 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Fb_ErrRecord" Id="{c9468793-42c9-4f4e-9d15-08687c5194da}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Fb_ErrRecord 
+VAR_INPUT
+	
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	i,j,k,z,c:UDINT;
+	Index:ARRAY[1..MaxArmNum] OF INT:=[5(2)];
+	m_Index:ARRAY[1..MaxArmNum] OF UDINT;
+	Err,Arm,Joint,ErrID:UDINT;
+	ErrWritingFalg:ARRAY [1..MaxArmNum] OF BOOL:=[5(FALSE)];
+	ArrayErrCodeTypeLast:ARRAY [1..MaxArmNum] OF UDINT;
+	ArrayDataForward: array_data_forward;
+	sPath: STRING(255);
+	mErr:ARRAY [0..MAX_CSV_COLUMNS] OF STRING(255);
+	StartRecord:ARRAY[1..MaxArmNum] OF R_TRIG;
+	RecordCompletion:ARRAY[1..MaxArmNum] OF F_TRIG;
+
+	fbSysTime	: 	GETSYSTEMTIME;
+	tFileTime	:	T_FILETIME;  
+	
+	_tNow,	_tNowBoLin	:	TIMESTRUCT; 
+	fbFormat 	: 	FB_FormatString;
+	_sPathFormat	: T_MaxString := '%s%d-%d-%d-%d-%d-%d-%s-%s-%s.csv'; 
+	
+	_iBuffer: UDINT := 1;
+		
+	StartTime:LREAL;
+	
+	iZeroRowsData:ARRAY[0..MAX_CSV_ROWS] OF  ARRAY [0..MAX_CSV_COLUMNS] OF STRING(MAX_CSV_FIELD_LENGTH);
+	iZeroErrCode:ARRAY [1..g_maxNum] OF ARRAY[0..100] OF UDINT;
+	gCSV_Buffer: ARRAY[1..MAX_CSV_RING_BUFFER] OF ST_Buffer;
+	mErrNameLocation: ARRAY [1..MAX_CSV_RING_BUFFER,0..MAX_CSV_COLUMNS] OF STRING(MAX_CSV_FIELD_LENGTH);
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbSysTime(timeLoDW=>tFileTime.dwLowDateTime , timeHiDW=> tFileTime.dwHighDateTime);
+
+_tNowBoLin := FILETIME_TO_SYSTEMTIME(tFileTime);
+_tNow:=_tNowBoLin;
+_tNow.wHour:=_tNowBoLin.wHour+8;
+IF _tNow.wHour>23 THEN
+	_tNow.wHour:=_tNow.wHour-24;
+END_IF
+IF _tNow.wYear = 0 THEN
+	RETURN;
+END_IF
+
+
+	
+IdentificationErrCode();
+
+DataAssignment();
+
+CarDataAssignment();
+
+FOR _iBuffer := 1 TO MAX_CSV_RING_BUFFER BY 1 DO
+	TransferToWrittenVariable();
+	
+
+	WriterCSV();
+	
+	StartRecord[_iBuffer](CLK:=ErrWritingFalg[_iBuffer] , Q=> );
+
+	IF ErrWritingFalg[_iBuffer] =FALSE THEN
+		Index[_iBuffer]:=Index[_iBuffer]+1;
+		IF Index[_iBuffer]>10000 THEN
+			index[_iBuffer]:=2;
+		END_IF
+	END_IF
+	
+END_FOR]]></ST>
+    </Implementation>
+    <Method Name="CarDataAssignment" Id="{313b4d79-2a41-4d3e-a849-9a1c6106bec1}">
+      <Declaration><![CDATA[METHOD CarDataAssignment : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+FOR z := 1 TO 8 BY 1 DO 
+	IF ErrWritingFalg[5] = FALSE THEN
+	c:=1;
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_FMTSTR(Robot_Status.Car_State_Machine_Joint[z],0, TRUE);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarMachineJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_STRING(Robot_Status.Actual_Car_Position_Second_Encoder[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarActSecPosJ',UDINT_TO_STRING(c));
+
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_STRING(Robot_Status.Actual_Car_Position[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarActJntPosJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UDINT_TO_STRING(Gvl_IO.Car_Drive_Error[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarDriveErrWordJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(Gvl_IO.Car_ActualPos_sec[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarActPosSecIOJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=DINT_TO_STRING(Gvl_IO.car_ActualTorque[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarActTorqueIOJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=UINT_TO_STRING(Robot_Status.Car_Joint_Status[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarDriveStateJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_STRING(Robot_Status.Car_Joint_Position[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarActJntPosDHJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_STRING(system_status_updating.Car_motor_target_position[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarTarPosJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_STRING(system_status_updating.Car_motor_actual_position[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarActPosJ',UDINT_TO_STRING(c));
+	
+	gCSV_Buffer[5].aBuffer[Index[5]][c:=c+1]:=LREAL_TO_STRING(Robot_Status.Car_Joint_Velocity_Filtered[z]);  gCSV_Buffer[5].aBuffer[1][c]:=CONCAT('CarJntVelJ',UDINT_TO_STRING(c));
+	END_IF
+END_FOR
+
+//CarActSecPos[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Actual_Car_Position_Second_Encoder[i],5,TRUE);
+	//CarActJntPos[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Actual_Car_Position[i],5,TRUE);
+	//CarDevSecAndMotor[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Car_Position_Deviation_Between_Encoders[i],5,TRUE);
+	
+	//CarDriveErrWord[i][Index[i]]:=LREAL_TO_FMTSTR(Gvl_IO.Car_Drive_Error[i],0,TRUE);
+	
+	//CarActPosSecIO[i][Index[i]]:=LREAL_TO_FMTSTR(Gvl_IO.Car_ActualPos_sec[i],0,TRUE); 
+	
+	//CarDriveState[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Car_Joint_Status[i],0,TRUE); 
+	
+	//CarActJntPosDH[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Car_Joint_Position[i],0,TRUE); 
+	
+	//CarTarPos[i][Index[i]]:=LREAL_TO_FMTSTR(system_status_updating.Car_motor_target_position[i],5,TRUE); 
+	//CarActPos[i][Index[i]]:=LREAL_TO_FMTSTR(system_status_updating.Car_motor_actual_position[i],5,TRUE); 
+	//CarFollowingDev[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Car_Motor_Following_Deviation[i],5,TRUE); 
+	
+	//CarJntVel[i][Index[i]]:=LREAL_TO_FMTSTR(Robot_Status.Car_Joint_Velocity_Filtered[i],5,TRUE); ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="DataAssignment" Id="{fb89aeab-1562-46a2-86c7-7ac09c7ad183}">
+      <Declaration><![CDATA[METHOD DataAssignment : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+
+
+FOR i:= 1 TO 4 BY 1 DO
+	IF ErrWritingFalg[i] = FALSE THEN
+	j:=1;
+	//状态机
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_FMTSTR(Robot_Status.Arm_State_Machine[i],0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='ArmMachine';
+	
+	//绝对值编码器、转换为弧度1
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_Second_Encoder_V2[i,3]);   gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecPosJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_Second_Encoder_V2[i,4]);   gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecPosJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_Second_Encoder_V2[i,5]);   gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecPosJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_Second_Encoder_V2[i,6]);   gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecPosJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_Second_Encoder_V2[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecPosJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_Second_Encoder_V2[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecPosJ11';
+	
+	//电机编码器、转换为弧度2
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_v2[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_v2[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_v2[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_v2[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_v2[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Actual_Joint_Position_v2[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosJ11';
+	
+		
+	//驱动器错误字4
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(Robot_Status.Arm_Drive_Error[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='DriveErrWordJ3'; 
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(Robot_Status.Arm_Drive_Error[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='DriveErrWordJ4'; 
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(Robot_Status.Arm_Drive_Error[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='DriveErrWordJ5'; 
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(Robot_Status.Arm_Drive_Error[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='DriveErrWordJ6'; 
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(Robot_Status.Arm_Drive_Error[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='DriveErrWordJ10'; 
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UDINT_TO_STRING(Robot_Status.Arm_Drive_Error[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='DriveErrWordJ11'; 
+    
+	//电角度与霍尔角度偏差5
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(Robot_Status.ArmPhieErr[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(Robot_Status.ArmPhieErr[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(Robot_Status.ArmPhieErr[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(Robot_Status.ArmPhieErr[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(Robot_Status.ArmPhieErr[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='PhieErrJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(Robot_Status.ArmPhieErr[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='PhieErrJ11';
+	
+	//电角度与霍尔角度偏差--IO6
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_Drive_PhieError[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_Drive_PhieError[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_Drive_PhieError[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_Drive_PhieError[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_Drive_PhieError[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_Drive_PhieError[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='PhieErrIOJ11';
+	
+	//绝对值编码器--IO7
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualPos_sec[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecIOJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualPos_sec[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecIOJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualPos_sec[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecIOJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualPos_sec[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecIOJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualPos_sec[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecIOJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualPos_sec[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntSecIOJ11';
+	
+	//关节状态字8
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(Robot_Status.Robot_Joint_Status[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='JntStatusJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(Robot_Status.Robot_Joint_Status[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='JntStatusJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(Robot_Status.Robot_Joint_Status[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='JntStatusJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(Robot_Status.Robot_Joint_Status[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='JntStatusJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(Robot_Status.Robot_Joint_Status[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='JntStatusJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=UINT_TO_STRING(Robot_Status.Robot_Joint_Status[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='JntStatusJ11';
+
+	//关节位置9
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Position_V2[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosDHJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Position_V2[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosDHJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Position_V2[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosDHJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Position_V2[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosDHJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Position_V2[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosDHJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Position_V2[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosDHJ3';
+
+	//关节实际电流--IO10
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualTorque[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntTorqueIOJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualTorque[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntTorqueIOJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualTorque[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntTorqueIOJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualTorque[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntTorqueIOJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualTorque[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntTorqueIOJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_ActualTorque[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntTorqueIOJ11';
+
+	//关节目标电流--IO11
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_TargetTorque[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='TartJntTorqueIOJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_TargetTorque[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='TartJntTorqueIOJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_TargetTorque[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='TartJntTorqueIOJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_TargetTorque[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='TartJntTorqueIOJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_TargetTorque[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='TartJntTorqueIOJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=DINT_TO_STRING(GVL_IO.Arm_TargetTorque[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='TartJntTorqueIOJ11';
+
+	//关节速度12
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Velocity_v2_filtered[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntVelJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Velocity_v2_filtered[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntVelJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Velocity_v2_filtered[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntVelJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Velocity_v2_filtered[i,6]);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntVelJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Velocity_v2_filtered[i,10]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntVelJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_Joint_Velocity_v2_filtered[i,11]); gCSV_Buffer[i].aBuffer[1][j]:='ActJntVelJ11';
+
+	//指令位置13
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(system_status_updating.motor_target_position[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(system_status_updating.motor_target_position[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(system_status_updating.motor_target_position[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_cmdJntPos[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_cmdJntPos[i][2]); gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_cmdJntPos[i][3]); gCSV_Buffer[i].aBuffer[1][j]:='cmdJntPosJ11';
+
+    //实际位置14
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(system_status_updating.motor_actual_position[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(system_status_updating.motor_actual_position[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(system_status_updating.motor_actual_position[i,5]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_ActJntPos[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_ActJntPos[i][2]); gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_ActJntPos[i][3]); gCSV_Buffer[i].aBuffer[1][j]:='curJntPosJ11';
+
+	 //指令关节力矩15
+	//gCSV_Buffer[i].aBuffer[j:=j+1][Index[i]]:=LREAL_TO_FMTSTR(system_status_updating.motor_actual_position[i,3],5, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:=CONCAT('curJntPos','J3');
+	//gCSV_Buffer[i].aBuffer[j:=j+1][Index[i]]:=LREAL_TO_FMTSTR(system_status_updating.motor_actual_position[i,4],5, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:=CONCAT('curJntPos','J4');
+	//gCSV_Buffer[i].aBuffer[j:=j+1][Index[i]]:=LREAL_TO_FMTSTR(system_status_updating.motor_actual_position[i,5],5, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:=CONCAT('curJntPos','J5');
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_macroJntCtrlTrq[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='macroJntCtrlTrqJ6';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_macroJntCtrlTrq[i][2]); gCSV_Buffer[i].aBuffer[1][j]:='macroJntCtrlTrqJ10';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Arm_Motion_Control_4K.m_macroJntCtrlTrq[i][3]); gCSV_Buffer[i].aBuffer[1][j]:='macroJntCtrlTrqJ11';
+
+	 //空间矢量16
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.tr_to_space_vector_1.x);  gCSV_Buffer[i].aBuffer[1][j]:='trToSpeaceVectorx';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.tr_to_space_vector_1.y);  gCSV_Buffer[i].aBuffer[1][j]:='trToSpeaceVectory';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.tr_to_space_vector_1.z);  gCSV_Buffer[i].aBuffer[1][j]:='trToSpeaceVectorz';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.tr_to_space_vector_1.rx);  gCSV_Buffer[i].aBuffer[1][j]:='trToSpeaceVectorRx';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.tr_to_space_vector_1.ry); gCSV_Buffer[i].aBuffer[1][j]:='trToSpeaceVectorRy';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.tr_to_space_vector_1.rz); gCSV_Buffer[i].aBuffer[1][j]:='trToSpeaceVectorRz';
+
+	 //目标M3 DH17
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.DH_Joint_position_M3.q1);  gCSV_Buffer[i].aBuffer[1][j]:='TarJntPosM3DHq1';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.DH_Joint_position_M3.q2);  gCSV_Buffer[i].aBuffer[1][j]:='TarJntPosM3DHq2';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.DH_Joint_position_M3.q3);  gCSV_Buffer[i].aBuffer[1][j]:='TarJntPosM3DHq3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.DH_Joint_position_M3.q4);  gCSV_Buffer[i].aBuffer[1][j]:='TarJntPosM3DHq4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.DH_Joint_position_M3.q5); gCSV_Buffer[i].aBuffer[1][j]:='TarJntPosM3DHq5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Control_method.Slave_Motion_Position_Calculation_v2_Num_1[i].Robot_Inverse_Kinematics_M2_Simple_v3_num_1.DH_Joint_position_M3.q6); gCSV_Buffer[i].aBuffer[1][j]:='TarJntPosM3DHq6';
+
+	//实际M3 DH18
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_DH_Joint_Position_M3[i].q1);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosM3DHq1';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_DH_Joint_Position_M3[i].q2);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosM3DHq2';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_DH_Joint_Position_M3[i].q3);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosM3DHq3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_DH_Joint_Position_M3[i].q4);  gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosM3DHq4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_DH_Joint_Position_M3[i].q5); gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosM3DHq5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Robot_Current_DH_Joint_Position_M3[i].q6); gCSV_Buffer[i].aBuffer[1][j]:='ActJntPosM3DHq6';
+
+	//空间速度19
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.SpaceVelocityFilteredM3[i][1]);  gCSV_Buffer[i].aBuffer[1][j]:='SpaceVelM3q1';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.SpaceVelocityFilteredM3[i][2]);  gCSV_Buffer[i].aBuffer[1][j]:='SpaceVelM3q2';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.SpaceVelocityFilteredM3[i][3]);  gCSV_Buffer[i].aBuffer[1][j]:='SpaceVelM3q3';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.SpaceVelocityFilteredM3[i][4]);  gCSV_Buffer[i].aBuffer[1][j]:='SpaceVelM3q4';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.SpaceVelocityFilteredM3[i][5]); gCSV_Buffer[i].aBuffer[1][j]:='SpaceVelM3q5';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.SpaceVelocityFilteredM3[i][6]); gCSV_Buffer[i].aBuffer[1][j]:='SpaceVelM3q6';
+
+
+	//空间位姿偏差20
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Space_Posture_Error[i,1]);  gCSV_Buffer[i].aBuffer[1][j]:='SpacePostureErrorx';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Space_Posture_Error[i,2]);  gCSV_Buffer[i].aBuffer[1][j]:='SpacePostureErrory';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Space_Posture_Error[i,3]);  gCSV_Buffer[i].aBuffer[1][j]:='SpacePostureErrorz';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Space_Posture_Error[i,4]);  gCSV_Buffer[i].aBuffer[1][j]:='SpacePostureErrorRx';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Space_Posture_Error[i,5]); gCSV_Buffer[i].aBuffer[1][j]:='SpacePostureErrorRy';
+	gCSV_Buffer[i].aBuffer[Index[i]][j:=j+1]:=LREAL_TO_STRING(Robot_Status.Space_Posture_Error[i,6]); gCSV_Buffer[i].aBuffer[1][j]:='SpacePostureErrorRz';
+
+
+	//停止信号
+	//gCSV_Buffer[i].aBuffer[j:=j+1][Index]:=LREAL_TO_FMTSTR(Gvl_Io.Stop_button,0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='SlaveStopButton';//CONCAT('SlaveStopButton','x');
+	//gCSV_Buffer[i].aBuffer[j:=j+1][Index]:=LREAL_TO_FMTSTR(gvl_com_upper_PC.stop_button,0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='PCStopButton';//CONCAT('SpacePostureError','y');
+	//gCSV_Buffer[i].aBuffer[j:=j+1][Index]:=LREAL_TO_FMTSTR(gvl_com_data_v2.Master_Stop_Button,0, TRUE);  gCSV_Buffer[i].aBuffer[1][j]:='MasterStopButton';//CONCAT('SpacePostureError','z');
+
+	END_IF
+END_FOR
+
+
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="IdentificationErrCode" Id="{d9533852-6df2-4b84-a42d-d6df4fa57ee7}">
+      <Declaration><![CDATA[METHOD IdentificationErrCode : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i:=1 TO 5 BY 1 DO
+	IF o_ArrayErrCodeArm[i][0]<>0 AND ArrayErrCodeTypeLast[i]<> o_ArrayErrCodeArm[i][0]  THEN
+		Arm:=SHR(o_ArrayErrCodeArm[i][0],24)-3;
+		IF Arm>5 THEN
+			Arm:=5;	
+		END_IF
+		Joint:=SHR(o_ArrayErrCodeArm[i][0],16) AND 16#FF;
+		ErrID:=o_ArrayErrCodeArm[i][0];
+		mErrNameLocation[Arm,1]:=LREAL_TO_FMTSTR(Arm,0, TRUE);
+		mErrNameLocation[Arm,2]:=LREAL_TO_FMTSTR(Joint,0, TRUE);
+		mErrNameLocation[Arm,3]:=LREAL_TO_FMTSTR(ErrID,0, TRUE);
+		m_Index[Arm]:=INT_TO_UDINT(Index[Arm]);
+		ErrWritingFalg[Arm]:=TRUE;
+	END_IF
+	ArrayErrCodeTypeLast[i]:=o_ArrayErrCodeArm[i][0];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TransferToWrittenVariable" Id="{68d50a8c-9562-41b4-824b-a714ed57def0}">
+      <Declaration><![CDATA[METHOD TransferToWrittenVariable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	
+
+	gCSV_Buffer[_iBuffer].aBuffer[Index[_iBuffer]][0]:= SYSTEMTIME_TO_STRING(_tNow);(*第二行第一列*)
+	gCSV_Buffer[_iBuffer].aBuffer[Index[_iBuffer]][1]:=LREAL_TO_FMTSTR(Index[_iBuffer],0, TRUE); 
+	
+	(*The first line shows the arm joint and the error name*)
+	gCSV_Buffer[_iBuffer].aBuffer[0][0] := mErrNameLocation[_iBuffer,0];
+	gCSV_Buffer[_iBuffer].aBuffer[0][1] := mErrNameLocation[_iBuffer,1];
+	gCSV_Buffer[_iBuffer].aBuffer[0][2] := mErrNameLocation[_iBuffer,2];
+	gCSV_Buffer[_iBuffer].aBuffer[0][3] := mErrNameLocation[_iBuffer,3];
+	//gCSV_Buffer[_iBuffer].aBuffer[4][0] := mErrNameLocation[_iBuffer,4];
+	
+	(*The second line shows the variable name*)
+	gCSV_Buffer[_iBuffer].aBuffer[1][0] := 'SystemTime';
+	gCSV_Buffer[_iBuffer].aBuffer[1][1] := 'Index';
+
+	sPath:= 'C:\Robot\Error\'; 
+	mErr[0]:=CONCAT('Arm',mErrNameLocation[_iBuffer,1]);
+	mErr[1]:=CONCAT('Joint',mErrNameLocation[_iBuffer,2]);
+	mErr[2]:=mErrNameLocation[_iBuffer,3];
+	IF StartRecord[_iBuffer].Q THEN  
+	gCSV_Buffer[_iBuffer].bFull := TRUE;
+	fbFormat( 	sFormat := _sPathFormat ,
+			 	arg1 := F_STRING(sPath),   arg2 := F_WORD(_tNow.wYear), arg3 := F_WORD(_tNow.wMonth), 
+				arg4 := F_WORD(_tNow.wDay), arg5 := F_WORD(_tNow.wHour),arg6 := F_WORD(_tNow.wMinute),arg7 := F_WORD(_tNow.wSecond),
+			    arg8 := F_STRING(mErr[0]),arg9 := F_STRING(mErr[1]),arg10 := F_STRING(mErr[2]),  sOut => gCSV_Buffer[_iBuffer].sPath);
+	END_IF
+
+	//F_STRING(mErr[0])]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="WriterCSV" Id="{aa35c94d-6826-4629-a0cb-b794e5d9c6dc}">
+      <Declaration><![CDATA[METHOD WriterCSV : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	
+	IF gCSV_Buffer[_iBuffer].bFull THEN
+
+		gCSV_Buffer[_iBuffer].fbWriter(bWrite:= gCSV_Buffer[_iBuffer].bFull,sFileName:=gCSV_Buffer[_iBuffer].sPath, pBuffer :=ADR(gCSV_Buffer[_iBuffer].aBuffer),Index:=m_Index[_iBuffer]);
+		gCSV_Buffer[_iBuffer].bFull := gCSV_Buffer[_iBuffer].fbWriter.bBusy;
+	END_IF
+
+
+	RecordCompletion[_iBuffer](CLK:= gCSV_Buffer[_iBuffer].bFull, Q=> );
+	IF RecordCompletion[_iBuffer].Q THEN
+		ErrWritingFalg[_iBuffer]:=FALSE;
+		Index[_iBuffer]:=2;
+		gCSV_Buffer[_iBuffer].aBuffer:=iZeroRowsData;
+		o_ArrayErrCodeArm[_iBuffer]:=iZeroErrCode[_iBuffer];
+		//gCSV_Buffer[_iBuffer].fbWriter.arrDataForward(array_in:=Robot_Status.ArrayErrCodeType[_iBuffer]  , array_out=> Robot_Status.ArrayErrCodeType[_iBuffer]);
+	END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="Fb_ErrRecord">
+      <LineId Id="83" Count="9" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="94" Count="23" />
+      <LineId Id="93" Count="0" />
+    </LineIds>
+    <LineIds Name="Fb_ErrRecord.CarDataAssignment">
+      <LineId Id="6" Count="9" />
+      <LineId Id="18" Count="13" />
+      <LineId Id="34" Count="20" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Fb_ErrRecord.DataAssignment">
+      <LineId Id="6" Count="0" />
+      <LineId Id="17" Count="24" />
+      <LineId Id="49" Count="147" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Fb_ErrRecord.IdentificationErrCode">
+      <LineId Id="6" Count="3" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="10" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Fb_ErrRecord.TransferToWrittenVariable">
+      <LineId Id="6" Count="27" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="Fb_ErrRecord.WriterCSV">
+      <LineId Id="6" Count="3" />
+      <LineId Id="17" Count="13" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

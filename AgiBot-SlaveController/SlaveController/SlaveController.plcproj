@@ -118,6 +118,9 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Enum\E_ArmLightCtrlWord.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Enum\E_CartJointState.TcTLEO">
       <SubType>Code</SubType>
     </Compile>
@@ -149,6 +152,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_CartInputDataPool.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\ST_EtherCATState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_InstruOnChipData.TcDUT">
@@ -262,6 +268,12 @@
     <Compile Include="DUTs\Type\Mat7d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec13d.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Vec13di.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec2i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -292,7 +304,13 @@
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec8di.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_InstruNearDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
@@ -328,10 +346,13 @@
     <Compile Include="FBs_BasicControllers\FB_dither.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FB_InstrumentControl.TcPOU">
+    <Compile Include="FBs_BasicControllers\FB_BasicInstruControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FBMacroJntControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_BasicControllers\FB_UltrosonicKnifeControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FB_PID.TcPOU">
@@ -642,6 +663,9 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\GVL_SafetyPara.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GVLs\GVL_SafetyParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -729,13 +753,55 @@
     <Compile Include="Mains\RobotDynamics.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\CarErrInputVariable.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\checkDelay.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\checkDelayTime.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\checkInputVariable.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\checkPermit.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\monitorThreshold.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\monitorThreshold_1.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\PromptMessage.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\ST_Buffer.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ErrRecord\T_Buffer.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\Fb_ErrRecord.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\Fb_SafetyCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\FB_SetupArmCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\FB_SlaveArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_Writer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_backup.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskCartControl.TcTTO">
@@ -783,6 +849,8 @@
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="FBs_Auxiliary" />
+    <Folder Include="SafetyCheck\ErrRecord" />
+    <Folder Include="Sandbox" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_CartJointEncoderCaliData_4" Id="{ea9af794-ed09-4c79-bc0f-21801fb45540}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// Robot4 --joints parameters of setup arms
+VAR_GLOBAL
+	// absolute encoder value at minimal joint positon[0, 0, 0, 0, 39509461, 14558528, 57761547, 8171292]
+	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 28568892, 16410777, 28864363, 4694008];
+		 
+	// absolute encoder value at maximum joint positon[0, 0, 0, 0, 36724181, 577308, 59809539,7327520 ];
+	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 25783612, 2424110, 30912363,2785754 ];
+	
+	// absolute encoder value at calibrated positon[0, 0, 0, 0, 39509461, 15956526, 59809539, 16172652];
+	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 28568892, 1026009, 30912363, 12073550];
+	
+	 // if absolute encoder value cross zeros within joint motion range
+	g_linkEncZeroCross :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 1, 0, 1];
+		 
+
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
+
+	// absolute encoder direction
+	g_asbEncoderDir :ARRAY[1..g_cartJntNum] OF INT :=[1, 1, 1, 1, -1, 1, -1, -1];
+													
+	// flag if joint can rotate multiple cycles
+	g_multipleCyclesJoint :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 0, 0, 0];
+		 
+	// joint position at link encoder calibrated point
+	g_linkEncCaliJntPos :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0];
+	
+	 // joint SDO address
+	g_slaveCartNetID: T_AmsNetId:='169.254.186.39.7.1';
+	g_slaveCartJointNetPort:ARRAY[1..g_cartJntNum] OF UINT :=[1005,	1004,	1003,	1002,	1001,   1006,  1007,  1008];
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

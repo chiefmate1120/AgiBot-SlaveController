@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -49,7 +49,6 @@ END_IF
 
 // run gravity model
 FOR i:=1 TO g_sArmNum DO
-//	m_setupJointData.m_curJntPos[i][5]:=pi/2;
 	m_slaveDynaData.m_gravity[i]:=m_slaveGravityModel[i].run(m_setupJointData.m_curJntPos[i][5], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i]);
 	m_setupGravityModel[i].run(m_setupJointData.m_curJntPos[i], m_slaveJointsData.m_curJntPos[i],m_instruInfo[i], o_jnt3Gravity=> m_setupJnt3Gravity[i], o_jnt5Gravity=> m_setupJnt5Gravity[i]);
 END_FOR
@@ -68,9 +67,7 @@ m_codeTime(START:=FALSE);
       <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="31" Count="0" />
-      <LineId Id="28" Count="1" />
-      <LineId Id="228" Count="0" />
-      <LineId Id="30" Count="0" />
+      <LineId Id="28" Count="2" />
       <LineId Id="295" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="260" Count="1" />

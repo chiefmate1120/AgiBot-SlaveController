@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="CarErrInputVariable" Id="{6de6908c-b422-4618-95af-57fd71c819d0}">
+    <Declaration><![CDATA[TYPE CarErrInputVariable :
+STRUCT
+	CarActJntSecPos:ARRAY [1..8] OF LREAL; //绝对值编码器转换弧度后的
+	CarActJntPos:ARRAY [1..8] OF LREAL;		//电机编码器转换弧度后的
+	CarDriveErrWord:ARRAY [1..8] OF UDINT; //驱动器错误字0开始第5位
+	CarActJntSecIO:ARRAY [1..8] OF DINT;		//绝对值编码器数据PDO直接读取
+	CarJntStatus:ARRAY [1..8] OF UDINT;			//驱动器状态字
+	CarActJntTorqueIO,CarActJntTorqueIOlast:ARRAY [1..8] OF DINT; //驱动器电流PDO直接读取
+	CarActJntPosDH:ARRAY [1..8] OF LREAL;  //实际关节角度、使用的电机编码器
+	CarMotPhieErr:ARRAY [1..8] OF LREAL;			//电角度偏差
+	CarcurJntPos:ARRAY [1..8] OF LREAL;		//电机实际角度PDO转换
+	CarcmdJntPos:ARRAY [1..8] OF LREAL;		//电机目标位置PDO转换
+	CarActJntVel:ARRAY [1..8] OF LREAL;		//实际关节速度滤波后
+	CarMorCurrentFilter:ARRAY [1..8] OF LREAL;		//电流电流滤波后
+	CarEtherCATState:ARRAY [1..8] OF BOOL;		//通讯状态
+	
+	SlaveStopButton:BOOL;
+	PCStopButton :UINT;
+	MasterStopButton :BOOL;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

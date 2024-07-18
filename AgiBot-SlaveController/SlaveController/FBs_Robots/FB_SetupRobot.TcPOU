@@ -71,13 +71,10 @@ FOR i:=1 TO g_sArmNum DO
 	r_setupJointsData.m_curLinkPos[i]:=m_setupArms[i].curLinkPos;
 	r_setupJointsData.m_curJntPos[i]:=m_setupArms[i].curJntPos;
 	r_setupJointsData.m_curJntVel[i]:=m_setupArms[i].curJntVel;
-	r_setupJointsData.m_curJntTrq[i]:=m_setupArms[i].curJntTrq;
 	
 	// command info
 	// joint info
 	r_setupJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
-	r_setupJointsData.m_cmdJntVel[i]:=m_armCtrlCmds[i].m_cmdJntVel;
-	r_setupJointsData.m_cmdJntTrq[i]:=m_armCtrlCmds[i].m_cmdJntTrq;
 	
 END_FOR]]></ST>
       </Implementation>
@@ -276,13 +273,12 @@ END_FOR]]></ST>
       <LineId Id="26" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="129" Count="0" />
-      <LineId Id="57" Count="5" />
+      <LineId Id="57" Count="4" />
       <LineId Id="56" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="35" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="1" />
+      <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">

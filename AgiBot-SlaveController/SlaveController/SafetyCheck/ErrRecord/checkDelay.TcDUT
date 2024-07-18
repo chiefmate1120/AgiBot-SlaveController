@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="checkDelay" Id="{84d26a64-d129-4323-bf30-7619f11566ce}">
+    <Declaration><![CDATA[TYPE checkDelay  :
+STRUCT
+	T_armJntEncErr:ARRAY [1..13] OF TON;
+	T_driveErr:ARRAY [1..13] OF TON;
+	T_linkEncErr:ARRAY [1..13] OF TON;
+	T_jntStatusErr:ARRAY [1..13] OF TON;
+	T_currentIsNotUpdate:ARRAY [1..13] OF TON;
+	T_outOfLimit:ARRAY [1..13] OF TON;
+	T_armJntFollowErr:ARRAY [1..13] OF TON;
+	T_jntVelErr:ARRAY [1..13] OF TON;
+	T_jntCurrentErr:ARRAY [1..13] OF TON;
+	T_fixedPointErr:TON;
+	T_spacePoseErr:ARRAY [1..13] OF TON;
+	
+	T_CarDualEncoderDev:ARRAY [1..8] OF TON;
+	T_CarDriveErr:ARRAY [1..8] OF TON;
+	T_CarActSec:ARRAY [1..8] OF TON;
+	T_CarJntStatus:ARRAY [1..8] OF TON;
+	T_CarTorMotor:ARRAY [1..8] OF TON;
+	T_CaroutofLimit:ARRAY [1..8] OF TON;
+	T_CarFollowDev:ARRAY [1..8] OF TON;
+	T_CarJntVel:ARRAY [1..8] OF TON;
+	T_CarJntCurrent:ARRAY [1..8] OF TON;
+	T_CarEtherCAT:ARRAY [1..8] OF TON;
+	T_CarMingzhiDriveErr:ARRAY [1..8] OF TON;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

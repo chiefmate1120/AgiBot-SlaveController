@@ -3,7 +3,10 @@
   <DUT Name="ST_MotorInputs" Id="{e44e69b4-1010-4dc2-83a5-4bfdea7e970d}">
     <Declaration><![CDATA[TYPE ST_MotorInputs:
 STRUCT
+	// driver error info
 	m_driverError:UDINT;
+	
+	// driver ethercat status
 	m_statusWord:UINT;
 	
 	// motor/relative encoder from IO
@@ -14,6 +17,9 @@ STRUCT
 	
 	// motor current from IO
 	m_current : DINT;
+	
+	//motor electrical angle deviation
+	m_electriAngleDev : DINT;
 	
 END_STRUCT
 END_TYPE

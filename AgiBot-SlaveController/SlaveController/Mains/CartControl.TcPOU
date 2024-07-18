@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM CartControl
 VAR
@@ -138,7 +138,7 @@ GVL_com_upper_PC.Cart_operation.Arm4_setup_sterile_state := BOOL_TO_UINT(m_asept
 GVL_com_upper_PC.Cart_operation.scope_install_state := BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_endoscopeMounted);
 
 FOR i := 1 TO 4 BY 1 DO
-	IF NOT SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.onChipData.m_Instrutype=InstruType_endoscope THEN
+	IF SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.Instrutype<>InstruType_endoscope THEN
 		IF SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i] AND SlaveArmControl.m_slaveRobot.m_endoscopeMounted THEN
 			GVL_com_upper_PC.Cart_operation.all_fixed_point_confirm := 1;
 			EXIT;

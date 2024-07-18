@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="checkPermit" Id="{596a4f78-9ed2-462f-bcbc-6fb090f26916}">
+    <Declaration><![CDATA[TYPE checkPermit :
+STRUCT
+	m_armJntEncErr :ARRAY [1..13] OF BOOL;
+	m_driveErr :ARRAY [1..13] OF BOOL;
+	m_jntStatusErr :ARRAY [1..13] OF BOOL;
+	m_currentIsNotUpdate :ARRAY [1..13] OF BOOL;
+	m_linkEncErr :ARRAY [1..13] OF BOOL;
+	m_motPhieErr:ARRAY [1..13] OF BOOL;
+	m_outOfLimit :ARRAY [1..13] OF BOOL;
+	m_armJntFollowErr :ARRAY [1..13] OF BOOL;
+	m_jntVelErr :ARRAY [1..13] OF BOOL;
+	m_jntCurrentErr :ARRAY [1..13] OF BOOL;
+	m_fixedPointErr :BOOL;
+	m_cmdJntSaltation:ARRAY [1..13] OF BOOL;
+	m_spacePoseErr:ARRAY [1..6] OF BOOL;
+	m_instruSingularity:BOOL;
+	m_instruOpenAngle:BOOL;
+	
+
+	CarJntStatus:ARRAY [1..8] OF BOOL:=[8(TRUE)];
+	CarTorMotor:ARRAY [1..8] OF BOOL:=[8(TRUE)];
+	CarActSec:ARRAY [1..8] OF BOOL:=[FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE];
+	CarDriveErr:ARRAY [1..8] OF BOOL:=[8(TRUE)];
+	CarDualEncoderDev:ARRAY [1..8] OF BOOL:=[FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE];
+	CaroutofLimit:ARRAY [1..8] OF BOOL:=[FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE];
+	CarFollowDev:ARRAY [1..8] OF BOOL:=[FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE];
+	CarJntVel:ARRAY [1..8] OF BOOL:=[FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE];
+	CarJntCurrent:ARRAY [1..8] OF BOOL:=[8(FALSE)];
+	CarMZDriveErr:ARRAY [1..8] OF BOOL:=[FALSE,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

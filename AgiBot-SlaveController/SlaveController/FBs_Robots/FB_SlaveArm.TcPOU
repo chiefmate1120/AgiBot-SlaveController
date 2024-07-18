@@ -17,8 +17,10 @@ VAR
 	m_panelInstrumentOnIO AT%I*	:UDINT;
 	m_panelDetect :FB_PanelDetect;
 	m_instruDetect :FB_InstrumentDetect;
+	m_instruNearDetect :FB_InstruNearDetect;
 	m_panelOnFlag :BOOL:=FALSE;
 	m_instruOnFlag :BOOL:=FALSE;
+	m_instruNearFlag :BOOL:=FALSE;
 
 	
 	// trocar and  adjust detect
@@ -27,6 +29,8 @@ VAR
 	m_trocarDetect : FB_TrocarDetect;
 	m_adjustOnFlag :BOOL;
 	m_trocarOnFlag :BOOL :=FALSE;
+	m_adjustFallEdge :BOOL:=false;
+	m_adjustFallEdgeDetect : F_TRIG;
 	
 	//arm light out to drive
 	m_lightIO AT %Q* :DINT;
@@ -104,6 +108,17 @@ END_VAR
       <ST><![CDATA[	]]></ST>
     </Implementation>
     <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
+    <Property Name="adjustFallEdge" Id="{892fbc5d-bccd-475a-836d-3ab99edcd203}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY adjustFallEdge : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e41aaa50-cc49-4924-aa5c-7939e5c2aefd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[adjustFallEdge := m_adjustFallEdge;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="adjustOn" Id="{afc98598-ed29-4176-9f45-d842c4ec164a}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY adjustOn : bool]]></Declaration>
       <Get Name="Get" Id="{d84a6e3e-5b0e-406e-b7c3-ff6a74a84739}">
@@ -223,6 +238,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// check adjust button
 m_adjustOnFlag := m_adjustDetect.run(m_adjustIO);
+m_adjustFallEdgeDetect(CLK:=m_adjustOnFlag, Q=>m_adjustFallEdge);
 
 // check trocar
 m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
@@ -230,12 +246,11 @@ m_trocarOnFlag := m_trocarDetect.run(m_adjustIO);
 // check panel and instrument
 m_panelOnFlag := m_panelDetect.run(m_panelInstrumentOnIO);
 m_instruOnFlag := m_instruDetect.run(m_panelInstrumentOnIO);
+m_instruNearFlag := m_instruNearDetect.run(m_panelInstrumentOnIO);
 
 //read instrument information
 IF FALSE = m_instruOnFlag THEN
 	m_instrument.reset();
-ELSE
-	m_instrument.onChipData.m_resetArmLEDFlag := FALSE;
 END_IF
 m_ReadLDP(CLK:= m_instruOnFlag, Q=>startFlag );
 // try to read again if instrument ID is undefined
@@ -251,7 +266,7 @@ IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
 		m_instrument.nextScopeType := EndoscopeType_30;
 	END_IF
 END_IF
-IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) THEN
+IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) AND m_instrument.curScopeType = EndoScopeType_30  THEN
 	IF m_instrument.curScopePosture = EndoScopePosture_HeadDown THEN
 		m_instrument.nextScopePosture := EndoscopePosture_HeadUp;
 	ELSE
@@ -264,29 +279,28 @@ END_IF
     <Method Name="checkLight" Id="{f01081ee-1e3d-4082-9296-257b5773b0af}">
       <Declaration><![CDATA[METHOD checkLight : BOOL
 VAR_INPUT
-	i_lightCrlWord : UDINT;
+	i_lightCtrlWord : UDINT;
 END_VAR
 
 VAR
-	m_lightCrlWord : UDINT;
+	lightCtrlWord : UDINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-m_lightIO := UDINT_TO_DINT(i_lightCrlWord);
-m_lightCrlWord := SHL(i_lightCrlWord,16);
-checkLight := TRUE;
+        <ST><![CDATA[// to PDO
+m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
 
-m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(m_lightCrlWord) , cbBufLen:=SIZEOF(m_lightCrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-IF NOT m_SdoWrite[1].bBusy THEN
+// trig sdo write
+lightCtrlWord := SHL(i_lightCtrlWord,16);
+m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+
+// disable sdo write
+IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
 	m_SdoWrite[1](bExecute:=FALSE);
-END_IF
-
-m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(m_lightCrlWord), cbBufLen:= SIZEOF(m_lightCrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-IF NOT m_SdoWrite[2].bBusy THEN
-	checkLight := FALSE;
 	m_SdoWrite[2](bExecute:=FALSE);
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Property Name="cmdCartPose" Id="{72bf034f-e694-478b-8fc6-77f6ebb37ccd}" FolderPath="property\">
@@ -510,6 +524,8 @@ VAR
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
 	DHRot :Mat3d;
+	
+	tmpRot1,tmpRot2 : Mat3d;
 
 END_VAR
 ]]></Declaration>
@@ -553,6 +569,14 @@ DHRot[3,3]:=c5*s1*s2 - s5*(c1*s4 - c2*c4*s1);
 
 // convert to tcp rotation
 matMultiply(DHRot, GVL_SlaveArmKinematic.g_tcpRotation, r_cartPOSE.m_rot);
+
+//TODO: need verify
+// rotate tcp coordinate 180 degree about z axis if instrument is a head-up 30deg endoscope
+IF m_instrument.instruType = InstruType_Endoscope AND m_instrument.curScopeType = EndoScopeType_30 AND m_instrument.curScopePosture = EndoscopePosture_HeadUp THEN
+	tmpRot2 := rotZ(pi);
+	tmpRot1 := r_cartPOSE.m_rot;
+	matMultiply(tmpRot1, tmpRot2, r_cartPOSE.m_rot);
+END_IF
 
 ]]></ST>
       </Implementation>
@@ -601,8 +625,8 @@ m_jointAddrJ8 := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,3];
 m_jointAddrPbox := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];
 
 // endosocpe toggle button check
-m_endoscopeTypeSwitch.init(0, 1000);
-m_endoscopePostureSwitch.init(0,1000);
+m_endoscopeTypeSwitch.init(0, 500);
+m_endoscopePostureSwitch.init(0,500);
 
 ]]></ST>
       </Implementation>
@@ -635,6 +659,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="instruNear" Id="{29bf66f9-822d-4749-92c9-ee092b53b459}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruNear : BOOL]]></Declaration>
+      <Get Name="Get" Id="{6b30ea9b-f7b2-4aff-9934-1c8f2b6bc1de}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruNear := m_instruNearFlag;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="instruOn" Id="{4486d0c9-79b0-4e6c-acfb-23ca16ba44f5}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY instruOn : bool]]></Declaration>
       <Get Name="Get" Id="{daa69233-49df-439c-8476-605873205ebf}">
@@ -663,12 +698,8 @@ END_VAR
 	RETURN;
 END_IF
 
-IF m_instrument.m_instruType = InstruType_Endoscope THEN
-	instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minScopeRCDis+checkBuffer);
-ELSE
-	instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
-										+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
-END_IF
+instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
+									+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
 ]]></ST>
       </Implementation>
     </Method>
@@ -752,18 +783,19 @@ END_VAR
 VAR_IN_OUT
 	r_jaco :Mat6d;
 END_VAR
-VAR_INPUT
+
+VAR CONSTANT
+	// modify joint2/3 position to avoid jacobian singularity
+	m_Jnt2PosThres :LREAL := -165 * g_deg2Rad;
+	m_Jnt3PosThres :LREAL := -0.05;
 END_VAR
 
 VAR
 	d1, L, a, b :LREAL;
-	q3:LREAL;
+	q2, q3:LREAL;
 
 	c1,c2,c4,c5,c6,c7 :LREAL;
 	s1,s2,s4,s5,s6,s7 :LREAL;
-	
-	// modify joint3 position to avoid jacobian singularity
-	m_Jnt3PosThres :LREAL := -0.03;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
@@ -771,19 +803,24 @@ L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
 b:=m_instrument.kinematicParameters.m_fingerLength;
 
+q2 := i_DHJntPos[2];
+IF q2 < m_Jnt2PosThres THEN
+	q2 := m_Jnt2PosThres;
+END_IF
+
 q3:=i_DHJntPos[3];
 IF q3 - L > m_Jnt3PosThres THEN
 	q3:= L + m_Jnt3PosThres;
 END_IF
 
 c1:=COS(i_DHJntPos[1]);
-c2:=COS(i_DHJntPos[2]);
+c2:=COS(q2);
 c4:=COS(i_DHJntPos[4]);
 c5:=COS(i_DHJntPos[5]);
 c6:=COS(i_DHJntPos[6]);
 
 s1:=SIN(i_DHJntPos[1]);
-s2:=SIN(i_DHJntPos[2]);
+s2:=SIN(q2);
 s4:=SIN(i_DHJntPos[4]);
 s5:=SIN(i_DHJntPos[5]);
 s6:=SIN(i_DHJntPos[6]);
@@ -865,15 +902,24 @@ END_VAR
 
 VAR
 	// check buffer
-	checkBuffer :LREAL := 0.005;
+	checkBuffer :LREAL := 0.01;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[readyForInstruMount := (m_curJntPos[3]> GVL_SlaveMotorParameters.g_maxDHJntPos[3]-checkBuffer AND m_panelOnFlag);]]></ST>
       </Implementation>
     </Method>
-    <Method Name="recordInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
-      <Declaration><![CDATA[METHOD PUBLIC recordInstruDepth : BOOL
+    <Method Name="resetInstruDepth" Id="{442cf664-eb0b-4d84-a453-ceda2815dd97}">
+      <Declaration><![CDATA[METHOD PUBLIC resetInstruDepth : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_instruInvasionDepth :=GVL_SlaveMotorParameters.g_maxJntPos[3];]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setInstruDepth" Id="{f666f43c-697b-4bc4-8326-000cbf8a2e4d}">
+      <Declaration><![CDATA[METHOD PUBLIC setInstruDepth : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -1084,6 +1130,9 @@ END_FOR
     <LineIds Name="FB_SlaveArm">
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.adjustFallEdge.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.adjustOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1106,15 +1155,16 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveArm.checkIO">
       <LineId Id="21" Count="1" />
+      <LineId Id="133" Count="0" />
       <LineId Id="58" Count="1" />
       <LineId Id="56" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="6" Count="2" />
+      <LineId Id="112" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="40" Count="0" />
-      <LineId Id="133" Count="1" />
       <LineId Id="42" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="85" Count="0" />
@@ -1135,18 +1185,11 @@ END_FOR
     <LineIds Name="FB_SlaveArm.checkLight">
       <LineId Id="38" Count="0" />
       <LineId Id="21" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="25" Count="1" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="28" Count="0" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="64" Count="4" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="63" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
       <LineId Id="2" Count="0" />
@@ -1220,6 +1263,11 @@ END_FOR
       <LineId Id="240" Count="0" />
       <LineId Id="239" Count="0" />
       <LineId Id="243" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="263" Count="2" />
+      <LineId Id="269" Count="1" />
+      <LineId Id="266" Count="0" />
       <LineId Id="241" Count="0" />
       <LineId Id="29" Count="0" />
     </LineIds>
@@ -1254,11 +1302,15 @@ END_FOR
     <LineIds Name="FB_SlaveArm.instrument.Get">
       <LineId Id="6" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.instruNear.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.instruOn.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.instruReady">
-      <LineId Id="38" Count="10" />
+      <LineId Id="38" Count="3" />
+      <LineId Id="45" Count="2" />
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.isEnabled">
@@ -1285,6 +1337,10 @@ END_FOR
       <LineId Id="248" Count="0" />
       <LineId Id="338" Count="1" />
       <LineId Id="253" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="402" Count="0" />
+      <LineId Id="404" Count="0" />
+      <LineId Id="414" Count="1" />
       <LineId Id="340" Count="0" />
       <LineId Id="254" Count="0" />
       <LineId Id="379" Count="3" />
@@ -1305,7 +1361,10 @@ END_FOR
     <LineIds Name="FB_SlaveArm.readyForInstruMount">
       <LineId Id="49" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.recordInstruDepth">
+    <LineIds Name="FB_SlaveArm.resetInstruDepth">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveArm.setInstruDepth">
       <LineId Id="5" Count="1" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="checkInputVariable" Id="{f641bcc5-1597-4d0c-903e-ba4da9cf7cc3}">
+    <Declaration><![CDATA[TYPE checkInputVariable :
+STRUCT
+	EmergencyStop:BOOL;
+	m_curLinkPos :vec13d; 				//绝对值编码器转换弧度后的
+	m_curJntPos :vec13d;					//电机编码器转换弧度后的
+	m_driverErrorWordIO :vec13di;		//驱动错误字0开始第5位
+	m_linkEncoderIO :vec13di;			//绝对值编码器数据PDO直接读取
+	m_jntStatusWordIO :vec13di;				//驱动器状态字
+	m_curJntTorqueIO :vec13di;		//驱动器电流PDO直接读取
+	m_motPhieErr :vec13d;					//电角度偏差
+	m_cmdJntPos :vec13d;					//电机目标位置PDO转换
+	m_cmdJntPosLast :vec13d;			//电机目标位置PDO转换
+	m_curJntVel :vec13d;					//实际关节速度滤波后
+	m_JntCurrent :vec13d;				//电流
+	m_EtherCATState:ARRAY [1..g_maxArmJoint] OF ST_EtherCATState;		//通讯状态
+	m_fixedPointErrLength: LREAL;	//不动点偏差长度
+	m_cmdSaltaValue :vec13d;			//1ms指令数值
+	m_spacePoseErr : vec6d;				//空间位置偏差
+	m_instruPitch:LREAL;				//器械俯仰角
+	m_instruOpenAngle:LREAL;		//器械开合角
+	
+	PromptStatus:ARRAY [1..20] OF BOOL;
+	ErrLocation:ARRAY [1..20] OF UDINT;
+	
+	
+	SlaveStopButton:BOOL;
+	PCStopButton :UINT;
+	MasterStopButton :BOOL;
+	
+	
+	CarActJntSecPos:ARRAY [1..g_maxCartJoint] OF LREAL; //绝对值编码器转换弧度后的
+	CarActJntPos:ARRAY [1..g_maxCartJoint] OF LREAL;		//电机编码器转换弧度后的
+	CarDriveErrWord:ARRAY [1..g_maxCartJoint] OF UDINT; //驱动器错误字0开始第5位
+	CarActJntSecIO:ARRAY [1..g_maxCartJoint] OF DINT;		//绝对值编码器数据PDO直接读取
+	CarJntStatus:ARRAY [1..g_maxCartJoint] OF UDINT;			//驱动器状态字
+	CarActJntTorqueIO,CarActJntTorqueIOlast:ARRAY [1..g_maxCartJoint] OF DINT; //驱动器电流PDO直接读取
+	CarActJntPosDH:ARRAY [1..g_maxCartJoint] OF LREAL;  //实际关节角度、使用的电机编码器
+	CarcurJntPos:ARRAY [1..g_maxCartJoint] OF LREAL;		//电机实际角度PDO转换
+	CarcmdJntPos:ARRAY [1..g_maxCartJoint] OF LREAL;		//电机目标位置PDO转换
+	CarActJntVel:ARRAY [1..g_maxCartJoint] OF LREAL;		//实际关节速度滤波后
+	CarMorCurrentFilter:ARRAY [1..g_maxCartJoint] OF LREAL;		//电流电流滤波后
+	CarEtherCATState:ARRAY [1..g_maxCartJoint] OF BOOL;		//通讯状态
+	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

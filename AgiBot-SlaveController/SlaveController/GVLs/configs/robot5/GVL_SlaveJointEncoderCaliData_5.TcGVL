@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SlaveJointEncoderCaliData_5" Id="{7e6157d6-2ede-4159-94b1-77aed4f00b6e}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot5 --joints parameters of slave arms
@@ -23,7 +23,7 @@ VAR_GLOBAL CONSTANT
 		[3882398, 8083626, 509984, 13079328, 101984, 14934512, 4402512, 5578752,
 		 8049042, 3955388, 10993024, 15376976, 15429216, 6997360, 7093456, 7154688,
 		 3865836, 8052426, 7690928, 15280848, 15470720, 7024336, 7061984, 7187520,
-		 8117082, 12176494, 12720912, 15362624, 15519280, 6971776, 6970208, 7079008];
+		 8117082, 12176494, 12720912, 15362624, 15350880, 6971776, 6970208, 7079008];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.

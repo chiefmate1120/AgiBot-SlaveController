@@ -41,14 +41,7 @@ m_jntOTG.run(m_targetRotJntPos, 0.0, o_cmdAcc=>m_cmdJntAcc[8],o_cmdVel=>m_cmdJnt
 
 // reach target check
 trackErr := ABS(i_slaveArm.curJntPos[8] - m_targetRotJntPos);
-m_isFinished := trackErr <g_jntCtrlAngTolHigh AND i_slaveArm.curJntVel[8]<g_jntStaticVelThres;
-
-IF m_isFinished THEN
-	// update endoscope type/posture
-	i_slaveArm.instrument.curScopeType := i_slaveArm.instrument.nextScopeType;
-	i_slaveArm.instrument.curScopePosture := i_slaveArm.instrument.nextScopePosture;
-END_IF
-]]></ST>
+m_isFinished := trackErr <2*g_jntCtrlAngTolHigh AND i_slaveArm.curJntVel[8]<g_jntStaticVelThres;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{d6394fcd-e49b-40e7-837c-8d44a4853971}">
@@ -70,6 +63,9 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
+m_jntOPMode[8] := DriverOPMode_PosTrq;
 
 // endoscope posture toggle
 IF i_slaveArm.instrument.nextScopePosture <> i_slaveArm.instrument.curScopePosture AND i_slaveArm.instrument.curScopeType = EndoScopeType_30 THEN
@@ -85,6 +81,10 @@ END_IF
 // init traj filter
 m_jntOTG.init(m_cmdJntPos[8], 0, m_rotVel, m_rotAcc, g_slaveArmCtrlCycleTime);
 
+// update endoscope type/posture
+i_slaveArm.instrument.curScopeType := i_slaveArm.instrument.nextScopeType;
+i_slaveArm.instrument.curScopePosture := i_slaveArm.instrument.nextScopePosture;
+
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);]]></ST>
       </Implementation>
@@ -98,15 +98,11 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="123" Count="0" />
       <LineId Id="205" Count="0" />
       <LineId Id="211" Count="0" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="224" Count="0" />
-      <LineId Id="226" Count="0" />
-      <LineId Id="228" Count="1" />
-      <LineId Id="227" Count="0" />
-      <LineId Id="98" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlScopeToggle.init">
       <LineId Id="152" Count="3" />
+      <LineId Id="270" Count="1" />
+      <LineId Id="269" Count="0" />
       <LineId Id="242" Count="0" />
       <LineId Id="241" Count="0" />
       <LineId Id="243" Count="1" />
@@ -118,6 +114,8 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="256" Count="0" />
       <LineId Id="194" Count="0" />
       <LineId Id="209" Count="0" />
+      <LineId Id="285" Count="2" />
+      <LineId Id="284" Count="0" />
       <LineId Id="189" Count="2" />
     </LineIds>
   </POU>
