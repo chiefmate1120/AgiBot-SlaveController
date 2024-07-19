@@ -5,8 +5,8 @@
   <Children>
     <Node>
       <Title>cartJointData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Users\NFJ\New Architecture\AgiBot-SlaveController\Scope-SlaveController\cartJointData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\cartJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -383,7 +383,7 @@
     <Node>
       <Title>SetupGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\NFJ\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -891,7 +891,7 @@
     <Node>
       <Title>SlaveGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\NFJ\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1398,12 +1398,12 @@
     </Node>
     <Node>
       <Title>SlaveJointData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Users\NFJ\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -1596,7 +1596,7 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -1607,7 +1607,7 @@
             </Node>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1620,7 +1620,7 @@
             </Node>
             <Node>
               <Title>Axis Group (6)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1635,12 +1635,12 @@
         </Node>
         <Node>
           <Title>YT Chart (1)</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1683,7 +1683,7 @@
             </Node>
             <Node>
               <Title>Axis Group (5)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -1726,7 +1726,7 @@
             </Node>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
