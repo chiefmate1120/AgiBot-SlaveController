@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -28,7 +28,7 @@ VAR
 	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
 	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDisable;
-	
+	m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SetupArmCtrl;
@@ -115,6 +115,7 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_Disable] := m_armDisable[i];
+	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -231,6 +232,13 @@ END_VAR]]></Declaration>
 			IF NOT(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
 				m_nextSetupArmState[i]:= SetupArmState_Hold;
 			END_IF
+			
+		//arm Performance
+		SetupArmState_Performance:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF				
 	END_CASE
 	
 	// arm disable
@@ -296,6 +304,7 @@ END_FOR]]></ST>
       <LineId Id="131" Count="0" />
       <LineId Id="138" Count="0" />
       <LineId Id="110" Count="0" />
+      <LineId Id="145" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="101" Count="0" />
@@ -355,6 +364,9 @@ END_FOR]]></ST>
       <LineId Id="263" Count="0" />
       <LineId Id="123" Count="0" />
       <LineId Id="268" Count="4" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="290" Count="4" />
+      <LineId Id="289" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="234" Count="0" />
       <LineId Id="259" Count="2" />

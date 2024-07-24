@@ -463,6 +463,9 @@
     <Compile Include="FBs_SetupControllers\FB_SetupCtrlManualAdjust.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SetupControllers\FB_SetupCtrlPerformance.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlDisable.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -473,6 +476,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlInstruCali.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlPerformance.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlScopeToggle.TcPOU">

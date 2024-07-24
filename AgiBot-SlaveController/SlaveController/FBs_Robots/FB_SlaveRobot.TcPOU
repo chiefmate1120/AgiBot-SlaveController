@@ -75,6 +75,7 @@ VAR
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDisable;
 	m_instruCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruCali;
 	m_scopeToggle :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlScopeToggle;
+	m_Performance :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlPerformance;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -209,6 +210,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_Disable] := m_armDisable[i];
 	m_armCtrlFactory[i,SlaveArmState_InstruCali] := m_instruCali[i];
 	m_armCtrlFactory[i,SlaveArmState_ScopeToggle] := m_scopeToggle[i];
+	m_armCtrlFactory[i,SlaveArmState_Performance] := m_Performance[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -560,6 +562,13 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
 			END_IF
 		
+		//arm Performance
+		SlaveArmState_Performance:
+			// to standby
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+			END_IF			
+			
 		// instrument retract
 		SlaveArmState_InstruRetract:
 			// to Adjust
@@ -755,6 +764,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="161" Count="0" />
       <LineId Id="168" Count="0" />
       <LineId Id="110" Count="0" />
+      <LineId Id="175" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="101" Count="0" />
@@ -971,7 +981,10 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="308" Count="4" />
       <LineId Id="307" Count="0" />
       <LineId Id="506" Count="2" />
-      <LineId Id="513" Count="5" />
+      <LineId Id="513" Count="0" />
+      <LineId Id="769" Count="4" />
+      <LineId Id="767" Count="1" />
+      <LineId Id="514" Count="4" />
       <LineId Id="509" Count="0" />
       <LineId Id="519" Count="2" />
       <LineId Id="576" Count="2" />
