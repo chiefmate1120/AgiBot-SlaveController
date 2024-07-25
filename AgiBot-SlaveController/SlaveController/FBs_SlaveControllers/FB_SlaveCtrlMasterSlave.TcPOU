@@ -225,16 +225,6 @@ matMultiVec(invJaco, m_slaveTrackTwist, m_simDHJointVel);
 // limit instrument wrist dofs
 limitInstruDofs(i_slaveArm, m_simDHJointVel);
 
-// limit DH joints velocity 
-cmdVelScale := 1;
-FOR i:=1 TO g_cartDofs DO 
-	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
-END_FOR
-vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
-vecSelfMultiNum(m_slaveTrackTwist, 1.0/cmdVelScale);
-vecSelfMultiNum(m_slaveCmdVel, 1.0/cmdVelScale);
-vecSelfMultiNum(m_slaveCmdWVel, 1.0/cmdVelScale);
-
 FOR i:=1 TO 3 DO
 	armDHJntVel[i]:=m_simDHJointVel[i];
 	wristDHJntVel[i]:=m_simDHJointVel[i+3];
@@ -268,13 +258,6 @@ matMultiVec(wristJntJaco, wristDHJntVel, velByWristJnt);
 vecSub(m_slaveCmdVel, velByWristJnt, velByArmJnt);
 matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
 
-// limit DH joints velocity 
-cmdVelScale := 1;
-FOR i:=1 TO 3 DO 
-	cmdVelScale:=MAX(cmdVelScale, ABS(armDHJntVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
-END_FOR
-vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
-
 // limit arm joint position
 m_reachMacroJntLimit :=FALSE;
 FOR i:=1 TO 3 DO
@@ -293,11 +276,18 @@ IF (armDHJntVel[3] > 0 AND i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArm
 	m_reachMacroJntLimit:=TRUE;
 END_IF
 
-// integrate command DH joint position
+// limit DH joints velocity 
 FOR i:=1 TO 3 DO
 	m_simDHJointVel[i]:=armDHJntVel[i];
 	m_simDHJointVel[i+3]:=wristDHJntVel[i];
 END_FOR
+cmdVelScale := 1;
+FOR i:=1 TO g_cartDofs DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
+
+// integrate command DH joint position
 vecMultiNum(m_simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
 slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
 vecAdd(slaveSimDHJntPos, DHJntCmdDeltaPos, m_simDHJntPos);
@@ -637,12 +627,6 @@ END_VAR
       <LineId Id="213" Count="0" />
       <LineId Id="1227" Count="1" />
       <LineId Id="1226" Count="0" />
-      <LineId Id="603" Count="0" />
-      <LineId Id="220" Count="0" />
-      <LineId Id="219" Count="0" />
-      <LineId Id="216" Count="2" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="261" Count="2" />
       <LineId Id="1154" Count="3" />
       <LineId Id="233" Count="0" />
       <LineId Id="1158" Count="0" />
@@ -665,9 +649,7 @@ END_VAR
       <LineId Id="253" Count="0" />
       <LineId Id="247" Count="0" />
       <LineId Id="260" Count="0" />
-      <LineId Id="264" Count="2" />
-      <LineId Id="365" Count="0" />
-      <LineId Id="268" Count="3" />
+      <LineId Id="264" Count="0" />
       <LineId Id="366" Count="0" />
       <LineId Id="277" Count="0" />
       <LineId Id="798" Count="0" />
@@ -681,10 +663,12 @@ END_VAR
       <LineId Id="1055" Count="0" />
       <LineId Id="1057" Count="1" />
       <LineId Id="1054" Count="0" />
+      <LineId Id="1287" Count="1" />
+      <LineId Id="1297" Count="2" />
+      <LineId Id="1296" Count="0" />
+      <LineId Id="1289" Count="4" />
       <LineId Id="297" Count="0" />
       <LineId Id="301" Count="0" />
-      <LineId Id="368" Count="2" />
-      <LineId Id="367" Count="0" />
       <LineId Id="214" Count="0" />
       <LineId Id="379" Count="0" />
       <LineId Id="300" Count="0" />

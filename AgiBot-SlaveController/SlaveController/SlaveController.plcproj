@@ -112,6 +112,9 @@
     <Compile Include="AgiMaths\MatrixLib\vecMultiNum.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecSelfSub.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSub.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -751,6 +754,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mains\RobotDynamics.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ASSERT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\ErrRecord\CarErrInputVariable.TcDUT">
