@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
 VAR
@@ -37,6 +37,9 @@ VAR
 	// cart status
 	m_cartStatus  : ST_CartStatus;
 	
+	//cart joint 5 enable detect
+	m_standColumnEnableDetect : FB_cartJntEnableDetect;
+	m_standColumnDisenableDetect : FB_cartJntDisenableDetect;
 
 		// arm joint data
 	m_curMotorPos :Vec8d;
@@ -259,9 +262,11 @@ END_VAR]]></Declaration>
 		END_IF
 	ELSIF i = 5 THEN
 		IF 1= i_jntIdx[i] THEN
-			m_screwBreak := m_cartJoints[i].enableMZ();
+			m_screwBreak := m_standColumnEnableDetect.run(IOValue:= m_cartJoints[i].enableMZ());
+			m_standColumnDisenableDetect.run(IOValue:=FALSE );
 		ELSE
-			m_screwBreak :=  NOT m_cartJoints[i].disable();
+			m_standColumnEnableDetect.run(IOValue:= FALSE);
+			m_screwBreak :=  NOT m_standColumnDisenableDetect.run(IOValue:=m_cartJoints[i].disable());
 		END_IF
 	ELSE
 		IF 1= i_jntIdx[i] THEN
@@ -531,7 +536,11 @@ END_FOR ]]></ST>
       <LineId Id="58" Count="3" />
       <LineId Id="57" Count="0" />
       <LineId Id="56" Count="0" />
-      <LineId Id="38" Count="3" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="41" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="44" Count="3" />

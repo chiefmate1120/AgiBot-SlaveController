@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlAdjust" Id="{673bb3aa-3c17-460e-a1b6-375536272abd}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAdjust EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -11,7 +11,7 @@ VAR
 	m_joystickSignal: Vec8d;	
 	m_fiducialValue:INT:= 512;
 	m_joystickRange:INT:=430;
-	m_joystickDir: Vec8i:=[1,1,1,1,-1,-1,1,-1];
+	m_joystickDir: Vec8i:=[1,1,1,1,-1,-1,1,1];
 	m_joystickVelInc: Vec8d;
 	m_actJntPos: Vec8d;
 	m_tarPosInc: Vec8d;
@@ -23,12 +23,9 @@ VAR
 	m_veiwAngle : LREAL;
 
 	m_carJntSoftwareLimit :ARRAY [5..8] OF LREAL := [0.005, 2*g_deg2Rad, 0.005, 2*g_deg2Rad];
-	// input joystick signal filter
-	m_joystickSignalLpf : ARRAY [1..4] OF FB_LowPassFilter;
-	m_joystickSignalFilter: Vec8d;
 	
 	// time threshold to 5-8joint after it's enabled
-	m_cartAdjustStartWaitTime :LREAL := 0.2;
+	m_cartAdjustStartWaitTime :LREAL := 0.3;
 	
 	//adjust start  time 
 	m_adjustStartTime :LREAL;
@@ -64,9 +61,8 @@ m_veiwAngle := m_actJntPos[6] + m_actJntPos[8];
 
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:= 1 TO 4 BY 1 DO
-		m_joystickSignalFilter[i] := m_joystickSignalLpf[i].run(i_rawData:= m_joystickSignal[i]);
 		m_joystickSignal[i] := i_slaveCart.m_joystickSignal[i] - m_fiducialValue;
-		m_joystickVelInc[i+4] := m_joystickSignalFilter[i]/m_joystickRange*m_joystickDir[i+4]*GVL_CartControlParameters.g_maxCartVel[i];
+		m_joystickVelInc[i+4] := m_joystickSignal[i]/m_joystickRange*m_joystickDir[i+4]*GVL_CartControlParameters.g_maxCartVel[i];
 		m_tarPosInc[i+4] := m_tarPosInc[i+4] + m_joystickVelInc[i+4] * g_cartCtrlCycleTime;
 	END_FOR
 	
@@ -120,7 +116,7 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
 //m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
-
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
 m_jntEnableFlag[5] :=1;
@@ -133,18 +129,16 @@ m_jntOPMode[6]:= DriverOPMode_Pos;
 m_jntOPMode[7]:= DriverOPMode_Pos;
 m_jntOPMode[8]:= DriverOPMode_Pos;
 
-m_joystickSignalFilter := g_zeroVec8d;
 m_joystickSignal := g_zeroVec8d;
 m_tarPosInc := g_zeroVec8d;
 m_trajJntPos := g_zeroVec8d;
 
-m_initActJntPos:=i_slaveCart.curJntPos;
+m_initActJntPos:=m_cmdJntPos;//i_slaveCart.curJntPos;
 m_initActCartPos[6] := (m_initActJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos) * SIN(m_initActJntPos[6]);
 m_initActCartPos[7] := (m_initActJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos) * COS(m_initActJntPos[6]);
 
 FOR i := 1 TO 4 BY 1 DO
 	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4] , i_Ts:=g_cartCtrlCycleTime );
-	m_joystickSignalLpf[i].init(i_filterOrd:= 1, i_cutoffFreq:= m_cmdJoystickLpfCutoffFreq, i_sampleFreq:= m_cartCtrlFreq);
 END_FOR
 
 m_adjustStartTime := 0;
@@ -165,7 +159,6 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="30" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="13" Count="0" />
-      <LineId Id="19" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="96" Count="0" />
@@ -208,7 +201,6 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="29" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="39" Count="0" />
-      <LineId Id="91" Count="0" />
       <LineId Id="90" Count="0" />
       <LineId Id="107" Count="0" />
       <LineId Id="41" Count="0" />
@@ -218,9 +210,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="75" Count="0" />
       <LineId Id="77" Count="0" />
       <LineId Id="31" Count="0" />
-      <LineId Id="58" Count="1" />
-      <LineId Id="76" Count="0" />
-      <LineId Id="60" Count="0" />
+      <LineId Id="58" Count="2" />
       <LineId Id="57" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />

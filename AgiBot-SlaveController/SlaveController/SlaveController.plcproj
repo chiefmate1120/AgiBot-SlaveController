@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <FileVersion>1.0.0.0</FileVersion>
@@ -311,6 +311,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec8i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_cartJntDisenableDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_cartJntEnableDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_InstruNearDetect.TcPOU">
@@ -793,6 +799,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\Fb_ErrRecord.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_EtherCATCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\Fb_SafetyCheck.TcPOU">

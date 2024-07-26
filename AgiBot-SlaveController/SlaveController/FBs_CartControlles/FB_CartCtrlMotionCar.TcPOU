@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlMotionCar" Id="{d05e52e3-1460-4326-9432-80246d34dd7a}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlMotionCar EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -78,7 +78,9 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+        <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
 m_jntEnableFlag[3] :=1;
 m_jntEnableFlag[4] :=1;
@@ -120,6 +122,8 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlMotionCar.init">
+      <LineId Id="79" Count="0" />
+      <LineId Id="78" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="24" Count="0" />

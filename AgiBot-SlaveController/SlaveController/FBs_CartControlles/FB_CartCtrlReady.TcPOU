@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlReady" Id="{d9e6de9d-36e0-4638-ae50-750334c7fa40}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlReady EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -21,7 +21,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cmdJntPos := i_slaveCart.curJntPos;]]></ST>
+        <ST><![CDATA[//m_cmdJntPos := i_slaveCart.curJntPos;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{dfe1fe06-fc95-4692-9cd0-0f60ba7eeb72}">
@@ -36,7 +36,9 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+        <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
 // update commands to arm
 copyCmds(r_cartCtrlCmd);]]></ST>
@@ -49,6 +51,8 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlReady.init">
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />

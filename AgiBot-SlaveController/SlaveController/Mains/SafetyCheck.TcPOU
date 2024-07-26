@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SafetyCheck
 VAR
@@ -32,6 +32,7 @@ VAR
 	
 	m_SafetyCheck : Fb_SafetyCheck;
 	m_checkVariable : ARRAY[1..g_maxNum] OF checkInputVariable;
+	m_EtherCATCheck :ARRAY [1..g_maxNum,1..g_maxArmJoint] OF Fb_EtherCATCheck;
 	m_errCode :ARRAY [1..3] OF UDINT;
 	i , j: INT;
 	
@@ -41,6 +42,8 @@ VAR
 	m_setupDriverInput :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF ST_MotorInputs; 
 	m_setupDriverOutput :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF ST_MotorOutputs;
  
+	// wait time before robot init  for ethercat to be statble 
+	m_safetyCheckInitWaitTime : LREAL:=0;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -54,22 +57,15 @@ IF FALSE = m_initFlag  THEN
 	m_initFlag:=TRUE;
 END_IF
 
-// copy driver data
-FOR i:=1 TO g_sArmNum DO 
-	FOR j:=1 TO  g_sJntNum DO 
-		m_slaveDriverInput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs;
-		m_slaveDriverOutput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorOutputs;
-	END_FOR
-	
-	FOR j:=1 TO  g_setupJntNum DO 
-		m_setupDriverInput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs;
-		m_setupDriverOutput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorOutputs;
-	END_FOR
-END_FOR
-
 armSafetyCheckInputCast();
 
 armSafetyCheckAllowed();
+
+// wait communication to be stable
+IF(m_safetyCheckInitWaitTime<g_robotInitWaitTime) THEN
+	m_safetyCheckInitWaitTime := m_safetyCheckInitWaitTime+g_setupArmCtrlCycleTime;
+	RETURN;
+END_IF
 
 FOR i:=1  TO g_sArmNum DO
 	m_SafetyCheck.armsSafetyCheck(i,m_checkVariable);
@@ -87,19 +83,7 @@ IF GVL_com_upper_PC.clear_Cart_fault=1 THEN
 	m_SafetyCheck.errFlagReset();
 	GVL_com_upper_PC.clear_Cart_fault := 0;
 END_IF
-
-
-//IF FALSE = m_initFlag  THEN
-//	FOR i:=1  TO g_sArmNum DO 
-//		m_safetyCheckData.m_slaveErrFlag[i]:=FALSE;
-//		m_safetyCheckData.m_setupErrFlag[i]:=FALSE;
-//		m_safetyCheckData.m_cartErrFlag:=FALSE;
-//	END_FOR
-//	m_initFlag:=TRUE;
-//END_IF
-//
-//m_slaveArmCheck.check(m_slaveStatus,m_slaveJointData, o_errorFlag=>m_safetyCheckData.m_slaveErrFlag);
-//m_setupArmCheck.check(m_setupStatus,m_setupJointsData, o_errorFlag=>m_safetyCheckData.m_setupErrFlag);]]></ST>
+]]></ST>
     </Implementation>
     <Method Name="armSafetyCheckAllowed" Id="{c2ebef6f-e712-49e3-9955-377a0083e93a}">
       <Declaration><![CDATA[METHOD armSafetyCheckAllowed : BOOL
@@ -174,7 +158,7 @@ END_VAR]]></Declaration>
 		m_checkVariable[i].m_cmdJntPos[j] := m_setupJointsData.m_cmdJntPos[i][j];
 		m_checkVariable[i].m_curJntVel[j] := m_setupJointsData.m_curJntVel[i][j];
 		m_checkVariable[i].m_JntCurrent[j] := m_setupJointsData.m_rawJntCurrent[i][j];
-		m_checkVariable[i].m_EtherCATState[j] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j]);
+		m_checkVariable[i].m_EtherCATState[j] := m_EtherCATCheck[i,j].EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j]);
 
 	END_FOR
 	
@@ -190,7 +174,7 @@ END_VAR]]></Declaration>
 		m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum] := m_slaveJointData.m_cmdJntPos[i][j];
 		m_checkVariable[i].m_curJntVel[j+g_setupJntNum] := m_slaveJointData.m_curJntVel[i][j];
 		m_checkVariable[i].m_JntCurrent[j+g_setupJntNum] := m_slaveJointData.m_rawJntCurrent[i][j];
-		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_SafetyCheck.EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
+		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_EtherCATCheck[i,j+g_setupJntNum].EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
 		
 		//m_SafetyCheck.AlarmVar[i].FixedPointErrLength := 
 		m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_simArmPose[i] );
@@ -199,6 +183,19 @@ END_VAR]]></Declaration>
 		//m_SafetyCheck.AlarmVar[i].InstruPitch := m_slaveStatus.m_curArmPose[i].m_rot
 	END_FOR
 
+END_FOR
+
+// copy driver data
+FOR i:=1 TO g_sArmNum DO 
+	FOR j:=1 TO  g_sJntNum DO 
+		m_slaveDriverInput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs;
+		m_slaveDriverOutput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorOutputs;
+	END_FOR
+	
+	FOR j:=1 TO  g_setupJntNum DO 
+		m_setupDriverInput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs;
+		m_setupDriverOutput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorOutputs;
+	END_FOR
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -207,18 +204,10 @@ END_FOR]]></ST>
       <LineId Id="113" Count="6" />
       <LineId Id="112" Count="0" />
       <LineId Id="179" Count="0" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="180" Count="1" />
-      <LineId Id="183" Count="0" />
-      <LineId Id="186" Count="0" />
-      <LineId Id="185" Count="0" />
-      <LineId Id="187" Count="0" />
-      <LineId Id="189" Count="2" />
-      <LineId Id="188" Count="0" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="120" Count="0" />
       <LineId Id="101" Count="0" />
       <LineId Id="105" Count="1" />
+      <LineId Id="243" Count="4" />
+      <LineId Id="242" Count="0" />
       <LineId Id="109" Count="0" />
       <LineId Id="108" Count="0" />
       <LineId Id="110" Count="0" />
@@ -232,15 +221,6 @@ END_FOR]]></ST>
       <LineId Id="134" Count="0" />
       <LineId Id="136" Count="0" />
       <LineId Id="135" Count="0" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="37" Count="3" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="5" Count="0" />
       <LineId Id="66" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckAllowed">
@@ -278,6 +258,9 @@ END_FOR]]></ST>
       <LineId Id="156" Count="0" />
       <LineId Id="131" Count="8" />
       <LineId Id="12" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="165" Count="10" />
+      <LineId Id="164" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_CartControlParameters" Id="{074a73f0-3a18-4892-a5c6-5bcdba165c5e}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'} 
 {attribute 'qualified_only'}
@@ -10,10 +10,10 @@ VAR_GLOBAL
 	g_curJntTrqLpfCutoffFreq :LREAL := 300;
 	
 	g_curBeamStretchJntInitPos :LREAL := 0.972;
-	g_maxCartVel :ARRAY [1..4] OF LREAL:= [0.016, 0.05, 0.05, 0.05];
+	g_maxCartVel :ARRAY [1..4] OF LREAL:= [0.014, 0.05, 0.05, 0.05];
 	
-	g_maxJntVel :ARRAY [1..8] OF LREAL:=[0.0025, 0.0025, 2.3, 2.3, 0.016, 5*g_deg2Rad, 0.050, 5*g_deg2Rad];
-	g_maxJntAcc :ARRAY [1..8] OF LREAL:=[0.0025*2, 0.0025*2, 2.3*2, 2.3*2, 0.016*2, 5*g_deg2Rad*2, 0.050*2, 5*g_deg2Rad*2];
+	g_maxJntVel :ARRAY [1..8] OF LREAL:=[0.0025, 0.0025, 2.3, 2.3, 0.014, 5*g_deg2Rad, 0.050, 5*g_deg2Rad];
+	g_maxJntAcc :ARRAY [1..8] OF LREAL:=[0.0025*2, 0.0025*2, 2.3*2, 2.3*2, 0.014*2, 5*g_deg2Rad*1.5, 0.050*1.5, 5*g_deg2Rad*1.5];
 	
 	g_surgicalOrientPos : ARRAY [1..5, 1..3, 1..4]  OF LREAL := [
 		0.1, 0.10, 0.10, 0.10,    0.1, -0.10, 0.10, -0.10,	0.1, 0.10, 0.10, -0.10,
