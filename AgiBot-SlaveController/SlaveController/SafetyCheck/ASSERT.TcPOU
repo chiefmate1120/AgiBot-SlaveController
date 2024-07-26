@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="ASSERT" Id="{ba49b7c8-3131-4df5-a3e8-52027de90f57}" SpecialFunc="None">
     <Declaration><![CDATA[// this function is used to check if input statament is true.
 // if false, the code will trigger a zero-devide exception and stop the whole program by PLC
