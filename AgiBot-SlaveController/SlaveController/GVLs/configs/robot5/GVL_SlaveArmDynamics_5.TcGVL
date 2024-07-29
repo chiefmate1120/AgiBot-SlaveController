@@ -5,7 +5,7 @@
 {attribute 'qualified_only'}
 // Robot5 --dynamic parameters of slave arms
 VAR_GLOBAL CONSTANT
-	
+	// arm gravity parameters
 (*graParam=[ 9.8*m5,...
            0.41601*m2 + 0.41601*m3 + 0.0000216012*m4 + 0.0000216012*m5 + 9.8*mx1 - 1.3639*mx3 - 9.70463*my3,...
            9.8*mz2 - 9.8*my5 - 9.8*my1 + 9.8*mz3 + 9.8*mz4,...
@@ -29,6 +29,29 @@ VAR_GLOBAL CONSTANT
 			  4.5927,    9.6040,    3.7367, 0.03, 0.03, 0.03, 0,
 		      4.3557,    8.4286,    5.9078,  0.03, 0.03, 0.03, 0.03, 0,
               4.1447,    7.2202,    6.8253,  0.03, 0.03, 0.03, 0.03, 0	 ];
+			  
+	//################ DO NOT modify parameters below ###########################
+	//################ dynamic reference model parameters below ###########################
+	// link mass [m1, m2, m3, m4, m5]
+	g_linkMass :ARRAY[1..5] OF LREAL :=[5.6565, 1.4613, 1.149, 1.5362, 0.6679] ;
+	
+	// lin center of amss
+	g_linkCOM :ARRAY[1..5,1..3] OF LREAL :=  [ 0.0566,    0.0302,   -0.4685,
+											   0.1191,   -0.0011,   -0.0588,
+											   0.1238,    0.0003,   -0.0120,
+											   0.0427,    0.0924,   -0.0004,
+											   -0.0262,        0,   -0.0292];
+	// link  inertial
+    // [Ixx,Iyy,Izz, Ixy,Ixz, Iyz]
+ 	g_linkInertia :ARRAY[1..5,1..6] OF LREAL :=[0.0735,    0.0738,    0.0144,    0.0016,   -0.0000,   -0.0079,
+												0.0016,    0.0190,    0.0185,         0,    0.0027,         0,
+											   0.0009,    0.0167,    0.0166,         0,    0.0012,         0,
+												0.0009,    0.0167,    0.0166,         0,    0.0012,         0,
+											  0.0009,    0.0167,    0.0166,         0,    0.0012,         0];
+
+	
+	//  motor inertial at link size
+	g_motorInertia :ARRAY[1..3] OF LREAL := [0.00004487, 0.00004487, 0.0000002280];
 	
 END_VAR]]></Declaration>
   </GVL>

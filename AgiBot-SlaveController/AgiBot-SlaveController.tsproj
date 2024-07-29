@@ -1614,7 +1614,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{5C7FD9D0-3F8D-531C-8598-9D8199CAA9F6}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{298434B8-38CA-5B16-9A15-5AF168FCF510}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -8510,34 +8510,13 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500800010403}" Id="#x020300c0"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500880000403}" Id="#x02030110"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008A0000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030060"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008E0000403}" Id="#x02030120"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500811000403}" Id="#x02030080"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500821000403}" Id="#x020301b0"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500821010403}" Id="#x020300f0"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500831000403}" Id="#x02030100"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0320-500841000403}" Id="#x02030140"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0420-500852000403}" Id="#x02030170"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0420-500860000403}" Id="#x020300b0"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030090" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030050" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500804205008}" Id="#x02030190" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-0100-0304-0020-500800010403}" Id="#x020300e0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x020300d0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-2005-0850-0220-500804205008}" Id="#x020301c0" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030070" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502003-00E0-0304-0020-5008E0000403}" Id="#x02030130" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-0100-0304-0020-500800010403}" Id="#x02030160" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-0040-0304-0020-500840000403}" Id="#x020301a0" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502005-00A0-0304-0020-5008A0000403}" Id="#x02030150" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-00C0-0304-0020-5008C0000403}" Id="#x020300a0" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-00E0-0304-0020-5008E0000403}" Id="#x02030180" Watchdog="00000000000000000000000000000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">
 			<OwnerB Name="TIID^Cart^CartJnt1">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_cartJoints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>

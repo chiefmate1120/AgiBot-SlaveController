@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_SlaveDynamic" Id="{98ec5a5b-8c67-427f-a0c1-5fe09819a45a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveDynamic
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR CONSTANT
+	//kinematic constraint
+	//  q3 =- q2;           
+	//  q4 = q2;             
+ 	// jacobian with active joints
+ 	// jaco_DH*qdot_DH = jaco_DH * (A * qdot_active)= jaco * qdot_active
+ 	// q_DH=[q1,q2,q3,q4,q5];
+ 	// q_active=[q1,q2,q5]
+	m_jacoA :Mat53 :=
+	[   1,  0,  0,
+        0,  1,  0,
+		0, -1,  0,
+		0,  1,  0,
+		0,  0,  1];
+	
+	// DH parameters for dynamic model
+	(*slaveDH=[   deg90       0           q1+pi                502.591/1000;
+            deg90       42.45/1000  q2-deg2rad(61.935)   0;
+            0           254/1000    q3-deg2rad(200.065) 0;
+            0           305/1000    q4+deg2rad(82)       0;
+            -deg90      119.5/1000  0                           q5-224.133/1000];*)
+	m_armOriginalDH:ARRAY[1..5,1..4] OF LREAL :=
+	[PI/2,       0,           pi,                502.591/1000,
+	PI/2,       42.45/1000,  -61.935*g_deg2rad,   0,
+	0,           254/1000,    -200.065*g_deg2rad, 0,
+	0,           305/1000,    82*g_deg2rad,       0,
+	-PI/2,      119.5/1000,  0,                   -224.133/1000];
+	
+END_VAR
+
+VAR
+			
+	m_armIdx :INT;
+	m_armDH:ARRAY[1..5] OF Vec4d;
+	
+	// dynamic parameters
+	m_linkMass :ARRAY[1..5] OF LREAL;
+	m_linkCOM :ARRAY[1..5] OF Vec3d;
+	m_linkInertia :ARRAY[1..5] OF Mat3d;
+		
+	// frame of each joint
+	m_jntFrame :ARRAY[1..5] OF ST_Frame;
+	
+	// jacobian of mass center
+	m_Jp :ARRAY[1..5] OF Mat3d;
+	m_Jo :ARRAY[1..5] OF Mat3d;
+	
+	// motor inertia at link size
+	m_motorInertia :Vec3d;
+	
+	// mass matrix in joint space
+	m_massMat :Mat3d;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Property" Id="{a2a88cc3-8177-45b9-8a2a-e92a999e61b9}" />
+    <Method Name="init" Id="{8875001b-4ea6-4a82-974b-57d1dabe89c7}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_armIdx :INT ;
+END_VAR
+
+VAR
+	i,j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx:=i_armIdx;
+
+m_linkMass:=GVL_SlaveArmDynamics.g_linkMass;
+FOR i:=1 TO 5 DO
+	m_linkCOM[i][1]:=GVL_SlaveArmDynamics.g_linkCOM[i,1];
+	m_linkCOM[i][2]:=GVL_SlaveArmDynamics.g_linkCOM[i,2];
+	m_linkCOM[i][3]:=GVL_SlaveArmDynamics.g_linkCOM[i,3];
+	
+	m_linkInertia[i][1,1]:=GVL_SlaveArmDynamics.g_linkInertia[i,1];
+	m_linkInertia[i][2,2]:=GVL_SlaveArmDynamics.g_linkInertia[i,2];
+	m_linkInertia[i][3,3]:=GVL_SlaveArmDynamics.g_linkInertia[i,3];
+	m_linkInertia[i][1,2]:=GVL_SlaveArmDynamics.g_linkInertia[i,4];
+	m_linkInertia[i][1,3]:=GVL_SlaveArmDynamics.g_linkInertia[i,5];
+	m_linkInertia[i][2,3]:=GVL_SlaveArmDynamics.g_linkInertia[i,6];
+	m_linkInertia[i][2,1]:=m_linkInertia[i][1,2];
+	m_linkInertia[i][3,1]:=m_linkInertia[i][1,3];
+	m_linkInertia[i][3,2]:=m_linkInertia[i][2,3];
+END_FOR
+
+FOR i:=1 TO 7 DO
+	m_motorInertia[i]:=GVL_SlaveArmDynamics.g_motorInertia[i]*GVL_SlaveMotorParameters.g_motorReduction[i]*GVL_SlaveMotorParameters.g_motorReduction[i];
+END_FOR
+
+FOR i:=1 TO 5 DO
+	FOR j:=1 TO 4 DO 
+		m_armDH[i][j] := m_armOriginalDH[i,j];
+	END_FOR
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="jntMassMat" Id="{ea9f4175-c5a8-4a83-9775-2ce4ca717798}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC jntMassMat : Mat3d]]></Declaration>
+      <Get Name="Get" Id="{a508046a-219b-4f72-b5a5-b486bb600f60}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntMassMat := m_massMat;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="updateDynamic" Id="{851887cc-2732-4394-8620-0ab012b3b9d9}">
+      <Declaration><![CDATA[// update dynamic and kinematic data 
+METHOD updateDynamic : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntPos : Vec8d;
+END_VAR
+VAR
+	tmpJntPos :Vec8d;
+	
+	i,j:INT;
+	m,n :INT;
+	linkMassMat :ARRAY[1..5] OF Mat3d;
+	linkInerMat :ARRAY[1..5] OF Mat3d;
+	inertia,Rt :Mat3d;
+	
+	JotI,Jot, Jpt :Mat3d;
+	
+	tmpMat3d :Mat3d;
+
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// update kinematic 
+tmpJntPos[1] := 0;
+tmpJntPos[2] := -PI/2;
+tmpJntPos[3] := 0.2;
+
+updateKinematic(tmpJntPos);
+
+// joint space mass matrix
+// massMat=m*Jp'*Jp+Jo'*R*I*R'*Jo
+FOR i:=1 TO 5 DO
+	// iner=R*I*R'
+	matMultiply(m_jntFrame[i].m_rot,m_linkInertia[i],tmpMat3d);
+	matTranspose(m_jntFrame[i].m_rot, Rt);
+	matMultiply(tmpMat3d,Rt,inertia);
+	
+	// m*Jp'*Jp+Jo'*iner*Jo
+	matTranspose(m_Jp[i],Jpt);
+	matMultiply(Jpt,m_Jp[i], tmpMat3d);
+	matMultiNum(tmpMat3d, m_linkMass[i],linkMassMat[i]);
+	
+	matTranspose(m_Jo[i],Jot);
+	matMultiply(Jot,inertia, JotI);
+	matMultiply(JotI,m_Jo[i],linkInerMat[i]);
+END_FOR
+
+// total mass mat
+m_massMat :=g_zeroMat3d;
+FOR i:=1 TO 5 DO
+	matSelfAdd(m_massMat,linkMassMat[i]);
+	matSelfAdd(m_massMat,linkInerMat[i]);
+END_FOR
+
+// add motor inertial 
+FOR i:=1 TO 3 DO
+	m_massMat[i,i]:=m_massMat[i,i]+m_motorInertia[i];
+END_FOR
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateKinematic" Id="{d7eec9ea-d7e0-4c73-a3ad-1deeadc32f97}">
+      <Declaration><![CDATA[// only update kinematic data
+METHOD PROTECTED updateKinematic : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntPos : Vec8d;
+END_VAR
+VAR
+	Jp :Mat35;
+	Jo :Mat35;
+	T :ST_Frame;
+	i,j:INT;
+	Pc,z,p:Vec3d;
+	m,n :INT;
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// tranform a joint positon to DH ones
+m_armDH[1][3] := m_armOriginalDH[1,3] + i_jntPos[1];
+m_armDH[2][3] := m_armOriginalDH[2,3] + i_jntPos[2];
+m_armDH[3][3] := m_armOriginalDH[3,3] - i_jntPos[2];
+m_armDH[4][3] := m_armOriginalDH[4,3] + i_jntPos[2];
+m_armDH[5][4] := m_armOriginalDH[5,4] + i_jntPos[3];
+
+// compute joint frame
+m_jntFrame[1]:=DHTrans(m_armDH[1]);
+T:=DHTrans(m_armDH[2]);
+m_jntFrame[2]:=transform(m_jntFrame[1],T);
+T:=DHTrans(m_armDH[3]);
+m_jntFrame[3]:=transform(m_jntFrame[2],T);
+T:=DHTrans(m_armDH[4]);
+m_jntFrame[4]:=transform(m_jntFrame[3],T);
+T:=DHTrans(m_armDH[5]);
+m_jntFrame[5]:=transform(m_jntFrame[4],T);
+
+
+// jacobian of mass center
+FOR i:=1 TO 5 DO 
+	Jp := g_zeroMat35;
+	Jo := g_zeroMat35;
+    T:=m_jntFrame[i];
+	// mass center world position
+    matMultiVec(T.m_rot,m_linkCOM[i], Pc);
+	vecSelfAdd(Pc, T.m_pos);
+    FOR j:=1 TO i DO
+        T:=m_jntFrame[j];
+		z[1]:=T.m_rot[1,3];
+		z[2]:=T.m_rot[2,3];
+		z[3]:=T.m_rot[3,3];
+		IF (5=j) THEN
+			Jp[1,j]:=z[1];
+			Jp[2,j]:=z[2];
+			Jp[3,j]:=z[3];
+			Jo[1,j]:=0;
+			Jo[2,j]:=0;
+			Jo[3,j]:=0;
+		ELSE
+			vecSub(Pc,T.m_pos,p);
+			p:=cross(z,p);
+			Jp[1,j]:=p[1];
+			Jp[2,j]:=p[2];
+			Jp[3,j]:=p[3];
+			Jo[1,j]:=z[1];
+			Jo[2,j]:=z[2];
+			Jo[3,j]:=z[3];			
+        END_IF
+    END_FOR
+	// multiply m_jacoA
+	matMultiply(Jp, m_jacoA, m_Jp[i]);
+	matMultiply(Jo, m_jacoA, m_Jo[i]);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SlaveDynamic">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveDynamic.init">
+      <LineId Id="31" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="22" Count="7" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveDynamic.jntMassMat.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveDynamic.updateDynamic">
+      <LineId Id="529" Count="0" />
+      <LineId Id="600" Count="3" />
+      <LineId Id="530" Count="30" />
+      <LineId Id="575" Count="2" />
+      <LineId Id="263" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveDynamic.updateKinematic">
+      <LineId Id="6" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="175" Count="3" />
+      <LineId Id="16" Count="10" />
+      <LineId Id="35" Count="3" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="39" Count="2" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="53" Count="3" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="189" Count="4" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="196" Count="6" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="203" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

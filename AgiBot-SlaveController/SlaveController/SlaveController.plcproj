@@ -244,6 +244,9 @@
     <Compile Include="DUTs\Type\Mat34.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Mat53.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Mat37.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -251,6 +254,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Mat45.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Mat35.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Mat4d.TcDUT">
@@ -425,6 +431,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_CartControlles\I_CartJointCtrl.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_SlaveDynamic.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_RobotDynamics\FB_SlaveGravity.TcPOU">
