@@ -140,11 +140,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// update kinematic 
-tmpJntPos[1] := 37.5*g_deg2Rad;
-tmpJntPos[2] := -152.4*g_deg2Rad;
-tmpJntPos[3] := 0.372;
-
-updateKinematic(tmpJntPos);
+updateKinematic(i_jntPos);
 
 // joint space mass matrix
 // massMat=m*Jp'*Jp+Jo'*R*I*R'*Jo
@@ -281,8 +277,8 @@ END_FOR]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveDynamic.updateDynamic">
       <LineId Id="529" Count="0" />
-      <LineId Id="600" Count="3" />
-      <LineId Id="530" Count="30" />
+      <LineId Id="623" Count="0" />
+      <LineId Id="531" Count="29" />
       <LineId Id="575" Count="2" />
       <LineId Id="263" Count="0" />
     </LineIds>
