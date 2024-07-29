@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlAsepticDeploy" Id="{2938379a-3fa1-4919-bcaa-4be4c07fb559}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAsepticDeploy EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -92,7 +92,8 @@ VAR
 	i : INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+        <ST><![CDATA[m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
 m_jntEnableFlag[5] :=1;
 m_jntEnableFlag[6] :=1;
@@ -104,7 +105,7 @@ m_jntOPMode[6]:= DriverOPMode_Pos;
 m_jntOPMode[7]:= DriverOPMode_Pos;
 m_jntOPMode[8]:= DriverOPMode_Pos;
 
-m_initActJntPos:=i_slaveCart.curJntPos;
+m_initActJntPos:=m_cmdJntPos;//i_slaveCart.curJntPos;
 m_jntPosArrival := g_zeroVec8b;
 m_incTarJntPos := g_zeroVec8d;
 m_tarJntPos := g_zeroVec8d;
@@ -154,6 +155,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAsepticDeploy.init">
+      <LineId Id="124" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="24" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlRotaOverhang" Id="{29cc6caf-ba9e-4e23-b00b-4fe9f9dc2a55}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlRotaOverhang EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -75,12 +75,15 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+        <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
 m_jntEnableFlag[8] :=1;
 
 m_jntOPMode[8]:= DriverOPMode_Pos;
-m_initJntPos := i_slaveCart.curJntPos[8];
+m_initJntPos :=m_cmdJntPos[8];
 m_tarJntInc := 0;
 
 m_jntOTG.init(i_curCmdPos:= m_cmdJntPos[8], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[8] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[8] , i_Ts:=g_cartCtrlCycleTime );
@@ -112,6 +115,9 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlRotaOverhang.init">
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="89" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="37" Count="0" />

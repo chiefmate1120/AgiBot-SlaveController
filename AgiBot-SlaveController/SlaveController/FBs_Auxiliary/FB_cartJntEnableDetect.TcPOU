@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_cartJntEnableDetect" Id="{f05dc0ba-8e5b-429f-9b7c-9c3f0df773eb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_cartJntEnableDetect
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_jntEnableCounts :INT :=0;
+	m_jntEnableCountThres :INT :=100;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{ed7942bd-5777-4132-a636-3cb286d6e001}">
+      <Declaration><![CDATA[// check if instrument is on
+METHOD run : BOOL
+VAR_INPUT
+	IOValue :BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// trocar io is 5th bit 
+IF TRUE=IOValue THEN
+	m_jntEnableCounts :=MIN(m_jntEnableCounts +1,m_jntEnableCountThres);
+ELSE
+	m_jntEnableCounts :=0;
+END_IF
+
+run := m_jntEnableCounts >= m_jntEnableCountThres;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_cartJntEnableDetect">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_cartJntEnableDetect.run">
+      <LineId Id="42" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

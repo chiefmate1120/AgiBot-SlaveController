@@ -1,13 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlError" Id="{78b2e60d-537e-446e-8b3b-6db63d5ab02c}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Error Hold
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlError EXTENDS FB_SlaveArmCtrlBase
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
 VAR
+	// velocity for full damping
+	m_maxAdjustVel :Vec3d := [1.2, 1.2, 0.3];
+	
+	// velocity start to enable damping
+	m_velLBForDamp :Vec3d := [1.0, 1.0, 0.2];
+	
+	// max damp
+	m_maxDamp :Vec3d := [50, 50, 500];
+	
+	// distance buffer from joint limit to start damp
+	m_limitBufferForDamp :Vec3d :=[20*g_deg2Rad, 20*g_deg2Rad, 0.03];
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -29,9 +36,62 @@ VAR_IN_OUT CONSTANT
 	// slave arm data
 	i_slaveArm :FB_SlaveArm;
 END_VAR
+VAR
+	i:INT;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_cmdJntPos := i_slaveArm.curJntPos;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{fdc795ea-c7ad-49b5-ae7f-ec8937b0edfa}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_endoscopePose : ST_Frame;
+	i_masterStatus :ST_MasterStatus;
+	i_setupStatus: ST_SetupStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i :INT;
+	dampScale :LREAL;
+	limitDis :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec8d;
+
+// enable joint adjust if its error is recoverable
+FOR i:=1 TO 3 DO
+	// disable joint
+	IF NOT(i_slaveArm.adjustOn) OR SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, i+g_setupJntNum, 2] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, i+g_setupJntNum, 3] THEN
+		m_jntEnableFlag[i]:= 0;
+		m_jntOPMode[i]:=DriverOPMode_Pos;
+		CONTINUE;
+	END_IF
+	
+	// enable joint
+	m_jntEnableFlag[i]:= 1;
+	m_jntOPMode[i]:=DriverOPMode_Trq;
+	
+	// add damp near joint limit
+	IF (i_slaveArm.curJntPos[i] > GVL_SlaveMotorParameters.g_maxDHJntPos[i] - m_limitBufferForDamp[i] AND  i_slaveArm.curJntVel[i]> 0 ) 
+		OR (i_slaveArm.curJntPos[i] < GVL_SlaveMotorParameters.g_minDHJntPos[i] + m_limitBufferForDamp[i] AND  i_slaveArm.curJntVel[i]<0 )  THEN
+		limitDis := MIN(GVL_SlaveMotorParameters.g_maxDHJntPos[i] - i_slaveArm.curJntPos[i], i_slaveArm.curJntPos[i]-GVL_SlaveMotorParameters.g_minDHJntPos[i]);
+		dampScale  :=LIMIT(0, 1-limitDis/m_limitBufferForDamp[i],1);
+		m_cmdJntTrq[i]:= -dampScale * m_maxDamp[i] * i_slaveArm.curJntVel[i];
+	END_IF
+
+	// compute damp
+	IF ABS(i_slaveArm.curJntVel[i]) > m_velLBForDamp[i] THEN 
+		dampScale:=LIMIT(0, (ABS(i_slaveArm.curJntVel[i])- m_velLBForDamp[i])/(m_maxAdjustVel[i] - m_velLBForDamp[i]), 1 );
+		m_cmdJntTrq[i] :=m_cmdJntTrq[i] -i_slaveArm.curJntVel[i] * m_maxDamp[i] * dampScale;
+	END_IF
+
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -79,6 +139,23 @@ copyCmds(r_slaveArmCtrlCmd);
     <LineIds Name="FB_SlaveCtrlError.calcCmdJntPos">
       <LineId Id="45" Count="0" />
       <LineId Id="27" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlError.calcCmdJntTrq">
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="127" Count="2" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="203" Count="3" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="187" Count="5" />
+      <LineId Id="195" Count="1" />
+      <LineId Id="198" Count="3" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="53" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlError.init">
       <LineId Id="67" Count="0" />

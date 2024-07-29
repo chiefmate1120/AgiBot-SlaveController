@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_CartMotorParameters" Id="{1cf66805-b1c5-4c97-ab58-2e7245e3e5b7}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 {attribute 'qualified_only'}
@@ -24,11 +24,11 @@ VAR_GLOBAL CONSTANT
 																												 
 	// joint position limit
 	g_minJntPos: ARRAY[1..g_cartJntNum] OF LREAL:=[0, 0, 1, 1, 0, -30*g_deg2Rad, 0.002, -160*g_deg2Rad];	
-	g_maxJntPos: ARRAY[1..g_cartJntNum] OF LREAL:=[0.053, 0.053, 1, 1,  0.6, 30*g_deg2Rad, 0.498, 160*g_deg2Rad];	
+	g_maxJntPos: ARRAY[1..g_cartJntNum] OF LREAL:=[0.053, 0.053, 1, 1,  0.68, 30*g_deg2Rad, 0.498, 160*g_deg2Rad];	
 	
 	// joint velocity limit
-	g_maxJntVel :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0025, 0.0025, 2.3, 2.3, 0.016, 5*g_deg2Rad, 0.050*g_deg2Rad, 5*g_deg2Rad];
-	g_maxJntAcc :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0025 * 2, 0.0025 * 2, 2.3 * 2, 2.3 * 2, 0.016 * 2, 5*g_deg2Rad * 2, 0.050*g_deg2Rad * 2, 5*g_deg2Rad * 2];
+	g_maxJntVel :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0025, 0.0025, 2.3, 2.3, 0.016, 5*g_deg2Rad, 0.050, 5*g_deg2Rad];
+	g_maxJntAcc :ARRAY[1..g_cartJntNum] OF LREAL :=[0.0025 * 2, 0.0025 * 2, 2.3 * 2, 2.3 * 2, 0.016 * 2, 5*g_deg2Rad * 2, 0.050 * 2, 5*g_deg2Rad * 2];
 END_VAR
 ]]></Declaration>
   </GVL>

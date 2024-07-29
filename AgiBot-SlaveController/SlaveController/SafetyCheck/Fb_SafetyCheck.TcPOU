@@ -197,11 +197,11 @@ END_FOR
 
 
 //Ethercat通讯检测
-//FOR i:=1 TO g_maxArmJoint BY 1 DO
-//	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState THEN
-//		errCodeAssign(i_ArmId, i_ArmId+3, 0, i, 16#2006, m_rcvLevel );
-//	END_IF
-//END_FOR
+FOR i:=1 TO g_maxArmJoint BY 1 DO
+	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState THEN
+		errCodeAssign(i_ArmId, i_ArmId+3, 0, i, 16#2006, m_rcvLevel );
+	END_IF
+END_FOR
 
 
 //不动点发生变化监控
@@ -577,37 +577,6 @@ END_FOR
 o_ErrCode[2]:=0;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="EtherCATVerify" Id="{85983f93-2127-4086-b181-c0ad6ff2a841}">
-      <Declaration><![CDATA[METHOD EtherCATVerify : ST_EtherCATState
-VAR_INPUT
-	armsNetID:T_AmsNetID;
-	jntAddr:UINT;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-m_commuEtherCATState(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> , state=> m_EcSlaveState);
-
-IF NOT m_commuEtherCATState.bBusy THEN
-	m_commuEtherCATState(bExecute:=FALSE);
-	IF m_EcSlaveState.deviceState = EC_DEVICE_STATE_OP THEN
-		EtherCATVerify.EtherCATState := TRUE;
-	ELSE
-		EtherCATVerify.EtherCATState := FALSE;
-	END_IF
-END_IF
-
-m_crcVerify(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> , crcError=> m_crcError);
-IF NOT m_crcVerify.bBusy THEN
-	m_crcVerify(bExecute:=FALSE);
-	EtherCATVerify.CRCPortA := MAX(EtherCATVerify.CRCPortA,m_crcError.portA);
-	EtherCATVerify.CRCPortB := MAX(EtherCATVerify.CRCPortB,m_crcError.portB);
-	EtherCATVerify.CRCPortC := MAX(EtherCATVerify.CRCPortC,m_crcError.portC);
-END_IF
-
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="poseErrCheck" Id="{634b1f68-028c-4865-89df-6d37274cf53c}">
       <Declaration><![CDATA[METHOD poseErrCheck : vec6d
 VAR_INPUT
@@ -891,23 +860,6 @@ m_PromptMassBusy:=FALSE;
       <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="9" Count="0" />
-    </LineIds>
-    <LineIds Name="Fb_SafetyCheck.EtherCATVerify">
-      <LineId Id="7" Count="1" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="14" Count="1" />
-      <LineId Id="17" Count="1" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="20" Count="1" />
-      <LineId Id="24" Count="1" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="30" Count="1" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.poseErrCheck">
       <LineId Id="8" Count="0" />
