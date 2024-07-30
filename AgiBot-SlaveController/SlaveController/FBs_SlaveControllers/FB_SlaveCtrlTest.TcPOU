@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlTest" Id="{25b7ca7b-a3c0-4d1d-9db6-09421c0085dc}" SpecialFunc="None">
-    <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
+    <Declaration><![CDATA[// Brief: Slave Arm test
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlTest EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR
@@ -31,7 +31,9 @@ VAR
 	
 	
 	m_errCmdPos, m_errCurPos :LREAL;
-	m_errPosIdx : int;
+	m_errPosIdx : INT;
+	
+	m_originalJntPos:Vec8d;
 	
 //####################################################################
 
@@ -72,6 +74,11 @@ END_IF
 
 // calculate target motor joint position from DH joint position
 i_slaveArm.instrument.instruIK(m_cmdDHJntPos,m_gripperAngle, o_jntPos=>m_cmdJntPos);
+//m_cmdJntPos[4]:=m_originalJntPos[4];
+//m_cmdJntPos[5]:=m_originalJntPos[5];
+//m_cmdJntPos[6]:=m_originalJntPos[6];
+//m_cmdJntPos[7]:=m_originalJntPos[7];
+//m_cmdJntPos[8]:=m_originalJntPos[8];
 
 IF m_freqTestFlag THEN 
 	vecSub(m_cmdJntPos, m_lastCmdJntPos, m_cmdJntVel);
@@ -161,12 +168,14 @@ m_jntOPMode[7] := DriverOPMode_Trq;
 m_jntOPMode[8] := DriverOPMode_Trq;
 
 m_initJntPos :=i_slaveArm.curDHJntPos;
+m_originalJntPos := i_slaveArm.curJntPos;
 m_cmdDHJntPos :=m_initJntPos;
 m_cmdDHJntVel :=g_zeroVec6d;
 m_gripperAngle := i_slaveArm.curGripAngle;
 
 // init instrument controller
 m_instruController.init(i_slaveArm);
+
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -190,6 +199,7 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="134" Count="0" />
       <LineId Id="161" Count="1" />
       <LineId Id="164" Count="0" />
+      <LineId Id="228" Count="4" />
       <LineId Id="211" Count="0" />
       <LineId Id="186" Count="2" />
       <LineId Id="212" Count="2" />
@@ -225,9 +235,11 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="19" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="67" Count="0" />
+      <LineId Id="120" Count="0" />
       <LineId Id="84" Count="1" />
       <LineId Id="93" Count="0" />
       <LineId Id="81" Count="2" />
+      <LineId Id="119" Count="0" />
       <LineId Id="110" Count="1" />
       <LineId Id="109" Count="0" />
       <LineId Id="80" Count="0" />

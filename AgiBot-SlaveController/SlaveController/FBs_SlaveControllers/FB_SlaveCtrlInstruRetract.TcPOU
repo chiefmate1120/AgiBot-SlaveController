@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlInstruRetract" Id="{596332da-68eb-4244-8a80-7e3d57b3bb9f}" SpecialFunc="None">
-    <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
+    <Declaration><![CDATA[// Brief: Slave Arm joint3 retract to up limit
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruRetract EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR

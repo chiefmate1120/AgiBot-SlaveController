@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlDisable" Id="{60755d0b-234c-40f1-aac2-711fb22efaaa}" SpecialFunc="None">
-    <Declaration><![CDATA[// Brief: Slave Arm Error Hold
+    <Declaration><![CDATA[// Brief: Disable a Slave Arm 
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlDisable EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR

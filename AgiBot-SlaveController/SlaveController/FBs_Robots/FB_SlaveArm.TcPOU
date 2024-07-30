@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -1024,7 +1024,7 @@ FOR i:=1 TO g_sJntNum DO
 	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_PosTrq THEN
 		// position controller and gravity feedforward
 		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i],m_cmdJntVel[i],m_curJntVel[i]);
-		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i] + i_armCtrlCmd.m_FFJntTrq[i];
 		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward

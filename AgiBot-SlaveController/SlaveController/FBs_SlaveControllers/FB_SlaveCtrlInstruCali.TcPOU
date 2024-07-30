@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlInstruCali" Id="{f6122a4e-e5d8-4252-8b12-6598a16e0174}" SpecialFunc="None">
-    <Declaration><![CDATA[// Brief: Mounting Instrument
+    <Declaration><![CDATA[// Brief: Calibrate the zero position of Instrument
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruCali EXTENDS FB_SlaveArmCtrlBase
 VAR
 	// mount motion planning

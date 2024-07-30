@@ -151,8 +151,8 @@ vecAdd(leftVel, rightVel , m_cmdVelLocal);
 vecSelfMultiNum(m_cmdVelLocal, 0.5);
 
 // motion scale
-m_singMotionScale := motionScale(i_slaveArm);
-vecSelfMultiNum(m_cmdVelLocal, m_MSMotionScale* m_singMotionScale);
+//m_singMotionScale := motionScale(i_slaveArm); // NOTE: velocity scale near singularity is disable current
+vecSelfMultiNum(m_cmdVelLocal, m_MSMotionScale);
 
 // radius vector from right arm to left arm
 vecSub(i_masterStatus.m_curArmPose[1].m_pos, i_masterStatus.m_curArmPose[2].m_pos, radiusVec);

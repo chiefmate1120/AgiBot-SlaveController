@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlScopeToggle" Id="{7f91246f-ffc7-4fcd-9845-791ccec5d233}" SpecialFunc="None">
-    <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
+    <Declaration><![CDATA[// Brief: toggle endoscope posture
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlScopeToggle EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR

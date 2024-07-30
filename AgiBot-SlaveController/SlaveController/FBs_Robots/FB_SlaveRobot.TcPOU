@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -75,6 +75,7 @@ VAR
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlDisable;
 	m_instruCali :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlInstruCali;
 	m_scopeToggle :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlScopeToggle;
+	m_armStop :ARRAY[1..g_sArmNum] OF FB_SlaveCtrlStop;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
@@ -209,6 +210,7 @@ END_VAR
 	m_armCtrlFactory[i,SlaveArmState_Disable] := m_armDisable[i];
 	m_armCtrlFactory[i,SlaveArmState_InstruCali] := m_instruCali[i];
 	m_armCtrlFactory[i,SlaveArmState_ScopeToggle] := m_scopeToggle[i];
+	m_armCtrlFactory[i,SlaveArmState_Stop] := m_armStop[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_slaveArmState[i]];
@@ -486,10 +488,10 @@ FOR i:=1 TO g_sArmNum DO
 			// to Adjust
 			IF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
-			// to standby
+			// to stop
 			ELSIF MasterArmState_Endoscope <> i_slavesInputDataPool.m_masterStatus.m_armState[1]
 				OR MasterArmState_Endoscope <> i_slavesInputDataPool.m_masterStatus.m_armState[2] THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				m_nextSlaveArmState[i]:=SlaveArmState_Stop;
 			// to scope toggle
 			ELSIF m_slaveArms[i].instrument.curScopePosture <> m_slaveArms[i].instrument.nextScopePosture OR
 					m_slaveArms[i].instrument.curScopeType <> m_slaveArms[i].instrument.nextScopeType THEN
@@ -555,6 +557,13 @@ FOR i:=1 TO g_sArmNum DO
 			
 		//arm test
 		SlaveArmState_Test:
+			// to stop
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Stop;
+			END_IF
+			
+		//arm stop
+		SlaveArmState_Stop:
 			// to standby
 			IF  m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
@@ -754,6 +763,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="147" Count="0" />
       <LineId Id="161" Count="0" />
       <LineId Id="168" Count="0" />
+      <LineId Id="175" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -971,6 +981,9 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="308" Count="4" />
       <LineId Id="307" Count="0" />
       <LineId Id="506" Count="2" />
+      <LineId Id="767" Count="0" />
+      <LineId Id="769" Count="4" />
+      <LineId Id="768" Count="0" />
       <LineId Id="513" Count="5" />
       <LineId Id="509" Count="0" />
       <LineId Id="519" Count="2" />

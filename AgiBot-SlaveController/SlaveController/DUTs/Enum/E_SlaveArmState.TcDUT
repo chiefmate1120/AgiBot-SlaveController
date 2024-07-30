@@ -24,8 +24,9 @@
 	SlaveArmState_Disable := 19,
 	SlaveArmState_InstruCali := 20,
 	SlaveArmState_ScopeToggle :=21,
+	SlaveArmState_Stop :=22,
 	
-	SlaveArmState_totalNum :=SlaveArmState_ScopeToggle
+	SlaveArmState_totalNum :=SlaveArmState_Stop
 );
 END_TYPE
 ]]></Declaration>

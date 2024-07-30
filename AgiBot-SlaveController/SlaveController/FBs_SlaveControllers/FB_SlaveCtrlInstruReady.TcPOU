@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlInstruReady" Id="{b4863c0c-c549-4967-ab29-6a1152ef3cd8}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Instrument Ready
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruReady EXTENDS FB_SlaveArmCtrlBase
@@ -30,8 +30,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// DO NOT hold last command
-//m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
+        <ST><![CDATA[//NOTE:DO NOT hold last command
 
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
@@ -41,7 +40,8 @@ SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruReady.init">
-      <LineId Id="91" Count="2" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>

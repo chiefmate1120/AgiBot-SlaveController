@@ -496,6 +496,9 @@
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlScopeToggle.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlStop.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_SlaveControllers\FB_SlaveCtrlTest.TcPOU">
       <SubType>Code</SubType>
     </Compile>

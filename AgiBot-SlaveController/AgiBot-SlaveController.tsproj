@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -816,7 +816,7 @@
 			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{89EEE9AC-51D2-771C-E483-68DF69652F1A}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{634CD105-A366-D054-CB78-55314FBB9773}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -904,8 +904,12 @@
 				<Enum>21</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_Stop]]></Text>
+				<Enum>22</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_totalNum]]></Text>
-				<Enum>21</Enum>
+				<Enum>22</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -1037,13 +1041,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>12224</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{89EEE9AC-51D2-771C-E483-68DF69652F1A}">E_SlaveArmState</Type>
+				<Type GUID="{634CD105-A366-D054-CB78-55314FBB9773}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1614,7 +1618,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{9EE9313A-937B-8DBF-814E-3E4C90A49D14}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1855,7 +1859,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
+							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2170,7 +2174,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
+							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2299,7 +2303,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
+							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -2412,7 +2416,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{9DDB1EF5-2CE7-92D4-690E-59A5F31F8872}">ST_SlaveStatus</Type>
+							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
@@ -2598,7 +2602,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
+							<Id NeedCalleeCall="true">0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2607,7 +2611,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
+							<Id NeedCalleeCall="true">1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2616,7 +2620,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>2</Id>
+							<Id NeedCalleeCall="true">2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2625,7 +2629,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>3</Id>
+							<Id NeedCalleeCall="true">3</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -2634,7 +2638,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>4</Id>
+							<Id NeedCalleeCall="true">4</Id>
 							<Name>TaskCartControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010070</OTCID>
