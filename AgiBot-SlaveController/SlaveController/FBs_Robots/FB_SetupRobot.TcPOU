@@ -28,6 +28,7 @@ VAR
 	m_armJnt3GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt3GraCali;
 	m_armJnt5GraCali :ARRAY[1..g_sArmNum] OF FB_SetupCtrlJnt5GraCali;
 	m_armDisable :ARRAY[1..g_sArmNum] OF FB_SetupCtrlDisable;
+	m_Performance :ARRAY[1..g_sArmNum] OF FB_SetupCtrlPerformance;
 	
 	
 	// arm controller interface
@@ -115,6 +116,7 @@ END_VAR
 	m_armCtrlFactory[i,SetupArmState_jnt3GravityCali] := m_armJnt3GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_jnt5GravityCali] := m_armJnt5GraCali[i];
 	m_armCtrlFactory[i,SetupArmState_Disable] := m_armDisable[i];
+	m_armCtrlFactory[i,SetupArmState_Performance] := m_Performance[i];
 	
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
@@ -231,6 +233,13 @@ END_VAR]]></Declaration>
 			IF NOT(SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i]) THEN
 				m_nextSetupArmState[i]:= SetupArmState_Hold;
 			END_IF
+			
+		//arm Performance
+		SetupArmState_Performance:
+			// to hold
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextSetupArmState[i]:=SetupArmState_Hold;
+			END_IF				
 	END_CASE
 	
 	// arm disable
@@ -282,24 +291,7 @@ END_FOR]]></ST>
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.Init">
-      <LineId Id="5" Count="0" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="47" Count="3" />
-      <LineId Id="80" Count="2" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="90" Count="2" />
-      <LineId Id="94" Count="0" />
-      <LineId Id="58" Count="1" />
-      <LineId Id="62" Count="5" />
-      <LineId Id="108" Count="1" />
-      <LineId Id="117" Count="0" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="101" Count="0" />
-      <LineId Id="13" Count="0" />
+      <LineId Id="145" Count="32" />
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.run">
@@ -323,53 +315,7 @@ END_FOR]]></ST>
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="5" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="247" Count="3" />
-      <LineId Id="246" Count="0" />
-      <LineId Id="251" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="280" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="29" Count="1" />
-      <LineId Id="41" Count="2" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="145" Count="0" />
-      <LineId Id="166" Count="1" />
-      <LineId Id="211" Count="0" />
-      <LineId Id="169" Count="2" />
-      <LineId Id="165" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="213" Count="7" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="221" Count="0" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="117" Count="5" />
-      <LineId Id="202" Count="1" />
-      <LineId Id="201" Count="0" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="264" Count="3" />
-      <LineId Id="263" Count="0" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="268" Count="4" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="234" Count="0" />
-      <LineId Id="259" Count="2" />
-      <LineId Id="236" Count="2" />
-      <LineId Id="235" Count="0" />
-      <LineId Id="56" Count="3" />
-      <LineId Id="61" Count="2" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="60" Count="0" />
+      <LineId Id="288" Count="93" />
       <LineId Id="16" Count="0" />
     </LineIds>
   </POU>

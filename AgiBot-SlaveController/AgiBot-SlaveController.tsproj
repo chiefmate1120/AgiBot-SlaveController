@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -392,7 +392,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{A2BF5F0D-F9B4-A36D-F72F-8DC8BCBBC14E}" AutoDeleteType="true">E_SetupArmState</Name>
+			<Name GUID="{C3E1838A-8A0B-3526-1161-EA3B52A8948A}" AutoDeleteType="true">E_SetupArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -440,8 +440,12 @@
 				<Enum>11</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SetupArmState_Performance]]></Text>
+				<Enum>12</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SetupArmState_totalNum]]></Text>
-				<Enum>11</Enum>
+				<Enum>12</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -540,11 +544,11 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}" AutoDeleteType="true">ST_SetupStatus</Name>
+			<Name GUID="{F34700EF-BA18-40BC-F208-8BBAC8F45D42}" AutoDeleteType="true">ST_SetupStatus</Name>
 			<BitSize>3904</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{A2BF5F0D-F9B4-A36D-F72F-8DC8BCBBC14E}">E_SetupArmState</Type>
+				<Type GUID="{C3E1838A-8A0B-3526-1161-EA3B52A8948A}">E_SetupArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -555,19 +559,19 @@
 				<Default>
 					<SubItem>
 						<Name>[1]</Name>
-						<EnumText>E_SetupArmState.SetupArmState_Init</EnumText>
+						<EnumText>E_SetupArmState.SetupArmState_Error</EnumText>
 					</SubItem>
 					<SubItem>
 						<Name>[2]</Name>
-						<EnumText>E_SetupArmState.SetupArmState_Init</EnumText>
+						<EnumText>E_SetupArmState.SetupArmState_Error</EnumText>
 					</SubItem>
 					<SubItem>
 						<Name>[3]</Name>
-						<EnumText>E_SetupArmState.SetupArmState_Init</EnumText>
+						<EnumText>E_SetupArmState.SetupArmState_Error</EnumText>
 					</SubItem>
 					<SubItem>
 						<Name>[4]</Name>
-						<EnumText>E_SetupArmState.SetupArmState_Init</EnumText>
+						<EnumText>E_SetupArmState.SetupArmState_Error</EnumText>
 					</SubItem>
 				</Default>
 			</SubItem>
@@ -816,7 +820,7 @@
 			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{634CD105-A366-D054-CB78-55314FBB9773}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{B9C3FFD5-4317-7E94-F21C-3006A1FCC183}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -904,12 +908,16 @@
 				<Enum>21</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[SlaveArmState_Stop]]></Text>
+				<Text><![CDATA[SlaveArmState_Performance]]></Text>
 				<Enum>22</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_Stop]]></Text>
+				<Enum>23</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_totalNum]]></Text>
-				<Enum>22</Enum>
+				<Enum>23</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -1041,13 +1049,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{513B4364-9BB6-C153-B164-521ACFF8B828}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>12224</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{634CD105-A366-D054-CB78-55314FBB9773}">E_SlaveArmState</Type>
+				<Type GUID="{B9C3FFD5-4317-7E94-F21C-3006A1FCC183}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1618,7 +1626,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{4E8D694D-D95D-DA00-BBA4-D327464F6439}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1641,7 +1649,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
 							<Comment><![CDATA[ setup arms infromation;]]></Comment>
-							<Type GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}">ST_SetupStatus</Type>
+							<Type GUID="{F34700EF-BA18-40BC-F208-8BBAC8F45D42}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
@@ -1859,7 +1867,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
+							<Type GUID="{513B4364-9BB6-C153-B164-521ACFF8B828}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2174,7 +2182,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
+							<Type GUID="{513B4364-9BB6-C153-B164-521ACFF8B828}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2281,7 +2289,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}">ST_SetupStatus</Type>
+							<Type GUID="{F34700EF-BA18-40BC-F208-8BBAC8F45D42}">ST_SetupStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
@@ -2303,7 +2311,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
+							<Type GUID="{513B4364-9BB6-C153-B164-521ACFF8B828}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -2416,12 +2424,12 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}">ST_SlaveStatus</Type>
+							<Type GUID="{513B4364-9BB6-C153-B164-521ACFF8B828}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
 							<Comment><![CDATA[ setup robot information]]></Comment>
-							<Type GUID="{6E00B448-0436-927F-E471-6BF8E72C36B8}">ST_SetupStatus</Type>
+							<Type GUID="{F34700EF-BA18-40BC-F208-8BBAC8F45D42}">ST_SetupStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">
@@ -2600,9 +2608,25 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-08-01T21:00:56">
+						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SlaveArmControl.m_slaveInputDataPool.m_setupStatus" TypeA="ST_SetupStatus" InOutA="0" GuidA="{6E00B448-0436-927F-E471-6BF8E72C36B8}" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus" RestoreInfo="TypeChanged" IdA="4491"/>
+							</OwnerB>
+						</OwnerA>
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_slaveStatus" RestoreInfo="TypeChanged" IdA="4575"/>
+								<Link VarA="SlaveArmControl.m_slaveStatus" TypeA="ST_SlaveStatus" InOutA="1" GuidA="{F6FF3774-0B90-92F4-39FB-9AA671B67F0C}" VarB="TaskSetupArmControl Inputs^SetupArmControl.m_setupInputDataPool.m_slaveStatus" RestoreInfo="TypeChanged" IdA="4575"/>
+							</OwnerB>
+							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
+								<Link VarA="SetupArmControl.m_setupStatus" TypeA="ST_SetupStatus" InOutA="1" GuidA="{6E00B448-0436-927F-E471-6BF8E72C36B8}" VarB="TaskCartControl Inputs^SafetyCheck.m_setupStatus" RestoreInfo="TypeChanged" IdA="5087"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id NeedCalleeCall="true">0</Id>
+							<Id>0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2611,7 +2635,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">1</Id>
+							<Id>1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2620,7 +2644,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">2</Id>
+							<Id>2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2629,7 +2653,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">3</Id>
+							<Id>3</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -2638,7 +2662,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">4</Id>
+							<Id>4</Id>
 							<Name>TaskCartControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010070</OTCID>
@@ -8527,13 +8551,11 @@
 		<MappingInfo Identifier="{00000000-2005-0850-0420-500852000403}" Id="#x02030160"/>
 		<MappingInfo Identifier="{00000000-2005-0850-0420-500860000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030090" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030050" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500804205008}" Id="#x02030190" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-0100-0304-0020-500800010403}" Id="#x02030100" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x020300d0" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-2005-0850-0220-500804205008}" Id="#x020301c0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x020300b0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00E0-0304-0020-5008E0000403}" Id="#x02030180" Watchdog="00000000000000000000000000000000"/>

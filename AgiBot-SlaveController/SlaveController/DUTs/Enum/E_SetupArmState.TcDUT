@@ -14,8 +14,9 @@
 	SetupArmState_jnt3GravityCali := 9,
 	SetupArmState_jnt5GravityCali := 10,
 	SetupArmState_Disable := 11,
+	SetupArmState_Performance:=12,
 	
-	SetupArmState_totalNum :=SetupArmState_Disable
+	SetupArmState_totalNum :=SetupArmState_Performance
 );
 END_TYPE
 ]]></Declaration>
