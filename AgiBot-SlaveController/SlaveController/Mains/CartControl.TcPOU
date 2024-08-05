@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM CartControl
 VAR
@@ -9,6 +9,8 @@ VAR
 	// Output cart status
 	m_cartStatus AT%Q* : ST_CartStatus;
 	
+	// cart joint data
+	m_cartJointsData AT %Q* :ST_CartJointData;
 	
 	m_cartDataPool: ST_CartInputDataPool;
 	
@@ -47,9 +49,10 @@ UIInputProcess();
 //Aseptic sleeve deployment completed
 m_cartDataPool.m_cartStatus.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveRobot.m_panelMountedFlag[1] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[2]
 																									AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[3] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[4];
-
 // cart run
 m_cartRobot.run(m_cartDataPool);
+
+m_cartRobot.getStatus(m_cartStatus,m_cartJointsData);
 
 
 UIOutputProcess();
@@ -165,7 +168,7 @@ IF m_cartInSterileStateTon.Q THEN
 	GVL_com_upper_PC.Cart_operation.Cart_static_in_sterile_state:=1;
 END_IF
 
-GVL_com_upper_PC.manual_mode := NOT m_cartRobot.m_slaveCart.m_stabilizFootSensorManual;]]></ST>
+GVL_com_upper_PC.manual_mode := NOT m_cartRobot.m_slaveCart.m_drivingLeverSensorManual;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="CartControl">
@@ -174,8 +177,9 @@ GVL_com_upper_PC.manual_mode := NOT m_cartRobot.m_slaveCart.m_stabilizFootSensor
       <LineId Id="60" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="87" Count="3" />
-      <LineId Id="27" Count="0" />
       <LineId Id="31" Count="1" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="119" Count="0" />
       <LineId Id="56" Count="1" />
       <LineId Id="55" Count="0" />
       <LineId Id="5" Count="0" />

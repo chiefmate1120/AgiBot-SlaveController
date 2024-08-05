@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
@@ -95,21 +95,15 @@ VAR
 	m_slaveTrackTwist :Vec6d;
 	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
 	
+	// last master gripper angle
+	m_lastMasterGripAngle :LREAL;
+	
+	// master gripper angle velocity
+	m_masterGripAngleVel :LREAL;
+	m_masterGripAngleVelLpf :FB_LowPassFilter;
+	
 	// flag to start gripper control
 	m_gripperCtrlFlag :BOOL;
-	
-	//################# variable to interpolate master pose ##############
-	m_firstInterpolate :BOOL :=TRUE;
-	m_lastMasterPose : ST_Frame;
-	m_lastMasterGripAngle :LREAL;
-	m_masterInterpolateCycle :INT := 4;
-	m_curInterpolateCylce :INT := 1;
-	m_masterPosInterStep :Vec3d;
-	m_masterOriInterStep :Mat3d;
-	m_masterGripAngleInterStep :LREAL;
-	m_interplotedMasterPose :ST_Frame;
-	m_interplotedMasterGripAngle :LREAL;
-	
 	
 	// code execute time measure
 	m_codeTime : Profiler;
@@ -157,10 +151,9 @@ END_IF
 // decide matched master arm index
 FOR i:=1 TO g_mArmNum DO 
 	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
-		masterPoseInterploate(i_masterStatus.m_curArmPose[i],i_masterStatus.m_gripAngle[i]);
-		m_masterPose := m_interplotedMasterPose;
-		m_masterGripAngle := m_interplotedMasterGripAngle;
+		m_masterPose := i_masterStatus.m_curArmPose[i];
 		m_masterTwist := i_masterStatus.m_curArmTwist[i];
+		m_masterGripAngle := i_masterStatus.m_gripAngle[i];
 	END_IF
 END_FOR
 
@@ -225,6 +218,16 @@ matMultiVec(invJaco, m_slaveTrackTwist, m_simDHJointVel);
 // limit instrument wrist dofs
 limitInstruDofs(i_slaveArm, m_simDHJointVel);
 
+// limit DH joints velocity 
+cmdVelScale := 1;
+FOR i:=1 TO g_cartDofs DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
+vecSelfMultiNum(m_slaveTrackTwist, 1.0/cmdVelScale);
+vecSelfMultiNum(m_slaveCmdVel, 1.0/cmdVelScale);
+vecSelfMultiNum(m_slaveCmdWVel, 1.0/cmdVelScale);
+
 FOR i:=1 TO 3 DO
 	armDHJntVel[i]:=m_simDHJointVel[i];
 	wristDHJntVel[i]:=m_simDHJointVel[i+3];
@@ -258,6 +261,13 @@ matMultiVec(wristJntJaco, wristDHJntVel, velByWristJnt);
 vecSub(m_slaveCmdVel, velByWristJnt, velByArmJnt);
 matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
 
+// limit DH joints velocity 
+cmdVelScale := 1;
+FOR i:=1 TO 3 DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(armDHJntVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(armDHJntVel, 1.0/cmdVelScale);
+
 // limit arm joint position
 m_reachMacroJntLimit :=FALSE;
 FOR i:=1 TO 3 DO
@@ -276,18 +286,11 @@ IF (armDHJntVel[3] > 0 AND i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArm
 	m_reachMacroJntLimit:=TRUE;
 END_IF
 
-// limit DH joints velocity 
+// integrate command DH joint position
 FOR i:=1 TO 3 DO
 	m_simDHJointVel[i]:=armDHJntVel[i];
 	m_simDHJointVel[i+3]:=wristDHJntVel[i];
 END_FOR
-cmdVelScale := 1;
-FOR i:=1 TO g_cartDofs DO 
-	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
-END_FOR
-vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
-
-// integrate command DH joint position
 vecMultiNum(m_simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
 slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
 vecAdd(slaveSimDHJntPos, DHJntCmdDeltaPos, m_simDHJntPos);
@@ -410,7 +413,12 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// compute matched slave grip angle and force
+        <ST><![CDATA[// compute master grip veloicty
+m_masterGripAngleVel:= (m_masterGripAngle - m_lastMasterGripAngle)/g_slaveArmCtrlCycleTime;
+m_masterGripAngleVel := m_masterGripAngleVelLpf.run(m_masterGripAngleVel);
+m_lastMasterGripAngle :=m_masterGripAngle;
+
+// compute matched slave grip angle and force
 i_slaveArm.instrument.gripAngleMap(m_masterGripAngle,o_instruGripAngle=>matchedSlaveGripAngle, o_instruGripForceLevel=>matchedSlaveGripForce);
 
 IF m_gripperCtrlFlag THEN
@@ -465,14 +473,11 @@ FOR i:=4 TO g_sJntNum DO
 END_FOR
 m_cmdYawAngLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
+m_masterGripAngleVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 
 // init controller
 m_basicInstruController.init(i_slaveArm);
 m_usKnifeController.init(i_slaveArm);
-
-// init interpolation data
-m_firstInterpolate :=TRUE;
-m_curInterpolateCylce := 1;
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -497,70 +502,14 @@ END_VAR
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Method Name="masterPoseInterploate" Id="{87f63227-64b7-47f4-901e-5d3267b5224a}">
-      <Declaration><![CDATA[METHOD masterPoseInterploate : BOOL
-VAR_INPUT
-	i_masterPose :ST_FRAME;
-	i_masterGripAngle :LREAL;
-END_VAR
-
-VAR
-	rotT :Mat3d;
-	rotErr:Mat3d;
-	errAngle:LREAL;
-	errAxisLocal :Vec3d;
-	tmpMat :Mat3d;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[IF m_firstInterpolate THEN
-	m_firstInterpolate :=FALSE;
-	m_lastMasterGripAngle :=i_masterGripAngle;
-	m_lastMasterPose := i_masterPose;
-	m_masterPosInterStep :=g_zeroVec3d;
-	m_masterOriInterStep :=g_eye3d;
-	m_masterGripAngleInterStep :=0.0;
-	m_interplotedMasterPose := i_masterPose;
-	m_interplotedMasterGripAngle := i_masterGripAngle;
-END_IF
-
-
-// update next interpolation
-IF m_curInterpolateCylce > m_masterInterpolateCycle THEN
-	vecSub(i_masterPose.m_pos, m_lastMasterPose.m_pos, m_masterPosInterStep);
-	vecSelfMultiNum( m_masterPosInterStep, 1.0/INT_TO_LREAL(m_masterInterpolateCycle));
-	
-	matTranspose(m_lastMasterPose.m_rot, rotT);
-	matMultiply(rotT, i_masterPose.m_rot, rotErr);
-	rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxisLocal);
-	m_masterOriInterStep := angAxis2Rot(errAngle/INT_TO_LREAL(m_masterInterpolateCycle), errAxisLocal);
-	
-	m_masterGripAngleInterStep := (i_masterGripAngle- m_lastMasterGripAngle)/INT_TO_LREAL(m_masterInterpolateCycle);
-	
-	m_curInterpolateCylce :=1;
-	m_lastMasterPose:= i_masterPose;
-	m_lastMasterGripAngle := i_masterGripAngle;
-END_IF
-
-// interpolation
-m_interplotedMasterGripAngle := m_interplotedMasterGripAngle + m_masterGripAngleInterStep;
-
-vecSelfAdd(m_interplotedMasterPose.m_pos, m_masterPosInterStep);
-tmpMat := m_interplotedMasterPose.m_rot;
-matMultiply(tmpMat, m_masterOriInterStep, m_interplotedMasterPose.m_rot);
-
-m_curInterpolateCylce:= m_curInterpolateCylce+1;
-]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="masterSlavePoseErr" Id="{87b704e0-4215-4360-b95f-fd5590f5f115}">
-      <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
+      <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE TO Vec6d]]></Declaration>
       <Get Name="Get" Id="{1ddbef06-84f8-4aa0-a258-43dd88acef2a}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[masterSlavePoseErr REF= m_masterSlavePoseError;]]></ST>
+          <ST><![CDATA[masterSlavePoseErr ref= m_masterSlavePoseError;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -573,10 +522,8 @@ END_VAR
       <LineId Id="459" Count="3" />
       <LineId Id="135" Count="1" />
       <LineId Id="138" Count="0" />
-      <LineId Id="1255" Count="0" />
       <LineId Id="141" Count="0" />
-      <LineId Id="1257" Count="0" />
-      <LineId Id="1256" Count="0" />
+      <LineId Id="146" Count="1" />
       <LineId Id="142" Count="0" />
       <LineId Id="139" Count="0" />
       <LineId Id="381" Count="0" />
@@ -627,6 +574,12 @@ END_VAR
       <LineId Id="213" Count="0" />
       <LineId Id="1227" Count="1" />
       <LineId Id="1226" Count="0" />
+      <LineId Id="603" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="216" Count="2" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="261" Count="2" />
       <LineId Id="1154" Count="3" />
       <LineId Id="233" Count="0" />
       <LineId Id="1158" Count="0" />
@@ -649,7 +602,9 @@ END_VAR
       <LineId Id="253" Count="0" />
       <LineId Id="247" Count="0" />
       <LineId Id="260" Count="0" />
-      <LineId Id="264" Count="0" />
+      <LineId Id="264" Count="2" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="268" Count="3" />
       <LineId Id="366" Count="0" />
       <LineId Id="277" Count="0" />
       <LineId Id="798" Count="0" />
@@ -663,12 +618,10 @@ END_VAR
       <LineId Id="1055" Count="0" />
       <LineId Id="1057" Count="1" />
       <LineId Id="1054" Count="0" />
-      <LineId Id="1287" Count="1" />
-      <LineId Id="1297" Count="2" />
-      <LineId Id="1296" Count="0" />
-      <LineId Id="1289" Count="4" />
       <LineId Id="297" Count="0" />
       <LineId Id="301" Count="0" />
+      <LineId Id="368" Count="2" />
+      <LineId Id="367" Count="0" />
       <LineId Id="214" Count="0" />
       <LineId Id="379" Count="0" />
       <LineId Id="300" Count="0" />
@@ -724,6 +677,10 @@ END_VAR
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
+      <LineId Id="25" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="26" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="24" Count="0" />
@@ -755,13 +712,11 @@ END_VAR
       <LineId Id="70" Count="0" />
       <LineId Id="74" Count="1" />
       <LineId Id="138" Count="1" />
+      <LineId Id="153" Count="0" />
       <LineId Id="79" Count="0" />
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="194" Count="0" />
-      <LineId Id="206" Count="0" />
-      <LineId Id="205" Count="0" />
-      <LineId Id="207" Count="1" />
       <LineId Id="151" Count="1" />
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
@@ -771,32 +726,6 @@ END_VAR
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.masterPoseInterploate">
-      <LineId Id="5" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="8" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="12" Count="2" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="22" Count="1" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="28" Count="2" />
-      <LineId Id="40" Count="6" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="59" Count="1" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="49" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />

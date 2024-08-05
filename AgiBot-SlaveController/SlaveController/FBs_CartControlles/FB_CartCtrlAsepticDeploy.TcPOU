@@ -11,6 +11,7 @@ VAR
 	m_actJntPos: Vec8d;
 	m_tarJntPos: Vec8d;
 	m_jntPosArrival : Vec8b;
+	m_jntTrajPosArrival : Vec8b;
 	m_initActJntPos: Vec8d;
 	m_initTarJntPos : Vec8d;
 	m_incTarJntPos : Vec8d;
@@ -57,10 +58,10 @@ IF m_adjustStartTime >= m_cartAdjustStartWaitTime THEN
 		END_IF
 		
 		IF ABS(m_initTarJntPos[i] - m_tarJntPos[i]) <= GVL_CartControlParameters.g_jntCtrlAngTolHigh  THEN
-			m_jntPosArrival[i-4] := TRUE;
+			m_jntTrajPosArrival[i] := TRUE;
 		END_IF
 		
-		IF m_jntPosArrival[i-4] = FALSE THEN
+		IF m_jntTrajPosArrival[i] = FALSE THEN
 			m_incTarJntPos[i] := m_incTarJntPos[i] + sign(m_initTarJntPos[i] - m_actJntPos[i]) * GVL_CartControlParameters.g_maxJntVel[i]/2 * g_cartCtrlCycleTime;
 			m_tarJntPos[i] := m_actJntPos[i] + m_incTarJntPos[i];
 		END_IF
@@ -107,6 +108,7 @@ m_jntOPMode[8]:= DriverOPMode_Pos;
 
 m_initActJntPos:=m_cmdJntPos;//i_slaveCart.curJntPos;
 m_jntPosArrival := g_zeroVec8b;
+m_jntTrajPosArrival := g_zeroVec8b;
 m_incTarJntPos := g_zeroVec8d;
 m_tarJntPos := g_zeroVec8d;
 m_jntPosArrival := g_zeroVec8b;
@@ -170,6 +172,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="47" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="58" Count="0" />
+      <LineId Id="136" Count="0" />
       <LineId Id="82" Count="0" />
       <LineId Id="111" Count="1" />
       <LineId Id="95" Count="4" />

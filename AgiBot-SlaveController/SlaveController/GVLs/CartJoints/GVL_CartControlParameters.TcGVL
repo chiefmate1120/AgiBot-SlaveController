@@ -25,6 +25,7 @@ VAR_GLOBAL
 	g_surgicalDrapingPos : ARRAY[1..8] OF LREAL := [0, 0, 0, 0, 0.3, 0, 0.2, 0];
 	
 	g_jntCtrlAngTolHigh :LREAL :=1*g_deg2Rad;
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

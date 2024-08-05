@@ -25,7 +25,7 @@ VAR
 	
 	// current and max allowed read tries
 	m_curReadTries :INT :=0;
-	m_maxReadTries :INT := 5;
+	m_maxReadTries :INT := 2;
 	
 	//IP of operating arm
 	m_armNetId:T_AmsNetId; 	
@@ -853,16 +853,16 @@ CASE m_Step OF
 			m_onChipData.m_InstruReadSucceed := FALSE;
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=3;
-(*		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
+			
+		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
 			IF m_HaveRecord THEN
-				m_onChipData.m_Instrutype:=2;
-				m_onChipData.m_InstruReadSucceed:=TRUE;
-				m_Step:=130;
+				//
 			ELSE
+				m_onChipData.m_InstruReadSucceed := FALSE;
 				m_onChipData.m_Error:=TRUE;
 				m_onChipData.m_ErrorID:=2;
-			END_IF*)
+			END_IF
 		END_IF
 		m_Step :=-1;
 		m_curReadTries := m_curReadTries +1;
@@ -1341,12 +1341,12 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="420" Count="0" />
       <LineId Id="417" Count="2" />
       <LineId Id="416" Count="0" />
+      <LineId Id="444" Count="0" />
       <LineId Id="177" Count="0" />
-      <LineId Id="180" Count="1" />
-      <LineId Id="249" Count="0" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="281" Count="0" />
-      <LineId Id="184" Count="2" />
+      <LineId Id="180" Count="2" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="445" Count="0" />
+      <LineId Id="185" Count="1" />
       <LineId Id="183" Count="0" />
       <LineId Id="175" Count="0" />
       <LineId Id="405" Count="1" />

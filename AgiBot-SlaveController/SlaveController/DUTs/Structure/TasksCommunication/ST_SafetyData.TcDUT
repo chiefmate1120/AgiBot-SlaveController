@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_SafetyData" Id="{322b279b-f9a5-4da8-8f90-8d4b82ec3137}">
     <Declaration><![CDATA[// Output from safety check task
 // Input to master arm control task
@@ -8,6 +8,11 @@ STRUCT
 	m_slaveErrFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
 	m_setupErrFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
 	m_cartErrFlag :BOOL :=FALSE;
+	m_cartSteadyFootErr :BOOL;
+	m_cartWheelErr :BOOL;
+	m_cartStandColumnErr :BOOL;
+	m_cartAdjustErr :BOOL;
+	m_cartOverhangErr :BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="checkDelayTime" Id="{1842a9f8-6be9-44f3-b29d-ddeaee55cb3b}">
     <Declaration><![CDATA[TYPE checkDelayTime :
 STRUCT
@@ -27,17 +27,16 @@ STRUCT
 	Ti_spacePoseErr:TIME:=T#0.1S;
 
 	
-	Ti_CarDualEncDev:TIME;
-	Ti_CarDriveErr:TIME;
-	Ti_CarActSec:TIME;
-	Ti_CarJntStatus:TIME;
-	Ti_CarTorMotor:TIME;
-	Ti_CaroutofLimit:TIME;
-	Ti_CarFollowDev:TIME;
-	Ti_CarJntVel:TIME;
-	Ti_CarJntCurrent:TIME;
-	Ti_CarEtherCAT:TIME;
-	Ti_CarMZDriveErr:TIME;
+	Ti_CarDualEncDev:TIME:=T#0.02S;
+	Ti_CarDriveErr:TIME:=T#1S;
+	Ti_CarActSec:TIME:=T#10S;
+	Ti_CarJntStatus:TIME:=T#1S;
+	Ti_CarTorMotor:TIME:=T#20S;
+	Ti_CaroutofLimit:TIME:=T#0.1S;
+	Ti_CarFollowDev:TIME:=T#0.02S;
+	Ti_CarJntVel:TIME:=T#0.05S;
+	Ti_CarJntCurrent:TIME:=T#1S;
+	Ti_CarMZDriveErr:TIME:=T#1S;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

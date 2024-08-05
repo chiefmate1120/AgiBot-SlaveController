@@ -94,7 +94,7 @@ END_VAR
 VAR
 	j:INT;
 	maxJntErr:LREAL;
-	jntCtrlErr:Vec8d;
+	jntCtrlErr:Vec7d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged

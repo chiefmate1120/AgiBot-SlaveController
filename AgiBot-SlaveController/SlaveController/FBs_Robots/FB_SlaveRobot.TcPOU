@@ -140,7 +140,13 @@ FOR i:=1 TO g_sArmNum DO
 	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.m_instruType;
 	r_slaveStatus.m_instruStauts[i].m_ready:=m_instrumentMountedFlag[i];
 	r_slaveStatus.m_instruStauts[i].m_fingerAngle:=m_slaveArms[i].curGripAngle;
-	
+	r_slaveStatus.m_instruReadErrId[i] := m_slaveArms[i].instrument.onChipData.m_ErrorID;
+	r_slaveStatus.m_instruInstallStatus[i] := m_slaveArms[i].instruOn;
+	r_slaveStatus.m_instruClampErrId[i] := m_mountInstru[i].instruClampErrId;
+	r_slaveStatus.m_panelInstallStatus[i] := m_slaveArms[i].panelOn;
+	r_slaveStatus.m_panelClampErrId[i] := m_mountPanel[i].panelClampErrId;
+	r_slaveStatus.m_trocarOnFlag[i] := m_slaveArms[i].trocarOn;
+	r_slaveStatus.m_masterOnLine := m_masterOnLine;
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
 	r_slaveStatus.m_simArmPose[i]:=m_slaveArms[i].simCartPose;
@@ -719,7 +725,11 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="115" Count="0" />
       <LineId Id="98" Count="0" />
       <LineId Id="114" Count="0" />
-      <LineId Id="100" Count="0" />
+      <LineId Id="192" Count="1" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="187" Count="1" />
       <LineId Id="64" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="172" Count="0" />

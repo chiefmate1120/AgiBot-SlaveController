@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlBase" Id="{d6cf23e6-1ee8-4a24-a297-ce6d0439587b}" SpecialFunc="None">
     <Declaration><![CDATA[// Slave Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_CartCtrlBase IMPLEMENTS I_CartJointCtrl
@@ -74,13 +74,13 @@ END_VAR
 VAR
 	j:INT;
 	maxJntErr:LREAL;
-	jntCtrlErr:Vec8d;
+	jntCtrlErr:Vec7d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
 vecSub(i_slaveCart.m_cmdJntPos, i_slaveCart.m_curJntPos,jntCtrlErr);
 maxJntErr:=0.0;
-FOR j:=1 TO g_sJntNum DO
+FOR j:=1 TO g_cartJntNum DO
 	maxJntErr:= MAX(maxJntErr, ABS(jntCtrlErr[j]));
 END_FOR
 

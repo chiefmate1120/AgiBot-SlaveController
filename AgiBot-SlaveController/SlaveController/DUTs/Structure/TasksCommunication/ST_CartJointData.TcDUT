@@ -1,32 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_CartJointData" Id="{bdea55cd-8a57-4f91-b0f7-e6f9cb33fd84}">
     <Declaration><![CDATA[TYPE ST_CartJointData :
 STRUCT
 	
 	// joint position compute with motor encoder
-	m_curMotorPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_curMotorPos : Vec8d;
 	
 	// joint position compute with link/abs encoder
-	m_curLinkPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_curLinkPos : Vec8d;
 	
 	// target joint position 
-	m_cmdJntPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_cmdJntPos : Vec8d;
 	
 	// current joint position 
-	m_curJntPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_curJntPos : Vec8d;
 	
 	// target joint velocity 
-	m_cmdJntVel :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_cmdJntVel : Vec8d;
 	
 	// current joint position 
-	m_curJntVel :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_curJntVel : Vec8d;
 	
 	// command joint torque 
-	m_cmdJntTrq :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_cmdJntTrq : Vec8d;
 	
 	// current joint torque 
-	m_curJntTrq :ARRAY[1..g_sArmNum] OF Vec8d;
+	m_curJntTrq : Vec8d;
 	
 END_STRUCT
 END_TYPE

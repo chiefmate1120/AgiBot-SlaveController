@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_SlaveStatus" Id="{8673ecde-c145-4df2-8157-2e6da5d46538}">
     <Declaration><![CDATA[// Output from slave arm control task, including arm status and cartesian data
 // Input to safety task and Master controller
@@ -33,6 +33,26 @@ STRUCT
 	// master slave pose error [position, angle*axis] in endoscope coordinate
 	m_masterSlavePoseError :ARRAY[1..g_sArmNum] OF Vec6d; 
 
+	//read instrument information error ID
+	m_instruReadErrId : ARRAY[1..g_sArmNum] OF INT;
+	
+	//instrument install status
+	m_instruInstallStatus : ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//instrument clamp error Id 
+	m_instruClampErrId : ARRAY[1..g_sArmNum] OF UINT;
+	
+	//panel install status
+	m_panelInstallStatus : ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//panel clamp error ID
+	m_panelClampErrId : ARRAY[1..g_sArmNum] OF UINT;
+	
+	//trocar install status 
+	m_trocarOnFlag : ARRAY[1..g_sArmNum] OF BOOL;
+
+	// flag if master are connected
+	m_masterOnLine :BOOL ;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

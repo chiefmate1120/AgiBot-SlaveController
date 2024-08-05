@@ -119,10 +119,10 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
-m_jntEnableFlag[5] :=1;
-m_jntEnableFlag[6] :=1;
-m_jntEnableFlag[7] :=1;
-m_jntEnableFlag[8] :=1;
+m_jntEnableFlag[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
+m_jntEnableFlag[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+m_jntEnableFlag[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+m_jntEnableFlag[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
 
 m_jntOPMode[5]:= DriverOPMode_cspMZ;
 m_jntOPMode[6]:= DriverOPMode_Pos;

@@ -25,6 +25,12 @@ VAR
 	// command mount motion
 	m_mountStepPos :LREAL := 45.0 * g_deg2Rad;
 	m_targetMountPos :Vec5d;
+	
+	//panel clamp error Id
+	m_panelClampErrId : UINT;
+	m_panelClampTime : LREAL;
+	m_noCurrentTime : LREAL :=10;
+	m_notReturnToZero : LREAL :=15;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -47,7 +53,10 @@ VAR
 	cycleNum :LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
+        <ST><![CDATA[IF m_panelClampErrId>0 THEN
+	RETURN;
+END_IF
+
 curJntPos := i_slaveArm.curJntPos;
 
 CASE m_mountStatus OF
@@ -90,6 +99,9 @@ CASE m_mountStatus OF
 		END_FOR
 END_CASE
 
+//panel clamp status check
+m_panelClampErrId := panelClampStatus();
+
 // traj plan
 FOR i:=1 TO 5 DO
 	m_jntOTG[i].run(m_targetMountPos[i],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
@@ -124,9 +136,40 @@ FOR i:=1 TO 5 DO
 	m_jntOTG[i].init(m_targetMountPos[i], 0,m_panelMountVel, m_panelMountAcc, g_slaveArmCtrlCycleTime);
 	m_jointMounted[i]:=FALSE;
 END_FOR
-
+m_panelClampTime :=0;
+m_panelClampErrId := 0;
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="panelClampErrId" Id="{5bdb25a2-6f11-4339-bd1e-c473b3f79ec5}">
+      <Declaration><![CDATA[PROPERTY panelClampErrId : UINT]]></Declaration>
+      <Get Name="Get" Id="{c79df79b-5cac-436e-892c-eeda99954cfc}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[panelClampErrId := m_panelClampErrId;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="panelClampStatus" Id="{eda9a7e2-0dfb-4ed0-8d8b-c62377a124d6}">
+      <Declaration><![CDATA[METHOD panelClampStatus : UINT
+VAR_IN_OUT CONSTANT
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_panelClampErrId=1 panel clamp the current does not reach the set value
+//m_panelClampErrId=2 panel clamp position does not return to zero
+m_panelClampTime := LIMIT(0,m_panelClampTime + g_slaveArmCtrlCycleTime,10);
+
+IF m_mountStatus=0  AND m_panelClampTime>=m_noCurrentTime  THEN
+	panelClampStatus := 1;
+ELSIF m_mountStatus=2 AND m_panelClampTime>=m_notReturnToZero  THEN
+	panelClampStatus := 2;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -134,6 +177,7 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountPanel.calcCmdJntPos">
+      <LineId Id="293" Count="2" />
       <LineId Id="228" Count="2" />
       <LineId Id="144" Count="0" />
       <LineId Id="155" Count="0" />
@@ -158,6 +202,9 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="244" Count="0" />
       <LineId Id="242" Count="0" />
       <LineId Id="156" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="278" Count="0" />
       <LineId Id="118" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="146" Count="2" />
@@ -175,9 +222,24 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="87" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="71" Count="0" />
-      <LineId Id="127" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="128" Count="0" />
       <LineId Id="126" Count="0" />
       <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountPanel.panelClampErrId.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountPanel.panelClampStatus">
+      <LineId Id="32" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="7" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

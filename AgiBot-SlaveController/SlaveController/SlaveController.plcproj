@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <FileVersion>1.0.0.0</FileVersion>
@@ -110,9 +110,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecMultiNum.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecSelfSub.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSub.TcPOU">
@@ -316,9 +313,6 @@
     <Compile Include="FBs_Auxiliary\FB_cartJntDisenableDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_Auxiliary\FB_cartJntEnableDetect.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="FBs_Auxiliary\FB_InstruNearDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -350,6 +344,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_AdjustDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_cartJntEnableDetect.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FB_dither.TcPOU">
@@ -419,6 +416,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_CartControlles\FB_CartCtrlRotaOverhang.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_CartControlles\FB_CartPinDeploy.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_CartControlles\FB_CartCtrlSlowDown.TcPOU">
@@ -656,10 +656,6 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_CartParameters.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
     <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -672,12 +668,8 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_SafetyPara.TcGVL">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="GVLs\GVL_SafetyParameters.TcGVL">
       <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\GVL_SystemParameters.TcGVL">
       <SubType>Code</SubType>
@@ -762,12 +754,6 @@
     <Compile Include="Mains\RobotDynamics.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\ASSERT.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SafetyCheck\ErrRecord\CarErrInputVariable.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SafetyCheck\ErrRecord\checkDelay.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -780,40 +766,22 @@
     <Compile Include="SafetyCheck\ErrRecord\checkPermit.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\ErrRecord\monitorThreshold.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SafetyCheck\ErrRecord\monitorThreshold_1.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SafetyCheck\ErrRecord\PromptMessage.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SafetyCheck\ErrRecord\ST_Buffer.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\ErrRecord\T_Buffer.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SafetyCheck\Fb_ErrRecord.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SafetyCheck\FB_EtherCATCheck.TcPOU">
+    <Compile Include="SafetyCheck\Fb_dataRecord.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\Fb_SafetyCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\FB_SetupArmCheck.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="SafetyCheck\FB_SlaveArmCheck.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="SafetyCheck\FB_Writer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_EtherCATCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_backup.TcPOU">
@@ -922,7 +890,10 @@
         <o>
           <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
           <d n="SubKeys" t="Hashtable" />
-          <d n="Values" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>CurrentUmlCompilerVersion</v>
+            <v>4.2.1.0</v>
+          </d>
         </o>
         <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
         <o>

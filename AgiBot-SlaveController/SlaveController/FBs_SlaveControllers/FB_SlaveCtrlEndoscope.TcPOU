@@ -69,7 +69,7 @@ cmdVelCalc(i_masterStatus, i_slaveArm);
 m_cmdVelLocal[1] := m_cmdVelLpf[1].run(m_cmdVelLocal[1]);
 m_cmdVelLocal[2] := m_cmdVelLpf[2].run(m_cmdVelLocal[2]);
 m_cmdVelLocal[3] := m_cmdVelLpf[3].run(m_cmdVelLocal[3]);
-m_cmdWVelLocal := -m_cmdVelLpf[4].run(m_cmdWVelLocal);
+m_cmdWVelLocal := m_cmdVelLpf[4].run(m_cmdWVelLocal);
 
 // get linear velocity in base
 matMultiVec(i_slaveArm.simCartPose.m_rot, m_cmdVelLocal, m_cmdVel);

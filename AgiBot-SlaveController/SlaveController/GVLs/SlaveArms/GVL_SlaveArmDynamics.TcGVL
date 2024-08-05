@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
-  <GVL Name="GVL_SlaveArmDynamics" Id="{1619ece5-bc50-4b30-99f0-f7b05af4ec24}">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SlaveArmDynamics" Id="{036f1027-6cc1-479a-aa74-880bc6493cec}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
-// Robot4 --dynamic parameters of slave arms
+// Robot5 --dynamic parameters of slave arms
 VAR_GLOBAL CONSTANT
 	
 (*graParam=[ 9.8*m5,...

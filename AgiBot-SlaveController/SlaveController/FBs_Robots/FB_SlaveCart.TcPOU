@@ -3,9 +3,6 @@
   <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
 VAR
-	//open laser io
-	m_openHorizonLaser AT  %Q* :DINT;
-	m_openCrossLaser AT  %Q* :DINT;
 	
 	//Driving force of the car io
 	m_driveForce AT %I* :Vec2i;
@@ -13,8 +10,8 @@ VAR
 	//stabilizing foot sensor  (normally-closed contact)
 	m_stabilizFootSensorLeft AT%I* :BOOL;
 	m_stabilizFootSensorRight AT%I* :BOOL;
-	m_stabilizFootSensorAuto AT%I* :BOOL;
-	m_stabilizFootSensorManual AT%I* :BOOL;
+	m_drivingLeverSensorAuto AT%I* :BOOL;
+	m_drivingLeverSensorManual AT%I* :BOOL;
 	
 	//Trocar IO check
 	m_trocarIO AT %I* : ARRAY [1..4] OF UDINT;
@@ -121,11 +118,6 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
-IF (m_curJntPos[5] * 1000 + 1850) > 1950 THEN
-	//
-END_IF
-
 //check overhang rotation button
 m_rotaOverhangOnFlag := MAX( m_rotaButtonDetect[1].run(m_carRotaOverhangIO[1]), m_rotaButtonDetect[2].run(m_carRotaOverhangIO[2]),m_rotaButtonDetect[3].run(m_carRotaOverhangIO[3]),m_rotaButtonDetect[4].run(m_carRotaOverhangIO[4]));
 
@@ -197,6 +189,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[curDHJntVel REF= m_curDHJntVel;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curJntCurrent" Id="{c06954b9-7d46-4bb1-b769-226d7700f290}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntCurrent :REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{803fed64-c7fc-4f5a-a733-13664a3be1b6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntCurrent ref=m_filtJntCurrent;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -488,8 +491,6 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.checkIO">
-      <LineId Id="6" Count="1" />
-      <LineId Id="52" Count="2" />
       <LineId Id="45" Count="0" />
       <LineId Id="44" Count="0" />
       <LineId Id="21" Count="0" />
@@ -516,6 +517,9 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.curDHJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curJntCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.curJntPos.Get">

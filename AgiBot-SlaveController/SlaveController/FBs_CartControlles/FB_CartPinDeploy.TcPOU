@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CartPinDeploy" Id="{55d7523f-ccb9-4e03-a220-3c80fe21a70d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CartPinDeploy EXTENDS FB_CartCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+
+	m_actJntPos: Vec8d;
+	m_tarJntPos: Vec8d;
+	m_initJntPos : Vec8d;
+	m_tarJntInc : Vec8d;
+	m_maxJntCurrent : ARRAY [1..2] OF LREAL := [1000,1000];
+	m_pinDeployed : ARRAY [1..2] OF BOOL; 
+	
+	m_carJntSoftwareLimit :ARRAY [1..2] OF LREAL := [0.005, 2*g_deg2Rad, 0.005, 2*g_deg2Rad];
+	
+	// time threshold to 5-8joint after it's enabled
+	m_cartAdjustStartWaitTime :LREAL := 0.2;
+	
+	//adjust start  time 
+	m_adjustStartTime :LREAL;
+
+	m_jntOTG :ARRAY [1..2] OF FB_secOrdTrajFilter;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{6b4938eb-71dc-4086-a7ef-b878d82f7a7c}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_IN_OUT CONSTANT
+	// slave cart joint data
+	i_slaveCart :FB_SlaveCart;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//In this method, 8 represents the overhang angle
+m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 1);
+m_actJntPos := i_slaveCart.curJntPos;
+IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
+	FOR i:=1 TO 2 DO
+		IF ABS(i_slaveCart.curJntCurrent[i]) > m_maxJntCurrent[i] THEN
+			m_pinDeployed[i] := TRUE;
+			m_tarJntPos[i] := m_actJntPos[i];
+		END_IF
+		
+		IF FALSE = m_pinDeployed[i] THEN
+			m_tarJntPos[i] := m_actJntPos[i] + GVL_CartControlParameters.g_maxJntVel[i] * g_cartCtrlCycleTime;
+		END_IF
+		m_jntOTG[i].run(i_targetPos:= m_tarJntPos[i], i_targetVel:= 0.0, o_cmdAcc=> , o_cmdVel=> , o_cmdPos=>m_cmdJntPos[i] );
+	END_FOR
+	
+	IF m_pinDeployed[1] AND m_pinDeployed[2] THEN
+		m_isFinished := TRUE;
+	END_IF
+
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{c2bc8804-7c26-45e5-860d-db010c88639a}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveCart	:FB_SlaveCart;
+END_VAR
+VAR_IN_OUT 
+	r_cartCtrlCmd :ST_SlaveArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
+
+SUPER^.init(i_slaveCart,r_cartCtrlCmd);
+
+m_jntEnableFlag[1] :=1;
+m_jntEnableFlag[2] :=1;
+
+m_jntOPMode[1]:= DriverOPMode_Pos;
+m_jntOPMode[2]:= DriverOPMode_Pos;
+
+m_pinDeployed[1] := FALSE;
+m_pinDeployed[2] := FALSE;
+
+m_jntOTG[1].init(i_curCmdPos:= m_cmdJntPos[1], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[1] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[1] , i_Ts:=g_cartCtrlCycleTime );
+m_jntOTG[2].init(i_curCmdPos:= m_cmdJntPos[2], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[2] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[2] , i_Ts:=g_cartCtrlCycleTime );
+
+m_adjustStartTime := 0;
+// update commands to arm
+copyCmds(r_cartCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CartPinDeploy">
+      <LineId Id="52" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartPinDeploy.calcCmdJntPos">
+      <LineId Id="12" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="121" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="117" Count="3" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartPinDeploy.init">
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
