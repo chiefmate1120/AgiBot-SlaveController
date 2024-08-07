@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_SlaveInputDataPool" Id="{8edc6f5a-e934-4abf-9384-df71872be806}">
     <Declaration><![CDATA[// Struct contains all data from other tasks and controller used for slave control
 TYPE ST_SlaveInputDataPool :
@@ -15,7 +15,7 @@ STRUCT
 	m_cartStatus AT %I*:ST_CartStatus;
 	
 	// master robot status, copy from MSCommu_MasterStatus
-	m_masterStatus :ST_MasterStatus;
+	m_masterStatus AT %Q* :ST_MasterStatus;
 	
 	// setup arms infromation;
 	m_setupStatus AT %I* : ST_SetupStatus;

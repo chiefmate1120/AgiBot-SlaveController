@@ -95,6 +95,7 @@ FOR i:=1 TO g_mArmNum DO
 	masterStatus.m_curArmTwist[i] :=masterInputData.m_curArmTwist[i];
 	masterStatus.m_pedalHover[i] := masterInputData.m_pedalHover[i];
 	masterStatus.m_electricKnifePedalTrigger[i] := masterInputData.m_electricKnifePedalTrigger[i];
+	masterStatus.m_tryMSControl[i] := masterInputData.m_tryMSControl[i];
 END_FOR
 ]]></ST>
       </Implementation>
@@ -317,6 +318,7 @@ GVL_com_upper_PC.instrument4:=GVL_com_upper_PC.instrument_information[4];
       <LineId Id="33" Count="0" />
       <LineId Id="24" Count="0" />
       <LineId Id="72" Count="1" />
+      <LineId Id="86" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="17" Count="0" />
     </LineIds>

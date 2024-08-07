@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupRobot" Id="{41d3f45b-28bf-4672-9f4d-c2ea05b7f776}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SetupRobot
 VAR_INPUT
@@ -176,6 +176,10 @@ END_VAR]]></Declaration>
 			IF FALSE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i]  THEN
 				m_nextSetupArmState[i]:=SetupArmState_Hold;
 			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0 THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			END_IF
 			
 		// init
 		SetupArmState_Init:
@@ -328,7 +332,9 @@ END_FOR]]></ST>
       <LineId Id="15" Count="0" />
       <LineId Id="247" Count="3" />
       <LineId Id="246" Count="0" />
+      <LineId Id="288" Count="2" />
       <LineId Id="251" Count="0" />
+      <LineId Id="291" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="280" Count="0" />

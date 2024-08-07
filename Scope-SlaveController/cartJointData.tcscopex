@@ -24,7 +24,8 @@
   <ImageAutoDeleteCapacity>0</ImageAutoDeleteCapacity>
   <ImageAutoDeleteOlderThan>0</ImageAutoDeleteOlderThan>
   <ImagesDeleteMode>Disabled</ImagesDeleteMode>
-  <IsTemplate>false</IsTemplate>
+  <KeepPreviousExports>false</KeepPreviousExports>
+  <KeepPreviousImageExports>false</KeepPreviousImageExports>
   <Layout>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;Layout&gt;
   &lt;Window Guid="b41b3700-ac86-486c-a8f7-e4186d7135d2" LastFocused="133668812749686930" DockedSize="200" PopupSize="0" FloatingLocation="-1, -1" FloatingSize="550, 400" LastOpenDockSituation="Document" LastFixedDockSituation="Document" LastFixedDockLocation="Right" LastFloatingWindowGuid="00000000-0000-0000-0000-000000000000" LastDockContainerCount="0" LastDockContainerIndex="0" DockedWorkingSize="250, 400" DockedWindowGroupGuid="00000000-0000-0000-0000-000000000000" DockedIndexInWindowGroup="0" DockedSplitPath="0" DocumentWorkingSize="250, 400" DocumentWindowGroupGuid="abb1ca4b-7aa9-448c-8169-af4d2b80feb3" DocumentIndexInWindowGroup="0" DocumentSplitPath="0" FloatingWorkingSize="250, 400" FloatingWindowGroupGuid="00000000-0000-0000-0000-000000000000" FloatingIndexInWindowGroup="0" FloatingSplitPath="0" /&gt;
@@ -78,7 +79,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>1</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>4559dd3b-0730-4930-925f-9a4bf205fd87</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -160,7 +161,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>2</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>1fb10b1f-c1b4-4ece-bbb7-1d144aced91d</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -242,7 +243,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>3</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>0f4b1769-4c03-4178-8f39-c97f0eea29dc</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -324,7 +325,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>4</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>3f7b10dd-2e3f-4f80-aadb-f90494740160</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -406,7 +407,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>5</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>e67db9ff-f849-44a2-b315-f3429acf269e</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -488,7 +489,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>6</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>d08a8b82-8276-4647-9e82-5eea53644c11</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -570,7 +571,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>7</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>91869a78-18dc-4c5e-b247-11821e62ac29</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -652,7 +653,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>8</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>1b33a5e3-aab1-441d-a6ee-a3fc69fe12b1</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -734,7 +735,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>9</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>e556db8b-bffb-447b-98db-4d3175104729</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -816,7 +817,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>10</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>741a798f-a3c3-493a-bd25-6c53b651fabd</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -898,7 +899,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>11</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>774625ee-e4ea-496c-97f3-56b7a35e9090</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -980,7 +981,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>12</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>ea5a7a2f-078b-474a-9176-9065d0664c16</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1062,7 +1063,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>13</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>6c75d318-2e43-4fa6-bfa4-0b44b2dc3b08</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1144,7 +1145,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>14</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>fe8ece2b-db83-49c9-a87d-914980739a24</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1226,7 +1227,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>15</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>940ff201-f59f-47d5-931d-44cfe45fb058</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1308,7 +1309,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>16</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>32bbf497-9a3c-46b9-aa4a-282db4f78afc</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1393,7 +1394,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>17</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>b6a42f5f-7828-415b-8b24-af308b7546ce</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1478,7 +1479,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>18</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>230bf70c-e677-4caf-9197-4561c69c27c2</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1563,7 +1564,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>19</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>45241a51-2d31-41cc-a305-5d9a75ba84d0</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1648,7 +1649,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>20</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>9027806f-bae0-4d3e-b572-288426658a38</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1730,7 +1731,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>21</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>1e55450b-a802-44ea-9bfd-ea35aeee42f7</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1812,7 +1813,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>22</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>29f155a9-35c7-4d9d-bad7-5f5ef6f92eba</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1894,7 +1895,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>23</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>bc4ae2c0-4a26-4b2d-beee-9c42ec159285</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -1976,7 +1977,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>24</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>5c89daab-2c80-4c4f-9e00-b485790571a4</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2058,7 +2059,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>25</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>0b1cf24e-cf6c-468b-8164-81654d0a735f</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2140,7 +2141,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>26</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>93d25ddf-decc-41b6-9ed9-af4cf4d338f8</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2222,7 +2223,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>27</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>836e23da-3856-4f6e-8827-b5df62f81dc4</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2304,7 +2305,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>28</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>19670979-cbd2-4b95-bb9d-da5e461b5090</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2386,7 +2387,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>29</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>215d2346-2314-4114-8562-5d0067c534ac</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2468,7 +2469,7 @@
           <DataType>UINT16</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>30</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>76957bdd-d99b-4507-bd47-5d1c6fbfdef8</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2550,7 +2551,7 @@
           <DataType>INT32</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>31</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>064c0450-cd72-48cb-ac09-cab919433650</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2632,7 +2633,7 @@
           <DataType>UINT16</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>32</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>77c76a16-752b-4b81-94bb-e78878b156bb</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2714,7 +2715,7 @@
           <DataType>INT32</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>33</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>747998c8-40a5-4d70-9987-605980e8bb85</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2799,7 +2800,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>34</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>eebc7a51-0376-405a-b287-384cba07500e</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2884,7 +2885,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>35</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>f4b3dd3c-b106-472b-a030-53b977c7636d</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -2969,7 +2970,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>36</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>64873553-83b8-46aa-aa1d-018a12ea1380</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3054,7 +3055,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>37</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>4c4d175d-9291-4428-8d0c-cfa121d282be</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3136,7 +3137,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>38</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>f92a1f1c-cb10-4437-a7f8-67e8e4cdfbfb</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3218,7 +3219,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>39</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>818a863b-aa04-4dcf-bc18-c1b6a3ed8a07</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3300,7 +3301,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>40</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>9f1944fe-bd99-469b-913d-61a6f1403ff1</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3382,7 +3383,7 @@
           <DataType>REAL64</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>41</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>b8e05f1f-732f-4ead-a8ff-50e56bba7075</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3464,7 +3465,7 @@
           <DataType>INT16</DataType>
           <DisplayColor>Black</DisplayColor>
           <Enabled>true</Enabled>
-          <FileHandle>42</FileHandle>
+          <FileHandle>0</FileHandle>
           <ForceOversampling>false</ForceOversampling>
           <Guid>c8453ffe-f062-423d-814d-bf9b029d54cf</Guid>
           <IndexGroup>16448</IndexGroup>
@@ -3526,13 +3527,16 @@
       <Title>DataPool_754</Title>
     </DataPool>
     <YTChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+      <AnchorTimestamp>0</AnchorTimestamp>
       <AssignedCore>0</AssignedCore>
       <AutoStart>true</AutoStart>
       <Comment />
+      <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-986896</DisplayColor>
+      <DisplayColor>-1118478</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
-      <ForeColor>-16777216</ForeColor>
+      <DurationLength>0</DurationLength>
+      <ForeColor>-14803426</ForeColor>
       <Guid>b41b3700-ac86-486c-a8f7-e4186d7135d2</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>YT Chart</Name>
@@ -3540,11 +3544,13 @@
       <SortPriority>10</SortPriority>
       <SubMember>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-657931</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>c3317651-719a-4080-b98c-d68898eee277</Guid>
           <Name>adjust</Name>
+          <ShowTitle>False</ShowTitle>
           <SortPriority>10</SortPriority>
           <SubMember>
             <TimeAxis AssemblyName="TwinCAT.Measurement.Scope.API.Model">
@@ -3561,21 +3567,24 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
+                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-14803426</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-14803426</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>bd2d3cfe-2859-41d9-9b7c-509853ed58b9</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style (1)</Name>
                   <Precision>6</Precision>
-                  <ShowName>false</ShowName>
+                  <ShowName>False</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_758</Title>
+                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -3595,21 +3604,24 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
+                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-14803426</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-14803426</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>1a2a90da-059e-4f90-9246-6283f4ab8179</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style</Name>
                   <Precision>6</Precision>
-                  <ShowName>false</ShowName>
+                  <ShowName>False</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_760</Title>
+                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -3638,7 +3650,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>d26f2fbe-da32-4105-8003-3e6705bfcba0</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarCartPos[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3747,7 +3758,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>8755d63e-c8ee-459a-bb57-8238616ee9ab</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarCartPos[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3856,7 +3866,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>e7514955-3a06-487d-a0fe-5fb41ff8c949</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarCartPos[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3965,7 +3974,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>2c6f2fb0-d4d5-4d7c-835f-94a00b4de871</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarCartPos[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4074,7 +4082,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>664e7cf6-f32e-4380-b2c4-3d24c0c930b1</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarPosInc[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4183,7 +4190,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>0cb814bb-b8db-41c5-80f2-c99f41ffdf3b</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarPosInc[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4292,7 +4298,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>a78a9843-980b-4334-b363-09fb331bcbd9</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarPosInc[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4401,7 +4406,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>401b8a53-db4e-4d06-b914-f7efca705912</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarPosInc[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4510,7 +4514,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>8aa1f9e9-9919-43ee-9e3c-23cec9ef28af</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_joystickSignal[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4619,7 +4622,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>e62b25ad-93b5-4ffd-90fb-d2a43ce7b92e</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_joystickSignal[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4728,7 +4730,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>e6a2cde8-9d3f-476c-8fba-666cbda31b6c</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_joystickSignal[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4837,7 +4838,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>44171373-33f9-40b0-bcb1-c81ff387d909</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarJntPos[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4946,7 +4946,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c78511dc-c1d7-4b46-94e2-400e0877a021</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarJntPos[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5055,7 +5054,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>444b1161-be90-4259-9c37-e12c9654edeb</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarJntPos[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5164,7 +5162,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>590f2905-9052-4f0a-a248-4393ac3eabfd</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_tarJntPos[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5273,7 +5270,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c5acdaeb-6788-4fd9-a341-2710bc28df54</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5382,7 +5378,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>5e663bba-3120-4efb-9f17-1e9c9879b010</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5491,7 +5486,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c1b6abc4-2180-45b5-bcbe-cfdc5aee93d9</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5600,7 +5594,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>132a1e77-ce11-4faa-b5c8-308fc5737631</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5709,7 +5702,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>1ff9cf00-db6a-4cd4-8052-c120f886c688</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_statusWord</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5818,7 +5810,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>4672be26-5b81-4f82-963a-32bff047c92d</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_controlWord</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -5927,7 +5918,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>dcbc52bb-1e52-4731-95a3-2c3129c76b56</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[5] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6036,7 +6026,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>b7e814e7-8ce6-4bc5-86e0-c792afa5fa23</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[6] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6145,7 +6134,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>825618a6-085d-4ae9-8fe9-0c5271924f78</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[7] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6254,7 +6242,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>910e61c8-9f36-4103-bc42-7d686acbfbe2</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[8] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6363,7 +6350,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>4daeaf80-8809-405c-92cc-53baf68cd122</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[5] (2)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6472,7 +6458,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>17c01966-321f-4d13-af8b-8ad8fe677cc6</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[6] (2)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6581,7 +6566,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>db121745-8388-4b7b-990f-992fad2ad82f</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[7] (2)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6690,7 +6674,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>443100b7-4770-49b1-9858-e8ffa7207f08</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[8] (2)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -6790,8 +6773,8 @@
         </AxisGroup>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-1</DisplayColor>
-          <ForeColor>-16777216</ForeColor>
+          <DisplayColor>-657931</DisplayColor>
+          <ForeColor>-14803426</ForeColor>
           <Guid>ff7c0e80-9294-4363-a7de-84fd02ba3db7</Guid>
           <Name>Overview Chart</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -6828,6 +6811,7 @@
               <EnabledButtons>RunButton PauseButton Splitter1 DisplaywidthTextBox Splitter2 ScrollBackBig ScrollBackSmall ScrollForwardSmall ScrollForwardBig Splitter3 PositionTextBox Splitter4 UndoButton RedoButton Splitter5 PanXButton PanXYButton ZoomXButton ZoomXYButton UnzoomButton ZoomOutMaxButton OverviewButton CopyToClipboard</EnabledButtons>
               <EnabledTimeLabels>All</EnabledTimeLabels>
               <Guid>76dbcc34-593f-42e3-a9e9-937e68253e73</Guid>
+              <IndexNavigation>false</IndexNavigation>
               <Name>Chartmenu Style</Name>
               <SortPriority>100</SortPriority>
               <TimeStripFontSize>8.25</TimeStripFontSize>
@@ -6851,11 +6835,13 @@
           <Title>MarkerContainer_767</Title>
         </MarkerContainer>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-657931</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>40b227be-b1de-4529-a5a0-de9e381fdd7f</Guid>
           <Name>Axis Group (1)</Name>
+          <ShowTitle>False</ShowTitle>
           <SortPriority>11</SortPriority>
           <SubMember>
             <RefGuid-TimeAxis>32d65e57-5cc1-4afd-a6db-0748acb3270d</RefGuid-TimeAxis>
@@ -6873,21 +6859,24 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
+                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-14803426</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-14803426</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>d7218b08-e39a-4871-beec-59c53438fba7</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style (2)</Name>
                   <Precision>6</Precision>
-                  <ShowName>false</ShowName>
+                  <ShowName>False</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_773</Title>
+                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -6916,7 +6905,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>694d6998-e206-4f52-bf27-f2d0a2f6c923</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_initActCartPos[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7025,7 +7013,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>6b87d6e4-9dcd-483e-86f6-ae13337451b2</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_initActCartPos[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7134,7 +7121,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>14a8faf2-aea6-477f-99e9-b7c2d10dc7aa</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_initActCartPos[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7243,7 +7229,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>db0d81eb-2500-4f39-8beb-1901e2609c05</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_initActCartPos[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7352,7 +7337,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>00dee6a0-683f-462f-a0c6-58542ef00391</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_adjustStartTime</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7461,7 +7445,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>bd66871b-179d-435b-bcc9-a9c66d8004f1</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdMotorEncoder</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7570,7 +7553,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>cdb5092c-a361-4e90-800f-82bc48741538</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_motorEncoder</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7679,7 +7661,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>1a2756e1-6c54-4b56-86de-9f9b87761414</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_actJntPos[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7788,7 +7769,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c3257946-5adf-4b47-b6bf-626cb7d41f95</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_actJntPos[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -7897,7 +7877,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>e18ca1a4-c002-4108-9f70-29c743e668ed</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_actJntPos[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -8006,7 +7985,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>b548f24d-1d52-4a12-84bf-b8797e0d9dad</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_actJntPos[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -8115,7 +8093,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>30cdbef5-465e-447f-994a-ea3ad8d60e09</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_motorEncoder (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -8124,15 +8101,15 @@
                       <Name>None</Name>
                       <ScaleFactor>1</ScaleFactor>
                       <SourceUnitPrefix>none</SourceUnitPrefix>
-                      <SourceUnitString />
+                      <SourceUnitString></SourceUnitString>
                       <Symbol>1</Symbol>
-                      <TargetUnitString />
+                      <TargetUnitString></TargetUnitString>
                       <TargetUnitValue>0</TargetUnitValue>
                     </Transformation>
                     <Unit>
-                      <BaseUnitString />
+                      <BaseUnitString></BaseUnitString>
                       <BaseUnitValue>0</BaseUnitValue>
-                      <NameExtension />
+                      <NameExtension></NameExtension>
                       <Offset>0</Offset>
                       <Prefix>none</Prefix>
                       <ReturnText> (None) </ReturnText>
@@ -8143,10 +8120,10 @@
                     <UnitScaleResult>1</UnitScaleResult>
                     <UserUnit>
                       <BaseName>UnitOfOne</BaseName>
-                      <BaseUnitString />
+                      <BaseUnitString></BaseUnitString>
                       <BaseUnitValue>0</BaseUnitValue>
                       <Name>None</Name>
-                      <NameExtension />
+                      <NameExtension></NameExtension>
                       <Offset>0</Offset>
                       <Prefix>none</Prefix>
                       <ScaleFactor>1</ScaleFactor>
@@ -8224,7 +8201,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>f365d30b-c291-4067-8e16-8ab929de305c</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdMotorEncoder (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -8233,15 +8209,15 @@
                       <Name>None</Name>
                       <ScaleFactor>1</ScaleFactor>
                       <SourceUnitPrefix>none</SourceUnitPrefix>
-                      <SourceUnitString />
+                      <SourceUnitString></SourceUnitString>
                       <Symbol>1</Symbol>
-                      <TargetUnitString />
+                      <TargetUnitString></TargetUnitString>
                       <TargetUnitValue>0</TargetUnitValue>
                     </Transformation>
                     <Unit>
-                      <BaseUnitString />
+                      <BaseUnitString></BaseUnitString>
                       <BaseUnitValue>0</BaseUnitValue>
-                      <NameExtension />
+                      <NameExtension></NameExtension>
                       <Offset>0</Offset>
                       <Prefix>none</Prefix>
                       <ReturnText> (None) </ReturnText>
@@ -8252,10 +8228,10 @@
                     <UnitScaleResult>1</UnitScaleResult>
                     <UserUnit>
                       <BaseName>UnitOfOne</BaseName>
-                      <BaseUnitString />
+                      <BaseUnitString></BaseUnitString>
                       <BaseUnitValue>0</BaseUnitValue>
                       <Name>None</Name>
-                      <NameExtension />
+                      <NameExtension></NameExtension>
                       <Offset>0</Offset>
                       <Prefix>none</Prefix>
                       <ScaleFactor>1</ScaleFactor>
@@ -8323,11 +8299,13 @@
           <Title>AxisGroup_769</Title>
         </AxisGroup>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-657931</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>bd210df9-a070-4b81-b09b-674f698ada72</Guid>
           <Name>Axis Group</Name>
+          <ShowTitle>False</ShowTitle>
           <SortPriority>12</SortPriority>
           <SubMember>
             <RefGuid-TimeAxis>32d65e57-5cc1-4afd-a6db-0748acb3270d</RefGuid-TimeAxis>
@@ -8345,21 +8323,24 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
+                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-14803426</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-14803426</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>6c5f1c29-4dd9-4baf-a18d-dc7354b112a2</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style (3)</Name>
                   <Precision>6</Precision>
-                  <ShowName>false</ShowName>
+                  <ShowName>False</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_1173</Title>
+                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -8434,7 +8415,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>27ff937f-91e8-4363-a241-77f32c266975</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartState</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -8487,7 +8467,10 @@
           <Title>AxisGroup_1169</Title>
         </AxisGroup>
       </SubMember>
+      <TimeOffset>0</TimeOffset>
+      <TimeRefreshMode>Explicit</TimeRefreshMode>
       <Title>YTChart_755</Title>
+      <TriggerGroupOffset>0</TriggerGroupOffset>
     </YTChart>
     <TriggerModule AssemblyName="TwinCAT.Measurement.Scope.API.Model">
       <Comment />
@@ -8504,7 +8487,6 @@
   <Title>ScopeProject_3</Title>
   <UseAutoSave>false</UseAutoSave>
   <UseFileStore>true</UseFileStore>
-  <UseUserSettings>true</UseUserSettings>
   <Version>1.0.0.3</Version>
   <ViewDetailLevel>Default</ViewDetailLevel>
 </ScopeProject>

@@ -340,6 +340,10 @@ FOR i:=1 TO g_sArmNum DO
 				ELSE
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
 				END_IF
+				// to adjust
+				IF (m_slaveArms[i].adjustOn) THEN
+					m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
+				END_IF
 			END_IF
 			
 		// init
@@ -844,6 +848,8 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="628" Count="0" />
       <LineId Id="630" Count="0" />
       <LineId Id="629" Count="0" />
+      <LineId Id="770" Count="0" />
+      <LineId Id="767" Count="2" />
       <LineId Id="352" Count="1" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />

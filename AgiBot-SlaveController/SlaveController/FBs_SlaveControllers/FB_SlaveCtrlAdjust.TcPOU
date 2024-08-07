@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCtrlAdjust" Id="{065dc40e-4d51-49bc-8f28-94a80cbbd0fd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlAdjust EXTENDS FB_SlaveArmCtrlBase
@@ -80,7 +80,9 @@ END_VAR
 VAR_IN_OUT 
 	r_slaveArmCtrlCmd :ST_SlaveArmCtrlCmds;
 END_VAR
-
+VAR
+	i :INT;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
@@ -89,6 +91,14 @@ m_holdLastCmds := checkToHoldLastCmds(i_slaveArm);
 //init
 SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
 
+// disable joints if this joint is an unrecoverable failure
+FOR i:=1 TO g_sJntNum DO
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, 0, 3] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_slaveArm.armIdx, i+g_setupJntNum, 3] THEN
+		m_jntEnableFlag[i] := 0;
+	ELSE
+		m_jntEnableFlag[i] := 1;
+	END_IF
+END_FOR
 
 // joint 1/2/3/7 run in torque mode
 m_jntOPMode[1]:=DriverOPMode_Trq;
@@ -146,6 +156,8 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="84" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="86" Count="0" />
+      <LineId Id="158" Count="6" />
+      <LineId Id="157" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="69" Count="0" />

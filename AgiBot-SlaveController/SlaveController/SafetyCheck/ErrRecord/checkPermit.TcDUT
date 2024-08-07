@@ -13,10 +13,10 @@ STRUCT
 	m_armJntFollowErr :ARRAY [1..13] OF BOOL;
 	m_jntVelErr :ARRAY [1..13] OF BOOL;
 	m_jntCurrentErr :ARRAY [1..13] OF BOOL;
+	m_jntCurrentCtrlErr :ARRAY [1..13] OF BOOL;
 	m_fixedPointErr :BOOL;
 	m_cmdJntSaltation:ARRAY [1..13] OF BOOL;
 	m_spacePoseErr:ARRAY [1..6] OF BOOL;
-	m_instruSingularity:BOOL;
 	m_instruOpenAngle:BOOL;
 	
 

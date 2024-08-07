@@ -14,11 +14,11 @@ STRUCT
 	m_EtherCATState:ARRAY [1..g_maxArmJoint] OF ST_EtherCATState;		
 	m_rcpCheck : BOOL;
 	m_spacePoseErr : vec6d;				
-	m_instruPitch:LREAL;				
+	m_cmdArmPos : 	vec6d;		
 	m_instruOpenAngle:LREAL;		
 	
-	m_promptStatus:ARRAY [1..20] OF BOOL;
-	m_promptLocation:ARRAY [1..20] OF UDINT;
+	m_promptStatus:ARRAY [1..30] OF BOOL;
+	m_promptLocation:ARRAY [1..30] OF UDINT;
 	
 	
 	SlaveStopButton:BOOL;

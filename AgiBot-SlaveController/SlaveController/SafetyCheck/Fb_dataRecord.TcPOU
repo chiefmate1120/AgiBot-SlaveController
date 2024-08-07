@@ -18,7 +18,9 @@ VAR
 	mErr:ARRAY [0..MAX_CSV_COLUMNS] OF STRING(255);
 	StartRecord:ARRAY[1..g_maxNum] OF R_TRIG;
 	RecordCompletion:ARRAY[1..g_maxNum] OF F_TRIG;
-
+	errFlagDelay1s :ARRAY [1..g_maxNum] OF TON;
+	ErrWritingAllowed :ARRAY [1..g_maxNum] OF BOOL:=[5(FALSE)];
+	
 	fbSysTime	: 	GETSYSTEMTIME;
 	tFileTime	:	T_FILETIME;  
 	
@@ -284,21 +286,22 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i:=1 TO 5 BY 1 DO
+FOR i:=1 TO g_maxNum BY 1 DO
 	IF g_ArrayErrCodeArm[i][0]<>0 AND ArrayErrCodeTypeLast[i]<> g_ArrayErrCodeArm[i][0]  THEN
-		Arm:=SHR(g_ArrayErrCodeArm[i][0],24)-3;
-		IF Arm>5 THEN
-			Arm:=5;	
+		arm:=SHR(g_ArrayErrCodeArm[i][0],24)-3;
+		IF arm>g_maxNum THEN
+			arm:=g_maxNum;	
 		END_IF
-		Joint:=SHR(g_ArrayErrCodeArm[i][0],16) AND 16#FF;
-		ErrID:=g_ArrayErrCodeArm[i][0];
-		mErrNameLocation[Arm,1]:=LREAL_TO_FMTSTR(Arm,0, TRUE);
-		mErrNameLocation[Arm,2]:=LREAL_TO_FMTSTR(Joint,0, TRUE);
-		mErrNameLocation[Arm,3]:=LREAL_TO_FMTSTR(ErrID,0, TRUE);
-		m_Index[Arm]:=INT_TO_UDINT(Index[Arm]);
-		ErrWritingFalg[Arm]:=TRUE;
+		Joint:=SHR(g_arrayErrCodeArm[i][0],16) AND 16#FF;
+		ErrID:=g_arrayErrCodeArm[i][0];
+		mErrNameLocation[arm,1]:=LREAL_TO_FMTSTR(Arm,0, TRUE);
+		mErrNameLocation[arm,2]:=LREAL_TO_FMTSTR(Joint,0, TRUE);
+		mErrNameLocation[arm,3]:=DWORD_TO_HEXSTR(UDINT_TO_DWORD(ErrID),0, TRUE);
+		m_Index[arm]:=INT_TO_UDINT(Index[arm]);
+		errWritingAllowed[arm]:=TRUE;
 	END_IF
 	ArrayErrCodeTypeLast[i]:=g_ArrayErrCodeArm[i][0];
+	errFlagDelay1s[i](IN:= errWritingAllowed[i], PT:= T#2S, Q=> errWritingFalg[i], ET=> );
 END_FOR
 ]]></ST>
       </Implementation>
@@ -373,6 +376,7 @@ END_VAR
 	gCSV_Buffer[_iBuffer].aBuffer[Index[_iBuffer]][1]:=LREAL_TO_FMTSTR(Index[_iBuffer],0, TRUE); 
 	
 	(*The first line shows the arm joint and the error name*)
+	mErrNameLocation[_iBuffer,0] := INT_TO_STRING(Index[_iBuffer]);
 	gCSV_Buffer[_iBuffer].aBuffer[0][0] := mErrNameLocation[_iBuffer,0];
 	gCSV_Buffer[_iBuffer].aBuffer[0][1] := mErrNameLocation[_iBuffer,1];
 	gCSV_Buffer[_iBuffer].aBuffer[0][2] := mErrNameLocation[_iBuffer,2];
@@ -405,23 +409,20 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-
-	
-	IF gCSV_Buffer[_iBuffer].bFull THEN
-
-		gCSV_Buffer[_iBuffer].fbWriter(bWrite:= gCSV_Buffer[_iBuffer].bFull,sFileName:=gCSV_Buffer[_iBuffer].sPath, pBuffer :=ADR(gCSV_Buffer[_iBuffer].aBuffer),Index:=m_Index[_iBuffer]);
-		gCSV_Buffer[_iBuffer].bFull := gCSV_Buffer[_iBuffer].fbWriter.bBusy;
-	END_IF
+IF gCSV_Buffer[_iBuffer].bFull THEN
+	gCSV_Buffer[_iBuffer].fbWriter(bWrite:= gCSV_Buffer[_iBuffer].bFull,sFileName:=gCSV_Buffer[_iBuffer].sPath, pBuffer :=ADR(gCSV_Buffer[_iBuffer].aBuffer),Index:=m_Index[_iBuffer]);
+	gCSV_Buffer[_iBuffer].bFull := gCSV_Buffer[_iBuffer].fbWriter.bBusy;
+END_IF
 
 
-	RecordCompletion[_iBuffer](CLK:= gCSV_Buffer[_iBuffer].bFull, Q=> );
-	IF RecordCompletion[_iBuffer].Q THEN
-		ErrWritingFalg[_iBuffer]:=FALSE;
-		Index[_iBuffer]:=2;
-		gCSV_Buffer[_iBuffer].aBuffer:=iZeroRowsData;
-		g_ArrayErrCodeArm[_iBuffer]:=iZeroErrCode[_iBuffer];
-		//gCSV_Buffer[_iBuffer].fbWriter.arrDataForward(array_in:=Robot_Status.ArrayErrCodeType[_iBuffer]  , array_out=> Robot_Status.ArrayErrCodeType[_iBuffer]);
-	END_IF
+RecordCompletion[_iBuffer](CLK:= gCSV_Buffer[_iBuffer].bFull, Q=> );
+IF RecordCompletion[_iBuffer].Q THEN
+	errWritingAllowed[_iBuffer]:=FALSE;
+	Index[_iBuffer]:=2;
+	gCSV_Buffer[_iBuffer].aBuffer:=iZeroRowsData;
+	g_ArrayErrCodeArm[_iBuffer]:=iZeroErrCode[_iBuffer];
+	//gCSV_Buffer[_iBuffer].fbWriter.arrDataForward(array_in:=Robot_Status.ArrayErrCodeType[_iBuffer]  , array_out=> Robot_Status.ArrayErrCodeType[_iBuffer]);
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -493,7 +494,9 @@ END_VAR
       <LineId Id="23" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="25" Count="0" />
-      <LineId Id="10" Count="9" />
+      <LineId Id="10" Count="8" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="19" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.run">
@@ -510,12 +513,16 @@ END_VAR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.TransferToWrittenVariable">
-      <LineId Id="6" Count="27" />
+      <LineId Id="6" Count="5" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="12" Count="21" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="Fb_dataRecord.writerCSV">
-      <LineId Id="6" Count="3" />
-      <LineId Id="17" Count="13" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="18" Count="6" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="26" Count="4" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

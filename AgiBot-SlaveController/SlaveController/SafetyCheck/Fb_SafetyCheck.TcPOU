@@ -26,6 +26,7 @@ VAR
 	
 	m_curJntTorqueIOlast :ARRAY [1..g_maxArmNum] OF vec13di;  
 	m_cmdJntPosLast : ARRAY [1..g_maxArmNum] OF vec13d;  
+	m_curJntPosLast : ARRAY [1..g_maxArmNum] OF vec13d;  
 	m_cartCurJntTorqueIOlast :vec8di;  
 	m_cartCmdJntPosLast : vec8d;  
 	o_ErrCode:ARRAY [1..3] OF UDINT;
@@ -536,7 +537,7 @@ END_FOR
 
 //关节运动超限位
 FOR i:=1 TO g_setupJntNum BY 1 DO
-	m_checkDelay[i_ArmId].T_outOfLimit[i](IN:= (i_setupJointData.m_curJntPos[i_armId][i]>=g_maxJntPos[i_armId,i] OR i_setupJointData.m_curJntPos[i_armId][i]<=g_minJntPos[i_armId,i]) AND m_checkPermit[i_ArmId].m_outOfLimit[i] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_outOfLimit[i](IN:= (i_setupJointData.m_curJntPos[i_armId][i]>=(g_maxJntPos[i_armId,i]+g_armJntPosLimitBuffer[i]) OR i_setupJointData.m_curJntPos[i_armId][i]<=(g_minJntPos[i_armId,i]-g_armJntPosLimitBuffer[i])) AND m_checkPermit[i_ArmId].m_outOfLimit[i] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_outOfLimit[i].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#3006, m_unrcvLevel );
 	END_IF
@@ -600,7 +601,7 @@ END_FOR
 //不动点发生变化监控
 m_checkDelay[i_ArmId].T_FixedPointErr(IN:=  i_safetyCheckVar[i_ArmId].m_rcpCheck AND m_checkPermit[i_ArmId].m_fixedPointErr, PT:=m_checkDelayTime.Ti_FixedPointErr , Q=> , ET=> );
 IF m_checkDelay[i_ArmId].T_FixedPointErr.Q THEN
-	errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2007, m_rcvLevel );
+	errCodeAssign(i_ArmId, i_ArmId+3,  0, 0, 16#2007, m_rcvLevel );
 END_IF
 
 
@@ -613,9 +614,21 @@ FOR i:=1 TO g_sJntNum BY 1 DO
 END_FOR
 
 
+//Deviation between command current and feedback current
+FOR i:=1 TO g_sJntNum BY 1 DO
+	IF ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_current)> g_jntCurrentCtrlLimit[i]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i] THEN
+		errCodeAssign(i_armId, i_armId+3, 0, i, 16#200B, m_rcvLevel );
+	END_IF
+END_FOR
 
 
-
+//motor encoder mutation detection
+FOR i:=1 TO g_sJntNum BY 1 DO
+	IF (i_safetyCheckVar[i_armId].m_setupDriverInput[i].m_motorEncoder - m_curJntPosLast[i_armId][i])>g_maxJntCurSalta[i] THEN
+		errCodeAssign(i_armId, i_ArmId+3, 0, i, 16#200C, m_rcvLevel );
+	END_IF
+	m_curJntPosLast[i_armId][i] := i_safetyCheckVar[i_armId].m_setupDriverInput[i].m_motorEncoder;
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -671,7 +684,7 @@ END_FOR
 
 //关节运动超限位
 FOR i:=1 TO g_sJntNum BY 1 DO
-	m_checkDelay[i_ArmId].T_outOfLimit[i+g_setupJntNum](IN:= (i_slaveJointData.m_curJntPos[i_armId][i]>=g_maxJntPos[i_armId,i+g_setupJntNum] OR i_slaveJointData.m_curJntPos[i_armId][i]<=g_minJntPos[i_armId,i+g_setupJntNum]) AND m_checkPermit[i_ArmId].m_outOfLimit[i+g_setupJntNum] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
+	m_checkDelay[i_ArmId].T_outOfLimit[i+g_setupJntNum](IN:= (i_slaveJointData.m_curJntPos[i_armId][i]>=(g_maxJntPos[i_armId,i+g_setupJntNum]+g_armJntPosLimitBuffer[i+g_setupJntNum]) OR i_slaveJointData.m_curJntPos[i_armId][i]<=(g_minJntPos[i_armId,i+g_setupJntNum]-g_armJntPosLimitBuffer[i+g_setupJntNum])) AND m_checkPermit[i_ArmId].m_outOfLimit[i+g_setupJntNum] , PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_outOfLimit[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#3006, m_unrcvLevel );
 	END_IF
@@ -749,15 +762,26 @@ FOR i:=1 TO g_sJntNum BY 1 DO
 END_FOR
 
 
-//器械在奇异区域内
-IF (i_safetyCheckVar[i_ArmId].m_instruPitch> g_maxInstruPitch OR i_safetyCheckVar[i_ArmId].m_instruPitch< g_minInstruPitch) AND m_checkPermit[i_ArmId].m_instruSingularity THEN
-	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200E, m_rcvLevel );
-END_IF
+//Deviation between command current and feedback current
+FOR i:=1 TO g_sJntNum BY 1 DO
+	IF ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i+g_setupJntNum].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i+g_setupJntNum].m_current)> g_jntCurrentCtrlLimit[i+g_setupJntNum]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i+g_setupJntNum] THEN
+		errCodeAssign(i_armId, i_armId+3, 0, i+g_setupJntNum, 16#200B, m_rcvLevel );
+	END_IF
+END_FOR
+
+
+//motor encoder mutation detection
+FOR i:=1 TO g_sJntNum BY 1 DO
+	IF (i_safetyCheckVar[i_armId].m_setupDriverInput[i+g_setupJntNum].m_motorEncoder - m_curJntPosLast[i_armId][i+g_setupJntNum])>g_maxJntCurSalta[i+g_setupJntNum] THEN
+		errCodeAssign(i_armId, i_ArmId+3, 0, i+g_setupJntNum, 16#200C, m_rcvLevel );
+	END_IF
+	m_curJntPosLast[i_armId][i+g_setupJntNum] := i_safetyCheckVar[i_armId].m_setupDriverInput[i+g_setupJntNum].m_motorEncoder;
+END_FOR
 
 
 //器械张开角度过大或过小
 IF (i_safetyCheckVar[i_ArmId].m_instruOpenAngle> g_maxInstruOpen OR i_safetyCheckVar[i_ArmId].m_instruOpenAngle< g_minInstruOpen) AND m_checkPermit[i_ArmId].m_instruOpenAngle THEN
-	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200F, m_rcvLevel );
+	errCodeAssign(i_ArmId, i_ArmId+3, 0, 0, 16#200D, m_rcvLevel );
 END_IF
 
 
@@ -803,7 +827,7 @@ END_IF
 
 
 //prompt message
-FOR i:=1 TO 20 BY 1 DO
+FOR i:=1 TO 30 BY 1 DO
 	PromptMassCode( i_safetyCheckVar[i_ArmId].m_promptStatus[i], i_ArmId,  i,  i_safetyCheckVar[i_ArmId].m_promptLocation[i]);
 END_FOR
 
@@ -1052,8 +1076,11 @@ END_FOR
       <LineId Id="317" Count="0" />
       <LineId Id="291" Count="0" />
       <LineId Id="288" Count="0" />
+      <LineId Id="401" Count="4" />
       <LineId Id="279" Count="0" />
-      <LineId Id="275" Count="1" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="415" Count="6" />
+      <LineId Id="276" Count="0" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">
@@ -1110,10 +1137,14 @@ END_FOR
       <LineId Id="164" Count="1" />
       <LineId Id="367" Count="0" />
       <LineId Id="317" Count="0" />
+      <LineId Id="418" Count="0" />
+      <LineId Id="391" Count="1" />
+      <LineId Id="395" Count="0" />
+      <LineId Id="398" Count="1" />
+      <LineId Id="396" Count="1" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="409" Count="6" />
       <LineId Id="166" Count="0" />
-      <LineId Id="192" Count="1" />
-      <LineId Id="196" Count="0" />
-      <LineId Id="198" Count="1" />
       <LineId Id="201" Count="2" />
       <LineId Id="206" Count="0" />
       <LineId Id="208" Count="1" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -133,11 +133,22 @@ END_VAR
 VAR_IN_OUT 
 	r_setupArmCtrlCmd :ST_SetupArmCtrlCmds;
 END_VAR
-
+VAR
+	i : INT;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_setupArm,r_setupArmCtrlCmd);
 m_jnt5EnableTime :=0;
+
+// disable joints if this joint is an unrecoverable failure
+FOR i:=1 TO g_setupJntNum DO
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, 0, 3] OR  SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_setupArm.armIdx, i+g_setupJntNum, 3] THEN
+		m_jntEnableFlag[i] := 0;
+	ELSE
+		m_jntEnableFlag[i] := 1;
+	END_IF
+END_FOR
 ]]></ST>
       </Implementation>
     </Method>
@@ -213,6 +224,8 @@ jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,
     <LineIds Name="FB_SetupCtrlManualAdjust.init">
       <LineId Id="57" Count="0" />
       <LineId Id="66" Count="0" />
+      <LineId Id="76" Count="7" />
+      <LineId Id="75" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.jnt3Friction">

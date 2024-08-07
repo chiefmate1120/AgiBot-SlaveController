@@ -33,6 +33,9 @@ STRUCT
 	
 	// electric Knife Pedal Trigger 
 	m_electricKnifePedalTrigger : ARRAY [1..2] OF UINT;
+	
+	//Attempt to enter master-slave control 
+	m_tryMSControl : ARRAY [1..2] OF INT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

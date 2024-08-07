@@ -5,8 +5,8 @@
   <Children>
     <Node>
       <Title>cartJointData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Robot\sRobotCrlsoftware\VerHistory\yangxuezun\NewSfteware\AgiBot-SlaveController0731\Scope-SlaveController\cartJointData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>D:\AgiBot-SlaveController\Scope-SlaveController\cartJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -269,12 +269,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>adjust</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -455,7 +455,7 @@
             </Node>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -540,7 +540,7 @@
             </Node>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -564,7 +564,7 @@
     <Node>
       <Title>SetupGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Robot\sRobotCrlsoftware\VerHistory\yangxuezun\NewSfteware\AgiBot-SlaveController0731\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1072,7 +1072,7 @@
     <Node>
       <Title>SlaveGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Robot\sRobotCrlsoftware\VerHistory\yangxuezun\NewSfteware\AgiBot-SlaveController0731\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1580,7 +1580,7 @@
     <Node>
       <Title>SlaveJointData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Robot\sRobotCrlsoftware\VerHistory\yangxuezun\NewSfteware\AgiBot-SlaveController0731\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <FileName>D:\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>

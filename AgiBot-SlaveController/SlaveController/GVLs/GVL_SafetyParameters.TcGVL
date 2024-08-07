@@ -8,7 +8,7 @@ VAR_GLOBAL
 	
 	// arm joint safety error
 	g_armMaxJntEncErr :vec13d:=[g_largeNum, g_largeNum, 0.010, 4(3*g_deg2Rad), 0.010, 5(10*g_deg2Rad)];
-	g_armMaxJntFollowErr :vec13d:=[g_largeNum, g_largeNum, 0.010, 4(5*g_deg2Rad), 0.010, 5(180*g_deg2Rad)];
+	g_armMaxJntFollowErr :vec13d:=[g_largeNum, g_largeNum, 0.010, 4(5*g_deg2Rad), 0.010, 5(170*g_deg2Rad)];
 	
 	//arm joint link encoder maximum and minimum values
 	g_maxLinkEnc : vec13di:=[16777215, 2(67108863), 10(16777215)];
@@ -19,6 +19,9 @@ VAR_GLOBAL
 	
 	// arm joint safety error
 	g_safetyJntVel : vec13d:=[2(g_largeNum), 1.0, pi, pi, pi, pi, 0.6, 5(4*pi)];
+	
+	// joint limit buffer(outside of joint limit)
+	g_armJntPosLimitBuffer :vec13d:=[10.0*g_deg2Rad,2(0.05),4(10.0*g_deg2Rad), 0.05, 5(0)];
 	
 	// joint position limit
 	g_minJntPos: ARRAY[1..g_sArmNum,  1..g_maxArmJoint] OF LREAL:=[ (-140-50)*g_deg2Rad, 0.779-0.36,0.00,-1.2351,-1.6, -2.7,	-1.5-pi/2,	0.23, 5(-g_largeNum),
@@ -37,7 +40,10 @@ VAR_GLOBAL
 	g_rcpDeviationThres :LREAL := 0.005;
 	
 	//max joint commend  saltation
-	g_maxJntCmdSalta : vec13d:=[2(g_largeNum), 0.010, 5(3*g_deg2Rad), 5(35*g_deg2Rad)];
+	g_maxJntCmdSalta : vec13d:=[2(g_largeNum), 0.010, 5(5*g_deg2Rad), 5(35*g_deg2Rad)];
+	
+	//max joint encoder current  saltation
+	g_maxJntCurSalta : vec13d:=[2(g_largeNum), 11(60000)];
 	
 	// setup joint limit buffer(outside of joint limit)
 	g_setupJntPosLimitBuffer :Vec5d := [5.0*g_deg2Rad, 0.01, 0.01,  2(5.0*g_deg2Rad)];
@@ -45,15 +51,14 @@ VAR_GLOBAL
 	// slave arm cartesion control safety error 
 	g_maxCartPoseErr :ARRAY [1..6] OF LREAL:=[0.010,0.010,0.010,90*g_deg2Rad,90*g_deg2Rad,90*g_deg2Rad];
 	
-	//instrument pitching joint maximum and minimum values
-	g_maxInstruPitch:LREAL:=-5*g_deg2Rad; 
-	g_minInstruPitch:LREAL:=-175*g_deg2Rad;
-	
 	//instrument open angle maximum and minimum values
 	g_maxInstruOpen:LREAL;
 	g_minInstruOpen:LREAL;
 	
 	g_motPhieErrLimit:DINT:=20000;
+	
+	//motor deviation between command current and feedback current limit
+	g_jntCurrentCtrlLimit : vec13d:=[2(g_largeNum), 1680, 1140, 3(1680), 200, 5(g_largeNum)];
 	
 	// cart joint safety check limit
 	g_cartMaxJntEncErr :Vec8d:=[0.01,0.01,3*g_deg2Rad,3*g_deg2Rad,0.01,3*g_deg2Rad,0.01,3*g_deg2Rad];
