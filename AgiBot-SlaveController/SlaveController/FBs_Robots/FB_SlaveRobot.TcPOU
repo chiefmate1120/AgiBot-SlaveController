@@ -340,10 +340,10 @@ FOR i:=1 TO g_sArmNum DO
 				ELSE
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
 				END_IF
-				// to adjust
-				IF (m_slaveArms[i].adjustOn) THEN
-					m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
-				END_IF
+			END_IF
+			// to adjust
+			IF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 			
 		// init
@@ -623,7 +623,7 @@ FOR i:=1 TO g_sArmNum DO
 	IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Disable;
 	// error check
-	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN
+	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] AND NOT m_slaveArms[i].adjustOn THEN
 		m_nextSlaveArmState[i]:=SlaveArmState_Error;
 	END_IF
 END_FOR]]></ST>
@@ -848,9 +848,10 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="628" Count="0" />
       <LineId Id="630" Count="0" />
       <LineId Id="629" Count="0" />
-      <LineId Id="770" Count="0" />
-      <LineId Id="767" Count="2" />
-      <LineId Id="352" Count="1" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="778" Count="2" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="781" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="634" Count="0" />

@@ -76,6 +76,7 @@ r_cartStatus.m_sdrivingLeverSensorManualFlag :=NOT m_slaveCart.m_drivingLeverSen
 //r_cartStatus.m_stabilizerDeployedFlag
 r_cartStatus.m_trocarOnFlag := m_slaveCart.m_trocarOnFlag;
 r_cartStatus.m_joystickValue := m_slaveCart.m_joystickSignal;
+r_cartStatus.m_jntPosReachLimit := m_cartAdjust.jntPosReachLimit;
 
 r_cartJointsData.m_cmdJntPos := m_slaveCart.cmdJntPos;
 r_cartJointsData.m_cmdJntVel := m_slaveCart.cmdJntVel;
@@ -311,6 +312,7 @@ END_IF
       <LineId Id="39" Count="0" />
       <LineId Id="35" Count="1" />
       <LineId Id="34" Count="0" />
+      <LineId Id="48" Count="0" />
       <LineId Id="24" Count="1" />
       <LineId Id="27" Count="2" />
       <LineId Id="15" Count="0" />

@@ -158,6 +158,12 @@
               <Children />
             </Node>
             <Node>
+              <Title>m_initPosInc[5]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
               <Title>m_joystickSignal[5]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
@@ -545,6 +551,32 @@
               <Children>
                 <Node>
                   <Title>m_cartState</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+              </Children>
+            </Node>
+          </Children>
+        </Node>
+        <Node>
+          <Title>YT Chart (1)</Title>
+          <Expanded>False</Expanded>
+          <FileName></FileName>
+          <Children>
+            <Node>
+              <Title>Axis Group (2)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children>
+                <Node>
+                  <Title>m_initPosInc[5]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_tarPosInc[5] (1)</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />

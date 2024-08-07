@@ -14,6 +14,7 @@ STRUCT
 	T_jntCurrentErr:ARRAY [1..13] OF TON;
 	T_fixedPointErr:TON;
 	T_spacePoseErr:ARRAY [1..13] OF TON;
+	T_jntCmdSalta:ARRAY [1..13] OF TON;
 	
 	T_cartJntEncErr:ARRAY [1..8] OF TON;
 	T_cartDriveErr:ARRAY [1..8] OF TON;

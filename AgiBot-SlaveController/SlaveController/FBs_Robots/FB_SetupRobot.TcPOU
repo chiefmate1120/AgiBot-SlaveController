@@ -241,7 +241,7 @@ END_VAR]]></Declaration>
 	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
 		m_nextSetupArmState[i] := SetupArmState_Disable;
 	// error check
-	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
+	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] AND NOT (m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0) THEN
 		m_nextSetupArmState[i]:=SetupArmState_Error;
 	END_IF
 	

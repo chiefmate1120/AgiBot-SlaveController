@@ -25,6 +25,8 @@ STRUCT
 	Ti_fixedPointErr:TIME:=T#0.1S;
 	//space pose error  delay time
 	Ti_spacePoseErr:TIME:=T#0.1S;
+	//commend joint position saltation delay time
+	Ti_jntCmdSaltationErr:TIME:=T#0.002S;
 
 	
 	Ti_CarDualEncDev:TIME:=T#0.02S;

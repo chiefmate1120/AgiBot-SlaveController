@@ -15,12 +15,15 @@ VAR
 	m_joystickVelInc: Vec8d;
 	m_actJntPos: Vec8d;
 	m_tarPosInc: Vec8d;
+	m_lastPosInc: Vec8d;
 	m_tarCartPos: Vec8d;
 	m_trajJntPos : Vec8d;
 	m_tarJntPos : Vec8d;
 	m_initActJntPos: Vec8d;
 	m_initActCartPos: Vec8d;
 	m_veiwAngle : LREAL;
+	m_jntPosReachLimit : Vec8b;
+	m_maxJntPos : vec8d;
 
 	m_carJntSoftwareLimit :ARRAY [5..8] OF LREAL := [0.005, 2*g_deg2Rad, 0.005, 2*g_deg2Rad];
 	
@@ -58,6 +61,7 @@ m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 1);
 m_actJntPos := i_slaveCart.curJntPos;
 m_actJntPos[7] := i_slaveCart.curJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos;
 m_veiwAngle := m_actJntPos[6] + m_actJntPos[8];
+m_jntEnableFlag := faultDetect();
 
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:= 1 TO 4 BY 1 DO
@@ -65,7 +69,6 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 		m_joystickVelInc[i+4] := m_joystickSignal[i]/m_joystickRange*m_joystickDir[i+4]*GVL_CartControlParameters.g_maxCartVel[i];
 		m_tarPosInc[i+4] := m_tarPosInc[i+4] + m_joystickVelInc[i+4] * g_cartCtrlCycleTime;
 	END_FOR
-	
 	
 	m_tarCartPos[5] := m_initActJntPos[5] + m_tarPosInc[5];
 	IF i_slaveCart.m_ctrlEnable.camera_joysticks_enable THEN
@@ -86,17 +89,49 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	m_trajJntPos[7] := m_tarCartPos[7]/COS(m_trajJntPos[6]) - GVL_CartControlParameters.g_curBeamStretchJntInitPos;
 	m_trajJntPos[8] := m_tarCartPos[8] -  (m_trajJntPos[6] - m_initActJntPos[6]);
 	
-	
-	
-	m_tarJntPos[5] := LIMIT(GVL_CartMotorParameters.g_minJntPos[5] + m_carJntSoftwareLimit[5], m_trajJntPos[5], GVL_CartMotorParameters.g_maxJntPos[5] - m_carJntSoftwareLimit[5]) ;
-	m_tarJntPos[6] := LIMIT(GVL_CartMotorParameters.g_minJntPos[6] + m_carJntSoftwareLimit[6], m_trajJntPos[6], GVL_CartMotorParameters.g_maxJntPos[6] - m_carJntSoftwareLimit[6]);
-	m_tarJntPos[7] := LIMIT(GVL_CartMotorParameters.g_minJntPos[7] + m_carJntSoftwareLimit[7], m_trajJntPos[7], GVL_CartMotorParameters.g_maxJntPos[7] - m_carJntSoftwareLimit[7]);
-	m_tarJntPos[8] := LIMIT(GVL_CartMotorParameters.g_minJntPos[8] + m_carJntSoftwareLimit[8], m_trajJntPos[8], GVL_CartMotorParameters.g_maxJntPos[8] - m_carJntSoftwareLimit[8]);
-	
-	FOR i := 5 TO 8 BY 1 DO
+	m_jntPosReachLimit := calcCmdReachLimit(i);
+	FOR i := 5 TO 8 DO 
+		m_tarJntPos[i] := LIMIT(GVL_CartMotorParameters.g_minJntPos[i] + m_carJntSoftwareLimit[i], m_trajJntPos[i], GVL_CartMotorParameters.g_maxJntPos[i] - m_carJntSoftwareLimit[i]) ;
 		m_jntOTG[i].run(i_targetPos:= m_tarJntPos[i], i_targetVel:= 0.0, o_cmdAcc=> , o_cmdVel=> , o_cmdPos=>m_cmdJntPos[i] );
 	END_FOR
 END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdReachLimit" Id="{e76fd30f-25e0-41dc-af4d-968e139e9a99}">
+      <Declaration><![CDATA[METHOD calcCmdReachLimit : vec8b
+VAR_INPUT
+	i : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF (GVL_CartMotorParameters.g_minJntPos[i] + m_carJntSoftwareLimit[i]) >= m_trajJntPos[i] THEN
+	IF (m_tarPosInc[i] - m_lastPosInc[i]) <0 THEN
+		m_tarPosInc[i] := m_lastPosInc[i];
+	END_IF
+	calcCmdReachLimit[i] := TRUE;
+
+ELSIF m_trajJntPos[i]>=(m_maxJntPos[i] - m_carJntSoftwareLimit[i]) THEN
+	IF (m_tarPosInc[i] - m_lastPosInc[i]) >0 THEN
+		m_tarPosInc[i] := m_lastPosInc[i];
+	END_IF
+	calcCmdReachLimit[i] := TRUE;
+ELSE
+	calcCmdReachLimit[i] := FALSE;
+END_IF
+m_lastPosInc[i] := m_tarPosInc[i];]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="faultDetect" Id="{3eb1df66-8f34-4507-9d11-b4ccf2531ade}">
+      <Declaration><![CDATA[METHOD faultDetect : vec8i
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[faultDetect[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
+faultDetect[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{4b0bf65e-8ba0-42dd-a86b-a06390c00e49}">
@@ -132,6 +167,10 @@ m_jntOPMode[8]:= DriverOPMode_Pos;
 m_joystickSignal := g_zeroVec8d;
 m_tarPosInc := g_zeroVec8d;
 m_trajJntPos := g_zeroVec8d;
+m_jntPosReachLimit := g_zeroVec8b;
+
+m_maxJntPos := GVL_CartMotorParameters.g_maxJntPos;
+m_maxJntPos[5] := i_slaveCart.m_cartDataFromUI.m_standColumnHightLimit;
 
 m_initActJntPos:=m_cmdJntPos;//i_slaveCart.curJntPos;
 m_initActCartPos[6] := (m_initActJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos) * SIN(m_initActJntPos[6]);
@@ -146,6 +185,17 @@ m_adjustStartTime := 0;
 copyCmds(r_cartCtrlCmd);]]></ST>
       </Implementation>
     </Method>
+    <Property Name="jntPosReachLimit" Id="{51d24024-552f-4b38-b701-ac99486b032c}">
+      <Declaration><![CDATA[PROPERTY jntPosReachLimit : vec8b]]></Declaration>
+      <Get Name="Get" Id="{5e4c83bb-bb62-4b31-9724-5c08126a2d99}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntPosReachLimit := m_jntPosReachLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <LineIds Name="FB_CartCtrlAdjust">
       <LineId Id="52" Count="0" />
       <LineId Id="9" Count="0" />
@@ -156,6 +206,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="29" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="33" Count="0" />
+      <LineId Id="190" Count="0" />
       <LineId Id="30" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="13" Count="0" />
@@ -163,8 +214,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="27" Count="0" />
       <LineId Id="96" Count="0" />
       <LineId Id="20" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="55" Count="0" />
+      <LineId Id="189" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="37" Count="0" />
@@ -178,14 +228,20 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="110" Count="1" />
       <LineId Id="84" Count="2" />
       <LineId Id="82" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="49" Count="1" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="68" Count="1" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="133" Count="0" />
       <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlAdjust.calcCmdReachLimit">
+      <LineId Id="9" Count="14" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlAdjust.faultDetect">
+      <LineId Id="7" Count="2" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.init">
       <LineId Id="106" Count="0" />
@@ -206,6 +262,9 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="41" Count="0" />
       <LineId Id="120" Count="0" />
       <LineId Id="47" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="134" Count="1" />
+      <LineId Id="133" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="75" Count="0" />
       <LineId Id="77" Count="0" />
@@ -214,6 +273,9 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="57" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlAdjust.jntPosReachLimit.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

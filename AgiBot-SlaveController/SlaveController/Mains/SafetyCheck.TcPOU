@@ -205,6 +205,9 @@ FOR i := 1 TO g_maxArmNum DO
 END_FOR
 
 FOR j:=1 TO  g_cartJntNum DO
+	m_checkVariable[5].EmergencyStop := m_emergencyStopButton;
+	m_checkVariable[5].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[5].SlaveStopButton := m_stopButton;
 	m_checkVariable[5].m_cartDriverInput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorInputs;
 	m_checkVariable[5].m_cartDriverOutput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorOutputs;
 	m_checkVariable[5].m_cartEtherCATState[j] := m_EtherCATCheck[5,j].EtherCATVerify(g_cartNetID,g_cartJointNetPort[j]);
@@ -330,7 +333,7 @@ FOR i := 1 TO 4 DO
 	
 	//0*1032   //0*102A
 	m_armsRS[i,10](SET:= m_slaveStatus.m_instruInstallStatus[i] AND NOT m_slaveStatus.m_trocarOnFlag[i], 
-							RESET1:= NOT m_slaveStatus.m_instruInstallStatus[i], 
+							RESET1:= NOT m_armsRS[i,10].SET, 
 							Q1=> m_checkVariable[i].m_promptStatus[10]);
 	m_checkVariable[i].m_promptLocation[10] := i + 3;	
 	
@@ -414,6 +417,12 @@ m_cartRS[21](SET:= m_cartStatus.m_trocarOnFlag>0 AND m_uiCtrlAdjustFlag,
 						RESET1:= m_cartStatus.m_trocarOnFlag=0 OR NOT m_uiCtrlAdjustFlag, 
 						Q1=> m_checkVariable[g_cartNum].m_promptStatus[21]);
 m_checkVariable[g_cartNum].m_promptLocation[21] := g_cartNum + 3;
+
+//0*1036
+m_cartRS[22](SET:= m_cartStatus.m_jntPosReachLimit[5] OR m_cartStatus.m_jntPosReachLimit[6] OR m_cartStatus.m_jntPosReachLimit[7] OR m_cartStatus.m_jntPosReachLimit[8], 
+						RESET1:= NOT m_cartRS[22].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[22]);
+m_checkVariable[g_cartNum].m_promptLocation[22] := g_cartNum + 3;
 
 						
 ]]></ST>
@@ -525,7 +534,10 @@ END_IF
       <LineId Id="196" Count="0" />
       <LineId Id="139" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="221" Count="3" />
+      <LineId Id="221" Count="1" />
+      <LineId Id="261" Count="1" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="223" Count="1" />
       <LineId Id="241" Count="0" />
       <LineId Id="176" Count="0" />
       <LineId Id="164" Count="0" />
@@ -631,6 +643,9 @@ END_IF
       <LineId Id="126" Count="0" />
       <LineId Id="273" Count="0" />
       <LineId Id="127" Count="6" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="285" Count="3" />
+      <LineId Id="284" Count="0" />
       <LineId Id="150" Count="0" />
       <LineId Id="140" Count="0" />
       <LineId Id="110" Count="0" />

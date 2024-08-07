@@ -21,6 +21,8 @@ STRUCT
 	
 	m_joystickValue : vec8d;
 	
+	m_jntPosReachLimit : vec8b;
+	
 	m_inMotion : BOOL := false;
 END_STRUCT
 END_TYPE
