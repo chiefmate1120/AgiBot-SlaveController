@@ -357,45 +357,45 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{373594A3-D4B5-0FC1-2D05-29243340037F}" AutoDeleteType="true">ST_ui_control</Name>
+			<Name GUID="{3BE06785-156A-0262-F052-1E0FBA89FE0E}" AutoDeleteType="true">ST_uiControl</Name>
 			<BitSize>48</BitSize>
 			<SubItem>
-				<Name>draping_enable</Name>
+				<Name>m_drapingEnable</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[台车自动摆位---姿态调整为建立无菌屏障时所需状态--结束后给定结束信号]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>docking_enable</Name>
+				<Name>m_dockingEnable</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[台车自动摆位---姿态调整为进入无菌区时所需状态（器械对接姿态）--结束后给定结束信号]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>8</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>stow_enable</Name>
+				<Name>m_packageEnable</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[所有机械臂收纳使能]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>16</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>joysticks_enable</Name>
+				<Name>m_joystickEnable</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[通过手柄按钮，任意拖动机械臂所有关节]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>24</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>camera_joysticks_enable</Name>
+				<Name>m_cameraJoystickEnable</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[相机界面中的使能按钮]]></Comment>
 				<BitSize>8</BitSize>
 				<BitOffs>32</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>limit_height_adjusting</Name>
+				<Name>m_heightLimitAdjustEnable</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<Comment><![CDATA[限制高度调整，true:使能，false:禁止]]></Comment>
 				<BitSize>8</BitSize>
@@ -421,7 +421,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{FFE12057-E628-3113-5501-59B438103B6E}" AutoDeleteType="true">ST_CartStatus</Name>
 			<Comment><![CDATA[ Output from cart control task
  Input to slave arm control task  ]]></Comment>
 			<BitSize>768</BitSize>
@@ -466,7 +466,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>m_uiControl</Name>
-				<Type GUID="{373594A3-D4B5-0FC1-2D05-29243340037F}">ST_ui_control</Type>
+				<Type GUID="{3BE06785-156A-0262-F052-1E0FBA89FE0E}">ST_uiControl</Type>
 				<BitSize>48</BitSize>
 				<BitOffs>80</BitOffs>
 			</SubItem>
@@ -2075,7 +2075,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
+							<Type GUID="{FFE12057-E628-3113-5501-59B438103B6E}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
@@ -2628,7 +2628,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
+							<Type GUID="{FFE12057-E628-3113-5501-59B438103B6E}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
@@ -2812,7 +2812,7 @@
 						<Var>
 							<Name>SafetyCheck.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
+							<Type GUID="{FFE12057-E628-3113-5501-59B438103B6E}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
@@ -2907,7 +2907,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
+							<Type GUID="{FFE12057-E628-3113-5501-59B438103B6E}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
@@ -2979,7 +2979,7 @@
 						<Var>
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
+							<Type GUID="{FFE12057-E628-3113-5501-59B438103B6E}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartJointsData</Name>

@@ -94,14 +94,14 @@ readErrFlag();
 m_SafetyCheck.errCodeUpdating();
 
 //The fault code is sent to the UI
-GVL_com_upper_PC.error_ID_type3:=m_SafetyCheck.o_ErrCode[3];
-GVL_com_upper_PC.error_ID_type2:=m_SafetyCheck.o_ErrCode[2];
-GVL_com_upper_PC.error_ID_type1:=m_SafetyCheck.o_ErrCode[1];
+GVL_interactUI.g_errIdType3:=m_SafetyCheck.o_ErrCode[3];
+GVL_interactUI.g_errIdType2:=m_SafetyCheck.o_ErrCode[2];
+GVL_interactUI.g_errIdType1:=m_SafetyCheck.o_ErrCode[1];
 
 //clear fault
-IF GVL_com_upper_PC.clear_Cart_fault=1 THEN
+IF GVL_interactUI.g_uiFaultReset=1 THEN
 	m_SafetyCheck.errFlagReset();
-	GVL_com_upper_PC.clear_Cart_fault := 0;
+	GVL_interactUI.g_uiFaultReset := 0;
 END_IF
 
 //robot record information
@@ -175,7 +175,7 @@ END_VAR]]></Declaration>
 FOR i := 1 TO g_maxArmNum DO
 	//emergency stop 、stop button and ui stop 
 	m_checkVariable[i].EmergencyStop := m_emergencyStopButton;
-	m_checkVariable[i].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[i].PCStopButton := GVL_interactUI.g_stopButtonFormUI;
 	m_checkVariable[i].SlaveStopButton := m_stopButton;
 	//m_SafetyCheck.AlarmVar[i].MasterStopButton
 	
@@ -206,7 +206,7 @@ END_FOR
 
 FOR j:=1 TO  g_cartJntNum DO
 	m_checkVariable[5].EmergencyStop := m_emergencyStopButton;
-	m_checkVariable[5].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[5].PCStopButton := GVL_interactUI.g_stopButtonFormUI;
 	m_checkVariable[5].SlaveStopButton := m_stopButton;
 	m_checkVariable[5].m_cartDriverInput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorInputs;
 	m_checkVariable[5].m_cartDriverOutput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorOutputs;
@@ -403,7 +403,7 @@ m_cartRS[19](SET:= m_cartStatus.m_sdrivingLeverSensorManualFlag,
 m_checkVariable[g_cartNum].m_promptLocation[19] := g_cartNum + 3;
 
 //0*102C   //0*1034
-m_uiCtrlJoystickEnable := m_cartStatus.m_uiControl.camera_joysticks_enable OR m_cartStatus.m_uiControl.joysticks_enable;
+m_uiCtrlJoystickEnable := m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_joystickEnable;
 m_joysticksTrigger := joystickAdjust(m_cartStatus.m_joystickValue);
 m_cartRS[20](SET:= m_cartStatus.m_trocarOnFlag=0 AND NOT m_uiCtrlJoystickEnable AND m_joysticksTrigger, 
 						RESET1:= NOT m_cartRS[20].SET, 
@@ -411,8 +411,8 @@ m_cartRS[20](SET:= m_cartStatus.m_trocarOnFlag=0 AND NOT m_uiCtrlJoystickEnable 
 m_checkVariable[g_cartNum].m_promptLocation[20] := g_cartNum + 3;
 					
 //0*102B   //0*1035
-m_uiCtrlAdjustFlag := m_cartStatus.m_uiControl.camera_joysticks_enable OR m_cartStatus.m_uiControl.docking_enable OR m_cartStatus.m_uiControl.draping_enable
-							OR m_cartStatus.m_uiControl.joysticks_enable OR m_cartStatus.m_uiControl.stow_enable;
+m_uiCtrlAdjustFlag := m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_dockingEnable OR m_cartStatus.m_uiControl.m_drapingEnable
+							OR m_cartStatus.m_uiControl.m_joystickEnable OR m_cartStatus.m_uiControl.m_packageEnable;
 m_cartRS[21](SET:= m_cartStatus.m_trocarOnFlag>0 AND m_uiCtrlAdjustFlag, 
 						RESET1:= m_cartStatus.m_trocarOnFlag=0 OR NOT m_uiCtrlAdjustFlag, 
 						Q1=> m_checkVariable[g_cartNum].m_promptStatus[21]);
@@ -435,15 +435,15 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-IF (GVL_com_upper_PC.current_error_type=3) THEN
+IF (GVL_interactUI.g_curErrType=3) THEN
 	warningTone[1] := TRUE;
 	warningTone[2] := FALSE;
 	warningTone[3] := FALSE;
-ELSIF (GVL_com_upper_PC.current_error_type=2) THEN
+ELSIF (GVL_interactUI.g_curErrType=2) THEN
 	warningTone[1] := FALSE;
 	warningTone[2] := TRUE;
 	warningTone[3] := FALSE;
-ELSIF  (GVL_com_upper_PC.current_error_type=1) THEN
+ELSIF  (GVL_interactUI.g_curErrType=1) THEN
 	warningTone[1] := FALSE;
 	warningTone[2] := FALSE;
 	warningTone[3] := TRUE;

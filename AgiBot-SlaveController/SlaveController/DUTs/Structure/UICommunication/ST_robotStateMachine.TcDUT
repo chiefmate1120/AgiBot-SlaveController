@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_robotStateMachine" Id="{eacf3ae3-4e42-4e69-9949-1ccf58239b23}">
+    <Declaration><![CDATA[TYPE ST_robotStateMachine :
+STRUCT
+	m_stateMachineCart : INT;
+	m_stateMachineArm1 : INT;
+	m_stateMachineArm2 : INT;
+	m_stateMachineArm3 : INT;
+	m_stateMachineArm4 : INT;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

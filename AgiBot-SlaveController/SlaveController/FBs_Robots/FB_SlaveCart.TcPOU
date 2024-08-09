@@ -64,7 +64,7 @@ VAR
 	//update ui information
 	m_joystickSignal:Vec8d;
 	m_cartDataFromUI : ST_CartUIData;
-	m_ctrlEnable : ST_UI_control;
+	m_ctrlEnable : ST_uiControl;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -152,7 +152,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="ctrlEnable" Id="{a3baaf86-b572-478d-828a-8abd1832149b}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY ctrlEnable : REFERENCE TO ST_UI_control]]></Declaration>
+      <Declaration><![CDATA[PROPERTY ctrlEnable : REFERENCE TO ST_uiControl]]></Declaration>
       <Get Name="Get" Id="{088e36f0-64b1-4fec-9db7-8ed59d586fe5}">
         <Declaration><![CDATA[VAR
 END_VAR

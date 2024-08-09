@@ -6,7 +6,6 @@
 TYPE ST_SlaveUIData :
 STRUCT
 	m_slaveArmDisableFlag :ARRAY[1..4] OF BOOL:=[4(FALSE)];
-	m_useNumFromUI : ARRAY[1..4] OF UINT:=[4(0)];
 	m_instruUsageWrite :ARRAY[1..4] OF BOOL:=[4(FALSE)];
 END_STRUCT
 END_TYPE

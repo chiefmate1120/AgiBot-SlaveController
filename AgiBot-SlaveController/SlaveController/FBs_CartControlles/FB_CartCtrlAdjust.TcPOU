@@ -71,7 +71,7 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	END_FOR
 	
 	m_tarCartPos[5] := m_initActJntPos[5] + m_tarPosInc[5];
-	IF i_slaveCart.m_ctrlEnable.camera_joysticks_enable THEN
+	IF i_slaveCart.m_ctrlEnable.m_cameraJoystickEnable THEN
 		m_tarCartPos[6] := m_initActCartPos[6] + m_tarPosInc[6]*COS(m_veiwAngle)+m_tarPosInc[7]*SIN(m_veiwAngle);
 		m_tarCartPos[7] := m_initActCartPos[7] - m_tarPosInc[6]*SIN(m_veiwAngle)+m_tarPosInc[7]*COS(m_veiwAngle);
 	ELSE
@@ -80,7 +80,7 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	END_IF
 	m_tarCartPos[8] := m_initActJntPos[8] + m_tarPosInc[8];
 	
-	IF i_slaveCart.m_ctrlEnable.limit_height_adjusting THEN
+	IF i_slaveCart.m_ctrlEnable.m_heightLimitAdjustEnable THEN
 		m_trajJntPos[5] := m_tarCartPos[5];
 	ELSE
 		m_trajJntPos[5] := LIMIT(GVL_CartMotorParameters.g_minJntPos[5], m_tarCartPos[5], MAX(m_actJntPos[5],i_slaveCart.m_cartDataFromUI.m_standColumnHightLimit));

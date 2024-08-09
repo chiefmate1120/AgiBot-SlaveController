@@ -17,7 +17,7 @@ STRUCT
 	
 	m_trocarOnFlag :INT;
 
-	m_uiControl : ST_ui_control;
+	m_uiControl : ST_uiControl;
 	
 	m_joystickValue : vec8d;
 	

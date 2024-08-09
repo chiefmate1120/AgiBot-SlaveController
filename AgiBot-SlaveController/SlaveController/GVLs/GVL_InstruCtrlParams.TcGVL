@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_InstruCtrlParams" Id="{f4067b3b-1600-41bf-bbfc-2a09113afeea}">
     <Declaration><![CDATA[// NOTICE： Use m_instruTypeIdx in FB_Instrument as the array index to get data below
 {attribute 'global_init_slot' := '49991'}

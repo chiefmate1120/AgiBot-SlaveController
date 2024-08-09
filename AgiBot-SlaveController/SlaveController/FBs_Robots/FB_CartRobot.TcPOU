@@ -65,13 +65,12 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-r_cartStatus.m_CartState :=m_cartState;
+        <ST><![CDATA[r_cartStatus.m_CartState :=m_cartState;
 r_cartStatus.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveRobot.m_panelMountedFlag[1] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[2]
 																									AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[3] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[4];
 
-r_cartStatus.m_uiControl := GVL_com_upper_PC.ui_control;
-r_cartStatus.m_cartDumpEnergy := GVL_com_upper_PC.battery_power_value;
+r_cartStatus.m_uiControl := GVL_interactUI.g_uiCtrlEnable;
+r_cartStatus.m_cartDumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
 r_cartStatus.m_sdrivingLeverSensorManualFlag :=NOT m_slaveCart.m_drivingLeverSensorManual;
 //r_cartStatus.m_stabilizerDeployedFlag
 r_cartStatus.m_trocarOnFlag := m_slaveCart.m_trocarOnFlag;
@@ -188,9 +187,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-m_hangAdjustAllowed := m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable);
-m_asepticDeploymentAllowed := m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND m_slaveCart.cartDockingState=0) 
-												OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable AND m_slaveCart.cartDrapingState=0)) AND NOT ( i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) ;
+m_hangAdjustAllowed := m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable);
+m_asepticDeploymentAllowed := m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND m_slaveCart.cartDockingState=0) 
+												OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable AND m_slaveCart.cartDrapingState=0)) AND NOT ( i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) ;
 m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  m_carHandChassisDriveUnlock[1] AND m_carHandChassisDriveUnlock[2] AND NOT i_cartDataPool.m_safetyData.m_cartWheelErr;
 m_rotaOverhangAllowed := m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 0 AND NOT i_cartDataPool.m_safetyData.m_cartOverhangErr;
 
@@ -246,22 +245,22 @@ CASE m_cartState OF
 		
 		
 	CartJointState_HangAdjust:
-		IF  m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable ) THEN
+		IF  m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable ) THEN
 			m_nextCartState :=CartJointState_SlowStop;
 		END_IF
 		
 		
 	CartJointState_AsepticDeployment:
 		IF m_cartCtrl.isFinished  THEN
-			IF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable THEN
+			IF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable THEN
 				m_slaveCart.cartDockingState := 1;
-			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable THEN
+			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable THEN
 				m_slaveCart.cartDrapingState := 1;
 			END_IF
 			m_nextCartState :=CartJointState_SlowStop;
 		ELSIF i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr THEN
 			m_nextCartState :=CartJointState_Ready;
-		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable) THEN
+		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable) THEN
 			m_nextCartState :=CartJointState_SlowStop;
 		END_IF
 		
@@ -302,21 +301,8 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.getStatus">
-      <LineId Id="14" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="35" Count="1" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="24" Count="1" />
-      <LineId Id="27" Count="2" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="30" Count="1" />
+      <LineId Id="57" Count="17" />
+      <LineId Id="31" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.init">
       <LineId Id="121" Count="0" />

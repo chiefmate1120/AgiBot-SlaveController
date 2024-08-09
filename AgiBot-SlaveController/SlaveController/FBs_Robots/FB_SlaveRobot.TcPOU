@@ -682,10 +682,10 @@ FOR i:=1 TO g_sArmNum DO
 	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
 		
 		// update command endoscope posture from UI
-		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
-			IF GVL_com_upper_PC.scope_up_down = 1 THEN
+		IF GVL_interactUI.g_scopeUpDown <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
+			IF GVL_interactUI.g_scopeUpDown = 1 THEN
 				m_slaveArms[i].instrument.nextScopePosture := EndoScopePosture_HeadDown;
-			ELSIF  GVL_com_upper_PC.scope_up_down = 2 THEN
+			ELSIF  GVL_interactUI.g_scopeUpDown = 2 THEN
 				m_slaveArms[i].instrument.nextScopePosture := EndoscopePosture_HeadUp;
 			END_IF
 		END_IF
@@ -693,9 +693,9 @@ FOR i:=1 TO g_sArmNum DO
 		// update current endoscope posture to UI
 		IF m_slaveArms[i].instrument.curScopePosture <> m_lastEndoScopePostureRobot THEN
 			IF m_slaveArms[i].instrument.curScopePosture = EndoScopePosture_HeadDown THEN
-				GVL_com_upper_PC.scope_up_down := 1 ;
+				GVL_interactUI.g_scopeUpDown := 1 ;
 			ELSIF  m_slaveArms[i].instrument.curScopePosture = EndoScopePosture_HeadUp THEN
-				GVL_com_upper_PC.scope_up_down := 2;
+				GVL_interactUI.g_scopeUpDown := 2;
 			END_IF
 		END_IF
 		m_lastEndoScopePostureRobot := m_slaveArms[i].instrument.curScopePosture;
@@ -703,7 +703,7 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 END_FOR
 
-m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
+m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
 ]]></ST>
       </Implementation>
     </Method>

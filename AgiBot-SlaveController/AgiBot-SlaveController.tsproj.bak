@@ -412,10 +412,19 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{6FECEA42-0F55-A88C-4B21-7808A7187B7F}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{638FD889-B72C-4618-6678-F8CDBABB9D1B}" AutoDeleteType="true">Vec8b</Name>
+			<BitSize>64</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>8</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}" AutoDeleteType="true">ST_CartStatus</Name>
 			<Comment><![CDATA[ Output from cart control task
  Input to slave arm control task  ]]></Comment>
-			<BitSize>704</BitSize>
+			<BitSize>768</BitSize>
 			<SubItem>
 				<Name>m_CartState</Name>
 				<Type GUID="{BE347C9B-50A4-E901-71DE-2E1334C83CC4}">E_CartJointState</Type>
@@ -468,10 +477,16 @@
 				<BitOffs>128</BitOffs>
 			</SubItem>
 			<SubItem>
+				<Name>m_jntPosReachLimit</Name>
+				<Type GUID="{638FD889-B72C-4618-6678-F8CDBABB9D1B}">Vec8b</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>640</BitOffs>
+			</SubItem>
+			<SubItem>
 				<Name>m_inMotion</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>640</BitOffs>
+				<BitOffs>704</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -2060,7 +2075,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{6FECEA42-0F55-A88C-4B21-7808A7187B7F}">ST_CartStatus</Type>
+							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_setupStatus</Name>
@@ -2613,7 +2628,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{6FECEA42-0F55-A88C-4B21-7808A7187B7F}">ST_CartStatus</Type>
+							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_setupJnt3Gravity</Name>
@@ -2797,7 +2812,7 @@
 						<Var>
 							<Name>SafetyCheck.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{6FECEA42-0F55-A88C-4B21-7808A7187B7F}">ST_CartStatus</Type>
+							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
@@ -2892,7 +2907,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{6FECEA42-0F55-A88C-4B21-7808A7187B7F}">ST_CartStatus</Type>
+							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_safetyData</Name>
@@ -2964,7 +2979,7 @@
 						<Var>
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{6FECEA42-0F55-A88C-4B21-7808A7187B7F}">ST_CartStatus</Type>
+							<Type GUID="{1A523F18-BA1F-72C7-54CA-BF630CC5CCF9}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartJointsData</Name>
@@ -9548,7 +9563,6 @@
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_setupJointData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_slaveJointsData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointsData" VarB="TaskCartControl Outputs^CartControl.m_cartJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupJointsData" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_setupStatus" VarB="TaskSetupArmControl Outputs^SetupArmControl.m_setupStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_slaveJointData" VarB="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveJointsData"/>

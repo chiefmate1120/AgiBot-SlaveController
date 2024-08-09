@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_CartUIData" Id="{8a7b800d-dda3-4ddf-b29a-44439086ce40}">
     <Declaration><![CDATA[TYPE ST_CartUIData :
 STRUCT
 	m_joystickDataFromUI:ARRAY [0..21] OF USINT;
-	m_ctrlEnableFromUI:ST_UI_control;
+	m_ctrlEnableFromUI:ST_uiControl;
 	m_standColumnHightLimit :LREAL;
 	m_surgicalSite : UINT;
 	m_surgicalLocation : UINT;

@@ -220,22 +220,16 @@
     <Compile Include="DUTs\Structure\ST_InstruKinematicParam.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_cart_operation.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_cartOperation.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_DH.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_instruInfomation.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_instrument_info.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_robotStateMachine.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_scope_info.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_state_machine_com.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_ui_control.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_uiControl.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Mat34.TcDUT">
@@ -656,7 +650,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
+    <Compile Include="GVLs\GVL_interactUI.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
