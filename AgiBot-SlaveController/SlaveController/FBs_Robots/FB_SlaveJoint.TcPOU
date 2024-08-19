@@ -136,7 +136,7 @@ IF m_jntIdx <3 THEN
 END_IF
 
 // write driver operation mode if it changs
-IF  m_jntIdx >=3 AND m_jntIdx <=7 THEN
+IF  m_jntIdx >=3 AND m_jntIdx <=8 THEN
 	m_opModeSDOWrite(sNetID:= GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[m_armIdx],
 					nSlaveAddr := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[m_armIdx,m_jntIdx],
 					nSubIndex:=0,nIndex:=SDOSubIndexMode,pSrcBuf:=ADR(m_motorOutputs.m_opMode),cbBufLen:=SIZEOF(m_motorOutputs.m_opMode),bExecute:=TRUE);
@@ -191,21 +191,7 @@ END_IF
       <LineId Id="62" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveJoint.writeSDOData">
-      <LineId Id="160" Count="12" />
-      <LineId Id="209" Count="0" />
-      <LineId Id="173" Count="2" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="195" Count="0" />
-      <LineId Id="194" Count="0" />
-      <LineId Id="176" Count="5" />
-      <LineId Id="196" Count="0" />
-      <LineId Id="199" Count="0" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="200" Count="0" />
-      <LineId Id="183" Count="4" />
-      <LineId Id="101" Count="0" />
-      <LineId Id="201" Count="0" />
-      <LineId Id="65" Count="2" />
+      <LineId Id="216" Count="39" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

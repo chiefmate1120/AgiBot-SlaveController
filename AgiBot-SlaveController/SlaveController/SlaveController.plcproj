@@ -674,6 +674,26 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\configs\robot6\GVL_CartJointEncoderCaliData_6.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot6\GVL_SetupArmDynamics_6.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot6\GVL_SetupJointEncoderCaliData_6.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot6\GVL_SlaveArmDynamics_6.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\configs\robot6\GVL_SlaveJointEncoderCaliData_6.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\GVL_CartParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -876,6 +896,7 @@
     <Folder Include="FBs_Robots" />
     <Folder Include="GVLs\CartJoints" />
     <Folder Include="GVLs\configs" />
+    <Folder Include="GVLs\configs\robot6" />
     <Folder Include="GVLs\configs\robot3" />
     <Folder Include="GVLs\configs\robot5" />
     <Folder Include="GVLs\configs\robot4" />

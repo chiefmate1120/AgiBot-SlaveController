@@ -301,11 +301,11 @@ CASE m_yawJntCaliStatus OF
 		END_IF
 	
 	2:// calculate center/calibarted positio
-		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2;
+		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2+g_instruYawBackslash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;;
 		m_yawJntCaliStatus := 3;
 
 	3:
-		IF ABS(m_targetMountPos[jntIdx]-curJntPos[jntIdx]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh  THEN
+		IF ABS(m_targetMountPos[jntIdx]-curJntPos[jntIdx]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
 			m_yawJntCaliStatus := -1;
 		END_IF
 		
@@ -396,36 +396,33 @@ CASE m_yawJntCaliStatus OF
 		END_IF
 		
 	2:// calculate center/calibarted position
-		m_targetMountPos[4] := (m_jntLimitPos1 + m_jntLimitPos3)/2;
-		m_targetMountPos[5] := (m_jntLimitPos2 + m_jntLimitPos4)/2;
+		m_targetMountPos[4] := (m_jntLimitPos1 + m_jntLimitPos3)/2-g_instruYawBackslash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
+		m_targetMountPos[5] := (m_jntLimitPos2 + m_jntLimitPos4)/2+g_instruYawBackslash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
 		m_yawJntCaliStatus := 3;
 
 	3:
-		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh  AND
-			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolHigh  THEN
+		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
+			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
+			m_targetMountPos[4] := curJntPos[4]+g_instruYawBackslash[i_slaveArm.instrument.m_instruTypeIdx];
 			m_yawJntCaliStatus := 4;
 		END_IF
 		
-	// close finger
+	// close finger	
 	4:
-		//buckle panel with instrument
-		FOR i:=4 TO 5 DO
-			// check if buckled 
-			IF i_slaveArm.filtJntCurrent[i]> m_fingerCloseCurrent THEN 
-				m_jointMounted[i]:=TRUE;
-				m_targetMountPos[i]:=curJntPos[i];
-				m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
-			END_IF
-			
-			// set target joint position
-			IF FALSE = m_jointMounted[i] THEN
-				m_targetMountPos[i]:=curJntPos[i]+m_mountMotionAng;
-			END_IF
-		END_FOR
+		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
+			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
+				m_targetMountPos[4] := curJntPos[4]+g_gripperCloseAng;
+				m_targetMountPos[5] := curJntPos[5]+g_gripperCloseAng;
+			m_yawJntCaliStatus := 5;
+		END_IF
 		
-		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+
+	5:
+		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
+			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
 			m_yawJntCaliStatus := -1;
 		END_IF
+
 END_CASE
 
 // traj plan
@@ -517,61 +514,11 @@ m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cm
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_finger">
-      <LineId Id="177" Count="0" />
-      <LineId Id="171" Count="0" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="71" Count="2" />
-      <LineId Id="146" Count="1" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="77" Count="0" />
-      <LineId Id="149" Count="0" />
-      <LineId Id="79" Count="1" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="152" Count="9" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="174" Count="1" />
-      <LineId Id="126" Count="1" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="137" Count="3" />
-      <LineId Id="142" Count="3" />
+      <LineId Id="187" Count="43" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_gripper">
-      <LineId Id="177" Count="4" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="227" Count="5" />
-      <LineId Id="274" Count="3" />
-      <LineId Id="273" Count="0" />
-      <LineId Id="233" Count="4" />
-      <LineId Id="279" Count="1" />
-      <LineId Id="278" Count="0" />
-      <LineId Id="238" Count="0" />
-      <LineId Id="302" Count="5" />
-      <LineId Id="241" Count="0" />
-      <LineId Id="191" Count="2" />
-      <LineId Id="283" Count="16" />
-      <LineId Id="256" Count="1" />
-      <LineId Id="308" Count="5" />
-      <LineId Id="203" Count="0" />
-      <LineId Id="323" Count="0" />
-      <LineId Id="314" Count="0" />
-      <LineId Id="317" Count="0" />
-      <LineId Id="324" Count="0" />
-      <LineId Id="318" Count="3" />
-      <LineId Id="325" Count="0" />
-      <LineId Id="322" Count="0" />
-      <LineId Id="214" Count="0" />
-      <LineId Id="326" Count="0" />
-      <LineId Id="328" Count="18" />
-      <LineId Id="327" Count="0" />
-      <LineId Id="215" Count="3" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="219" Count="2" />
+      <LineId Id="357" Count="98" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
