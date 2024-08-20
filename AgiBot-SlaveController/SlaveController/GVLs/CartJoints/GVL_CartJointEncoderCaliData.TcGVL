@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_CartJointEncoderCaliData" Id="{e961c27a-267b-45f9-b932-ee757f51bf27}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot5 --joints parameters of setup arms
 VAR_GLOBAL
 	// absolute encoder value at minimal joint positon
-	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 39509461, 14558528, 57761547, 8171292];
+	g_minLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 12912698, 863216, 13187303, 654894];
 		 
 	// absolute encoder value at maximum joint positon
-	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 36724181, 577308, 59809539,7327520 ];
+	g_maxLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 10127418, 3841586, 15255509,16569304 ];
 	
 	// absolute encoder value at calibrated positon
-	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 39509461, 15956526, 59809539, 16172652];
+	g_caliLinkEncoder :ARRAY[1..g_cartJntNum] OF DINT :=[0, 0, 0, 0, 12912698, 2352401, 15255509, 8612099];
 	
 	 // if absolute encoder value cross zeros within joint motion range
-	g_linkEncZeroCross :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 1, 0, 1];
+	g_linkEncZeroCross :ARRAY[1..g_cartJntNum] OF INT :=[0, 0, 0, 0, 0, 0, 0, 1];
 		 
 
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position

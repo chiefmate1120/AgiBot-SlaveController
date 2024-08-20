@@ -1,35 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SetupJointEncoderCaliData" Id="{b3f4d34f-86a2-4a2a-bdea-e22925229212}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
-// Robot5 --joints parameters of setup arms
+// Robot6 --joints parameters of setup arms
 VAR_GLOBAL
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[10820860, 64919092, 57409031, 1851032, 1117696,
-		 15040796, 19250150, 52220472, 1865736, 5370968,
-		 15165364, 61524935, 56328180, 10224882, 1019944,
-		 12364020, 63250814, 55221937, 14440620, 5319980];
+		[15154005, 20642140, 2227846, 14466277, 9101921,
+		 7319087, 17242128, 3319013, 14513407, 4923413,
+		 1893735, 18952151, 5180416, 4939681, 4923413,
+		 9631079, 15529480, 1114624, 6100507, 13177989];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[6102024, 63534315, 56635702, 394750, 9155824,
-		 10329032, 17795974, 51417699, 303438, 13416490,
-		 10495464, 60071845, 55514393, 8671968, 9053316,
-		 7627212, 61793781, 54433447, 12871432, 13365450];
+		[3111223, 22098100, 3018537, 12898665, 1110933,
+		 12036590, 18682052, 4122128, 12917951, 13714539,
+		 6546979, 20395036, 14538137, 9477397, 13695977,
+		 14360335, 16982188, 1934331, 4520019, 5314321];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF DINT :=
-		[8479084, 63534315, 57409031, 9224498, 13527366,
-		 12606456, 17795974, 52220472, 9143734, 994974,
-		 12863028, 60071845, 56328180, 774190, 13414374,
-		 10068792, 61793781, 55221937, 5068940, 951234];
+		[746400, 20642329, 3019248, 5038400, 13414000,
+		 9701120, 17236017, 4139006, 4959720, 9316700,
+		 4250150, 18942693, 5244862, 9246550, 9290488,
+		 11982000, 15555555, 1917113, 13457900, 991280];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF INT :=
-		[0, 0, 0, 1, 1,
-		 0, 0, 0, 1, 1,
-		 0, 0, 0, 1, 1,
+		[1, 0, 0, 0, 1,
+		 0, 0, 0, 1, 0,
+		 0, 0, 0, 0, 0,
 		 0, 0, 0, 1, 1];
 		 
 //################ DO NOT modify parameters below ###########################

@@ -11,12 +11,14 @@ STRUCT
 	
 	//instrument arm in master-slave
 	m_instruInMasterSlave : BOOL;
-
+	
+	//master send  pedal active
+	m_pedalHover : BOOL;
+	
 	//0 : Passive instrument , 1 : unipolar instrument , 2 : bipolar instrument, 3 : ultrasound knife, 4 : endoscope
 	m_instruType : UINT;
 	
-	//master send  pedal hover and pedal active
-	m_pedalHover : BOOL;
+	//master send  pedal hover
 	m_pedalActive : UINT;
 	
 	//arm id
@@ -43,7 +45,7 @@ STRUCT
 	m_nameEn : STRING;
 	
 	//instrument Chinese name 
-	m_nameCh : STRING;
+	m_nameCh : WSTRING;
 	
 END_STRUCT
 END_TYPE

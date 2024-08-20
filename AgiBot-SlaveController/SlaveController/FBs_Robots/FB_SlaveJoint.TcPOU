@@ -104,7 +104,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[SUPER^.updateCmds(i_opMode, i_cmdPos, i_cmdTrq);
 
 // write SDO data
-//writeSDOData();
+writeSDOData();
 ]]></ST>
       </Implementation>
     </Method>

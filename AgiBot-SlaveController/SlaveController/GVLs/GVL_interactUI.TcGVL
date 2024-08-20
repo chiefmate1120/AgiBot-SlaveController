@@ -19,7 +19,7 @@ VAR_GLOBAL
 	g_heightLimitEnbale : BOOL;
 	
 	//ui control button enable
-	g_uiCtrlEnable : ST_uiControl;
+	g_uiCtrl : ST_uiControl;
 
 	//ui send reset fault
 	g_uiFaultReset : UINT;
@@ -34,7 +34,7 @@ VAR_GLOBAL
 	//instrument information
 	g_instruInformatiom :ARRAY[1..4] OF  ST_instruInfomation;
 	
-	//
+	//UPS power supply mode : line voltage supply : 1 , battery powered : 2
 	g_powerSupplyModeUPS : UINT;
 	
 	//UPS dump energy
@@ -55,10 +55,13 @@ VAR_GLOBAL
 	//PLC  version
 	g_plcVersion : STRING;	
 
+	//Surgical guidance
 	g_cartOperation : ST_cartOperation;
 	
+	//robot state  machine
 	g_armStateMachine : ST_robotStateMachine;
 	
+	//scope gravity angle
 	g_scopeGravityAngle : LREAL;
 	
 	//scope type
@@ -67,9 +70,14 @@ VAR_GLOBAL
 	//fault tone current error type : 0 No fault , 1 low-level , 2 medium-level , 3 height-level
 	g_curErrType : UINT;
 	
+	//30° endoscope face up or face down
 	g_scopeUpDown : UINT := 1;
 	
+	//joystick signal  read RS232 data from UI
 	g_joystickSignalArray : ARRAY[0..21] OF USINT;
+	
+	//joystick trigger
+	g_joysticksTrigger : BOOL;
 	
 	//0: init status 1: checking 2:check succeed 3: check failed
 	g_slaveSelfCheckStatus : UINT; 
@@ -92,6 +100,19 @@ VAR_GLOBAL
 	
 	//left-right eye switch、0Left eye , 1 right eye
 	g_switchLeftRightEye : INT;
+	
+	//the pop-up fault code is displayed
+	g_popupErrorArm1 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm2 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm3 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm4 : ARRAY [0..2] OF UDINT;
+	g_popupRefresh : ARRAY [1..4] OF UINT;
+	
+	//instrument out of sight
+	g_instruOutScope : ARRAY [1..4] OF BOOL;
+	
+	//arm is adjustment
+	g_armIsAdjustment : ARRAY [1..4] OF UINT;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

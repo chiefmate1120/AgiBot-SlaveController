@@ -13,6 +13,7 @@ VAR
 	
 	// instrument name
 	m_instruName : STRING:= g_instruNullName;
+	m_instruNameCH : WSTRING;
 	
 	// instrument type index, which is used to get relative parameters from global variable arrays
 	m_instruTypeIdx :INT:=0;
@@ -126,6 +127,7 @@ END_IF
 // instrument type and name
 m_instruType := m_onChipData.m_InstruID;
 m_instruName :=GVL_InstruCtrlParams.g_instruNameString[m_instruTypeIdx];
+m_instruNameCH := GVL_InstruCtrlParams.g_instruNameStringCH[m_instruTypeIdx];
 
 // check if instrument has one finger
 m_isSingleFinger :=  (m_instruType = InstruType_CauteryHook OR  m_instruType = InstruType_CauterySpatula );
@@ -539,6 +541,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[instruName := m_instruName;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="instruNameCH" Id="{fe4ca7cf-bcad-49ba-86fd-3ae926574c61}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruNameCH : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{27367f18-af3a-4bb4-875f-a9cbdbda8e9f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruNameCH := m_instruNameCH;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -1133,6 +1146,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="262" Count="0" />
       <LineId Id="217" Count="0" />
       <LineId Id="263" Count="2" />
+      <LineId Id="274" Count="0" />
       <LineId Id="216" Count="0" />
       <LineId Id="174" Count="0" />
       <LineId Id="219" Count="0" />
@@ -1217,6 +1231,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="220" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruName.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Instrument.instruNameCH.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruSreiesFind">

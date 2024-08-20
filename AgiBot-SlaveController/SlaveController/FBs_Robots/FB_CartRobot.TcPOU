@@ -69,7 +69,7 @@ END_VAR
 r_cartStatus.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveRobot.m_panelMountedFlag[1] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[2]
 																									AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[3] AND SlaveArmControl.m_slaveRobot.m_panelMountedFlag[4];
 
-r_cartStatus.m_uiControl := GVL_interactUI.g_uiCtrlEnable;
+r_cartStatus.m_uiControl := GVL_interactUI.g_uiCtrl;
 r_cartStatus.m_cartDumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
 r_cartStatus.m_sdrivingLeverSensorManualFlag :=NOT m_slaveCart.m_drivingLeverSensorManual;
 //r_cartStatus.m_stabilizerDeployedFlag

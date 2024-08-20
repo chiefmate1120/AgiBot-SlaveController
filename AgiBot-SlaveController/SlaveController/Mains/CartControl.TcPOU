@@ -71,14 +71,14 @@ END_VAR
         <ST><![CDATA[// cart Joystick data
 m_cartDataPool.m_UIData.m_joystickDataFromUI := GVL_interactUI.g_joystickSignalArray;
 
-m_cartDataPool.m_UIData.m_ctrlEnableFromUI := GVL_interactUI.g_uiCtrlEnable;
+m_cartDataPool.m_UIData.m_ctrlEnableFromUI := GVL_interactUI.g_uiCtrl;
 
 //limit_height:UINT;  上位机的高度值单位是mm，系统的高度值单位是m，底座高度是1850mm
 //打开ui_control.limit_height_adjusting后可以调整立柱，并实时将立柱当前高度上传
-IF (GVL_interactUI.g_uiCtrlEnable.m_heightLimitAdjustEnable=TRUE) THEN
+IF (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=TRUE) THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
 	GVL_interactUI.g_heightLimit :=LREAL_TO_UINT (m_cartRobot.m_slaveCart.curJntPos[5] * 1000 + 1850);
-ELSIF 	 (GVL_interactUI.g_uiCtrlEnable.m_heightLimitAdjustEnable=FALSE) AND GVL_interactUI.g_heightLimitEnbale AND ABS((m_cartDataPool.m_UIData.m_standColumnHightLimit *1000+1850)-GVL_interactUI.g_heightLimit)>5 THEN
+ELSIF 	 (GVL_interactUI.g_uiCtrl.m_heightLimitAdjustEnable=FALSE) AND GVL_interactUI.g_heightLimitEnbale AND ABS((m_cartDataPool.m_UIData.m_standColumnHightLimit *1000+1850)-GVL_interactUI.g_heightLimit)>5 THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := UINT_TO_LREAL(GVL_interactUI.g_heightLimit-1850)/1000;
 ELSIF GVL_interactUI.g_heightLimitEnbale=FALSE THEN
 	m_cartDataPool.m_UIData.m_standColumnHightLimit := GVL_CartMotorParameters.g_maxJntPos[5];
@@ -118,6 +118,7 @@ GVL_interactUI.g_trocarStatus := INT_TO_BOOL(m_cartRobot.m_slaveCart.m_trocarOnF
 
 GVL_interactUI.g_slaveRunAlone := NOT SlaveArmControl.m_slaveRobot.m_masterOnLine;
 GVL_interactUI.g_slaveRecoverErrFlag := 0;
+GVL_interactUI.g_joysticksTrigger := SafetyCheck.m_joysticksTrigger;
 
 IF GVL_interactUI.g_surgicalStatus = 1 THEN
 	IF m_cartDataPool.m_cartStatus.m_asepticDeployCompletedFlag =FALSE THEN
@@ -213,6 +214,7 @@ END_IF
       <LineId Id="34" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="81" Count="0" />
+      <LineId Id="131" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="116" Count="2" />
       <LineId Id="124" Count="0" />

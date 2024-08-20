@@ -272,7 +272,7 @@ CASE m_instruMountStatus OF
 			
 			// set target joint position
 			IF FALSE = m_jointMounted[i] THEN
-				IF i = 4 THEN
+				IF i = 4  THEN
 					m_targetMountPos[i+3]:=curJntPos[i+3]+m_mountMotionAng[i];
 				ELSE
 					m_targetMountPos[i+3]:=curJntPos[i+3]-m_mountMotionAng[i];

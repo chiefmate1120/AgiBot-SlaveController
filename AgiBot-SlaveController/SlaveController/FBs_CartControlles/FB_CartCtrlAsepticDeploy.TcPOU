@@ -120,7 +120,7 @@ ELSIF i_slaveCart.ctrlEnable.m_drapingEnable THEN
 END_IF
 
 FOR i := 1 TO 4 BY 1 DO
-	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4]/2 , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4]/2 , i_Ts:=g_cartCtrlCycleTime );
+	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4] , i_Ts:=g_cartCtrlCycleTime );
 END_FOR
 //m_initTarJntPos := m_tarJntPos;
 m_adjustStartTime := 0;
