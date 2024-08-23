@@ -35,6 +35,14 @@ VAR
 	
 	m_originalJntPos:Vec8d;
 	
+	// instrument rotation test
+	m_instruRotTest :BOOL :=FALSE;
+	m_instruRotOTG : FB_secOrdTrajFilter;
+	m_slaveOriginPose : ST_Frame;
+	m_slaveCmdPose : ST_Frame;
+	m_instruRotAxis :Vec3d := [0, 0, 1];;
+	
+	
 //####################################################################
 
 END_VAR
@@ -55,6 +63,19 @@ VAR
 	i:INT :=0;
 	errThres :LREAL;
 	m_masterGripAngle: INT;
+	instruRotAng:REAL;
+	instruRotMat:Mat3d;
+	slavePosErr:Vec3d;
+	tmpMat3d:Mat3d;
+	slaveRotErr :Mat3d;
+	errAngle:LREAL;
+	errAxisLocal,errAxis:Vec3d;
+	slaveCmdVel, slaveCmdWVel:Vec3d;
+	slaveTrackTwist:Vec6d;
+	cmdVelScale :REAL:=1;
+	invJaco :Mat6d;
+	simDHJointVel:Vec6d;
+	DHJntCmdDeltaPos:Vec6d;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -70,6 +91,48 @@ IF m_testJntIdx >=1 AND m_testJntIdx <=7 THEN
 		m_timePeriod:=0;
 	END_IF
 	
+END_IF
+
+// instrument rotation test
+IF m_instruRotTest AND NOT(m_freqTestFlag) AND NOT(m_stepTestFlag) THEN
+	m_instruRotOTG.run(m_jntStep,0.0, o_cmdAcc=>,o_cmdVel=>,o_cmdPos=> instruRotAng);
+	instruRotMat :=  angAxis2Rot(instruRotAng,m_instruRotAxis);
+	matMultiply(m_slaveOriginPose.m_rot, instruRotMat,m_slaveCmdPose.m_rot );
+	
+		
+	// compute pose error
+	vecSub(m_slaveCmdPose.m_pos, i_slaveArm.simCartPose.m_pos, slavePosErr);
+	matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
+	matMultiply(tmpMat3d, m_slaveCmdPose.m_rot, slaveRotErr);
+	rot2AngAxis(slaveRotErr, angle=>errAngle, axis=>errAxisLocal);
+	matMultiVec(i_slaveArm.simCartPose.m_rot, errAxisLocal, errAxis);
+	
+	// pose track control
+	vecMultiNum(slavePosErr, g_slaveArmCtrlFreq, slaveCmdVel);
+	vecMultiNum(errAxis, errAngle*g_slaveArmCtrlFreq, slaveCmdWVel);
+	FOR i:=1 TO 3 DO 
+		slaveTrackTwist[i] := slaveCmdVel[i];
+		slaveTrackTwist[i+3] := slaveCmdWVel[i];
+	END_FOR
+	
+	// compute command velocity for DH joints
+	invJaco := i_slaveArm.simJacoInv;
+	matMultiVec(invJaco, slaveTrackTwist, simDHJointVel);
+	
+	// limit DH joints velocity 
+	cmdVelScale := 1;
+	FOR i:=1 TO g_cartDofs DO 
+		cmdVelScale:=MAX(cmdVelScale, ABS(simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+	END_FOR
+	vecSelfMultiNum(simDHJointVel, 1.0/cmdVelScale);
+	
+	// integrate command DH joint position
+	vecMultiNum(simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
+	vecSelfAdd(m_cmdDHJntPos, DHJntCmdDeltaPos);
+	
+ELSE
+	m_slaveOriginPose := i_slaveArm.simCartPose;
+	m_slaveCmdPose := m_slaveOriginPose;
 END_IF
 
 // calculate target motor joint position from DH joint position
@@ -176,6 +239,8 @@ m_gripperAngle := i_slaveArm.curGripAngle;
 // init instrument controller
 m_instruController.init(i_slaveArm);
 
+m_instruRotOTG.init(0, 0,1, 2, g_slaveArmCtrlCycleTime);
+
 
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
@@ -197,6 +262,31 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="207" Count="0" />
       <LineId Id="139" Count="0" />
       <LineId Id="134" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="248" Count="1" />
+      <LineId Id="257" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="262" Count="5" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="270" Count="5" />
+      <LineId Id="269" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="298" Count="1" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="286" Count="0" />
+      <LineId Id="291" Count="3" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="302" Count="0" />
+      <LineId Id="304" Count="1" />
+      <LineId Id="303" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="251" Count="1" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="250" Count="0" />
       <LineId Id="161" Count="1" />
       <LineId Id="164" Count="0" />
       <LineId Id="228" Count="4" />
@@ -239,6 +329,8 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="84" Count="1" />
       <LineId Id="93" Count="0" />
       <LineId Id="81" Count="2" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="128" Count="0" />
       <LineId Id="119" Count="0" />
       <LineId Id="110" Count="1" />
       <LineId Id="109" Count="0" />
