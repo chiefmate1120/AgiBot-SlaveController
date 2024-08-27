@@ -73,11 +73,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
-m_jntOPMode := g_slaveAllPosTrqMode;
-m_cmdJntVel := i_slaveArm.curJntVel;
 
 // determine joint deceleration
 FOR i:=1 TO 3 DO 
+	m_jntOPMode[i] := DriverOPMode_PosTrq;
+	m_cmdJntVel[i] := i_slaveArm.curJntVel[i];
 	i_slaveArm.m_jntPIDCtrl[i].reset();
 	m_cmdJntAcc[i] := -i_slaveArm.curJntVel[i]/m_decPeriod;
 END_FOR
@@ -116,11 +116,10 @@ copyCmds(r_slaveArmCtrlCmd);
     </LineIds>
     <LineIds Name="FB_SlaveCtrlStop.init">
       <LineId Id="95" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="136" Count="0" />
       <LineId Id="108" Count="0" />
       <LineId Id="103" Count="0" />
       <LineId Id="109" Count="0" />
+      <LineId Id="172" Count="1" />
       <LineId Id="158" Count="1" />
       <LineId Id="114" Count="0" />
       <LineId Id="104" Count="3" />
