@@ -170,6 +170,9 @@ END_FOR
 // state machine transition
 stateMachine(i_setupInputDataPool);
 
+// controller transition
+controllerTransit();
+
 FOR i:=1 TO g_sArmNum DO
 	// null ptr check
 	ASSERT(0 <> m_armCtrl[i]);
@@ -312,7 +315,10 @@ END_FOR]]></ST>
       <LineId Id="114" Count="5" />
       <LineId Id="132" Count="0" />
       <LineId Id="113" Count="0" />
-      <LineId Id="19" Count="2" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="21" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="76" Count="0" />
       <LineId Id="135" Count="0" />
