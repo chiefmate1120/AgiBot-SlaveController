@@ -183,7 +183,7 @@ CASE m_pitchJntCaliStatus OF
 		END_IF
 	
 	2:// calculate center/calibarted position
-		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2;
+		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2+g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
 		m_pitchJntCaliStatus := 3;
 
 	3:
@@ -484,8 +484,7 @@ m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cm
       <LineId Id="92" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.pitchJntCali">
-      <LineId Id="176" Count="28" />
-      <LineId Id="207" Count="14" />
+      <LineId Id="231" Count="43" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.rollJntCali">

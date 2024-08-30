@@ -27,7 +27,7 @@ VAR
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
-	m_maxGripCurrent:LREAL:=180.0;
+	m_maxGripCurrent:LREAL:=150.0;
 	
 	// max gripper finger control force/current(mA)
 	m_maxGripCtrlForce:LREAL;
@@ -109,9 +109,18 @@ FOR i:=1 TO 4 DO
 	
 	// limit compensated backslash angle
 	IF i<3 THEN 
-		m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(0, ABS(m_jntBacklash[i]), g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
+		IF g_instruBacklashDir[i] > 0 THEN
+			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(0, ABS(m_jntBacklash[i]), g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
+		ELSE
+			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(-g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx], ABS(m_jntBacklash[i]), 0);	
+		END_IF
+
 	ELSIF i=3 THEN
-		m_jntBacklash [i] :=  g_instruBacklashDir[i] * LIMIT(0, ABS(m_jntBacklash[i]), g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
+		IF g_instruBacklashDir[i] > 0 THEN
+			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(0, ABS(m_jntBacklash[i]), g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
+		ELSE
+			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(-g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx], ABS(m_jntBacklash[i]), 0);	
+		END_IF
 	ELSE
 		m_jntBacklash [i]:=0;
 	END_IF
@@ -212,6 +221,7 @@ END_VAR
 
 VAR
 	i: INT;
+	deltaAng:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -219,6 +229,7 @@ END_VAR
 
 // calculate instrument backlash
 calcBacklash(i_cmdInstruJntPos, i_cmdYawPos, i_slaveArm);
+
 
 // joint position control
 FOR i:=1 TO 4 DO	
@@ -232,6 +243,7 @@ m_instruJntCtrlTrq[5]:=0;
 
 m_instruCurYawVel :=i_slaveArm.curDHJntVel[6];
 m_yawAngErr:=g_rad2Deg*(i_cmdYawPos-i_slaveArm.curDHJntPos[6]);
+
 
 // exert grip force 
 IF m_graspForceLevel >0  THEN
@@ -255,8 +267,7 @@ IF m_graspForceLevel >0  THEN
 END_IF
 
 
-o_cmdJntTrq := m_instruJntCtrlTrq;
-]]></ST>
+o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_BasicInstruControl">
@@ -264,17 +275,7 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.calcBacklash">
-      <LineId Id="6" Count="4" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="16" Count="3" />
-      <LineId Id="21" Count="6" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="61" Count="3" />
-      <LineId Id="82" Count="13" />
-      <LineId Id="97" Count="7" />
-      <LineId Id="113" Count="1" />
-      <LineId Id="117" Count="1" />
-      <LineId Id="115" Count="1" />
+      <LineId Id="134" Count="58" />
       <LineId Id="60" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">
@@ -282,13 +283,7 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
       <LineId Id="113" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.run">
-      <LineId Id="698" Count="0" />
-      <LineId Id="836" Count="0" />
-      <LineId Id="699" Count="0" />
-      <LineId Id="732" Count="16" />
-      <LineId Id="757" Count="7" />
-      <LineId Id="791" Count="8" />
-      <LineId Id="802" Count="3" />
+      <LineId Id="896" Count="41" />
       <LineId Id="70" Count="0" />
     </LineIds>
   </POU>

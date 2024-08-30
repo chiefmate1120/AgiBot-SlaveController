@@ -2,6 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[//{attribute 'qualified_only'}
+{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT
 	// safety error counts threshold to trigger fault
 	g_faultTriggerCounts :INT :=10;
