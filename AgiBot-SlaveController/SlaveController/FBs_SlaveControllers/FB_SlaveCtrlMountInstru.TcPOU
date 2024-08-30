@@ -45,6 +45,11 @@ VAR
 	m_scopeJnt4CenterMotionAng :LREAL :=175*g_deg2Rad;
 	m_scopeJnt5CenterMotionAng :LREAL :=150*g_deg2Rad;
 	
+	//instrument clamp error Id
+	m_instruClampErrId : UINT;
+	m_instruClampTime : LREAL;
+	m_noCurrentTime : LREAL :=3;
+	m_notReturnToZero : LREAL :=5;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -64,7 +69,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// return directly if instrument/endoscope is not readed
-IF i_slaveArm.instrument.onChipData.m_Error THEN
+IF i_slaveArm.instrument.onChipData.m_Error OR m_instruClampErrId >0  THEN
 	return;
 END_IF
 
@@ -74,7 +79,8 @@ ELSIF i_slaveArm.instrument.onChipData.m_InstruReadSucceed AND (InstruType_Ultra
 	mountUltraKnife(i_slaveArm);
 ELSE
 	mountInstrument(i_slaveArm);
-END_IF]]></ST>
+END_IF
+m_instruClampErrId := instruClampStatus(i_slaveArm);]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{85ccbdcb-d27d-4162-a6ec-e8e93d30dbc6}">
@@ -109,11 +115,59 @@ END_FOR
 m_instruMountStatus:=0;
 m_scopeMountStatus:=0;
 m_ultrasoundMountStatus:=0;
-
+m_instruClampErrId := 0;
+m_instruClampTime := 0;
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);
 
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="instruClampErrId" Id="{f1028432-c4d8-4b7e-a34b-a7a30fe5b17a}">
+      <Declaration><![CDATA[PROPERTY instruClampErrId :  UINT]]></Declaration>
+      <Get Name="Get" Id="{4e5cc1ce-1710-4380-ad0f-4115ae9409f8}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruClampErrId := m_instruClampErrId;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="instruClampStatus" Id="{59da6779-a8b0-41c0-b6ac-feaa3bdf40f7}">
+      <Declaration><![CDATA[METHOD instruClampStatus : UINT
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_instruClampErrId=1 instrumen clamp the current does not reach the set value
+//m_instruClampErrId=2 instrumen clamp position does not return to zero
+m_instruClampTime := LIMIT(0,m_instruClampTime + g_slaveArmCtrlCycleTime,10);
+IF i_slaveArm.instrument.onChipData.m_InstruReadSucceed THEN
+	IF InstruType_endoscope = i_slaveArm.instrument.m_instruType THEN
+		IF (m_scopeMountStatus=0 OR m_scopeMountStatus=1) AND m_instruClampTime>=m_noCurrentTime  THEN
+			instruClampStatus := 1;
+		ELSIF m_scopeMountStatus=3 AND m_instruClampTime>=m_notReturnToZero  THEN
+			instruClampStatus := 2;
+		END_IF
+		
+	ELSIF (InstruType_UltrasoundKnifeS = i_slaveArm.instrument.m_instruType OR InstruType_UltrasoundKnifeU = i_slaveArm.instrument.m_instruType) THEN
+		IF (m_ultrasoundMountStatus=0) AND m_instruClampTime>=m_noCurrentTime  THEN
+			instruClampStatus := 1;
+		ELSIF (m_scopeMountStatus=3) AND m_instruClampTime>=m_notReturnToZero  THEN
+			instruClampStatus := 2;
+		END_IF
+			
+	ELSE
+		IF (m_instruMountStatus=0) AND m_instruClampTime>=m_noCurrentTime  THEN
+			instruClampStatus := 1;
+		ELSIF (m_instruMountStatus=3) AND m_instruClampTime>=m_notReturnToZero  THEN
+			instruClampStatus := 2;
+		END_IF
+	END_IF
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="mountEndoscope" Id="{924322f0-f77b-4627-9090-85580b93061c}">
@@ -380,12 +434,19 @@ END_FOR]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.calcCmdJntPos">
-      <LineId Id="506" Count="10" />
+      <LineId Id="527" Count="11" />
       <LineId Id="478" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.init">
-      <LineId Id="206" Count="22" />
+      <LineId Id="239" Count="23" />
       <LineId Id="92" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountInstru.instruClampErrId.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMountInstru.instruClampStatus">
+      <LineId Id="3" Count="24" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountEndoscope">
       <LineId Id="14" Count="36" />

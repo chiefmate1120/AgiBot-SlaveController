@@ -5,9 +5,24 @@
 // Input to slave arm control task  
 TYPE ST_CartStatus :
 STRUCT
-	m_CartState :ARRAY[1..g_cartJntNum] OF E_CartJointState:=[g_cartJntNum(CartJointState_Error)];
+	m_CartState :E_CartJointState:=CartJointState_Error;
 	
 	m_asepticDeployCompletedFlag : BOOL;
+	
+	m_cartDumpEnergy :UINT;
+	
+	m_stabilizerDeployedFlag : BOOL;
+	
+	m_sdrivingLeverSensorManualFlag : BOOL;
+	
+	m_trocarOnFlag :INT;
+
+	m_uiControl : ST_uiControl;
+	
+	m_joystickValue : vec8d;
+	
+	m_jntPosReachLimit : vec8b;
+	
 	m_inMotion : BOOL := false;
 END_STRUCT
 END_TYPE

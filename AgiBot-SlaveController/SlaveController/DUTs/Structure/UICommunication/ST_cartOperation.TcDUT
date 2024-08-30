@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_cartOperation" Id="{d817cdb3-d3ce-4103-82f9-4250e5cfec2c}">
+    <Declaration><![CDATA[TYPE ST_cartOperation :
+STRUCT
+	//sterile state ,  0 : unfinshed  , 1 : complete
+	m_setupSterileStateArm1 : UINT;
+	m_setupSterileStateArm2 : UINT;
+	m_setupSterileStateArm3 : UINT;
+	m_setupSterileStateArm4 : UINT;
+	
+	//draping adjust state , 0 : unfinshed  , 1 : finshed
+	m_drapingAdjustState : UINT;
+
+	//sterile install state , 0 : unfinshed  , 1 : finshed
+	m_setupSterileState : UINT;
+
+	//docking adjust state , 0 : unfinshed  , 1 : finshed
+	m_dockingAdjustState : UINT;
+	
+	//cart in the sterile area 
+	m_cartInSterileState : UINT;
+	
+	//scope installed , 0 : unfinshed  , 1 : finshed
+	m_scopeInstalled :UINT;
+	
+	//robot in surgical allowed , scope installed and an arm mounted instrument
+	m_inSurgicalAllowed : UINT;
+	
+	//arm storage completed
+	m_armStorageCompleted : UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

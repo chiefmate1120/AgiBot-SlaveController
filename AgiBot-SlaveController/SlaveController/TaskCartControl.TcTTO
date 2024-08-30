@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <Task Name="TaskCartControl" Id="{053fdd96-84c4-402b-b19b-e2238d2e11db}">
     <!--CycleTime in micro seconds.-->
     <CycleTime>1000</CycleTime>
-    <Priority>5</Priority>
+    <Priority>4</Priority>
     <PouCall>
       <Name>CartControl</Name>
     </PouCall>

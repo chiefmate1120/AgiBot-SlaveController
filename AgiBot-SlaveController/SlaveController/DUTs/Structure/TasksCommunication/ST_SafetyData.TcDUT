@@ -8,6 +8,11 @@ STRUCT
 	m_slaveErrFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
 	m_setupErrFlag :ARRAY[1..g_sArmNum] OF BOOL :=[4(FALSE)];
 	m_cartErrFlag :BOOL :=FALSE;
+	m_cartSteadyFootErr :BOOL;
+	m_cartWheelErr :BOOL;
+	m_cartStandColumnErr :BOOL;
+	m_cartAdjustErr :BOOL;
+	m_cartOverhangErr :BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

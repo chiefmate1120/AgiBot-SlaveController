@@ -205,6 +205,10 @@ END_VAR]]></Declaration>
 			IF FALSE = i_setupInputDataPool.m_safetyData.m_setupErrFlag[i]  THEN
 				m_nextSetupArmState[i]:=SetupArmState_Hold;
 			END_IF
+			// to manual adjust
+			IF m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0 THEN
+				m_nextSetupArmState[i]:=SetupArmState_ManualAdjust;
+			END_IF
 			
 		// init
 		SetupArmState_Init:
@@ -273,7 +277,7 @@ END_VAR]]></Declaration>
 	IF SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
 		m_nextSetupArmState[i] := SetupArmState_Disable;
 	// error check
-	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] THEN
+	ELSIF i_setupInputDataPool.m_safetyData.m_setupErrFlag[i] AND NOT (m_setupArms[i].manualAdjustOn OR m_setupArms[i].m_jnt5AdjustDir<>0) THEN
 		m_nextSetupArmState[i]:=SetupArmState_Error;
 	END_IF
 END_FOR]]></ST>
@@ -332,7 +336,7 @@ END_FOR]]></ST>
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.stateMachine">
-      <LineId Id="288" Count="78" />
+      <LineId Id="457" Count="82" />
       <LineId Id="16" Count="0" />
     </LineIds>
   </POU>

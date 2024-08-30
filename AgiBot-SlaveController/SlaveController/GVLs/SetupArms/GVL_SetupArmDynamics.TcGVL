@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_SetupArmDynamics" Id="{bffc5486-72c9-4f40-8f0f-2623ed341a98}">
+  <GVL Name="GVL_SetupArmDynamics" Id="{96973c4d-5076-49a0-8f19-dd257b767c40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
-// Robot6 --dynamic parameters of setup arms
+// Robot3 --dynamic parameters of setup arms
 VAR_GLOBAL 
 	(* setup joint5 gravity parameters. last 5 parameters are defined in slave arm dynamic
 	% graParam=[ 9.8*mx0,...
@@ -22,15 +22,15 @@ VAR_GLOBAL
 	  0.0196,   59.3080 ];
 
 	(* setup joint3 gravity parameters
-	 graParams = [p1,p2,p3,p4]
+	 graParams = [p1mp2,p3,p4]
 	 gravity = p1*q^3 + p2*q^2 + p3^q + p4
 	 q(- [q0,q1]*)
  	// setup joint3 gravity parameter
 	g_setupJnt3GravityParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[17452.1, -4008.76, 401.477, -117.096,
-	 8476.95, -1240.58, 104.752, -105.76,
-	 14956.5, -4297.99, 622.564, -131.776,
-	 14926.3, -2807.93, 154.175, -103.6];
+	[13129.9, -3010.8, 300.188, -99.7871,
+	 14085.9, -3787.37, 476.955, -104.313,
+	  6440.78, -1524.39, 415.869, -117.102,
+	 22097.9, -5714.59, 558.077, -104.732];
 	 
 	(* setup joint3 friction parameters
 	 graParams = [p1mp2,p3,p4]
@@ -38,10 +38,10 @@ VAR_GLOBAL
 	 q(- [q0,q1]*)
  	// setup joint3 friction parameter
 	g_setupJnt3FrictionParams :ARRAY[1..4, 1..4] OF LREAL :=
-	[ -18790.6, 5987.36, -582.149, 60.6865,
-	  -19818.6, 7327.61, -903.65, 81.3597,
-	-60054.7, 22353.3, -2711.22, 147.637,
-	-25150.3, 8097.23, -822.128, 75.4573];
+	[-11173.7, 3888.25, -491.555, 79.4495,
+	 -17709.9, 6947.19, -897.825, 94.243,
+	 -49343.5, 18899.5, -2449.52, 166.011,
+	-11537.6, 3698.16, -380.906, 51.8712];
 	
 	g_setupJnt3GravityPosRange :ARRAY[1..4, 1..2] OF REAL :=
 	[0.0189, 	0.1789,
@@ -49,7 +49,6 @@ VAR_GLOBAL
 	 0.0189,    0.1789,
 	 0.0189,    0.1789];
  	
-	 
 	// joint gravity offset
 	g_setupJntGravityOffset :ARRAY[1..4,1..5] OF REAL := 
 	[0, 0, 0, 0,  0,

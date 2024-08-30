@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartRobot" Id="{1219119a-c34a-4efb-a0e2-076d2e563cc0}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartRobot
 VAR_INPUT
@@ -12,11 +12,13 @@ VAR
 	
 	// input arm button 
 	m_carHandChassisDriveUnlock AT%I* :ARRAY [1..2] OF BOOL;
+	
+	//open laser io
+	m_openHorizonLaser AT  %Q* :DINT;
+	m_openCrossLaser AT  %Q* :DINT;
 
 	m_joystickData:Vec8d;
 
-	//m_cartDrapingState : UINT;
-	//m_cartDockingState : UINT;
 	// all cart controller instance 
 	m_cartCtrlFactory :ARRAY[1..CartJointState_totalNum] OF I_CartJointCtrl;
 	
@@ -42,6 +44,11 @@ VAR
 	m_cartCtrl : I_CartJointCtrl;
 	m_cartCtrlCmds : ST_SlaveArmCtrlCmds;
 	
+	//state machine flow jump condition allowed
+	m_hangAdjustAllowed : BOOL;
+	m_asepticDeploymentAllowed :BOOL;
+	m_cartMoveAllowed :BOOL;
+	m_rotaOverhangAllowed :BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -56,11 +63,35 @@ VAR_IN_OUT
 	// cart joint data
 	r_cartJointsData :ST_CartJointData;
 END_VAR
-]]></Declaration>
+
+VAR 
+	i : INT;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//r_cartStatus.m_CartState:=m_cartState;
-]]></ST>
+        <ST><![CDATA[r_cartStatus.m_CartState :=m_cartState;
+FOR i := 1 TO g_sArmNum DO
+	r_cartStatus.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];	
+	IF NOT r_cartStatus.m_asepticDeployCompletedFlag THEN
+		EXIT;
+	END_IF
+END_FOR
+
+
+r_cartStatus.m_uiControl := GVL_interactUI.g_uiCtrl;
+r_cartStatus.m_cartDumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
+r_cartStatus.m_sdrivingLeverSensorManualFlag :=NOT m_slaveCart.m_drivingLeverSensorManual;
+//r_cartStatus.m_stabilizerDeployedFlag
+r_cartStatus.m_trocarOnFlag := m_slaveCart.m_trocarOnFlag;
+r_cartStatus.m_joystickValue := m_slaveCart.m_joystickSignal;
+r_cartStatus.m_jntPosReachLimit := m_cartAdjust.jntPosReachLimit;
+
+r_cartJointsData.m_cmdJntPos := m_slaveCart.cmdJntPos;
+r_cartJointsData.m_cmdJntVel := m_slaveCart.cmdJntVel;
+r_cartJointsData.m_curJntPos := m_slaveCart.curJntPos;
+r_cartJointsData.m_curJntTrq := m_slaveCart.curJntCurrent;
+r_cartJointsData.m_curJntVel := m_slaveCart.curJntVel;
+r_cartJointsData.m_curLinkPos := m_slaveCart.curLinkPos;
+r_cartJointsData.m_curMotorPos := m_slaveCart.curMotorPos;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{dac0d65c-106c-4eed-932d-303e798c1acc}">
@@ -106,6 +137,28 @@ m_cartCtrl.Init(m_slaveCart,m_cartCtrlCmds);
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="laserIO" Id="{4619ebd3-1444-4ef9-b949-07f0643ac6ed}">
+      <Declaration><![CDATA[METHOD laserIO : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//cross laser IO output , when slave self check succeed , and trocar  install at least one
+IF GVL_interactUI.g_slaveSelfCheckStatus = 2 AND m_slaveCart.m_trocarOnFlag = 0 THEN
+	m_openCrossLaser := 1;
+ELSE
+	m_openCrossLaser := 0;
+END_IF
+
+//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
+IF (m_slaveCart.curJntPos[5] * 1000 + GVL_CartControlParameters.g_cartInitialHeight) > GVL_CartControlParameters.g_cartOpenHorizonLaserHeight AND  (m_cartState = CartJointState_Movement OR m_cartState = CartJointState_HangAdjust) THEN
+	m_openHorizonLaser :=  1;
+ELSE
+	m_openHorizonLaser :=  0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="run" Id="{a2c569bc-04e6-4881-bf0d-89b31bc10fd5}">
       <Declaration><![CDATA[METHOD PUBLIC run : BOOL
 VAR_IN_OUT CONSTANT
@@ -115,8 +168,7 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-// state machine transition
+        <ST><![CDATA[// state machine transition
 stateMachine(i_cartDataPool);	
 
 //update ui data
@@ -125,6 +177,7 @@ m_slaveCart.ProcessingUIData(i_cartDataPool.m_UIData);
 //update cart joint status
 m_slaveCart.updateStatus();
 
+laserIO();
 
 // null ptr check
 IF 0 = m_cartCtrl THEN
@@ -148,7 +201,12 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
+        <ST><![CDATA[m_hangAdjustAllowed := m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable);
+m_asepticDeploymentAllowed := m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND m_slaveCart.cartDockingState=0) 
+												OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable AND m_slaveCart.cartDrapingState=0)) AND NOT ( i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) ;
+m_cartMoveAllowed := m_slaveCart.m_trocarOnFlag=0 AND  m_carHandChassisDriveUnlock[1] AND m_carHandChassisDriveUnlock[2] AND NOT i_cartDataPool.m_safetyData.m_cartWheelErr;
+m_rotaOverhangAllowed := m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 0 AND NOT i_cartDataPool.m_safetyData.m_cartOverhangErr;
+
 // state machine transit
 CASE m_cartState OF
 	//cart joint error
@@ -172,16 +230,16 @@ CASE m_cartState OF
 		IF m_cartCtrl.isFinished  THEN
 			m_nextCartState := CartJointState_InSurgery;
 			
-		ELSIF m_slaveCart.m_trocarOnFlag=0 AND ( i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable OR i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable) THEN
+		ELSIF m_hangAdjustAllowed THEN
 			m_nextCartState := CartJointState_HangAdjust;
 			
-		ELSIF m_slaveCart.m_trocarOnFlag=0 AND ((i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND m_slaveCart.cartDockingState=0) OR (i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable AND m_slaveCart.cartDrapingState=0)) THEN//AND m_lastCartState <>CartJointState_AsepticDeployment THEN
+		ELSIF m_asepticDeploymentAllowed THEN
 			m_nextCartState := CartJointState_AsepticDeployment;
 			
-		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_carHandChassisDriveUnlock[1] AND m_carHandChassisDriveUnlock[2] THEN
+		ELSIF m_cartMoveAllowed THEN
 			m_nextCartState := CartJointState_Movement;
 			
-		ELSIF m_slaveCart.m_trocarOnFlag=0 AND m_slaveCart.m_rotaOverhangOnFlag > 0 THEN
+		ELSIF m_rotaOverhangAllowed THEN
 			m_nextCartState := CartJointState_RotaOverhang;
 		END_IF
 		
@@ -195,31 +253,37 @@ CASE m_cartState OF
 	CartJointState_Movement:
 		IF m_slaveCart.m_trocarOnFlag<>0 OR (NOT m_carHandChassisDriveUnlock[1] AND NOT m_carHandChassisDriveUnlock[2])  THEN
 			m_nextCartState :=CartJointState_Ready;
+		ELSIF i_cartDataPool.m_safetyData.m_cartWheelErr THEN
+			m_nextCartState :=CartJointState_Ready;
 		END_IF
 		
 		
 	CartJointState_HangAdjust:
-		IF  m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.joysticks_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.camera_joysticks_enable ) THEN
+		IF  m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_joystickEnable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_cameraJoystickEnable ) THEN
 			m_nextCartState :=CartJointState_SlowStop;
 		END_IF
 		
 		
 	CartJointState_AsepticDeployment:
 		IF m_cartCtrl.isFinished  THEN
-			IF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable THEN
+			IF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable THEN
 				m_slaveCart.cartDockingState := 1;
-			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable THEN
+			ELSIF i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable THEN
 				m_slaveCart.cartDrapingState := 1;
 			END_IF
 			m_nextCartState :=CartJointState_SlowStop;
-		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.docking_enable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.draping_enable) THEN
+		ELSIF i_cartDataPool.m_safetyData.m_cartAdjustErr OR i_cartDataPool.m_safetyData.m_cartStandColumnErr THEN
+			m_nextCartState :=CartJointState_Ready;
+		ELSIF m_slaveCart.m_trocarOnFlag<>0 OR (NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_dockingEnable AND NOT i_cartDataPool.m_UIData.m_ctrlEnableFromUI.m_drapingEnable) THEN
 			m_nextCartState :=CartJointState_SlowStop;
 		END_IF
 		
 		
 	CartJointState_RotaOverhang:
-		IF m_slaveCart.m_rotaOverhangOnFlag = 0 OR  m_slaveCart.m_trocarOnFlag<>0 THEN
+		IF m_slaveCart.m_rotaOverhangOnFlag = 0 OR  m_slaveCart.m_trocarOnFlag<>0  THEN
 			m_nextCartState :=CartJointState_SlowStop;
+		ELSIF i_cartDataPool.m_safetyData.m_cartOverhangErr THEN
+			m_nextCartState :=CartJointState_Ready;
 		END_IF
 		
 		
@@ -251,8 +315,7 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.getStatus">
-      <LineId Id="14" Count="0" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="35" Count="22" />
       <LineId Id="15" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.init">
@@ -267,84 +330,11 @@ END_IF
       <LineId Id="57" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.run">
-      <LineId Id="37" Count="1" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="42" Count="6" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="49" Count="0" />
+      <LineId Id="67" Count="19" />
       <LineId Id="51" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.stateMachine">
-      <LineId Id="19" Count="2" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="27" Count="1" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="31" Count="1" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="35" Count="4" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="57" Count="2" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="117" Count="1" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="119" Count="1" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="121" Count="1" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="123" Count="1" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="64" Count="2" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="100" Count="1" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="105" Count="2" />
-      <LineId Id="104" Count="0" />
-      <LineId Id="111" Count="0" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="113" Count="1" />
-      <LineId Id="153" Count="1" />
-      <LineId Id="156" Count="1" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="151" Count="1" />
-      <LineId Id="112" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="132" Count="0" />
-      <LineId Id="129" Count="2" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="143" Count="0" />
-      <LineId Id="139" Count="0" />
-      <LineId Id="141" Count="1" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="68" Count="1" />
-      <LineId Id="71" Count="1" />
-      <LineId Id="87" Count="3" />
-      <LineId Id="92" Count="1" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="94" Count="2" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="70" Count="0" />
+      <LineId Id="165" Count="106" />
       <LineId Id="22" Count="0" />
     </LineIds>
   </POU>

@@ -1,17 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_SlaveArmDynamics" Id="{00583c20-5570-4b14-84ec-d3ff6149d4b7}">
+  <GVL Name="GVL_SlaveArmDynamics" Id="{b423595b-65ef-4a72-b56a-df34f138838a}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
-// Robot6 --dynamic parameters of slave arms
+// Robot3 --dynamic parameters of slave arms
 VAR_GLOBAL CONSTANT
+	
 	// arm gravity parameters
 (*graParam=[ 9.8*m5,...
            0.41601*m2 + 0.41601*m3 + 0.0000216012*m4 + 0.0000216012*m5 + 9.8*mx1 - 1.3639*mx3 - 9.70463*my3,...
            9.8*mz2 - 9.8*my5 - 9.8*my1 + 9.8*mz3 + 9.8*mz4,...
            2.19651*m3 + 2.19651*m4 + 0.00000258969*m5 + 8.64766*mx2 - 4.61063*my2 + 9.8*my4 + 9.8*mz5,...
           1.1711*m3 + 1.1711*m4 + 0.00000122416*m5 + 4.61063*mx2 - 9.8*mx4 - 9.8*mx5 + 8.64766*my2]'
-*)			
+*)				
 	// robot No.4
 	g_gravityParam :ARRAY[1..4,1..5] OF REAL := 
 	[ 7.5951,    1.6336,   -4.2417,    9.4106,    4.7289,
@@ -52,7 +53,7 @@ VAR_GLOBAL CONSTANT
 	
 	//  motor inertial at link size
 	g_motorInertia :ARRAY[1..3] OF LREAL := [0.00004487, 0.00004487, 0.0000002280];
-	
+
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

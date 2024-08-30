@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCtrlAsepticDeploy" Id="{2938379a-3fa1-4919-bcaa-4be4c07fb559}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAsepticDeploy EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -16,7 +16,7 @@ VAR
 	m_incTarJntPos : Vec8d;
 
 	// time threshold to 5-8joint after it's enabled
-	m_cartAdjustStartWaitTime :LREAL := 0.2;
+	m_cartAdjustStartWaitTime :LREAL := 0.3;
 	
 	//adjust start  time 
 	m_adjustStartTime :LREAL;
@@ -39,29 +39,29 @@ END_VAR
 
 VAR
 	i:INT;
+	actPosErr : vec8d;
+	tarPosErr : vec8d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//In this method, 5 represents the pillar postion , 6 represents the beam rotation angle ,7 represents the beam stretch position ,8 represents the overhang angle
 m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 1);
 m_actJntPos := i_slaveCart.curJntPos;
-IF i_slaveCart.ctrlEnable.docking_enable THEN
+IF i_slaveCart.ctrlEnable.m_dockingEnable THEN
 	m_initTarJntPos := i_slaveCart.m_cartDataFromUI.m_cartSpecificPosDocking;
-ELSIF i_slaveCart.ctrlEnable.draping_enable THEN
+ELSIF i_slaveCart.ctrlEnable.m_drapingEnable THEN
 	m_initTarJntPos := i_slaveCart.m_cartDataFromUI.m_cartSpecificPosDraping;
 END_IF
+vecSub(m_initTarJntPos, m_actJntPos, actPosErr);
+vecSub(m_initTarJntPos, m_tarJntPos, tarPosErr);
 
 IF m_adjustStartTime >= m_cartAdjustStartWaitTime THEN
 	FOR i := 5 TO 8 BY 1 DO
-		IF ABS(m_initTarJntPos[i] - m_actJntPos[i]) <= GVL_CartControlParameters.g_jntCtrlAngTolHigh*2  THEN
+		IF ABS(actPosErr[i]) <= GVL_CartControlParameters.g_jntCtrlAngTolHigh*2  THEN
 			m_jntPosArrival[i] := TRUE;
 		END_IF
 		
-		IF ABS(m_initTarJntPos[i] - m_tarJntPos[i]) <= GVL_CartControlParameters.g_jntCtrlAngTolHigh  THEN
-			m_jntPosArrival[i-4] := TRUE;
-		END_IF
-		
-		IF m_jntPosArrival[i-4] = FALSE THEN
-			m_incTarJntPos[i] := m_incTarJntPos[i] + sign(m_initTarJntPos[i] - m_actJntPos[i]) * GVL_CartControlParameters.g_maxJntVel[i]/2 * g_cartCtrlCycleTime;
+		IF ABS(tarPosErr[i]) > GVL_CartControlParameters.g_jntCtrlAngTolHigh THEN
+			m_incTarJntPos[i] := m_incTarJntPos[i] + sign(actPosErr[i]) * GVL_CartControlParameters.g_maxJntVel[i]/2 * g_cartCtrlCycleTime;
 			m_tarJntPos[i] := m_actJntPos[i] + m_incTarJntPos[i];
 		END_IF
 	END_FOR
@@ -111,14 +111,14 @@ m_incTarJntPos := g_zeroVec8d;
 m_tarJntPos := g_zeroVec8d;
 m_jntPosArrival := g_zeroVec8b;
 
-IF i_slaveCart.ctrlEnable.docking_enable THEN
+IF i_slaveCart.ctrlEnable.m_dockingEnable THEN
 	m_initTarJntPos := i_slaveCart.m_cartDataFromUI.m_cartSpecificPosDocking;
-ELSIF i_slaveCart.ctrlEnable.draping_enable THEN
+ELSIF i_slaveCart.ctrlEnable.m_drapingEnable THEN
 	m_initTarJntPos := i_slaveCart.m_cartDataFromUI.m_cartSpecificPosDraping;
 END_IF
 
 FOR i := 1 TO 4 BY 1 DO
-	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4]/2 , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4]/2 , i_Ts:=g_cartCtrlCycleTime );
+	m_jntOTG[i+4].init(i_curCmdPos:= m_cmdJntPos[i+4], i_curCmdVel:= 0, i_maxV:=GVL_CartControlParameters.g_maxJntVel[i+4] , i_maxA:=GVL_CartControlParameters.g_maxJntAcc[i+4] , i_Ts:=g_cartCtrlCycleTime );
 END_FOR
 //m_initTarJntPos := m_tarJntPos;
 m_adjustStartTime := 0;
@@ -131,53 +131,11 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAsepticDeploy.calcCmdJntPos">
-      <LineId Id="12" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="136" Count="3" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="112" Count="3" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="145" Count="1" />
-      <LineId Id="144" Count="0" />
-      <LineId Id="143" Count="0" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="116" Count="5" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="122" Count="0" />
-      <LineId Id="124" Count="1" />
-      <LineId Id="123" Count="0" />
-      <LineId Id="111" Count="0" />
-      <LineId Id="67" Count="0" />
+      <LineId Id="167" Count="31" />
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAsepticDeploy.init">
-      <LineId Id="124" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="111" Count="1" />
-      <LineId Id="95" Count="4" />
-      <LineId Id="94" Count="0" />
-      <LineId Id="59" Count="2" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="22" Count="1" />
+      <LineId Id="136" Count="30" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>

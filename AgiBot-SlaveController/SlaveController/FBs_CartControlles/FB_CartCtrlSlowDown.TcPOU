@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCtrlSlowDown" Id="{0c77f5f0-20e1-4fb9-8be8-91bb56c7cc44}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlSlowDown EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -68,8 +68,7 @@ VAR_IN_OUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-m_cmdJntPos:=r_cartCtrlCmd.m_cmdJntPos;
+        <ST><![CDATA[m_cmdJntPos:=r_cartCtrlCmd.m_cmdJntPos;
 m_initPos := m_cmdJntPos;
 
 m_jntEnableFlag :=r_cartCtrlCmd.m_jntEnableFlag;
@@ -98,10 +97,10 @@ m_initVel[7] := LIMIT(-GVL_CartMotorParameters.g_maxJntVel[7], i_slaveCart.curJn
 m_initVel[8] := LIMIT(-GVL_CartMotorParameters.g_maxJntVel[8], i_slaveCart.curJntVel[8], GVL_CartMotorParameters.g_maxJntVel[8]);
 
 
-m_initDec[5] := sign(m_initVel[5])*GVL_CartMotorParameters.g_maxJntVel[5];
-m_initDec[6] := sign(m_initVel[6])*GVL_CartMotorParameters.g_maxJntVel[6];
-m_initDec[7] := sign(m_initVel[7])*GVL_CartMotorParameters.g_maxJntVel[7];
-m_initDec[8] := sign(m_initVel[8])*GVL_CartMotorParameters.g_maxJntVel[8];
+m_initDec[5] := sign(m_initVel[5])*GVL_CartMotorParameters.g_maxJntVel[5]*2;
+m_initDec[6] := sign(m_initVel[6])*GVL_CartMotorParameters.g_maxJntVel[6]*2;
+m_initDec[7] := sign(m_initVel[7])*GVL_CartMotorParameters.g_maxJntVel[7]*2;
+m_initDec[8] := sign(m_initVel[8])*GVL_CartMotorParameters.g_maxJntVel[8]*2;
 
 
 m_slowStopTime := 0.5;
@@ -128,34 +127,7 @@ copyCmds(r_cartCtrlCmd);]]></ST>
       <LineId Id="71" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlSlowDown.init">
-      <LineId Id="147" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="136" Count="1" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="59" Count="2" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="86" Count="2" />
-      <LineId Id="93" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="67" Count="2" />
-      <LineId Id="94" Count="0" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="111" Count="2" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="22" Count="1" />
+      <LineId Id="157" Count="36" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>

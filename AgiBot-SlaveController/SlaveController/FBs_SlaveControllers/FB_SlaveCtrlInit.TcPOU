@@ -11,7 +11,9 @@ VAR
 	m_initState :INT :=0;
 	
 	// SDO writer
-	m_MotorCurrentSDOWrite: ARRAY[1..5] of FB_EcCoESdoWrite;
+	m_MotorCurrentSDOWrite: ARRAY[1..5] OF FB_EcCoESdoWrite;
+	// power box joint motor rated current
+	m_wristJntRatedCurrent : DINT := 200;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -35,14 +37,14 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF m_timePeriod > 1.0 THEN
-	m_isFinished := true;
+	m_isFinished := TRUE;
 END_IF
 
 // reset instrument control box motor current limit
 armIdx :=i_slaveArm.armIdx;
 FOR jntIdx :=4 TO 8 DO
 	//动力盒移动关节和器械旋转关节，共享一个控制字，由SDO写入
-	IF (jntIdx=3) OR (jntIdx=8)  THEN
+	IF (jntIdx=8)  THEN
 		SDOSubIndexCur:=16#6098;
 	//动力盒3、5号电机为一个驱动器，共享一个控制字，由SDO写入
 	ELSIF (jntIdx=4) OR (jntIdx=6)  THEN
@@ -52,15 +54,15 @@ FOR jntIdx :=4 TO 8 DO
 		SDOSubIndexCur:=16#609A;
 	END_IF
 
-	// write max motor current if it changes and works in position mode
+	// write max motor current if it changes and works in position mode  GVL_SlaveMotorParameters.g_motorMaxCurrent[jntIdx]
 	m_MotorCurrentSDOWrite[jntIdx-3](sNetID:= GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx],
 					nSlaveAddr := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,jntIdx],
-					nSubIndex:=0,nIndex:=SDOSubIndexCur,pSrcBuf:=ADR(GVL_SlaveMotorParameters.g_motorMaxCurrent[jntIdx]),
-					cbBufLen:=SIZEOF(GVL_SlaveMotorParameters.g_motorMaxCurrent[jntIdx]),bExecute:=TRUE);
+					nSubIndex:=0,nIndex:=SDOSubIndexCur,pSrcBuf:=ADR(m_wristJntRatedCurrent),
+					cbBufLen:=SIZEOF(m_wristJntRatedCurrent),bExecute:=TRUE);
 	IF NOT m_MotorCurrentSDOWrite[jntIdx-3].bBusy THEN
 		m_MotorCurrentSDOWrite[jntIdx-3](bExecute:=FALSE);
 	END_IF
-
+	
 END_FOR
 
 
@@ -94,23 +96,7 @@ copyCmds(r_slaveArmCtrlCmd);
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInit.calcCmdJntPos">
-      <LineId Id="98" Count="0" />
-      <LineId Id="164" Count="1" />
-      <LineId Id="264" Count="0" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="218" Count="0" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="221" Count="1" />
-      <LineId Id="224" Count="2" />
-      <LineId Id="228" Count="2" />
-      <LineId Id="232" Count="1" />
-      <LineId Id="248" Count="1" />
-      <LineId Id="251" Count="2" />
-      <LineId Id="263" Count="0" />
-      <LineId Id="254" Count="1" />
-      <LineId Id="259" Count="0" />
-      <LineId Id="219" Count="1" />
-      <LineId Id="216" Count="1" />
+      <LineId Id="278" Count="29" />
       <LineId Id="177" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInit.init">

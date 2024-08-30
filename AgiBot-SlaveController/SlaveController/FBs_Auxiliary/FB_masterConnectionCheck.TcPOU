@@ -54,7 +54,7 @@ ELSE
 		m_curDisconnectionCycles :=0;
 	END_IF
 	
-	IF m_curDisconnectionCycles>= m_curDisconnectionCycles THEN
+	IF m_curDisconnectionCycles>= m_connectionCyclesThres THEN
 		m_isConnected:=FALSE;
 	END_IF
 
@@ -68,27 +68,7 @@ check:=m_isConnected;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_masterConnectionCheck.check">
-      <LineId Id="33" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="27" Count="1" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="29" Count="1" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="37" Count="5" />
-      <LineId Id="48" Count="2" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="15" Count="0" />
+      <LineId Id="58" Count="30" />
       <LineId Id="53" Count="0" />
     </LineIds>
   </POU>

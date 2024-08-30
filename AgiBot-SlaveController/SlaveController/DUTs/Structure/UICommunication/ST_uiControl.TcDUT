@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_uiControl" Id="{5feec175-de79-40fc-b60d-eb6c37040d35}">
+    <Declaration><![CDATA[TYPE ST_uiControl :
+STRUCT
+	//台车自动摆位---姿态调整为建立无菌屏障时所需状态--结束后给定结束信号
+	m_drapingEnable : BOOL;
+	
+	//台车自动摆位---姿态调整为进入无菌区时所需状态（器械对接姿态）--结束后给定结束信号
+	m_dockingEnable : BOOL;
+	
+	//所有机械臂收纳使能
+	m_packageEnable : BOOL;
+	
+	//通过手柄按钮，任意拖动机械臂所有关节
+	m_joystickEnable : BOOL;
+	
+	//相机界面中的使能按钮
+	m_cameraJoystickEnable : BOOL;
+	
+	 //限制高度调整，true:使能，false:禁止
+	m_heightLimitAdjustEnable : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,37 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_SlaveJointEncoderCaliData" Id="{5a0acc22-f75e-44c0-a23e-81cd5acea96c}">
+  <GVL Name="GVL_SlaveJointEncoderCaliData" Id="{7eae507e-05dd-426e-b2d5-321e9d64d4f5}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
-// Robot6 --joints parameters of slave arms
-VAR_GLOBAL CONSTANT
+// Robot3 --joints parameters of slave arms
+VAR_GLOBAL CONSTANT	
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[9015451, 13207807, 650879, 0, 0, 0, 0, 0,
-		 4890935, 9185623, 506623, 0, 0, 0, 0, 0,
-		 712149, 4893469, 13158055, 0, 0, 0, 0, 0,
-		 9022699, 13304191, 8138925, 0, 0, 0, 0, 0];
+		[796618, 12395160, 5368016, 0, 0, 0, 0, 0,
+		 13317378, 3888760, 9175760, 0, 0, 0, 0, 0,
+		 823964, 3955316, 15205696, 0, 0, 0, 0, 0,
+		 4820816, 7977020, 9226720, 0, 0, 0, 0, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[6982407, 4260603, 9942895, 0, 0, 0, 0, 0,
-		 2838445, 72017, 9799471, 0, 0, 0, 0, 0,
-		 15438395, 12569941, 5587336, 0, 0, 0, 0, 0,
-		 7017365, 4223351, 568399, 0, 0, 0, 0, 0];
+		[15464922, 5123844, 14570432, 0, 0, 0, 0, 0,
+		 11230582, 13464106, 1613344, 0, 0, 0, 0, 0,
+		 15526052, 13536910, 7701984, 0, 0, 0, 0, 0,
+		 2731020, 789080, 1671808, 0, 0, 0, 0, 0];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
-		[16348942, 6700, 9921200, 99713, 16623440, 8382220, 16654192, 8367312,
-		 12305300, 12521700, 9764288, 16649696, 16555424, 8487936, 8451400, 8474272,
-		 8116240, 8266990, 5574900, 16658032, 16560944, 8162864, 8354600, 2283056,
-		 16416000, 16775600, 573808, 16553408, 16578880, 8005370, 8459520, 8439376];
+		[8162412, 8169482, 14570432, 15377856,15482848, 7058832, 6935120, 7155184,
+		 3932766, 16478880, 1613344, 15324752, 15485488, 7135776, 7032592, 6946704,
+		 8248074, 16595424, 7701984, 15349408, 15361392, 6997280, 6757296, 720176,
+		 12196142, 3807946, 1671808, 15274368, 15387696, 6812992, 6747792, 13454432];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.
 	g_linkEncZeroCross :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF INT :=
-		[1, 1, 0, 1, 1, 1, 1, 1,
-		 1, 1, 0, 1, 1, 1, 1, 1,
-		 0, 0, 1, 1, 1, 1, 1, 1,
-		 1, 1, 1, 1, 1, 1, 1, 1];
+		[0, 0, 0, 1, 1, 1, 1, 1,
+		 1, 1, 1, 1, 1, 1, 1, 1,
+		 0, 1, 1, 1, 1, 1, 1, 1,
+		 1, 0, 1, 1, 1, 1, 1, 1];
 		 
 	 // joint SDO address
 	g_slaveArmNetID: ARRAY[1..4] OF T_AmsNetId:=['169.254.186.39.3.1','169.254.186.39.8.1','169.254.186.39.9.1','169.254.186.39.10.1'];

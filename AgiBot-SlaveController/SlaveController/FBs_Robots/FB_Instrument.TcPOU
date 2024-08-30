@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -13,6 +13,7 @@ VAR
 	
 	// instrument name
 	m_instruName : STRING:= g_instruNullName;
+	m_instruNameCH : WSTRING;
 	
 	// instrument type index, which is used to get relative parameters from global variable arrays
 	m_instruTypeIdx :INT:=0;
@@ -25,7 +26,7 @@ VAR
 	
 	// current and max allowed read tries
 	m_curReadTries :INT :=0;
-	m_maxReadTries :INT := 5;
+	m_maxReadTries :INT := 2;
 	
 	//IP of operating arm
 	m_armNetId:T_AmsNetId; 	
@@ -126,6 +127,7 @@ END_IF
 // instrument type and name
 m_instruType := m_onChipData.m_InstruID;
 m_instruName :=GVL_InstruCtrlParams.g_instruNameString[m_instruTypeIdx];
+m_instruNameCH := GVL_InstruCtrlParams.g_instruNameStringCH[m_instruTypeIdx];
 
 // check if instrument has one finger
 m_isSingleFinger :=  (m_instruType = InstruType_CauteryHook OR  m_instruType = InstruType_CauterySpatula );
@@ -542,6 +544,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="instruNameCH" Id="{fe4ca7cf-bcad-49ba-86fd-3ae926574c61}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruNameCH : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{27367f18-af3a-4bb4-875f-a9cbdbda8e9f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[instruNameCH := m_instruNameCH;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="InstruSreiesFind" Id="{f880300d-e9dd-456f-88b6-72b1cc8bd3d5}">
       <Declaration><![CDATA[METHOD PROTECTED InstruSreiesFind : BOOL
 VAR_INPUT
@@ -844,6 +857,7 @@ CASE m_Step OF
 		
 		
 	120://结果诊断
+		m_onChipData.m_ErrorID:=0;
 		m_onChipData.m_InstruReadSucceed:=checkInstruType();
 		IF NOT(m_onChipData.m_InstruReadSucceed) THEN
 			m_onChipData.m_Error:=TRUE;
@@ -853,16 +867,16 @@ CASE m_Step OF
 			m_onChipData.m_InstruReadSucceed := FALSE;
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=3;
-(*		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
+			
+		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
 			IF m_HaveRecord THEN
-				m_onChipData.m_Instrutype:=2;
-				m_onChipData.m_InstruReadSucceed:=TRUE;
-				m_Step:=130;
+				//
 			ELSE
+				m_onChipData.m_InstruReadSucceed := FALSE;
 				m_onChipData.m_Error:=TRUE;
 				m_onChipData.m_ErrorID:=2;
-			END_IF*)
+			END_IF
 		END_IF
 		m_Step :=-1;
 		m_curReadTries := m_curReadTries +1;
@@ -1120,34 +1134,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.checkInstruType">
-      <LineId Id="166" Count="0" />
-      <LineId Id="233" Count="0" />
-      <LineId Id="227" Count="1" />
-      <LineId Id="230" Count="0" />
-      <LineId Id="232" Count="0" />
-      <LineId Id="231" Count="0" />
-      <LineId Id="229" Count="0" />
-      <LineId Id="167" Count="1" />
-      <LineId Id="234" Count="0" />
-      <LineId Id="169" Count="2" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="263" Count="2" />
-      <LineId Id="216" Count="0" />
-      <LineId Id="174" Count="0" />
-      <LineId Id="219" Count="0" />
-      <LineId Id="218" Count="0" />
-      <LineId Id="175" Count="11" />
-      <LineId Id="235" Count="0" />
-      <LineId Id="266" Count="1" />
-      <LineId Id="239" Count="5" />
-      <LineId Id="246" Count="2" />
-      <LineId Id="251" Count="0" />
-      <LineId Id="259" Count="0" />
-      <LineId Id="258" Count="0" />
-      <LineId Id="260" Count="1" />
-      <LineId Id="236" Count="1" />
-      <LineId Id="208" Count="1" />
+      <LineId Id="274" Count="56" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.curScopePosture.Get">
@@ -1262,95 +1249,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="5" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="219" Count="0" />
-      <LineId Id="222" Count="2" />
-      <LineId Id="220" Count="0" />
-      <LineId Id="428" Count="0" />
-      <LineId Id="221" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="51" Count="2" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="61" Count="2" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="64" Count="2" />
-      <LineId Id="70" Count="1" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="76" Count="3" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="80" Count="1" />
-      <LineId Id="83" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="90" Count="1" />
-      <LineId Id="93" Count="3" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="395" Count="2" />
-      <LineId Id="361" Count="0" />
-      <LineId Id="104" Count="0" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="137" Count="3" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="145" Count="0" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="148" Count="1" />
-      <LineId Id="132" Count="0" />
-      <LineId Id="155" Count="4" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="151" Count="1" />
-      <LineId Id="162" Count="0" />
-      <LineId Id="415" Count="0" />
-      <LineId Id="167" Count="0" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="436" Count="0" />
-      <LineId Id="273" Count="1" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="387" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="174" Count="0" />
-      <LineId Id="176" Count="0" />
-      <LineId Id="420" Count="0" />
-      <LineId Id="417" Count="2" />
-      <LineId Id="416" Count="0" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="180" Count="1" />
-      <LineId Id="249" Count="0" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="281" Count="0" />
-      <LineId Id="184" Count="2" />
-      <LineId Id="183" Count="0" />
-      <LineId Id="175" Count="0" />
-      <LineId Id="405" Count="1" />
-      <LineId Id="276" Count="0" />
+      <LineId Id="570" Count="125" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">

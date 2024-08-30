@@ -1,11 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
 VAR
-	//open laser io
-	m_openHorizonLaser AT  %Q* :DINT;
-	m_openCrossLaser AT  %Q* :DINT;
 	
 	//Driving force of the car io
 	m_driveForce AT %I* :Vec2i;
@@ -13,8 +10,8 @@ VAR
 	//stabilizing foot sensor  (normally-closed contact)
 	m_stabilizFootSensorLeft AT%I* :BOOL;
 	m_stabilizFootSensorRight AT%I* :BOOL;
-	m_stabilizFootSensorAuto AT%I* :BOOL;
-	m_stabilizFootSensorManual AT%I* :BOOL;
+	m_drivingLeverSensorAuto AT%I* :BOOL;
+	m_drivingLeverSensorManual AT%I* :BOOL;
 	
 	//Trocar IO check
 	m_trocarIO AT %I* : ARRAY [1..4] OF UDINT;
@@ -67,7 +64,7 @@ VAR
 	//update ui information
 	m_joystickSignal:Vec8d;
 	m_cartDataFromUI : ST_CartUIData;
-	m_ctrlEnable : ST_UI_control;
+	m_ctrlEnable : ST_uiControl;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -120,13 +117,7 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//Horizontal laser IO output ,when adjusting the trolley or moving the trolley
-IF (m_curJntPos[5] * 1000 + 1850) > 1950 THEN
-	//
-END_IF
-
-//check overhang rotation button
+        <ST><![CDATA[//check overhang rotation button
 m_rotaOverhangOnFlag := MAX( m_rotaButtonDetect[1].run(m_carRotaOverhangIO[1]), m_rotaButtonDetect[2].run(m_carRotaOverhangIO[2]),m_rotaButtonDetect[3].run(m_carRotaOverhangIO[3]),m_rotaButtonDetect[4].run(m_carRotaOverhangIO[4]));
 
 FOR i := 1 TO 4 BY 1 DO
@@ -160,7 +151,7 @@ END_VAR
       </Get>
     </Property>
     <Property Name="ctrlEnable" Id="{a3baaf86-b572-478d-828a-8abd1832149b}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY ctrlEnable : REFERENCE TO ST_UI_control]]></Declaration>
+      <Declaration><![CDATA[PROPERTY ctrlEnable : REFERENCE TO ST_uiControl]]></Declaration>
       <Get Name="Get" Id="{088e36f0-64b1-4fec-9db7-8ed59d586fe5}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -197,6 +188,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[curDHJntVel REF= m_curDHJntVel;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curJntCurrent" Id="{c06954b9-7d46-4bb1-b769-226d7700f290}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntCurrent :REFERENCE TO Vec8d]]></Declaration>
+      <Get Name="Get" Id="{803fed64-c7fc-4f5a-a733-13664a3be1b6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntCurrent ref=m_filtJntCurrent;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -365,8 +367,7 @@ VAR
 	i : INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-m_joystickSignal := joystickSignalAnalysis(i_UIData.m_joystickDataFromUI);
+        <ST><![CDATA[m_joystickSignal := joystickSignalAnalysis(i_UIData.m_joystickDataFromUI);
 
 m_ctrlEnable:=i_UIData.m_ctrlEnableFromUI;
 
@@ -381,8 +382,8 @@ FOR i := 1 TO 4 BY 1 DO
 	END_IF
 END_FOR
 
-IF NOT m_cartDataFromUI.m_surgicalSite = i_UIData.m_surgicalSite OR NOT m_cartDataFromUI.m_surgicalLocation = i_UIData.m_surgicalLocation THEN
-	m_cartDataFromUI.m_cartDockingState := 0;
+IF NOT (m_cartDataFromUI.m_surgicalSite = i_UIData.m_surgicalSite) OR NOT (m_cartDataFromUI.m_surgicalLocation = i_UIData.m_surgicalLocation) THEN
+	cartDockingState := 0;
 END_IF
 
 m_cartDataFromUI.m_surgicalSite := i_UIData.m_surgicalSite;
@@ -488,16 +489,7 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.checkIO">
-      <LineId Id="6" Count="1" />
-      <LineId Id="52" Count="2" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="28" Count="1" />
-      <LineId Id="24" Count="0" />
+      <LineId Id="60" Count="7" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.cmdJntPos.Get">
@@ -576,25 +568,8 @@ END_FOR ]]></ST>
       <LineId Id="30" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.ProcessingUIData">
-      <LineId Id="9" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="43" Count="2" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="34" Count="1" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="21" Count="1" />
+      <LineId Id="53" Count="20" />
+      <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.status.Get">
       <LineId Id="2" Count="0" />

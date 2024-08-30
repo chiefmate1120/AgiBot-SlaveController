@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_interactUI" Id="{b6fc928c-802a-4bca-a5ad-5de470837f32}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	//read from UI
+	//surgical status: true surgical start   false surgical finshed
+	g_surgicalStatus : BOOL;
+
+	//surgical site selection
+	g_surgicalSite : UINT;
+
+	//surgical location selection
+	g_surgicalLocation : UINT;
+
+	//stand column height limit : design 1805mm - 2495mm 
+	g_heightLimit : UINT;
+	g_heightLimitFromUI : UINT;
+	g_heightLimitEnbale : BOOL;
+	
+	//ui control button enable
+	g_uiCtrl : ST_uiControl;
+
+	//ui send reset fault
+	g_uiFaultReset : UINT;
+
+	//write UI 
+	//error code ID
+	g_errIdType3 : UDINT;
+	g_errIdType2 : UDINT;
+	g_errIdType1 : UDINT;
+	g_errIdType0 : UDINT;
+	
+	//instrument information
+	g_instruInformatiom :ARRAY[1..4] OF  ST_instruInfomation;
+	
+	//UPS power supply mode : line voltage supply : 1 , battery powered : 2
+	g_powerSupplyModeUPS : UINT;
+	
+	//UPS dump energy
+	g_dumpEnergyUPS : UINT:=51;
+	
+	//ui shutdown button enable
+	g_uiPowerOffEnable : BOOL;
+	
+	//plc confirm shutdown
+	g_plcPowerOffEnable : BOOL:=FALSE;
+	
+	//joystick enable tip : true trigger
+	g_joystickEnableTip : BOOL;
+	
+	//stop button signal : 0 press  , 1 No press
+	g_stopButtonFormUI : UINT:=1;
+
+	//PLC  version
+	g_plcVersion : STRING;	
+
+	//Surgical guidance
+	g_cartOperation : ST_cartOperation;
+	
+	//robot state  machine
+	g_armStateMachine : ST_robotStateMachine;
+	
+	//scope gravity angle
+	g_scopeGravityAngle : REAL;
+	
+	//scope type
+	g_scopeType : INT;
+
+	//fault tone current error type : 0 No fault , 1 low-level , 2 medium-level , 3 height-level
+	g_curErrType : UINT;
+	
+	//30° endoscope face up or face down
+	g_scopeUpDown : UINT := 1;
+	
+	//joystick signal  read RS232 data from UI
+	g_joystickSignalArray : ARRAY[0..21] OF USINT;
+	
+	//joystick trigger
+	g_joysticksTrigger : BOOL;
+	
+	//0: init status 1: checking 2:check succeed 3: check failed
+	g_slaveSelfCheckStatus : UINT; 
+	g_salveSelfCheckEnable : BOOL;
+	
+	//arm in disable status : 0 No disable , 1-4 number  corresponds to arms 1-4
+	g_armIsDisable : UINT:=0;
+	
+	//the patient side has recover error flag
+	g_slaveRecoverErrFlag : INT;
+
+	//the patient side runs separately
+	g_slaveRunAlone : BOOL;
+
+	//trocar status : 0 No trocar , 1 have trocar
+	g_trocarStatus : BOOL;
+
+	//heartbeat signal
+	g_heartBeat : INT;
+	
+	//left-right eye switch、0Left eye , 1 right eye
+	g_switchLeftRightEye : INT;
+	
+	//the pop-up fault code is displayed
+	g_popupErrorArm1 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm2 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm3 : ARRAY [0..2] OF UDINT;
+	g_popupErrorArm4 : ARRAY [0..2] OF UDINT;
+	g_popupRefresh : ARRAY [1..4] OF UINT;
+	
+	//instrument out of sight
+	g_instruOutScope : ARRAY [1..4] OF BOOL;
+	
+	//arm is adjustment
+	g_armIsAdjustment : ARRAY [1..4] OF UINT;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -498,7 +498,8 @@ END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="masterPoseInterploate" Id="{87f63227-64b7-47f4-901e-5d3267b5224a}">
-      <Declaration><![CDATA[METHOD masterPoseInterploate : BOOL
+      <Declaration><![CDATA[// every some cycles the data from master robots would be miss, so add this interpolation
+METHOD masterPoseInterploate : BOOL
 VAR_INPUT
 	i_masterPose :ST_FRAME;
 	i_masterGripAngle :LREAL;
@@ -542,12 +543,17 @@ IF m_curInterpolateCylce > m_masterInterpolateCycle THEN
 	m_lastMasterGripAngle := i_masterGripAngle;
 END_IF
 
+// control points
+IF m_curInterpolateCylce = m_masterInterpolateCycle THEN
+	m_interplotedMasterGripAngle := m_lastMasterGripAngle;
+	m_interplotedMasterPose := m_lastMasterPose;
 // interpolation
-m_interplotedMasterGripAngle := m_interplotedMasterGripAngle + m_masterGripAngleInterStep;
-
-vecSelfAdd(m_interplotedMasterPose.m_pos, m_masterPosInterStep);
-tmpMat := m_interplotedMasterPose.m_rot;
-matMultiply(tmpMat, m_masterOriInterStep, m_interplotedMasterPose.m_rot);
+ELSE
+	m_interplotedMasterGripAngle := m_interplotedMasterGripAngle + m_masterGripAngleInterStep;
+	vecSelfAdd(m_interplotedMasterPose.m_pos, m_masterPosInterStep);
+	tmpMat := m_interplotedMasterPose.m_rot;
+	matMultiply(tmpMat, m_masterOriInterStep, m_interplotedMasterPose.m_rot);
+END_IF
 
 m_curInterpolateCylce:= m_curInterpolateCylce+1;
 ]]></ST>
@@ -788,12 +794,16 @@ END_VAR
       <LineId Id="28" Count="2" />
       <LineId Id="40" Count="6" />
       <LineId Id="26" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="74" Count="0" />
       <LineId Id="48" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="59" Count="1" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="76" Count="0" />
       <LineId Id="56" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="49" Count="0" />

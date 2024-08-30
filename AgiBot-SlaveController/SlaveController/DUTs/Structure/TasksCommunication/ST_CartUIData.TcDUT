@@ -4,7 +4,7 @@
     <Declaration><![CDATA[TYPE ST_CartUIData :
 STRUCT
 	m_joystickDataFromUI:ARRAY [0..21] OF USINT;
-	m_ctrlEnableFromUI:ST_UI_control;
+	m_ctrlEnableFromUI:ST_uiControl;
 	m_standColumnHightLimit :LREAL;
 	m_surgicalSite : UINT;
 	m_surgicalLocation : UINT;

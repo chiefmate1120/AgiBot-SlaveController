@@ -142,7 +142,13 @@ FOR i:=1 TO g_sArmNum DO
 	r_slaveStatus.m_instruStauts[i].m_type:=m_slaveArms[i].instrument.m_instruType;
 	r_slaveStatus.m_instruStauts[i].m_ready:=m_instrumentMountedFlag[i];
 	r_slaveStatus.m_instruStauts[i].m_fingerAngle:=m_slaveArms[i].curGripAngle;
-	
+	r_slaveStatus.m_instruReadErrId[i] := m_slaveArms[i].instrument.onChipData.m_ErrorID;
+	r_slaveStatus.m_instruInstallStatus[i] := m_slaveArms[i].instruOn;
+	r_slaveStatus.m_instruClampErrId[i] := m_mountInstru[i].instruClampErrId;
+	r_slaveStatus.m_panelInstallStatus[i] := m_slaveArms[i].panelOn;
+	r_slaveStatus.m_panelClampErrId[i] := m_mountPanel[i].panelClampErrId;
+	r_slaveStatus.m_trocarOnFlag[i] := m_slaveArms[i].trocarOn;
+	r_slaveStatus.m_masterOnLine := m_masterOnLine;
 	// cartesion
 	r_slaveStatus.m_curArmPose[i]:=m_slaveArms[i].curCartPose;
 	r_slaveStatus.m_simArmPose[i]:=m_slaveArms[i].simCartPose;
@@ -339,6 +345,10 @@ FOR i:=1 TO g_sArmNum DO
 				ELSE
 					m_nextSlaveArmState[i] :=SlaveArmState_Init;
 				END_IF
+			END_IF
+			// to adjust
+			IF (m_slaveArms[i].adjustOn) THEN
+				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			END_IF
 			
 		// init
@@ -632,7 +642,7 @@ FOR i:=1 TO g_sArmNum DO
 	IF i_slavesInputDataPool.m_UIData.m_slaveArmDisableFlag[i] THEN
 		m_nextSlaveArmState[i] := SlaveArmState_Disable;
 	// error check
-	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] THEN
+	ELSIF i_slavesInputDataPool.m_safetyData.m_slaveErrFlag[i] AND NOT m_slaveArms[i].adjustOn THEN
 		m_nextSlaveArmState[i]:=SlaveArmState_Error;
 	END_IF
 END_FOR]]></ST>
@@ -660,7 +670,11 @@ END_VAR]]></Declaration>
 
 FOR i := 1 TO g_sArmNum BY 1 DO
 	IF m_slaveArmState[i] = SlaveArmState_Error OR i_slaveInputDataPool.m_setupStatus.m_armState[i] = SlaveArmState_Error THEN
-		m_lightCrlWord[i] := ArmLight_AmberBlink;
+		IF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,3] THEN
+			m_lightCrlWord[i] := ArmLight_RedBlink;
+		ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
+			m_lightCrlWord[i] := ArmLight_AmberBlink;
+		END_IF
 	ELSIF m_slaveArmState[i] = SlaveArmState_MountPanel OR m_slaveArmState[i] = SlaveArmState_MountInstru THEN
 		m_lightCrlWord[i] := ArmLight_BluePulse;
 	ELSIF m_slaveArmState[i] = SlaveArmState_InstruRetract OR m_slaveArmState[i] = SlaveArmState_Adjust OR i_slaveInputDataPool.m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust THEN
@@ -691,10 +705,10 @@ FOR i:=1 TO g_sArmNum DO
 	IF m_slaveArms[i].instrument.m_instruType=InstruType_endoscope THEN
 		
 		// update command endoscope posture from UI
-		IF GVL_com_upper_PC.scope_up_down <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
-			IF GVL_com_upper_PC.scope_up_down = 1 THEN
+		IF GVL_interactUI.g_scopeUpDown <> m_lastEndoScopePostureUI AND m_slaveArms[i].instrument.curScopeType = EndoScopeType_30 THEN
+			IF GVL_interactUI.g_scopeUpDown = 1 THEN
 				m_slaveArms[i].instrument.nextScopePosture := EndoScopePosture_HeadDown;
-			ELSIF  GVL_com_upper_PC.scope_up_down = 2 THEN
+			ELSIF  GVL_interactUI.g_scopeUpDown = 2 THEN
 				m_slaveArms[i].instrument.nextScopePosture := EndoscopePosture_HeadUp;
 			END_IF
 		END_IF
@@ -702,9 +716,9 @@ FOR i:=1 TO g_sArmNum DO
 		// update current endoscope posture to UI
 		IF m_slaveArms[i].instrument.curScopePosture <> m_lastEndoScopePostureRobot THEN
 			IF m_slaveArms[i].instrument.curScopePosture = EndoScopePosture_HeadDown THEN
-				GVL_com_upper_PC.scope_up_down := 1 ;
+				GVL_interactUI.g_scopeUpDown := 1 ;
 			ELSIF  m_slaveArms[i].instrument.curScopePosture = EndoScopePosture_HeadUp THEN
-				GVL_com_upper_PC.scope_up_down := 2;
+				GVL_interactUI.g_scopeUpDown := 2;
 			END_IF
 		END_IF
 		m_lastEndoScopePostureRobot := m_slaveArms[i].instrument.curScopePosture;
@@ -712,7 +726,7 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 END_FOR
 
-m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
+m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
 ]]></ST>
       </Implementation>
     </Method>
@@ -728,29 +742,7 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.getStatus">
-      <LineId Id="23" Count="0" />
-      <LineId Id="129" Count="1" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="144" Count="0" />
-      <LineId Id="57" Count="4" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="40" Count="0" />
+      <LineId Id="186" Count="33" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">
@@ -825,246 +817,15 @@ m_lastEndoScopePostureUI := GVL_com_upper_PC.scope_up_down;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="347" Count="0" />
-      <LineId Id="346" Count="0" />
-      <LineId Id="338" Count="6" />
-      <LineId Id="337" Count="0" />
-      <LineId Id="367" Count="0" />
-      <LineId Id="366" Count="0" />
-      <LineId Id="368" Count="1" />
-      <LineId Id="377" Count="0" />
-      <LineId Id="380" Count="1" />
-      <LineId Id="378" Count="1" />
-      <LineId Id="733" Count="4" />
-      <LineId Id="742" Count="0" />
-      <LineId Id="738" Count="0" />
-      <LineId Id="750" Count="0" />
-      <LineId Id="739" Count="1" />
-      <LineId Id="758" Count="0" />
-      <LineId Id="741" Count="0" />
-      <LineId Id="370" Count="0" />
-      <LineId Id="348" Count="0" />
-      <LineId Id="345" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="322" Count="2" />
-      <LineId Id="350" Count="0" />
-      <LineId Id="631" Count="0" />
-      <LineId Id="627" Count="0" />
-      <LineId Id="351" Count="0" />
-      <LineId Id="632" Count="0" />
-      <LineId Id="628" Count="0" />
-      <LineId Id="630" Count="0" />
-      <LineId Id="629" Count="0" />
-      <LineId Id="352" Count="1" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="634" Count="0" />
-      <LineId Id="759" Count="0" />
-      <LineId Id="358" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="636" Count="2" />
-      <LineId Id="635" Count="0" />
-      <LineId Id="41" Count="2" />
-      <LineId Id="354" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="633" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="145" Count="0" />
-      <LineId Id="166" Count="1" />
-      <LineId Id="193" Count="0" />
-      <LineId Id="169" Count="0" />
-      <LineId Id="290" Count="0" />
-      <LineId Id="298" Count="0" />
-      <LineId Id="291" Count="0" />
-      <LineId Id="293" Count="0" />
-      <LineId Id="292" Count="0" />
-      <LineId Id="194" Count="2" />
-      <LineId Id="171" Count="0" />
-      <LineId Id="168" Count="0" />
-      <LineId Id="147" Count="1" />
-      <LineId Id="356" Count="0" />
-      <LineId Id="151" Count="1" />
-      <LineId Id="224" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="357" Count="0" />
-      <LineId Id="204" Count="1" />
-      <LineId Id="153" Count="0" />
-      <LineId Id="149" Count="1" />
-      <LineId Id="146" Count="0" />
-      <LineId Id="603" Count="1" />
-      <LineId Id="602" Count="0" />
-      <LineId Id="240" Count="3" />
-      <LineId Id="299" Count="0" />
-      <LineId Id="593" Count="0" />
-      <LineId Id="591" Count="0" />
-      <LineId Id="300" Count="0" />
-      <LineId Id="710" Count="1" />
-      <LineId Id="720" Count="0" />
-      <LineId Id="712" Count="0" />
-      <LineId Id="709" Count="0" />
-      <LineId Id="594" Count="0" />
-      <LineId Id="589" Count="1" />
-      <LineId Id="592" Count="0" />
-      <LineId Id="383" Count="0" />
-      <LineId Id="487" Count="0" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="301" Count="0" />
-      <LineId Id="722" Count="2" />
-      <LineId Id="251" Count="0" />
-      <LineId Id="359" Count="0" />
-      <LineId Id="252" Count="1" />
-      <LineId Id="257" Count="0" />
-      <LineId Id="313" Count="0" />
-      <LineId Id="295" Count="1" />
-      <LineId Id="294" Count="0" />
-      <LineId Id="297" Count="0" />
-      <LineId Id="258" Count="0" />
-      <LineId Id="543" Count="2" />
-      <LineId Id="495" Count="0" />
-      <LineId Id="488" Count="0" />
-      <LineId Id="490" Count="0" />
-      <LineId Id="494" Count="0" />
-      <LineId Id="259" Count="4" />
-      <LineId Id="360" Count="0" />
-      <LineId Id="264" Count="1" />
-      <LineId Id="555" Count="0" />
-      <LineId Id="266" Count="1" />
-      <LineId Id="361" Count="1" />
-      <LineId Id="365" Count="0" />
-      <LineId Id="269" Count="3" />
-      <LineId Id="428" Count="1" />
-      <LineId Id="427" Count="0" />
-      <LineId Id="273" Count="2" />
-      <LineId Id="505" Count="0" />
-      <LineId Id="503" Count="1" />
-      <LineId Id="556" Count="0" />
-      <LineId Id="276" Count="1" />
-      <LineId Id="403" Count="0" />
-      <LineId Id="406" Count="2" />
-      <LineId Id="557" Count="0" />
-      <LineId Id="409" Count="1" />
-      <LineId Id="412" Count="1" />
-      <LineId Id="416" Count="0" />
-      <LineId Id="683" Count="3" />
-      <LineId Id="414" Count="0" />
-      <LineId Id="404" Count="0" />
-      <LineId Id="415" Count="0" />
-      <LineId Id="418" Count="1" />
-      <LineId Id="431" Count="1" />
-      <LineId Id="430" Count="0" />
-      <LineId Id="420" Count="1" />
-      <LineId Id="425" Count="0" />
-      <LineId Id="423" Count="0" />
-      <LineId Id="553" Count="1" />
-      <LineId Id="552" Count="0" />
-      <LineId Id="688" Count="2" />
-      <LineId Id="687" Count="0" />
-      <LineId Id="558" Count="0" />
-      <LineId Id="417" Count="0" />
-      <LineId Id="424" Count="0" />
-      <LineId Id="279" Count="3" />
-      <LineId Id="306" Count="0" />
-      <LineId Id="639" Count="1" />
-      <LineId Id="672" Count="0" />
-      <LineId Id="675" Count="0" />
-      <LineId Id="673" Count="1" />
-      <LineId Id="451" Count="1" />
-      <LineId Id="691" Count="2" />
-      <LineId Id="699" Count="2" />
-      <LineId Id="697" Count="0" />
-      <LineId Id="694" Count="2" />
-      <LineId Id="455" Count="1" />
-      <LineId Id="454" Count="0" />
-      <LineId Id="457" Count="1" />
-      <LineId Id="460" Count="0" />
-      <LineId Id="459" Count="0" />
-      <LineId Id="461" Count="0" />
-      <LineId Id="433" Count="4" />
-      <LineId Id="439" Count="0" />
-      <LineId Id="645" Count="5" />
-      <LineId Id="462" Count="1" />
-      <LineId Id="465" Count="5" />
-      <LineId Id="464" Count="0" />
-      <LineId Id="471" Count="0" />
-      <LineId Id="308" Count="4" />
-      <LineId Id="307" Count="0" />
-      <LineId Id="506" Count="2" />
-      <LineId Id="781" Count="0" />
-      <LineId Id="783" Count="4" />
-      <LineId Id="782" Count="0" />
-      <LineId Id="767" Count="0" />
-      <LineId Id="769" Count="4" />
-      <LineId Id="768" Count="0" />
-      <LineId Id="513" Count="5" />
-      <LineId Id="509" Count="0" />
-      <LineId Id="519" Count="2" />
-      <LineId Id="576" Count="2" />
-      <LineId Id="575" Count="0" />
-      <LineId Id="523" Count="1" />
-      <LineId Id="526" Count="1" />
-      <LineId Id="546" Count="2" />
-      <LineId Id="664" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="472" Count="1" />
-      <LineId Id="615" Count="2" />
-      <LineId Id="651" Count="5" />
-      <LineId Id="618" Count="1" />
-      <LineId Id="586" Count="1" />
-      <LineId Id="478" Count="0" />
-      <LineId Id="475" Count="1" />
-      <LineId Id="448" Count="0" />
-      <LineId Id="325" Count="0" />
-      <LineId Id="440" Count="0" />
-      <LineId Id="442" Count="1" />
-      <LineId Id="441" Count="0" />
-      <LineId Id="326" Count="2" />
-      <LineId Id="612" Count="2" />
-      <LineId Id="329" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="286" Count="1" />
+      <LineId Id="795" Count="345" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateArmLight">
-      <LineId Id="8" Count="7" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="70" Count="9" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="60" Count="1" />
-      <LineId Id="23" Count="0" />
+      <LineId Id="87" Count="30" />
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">
-      <LineId Id="6" Count="0" />
-      <LineId Id="8" Count="1" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="27" Count="1" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="32" Count="1" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="40" Count="0" />
+      <LineId Id="47" Count="26" />
       <LineId Id="39" Count="0" />
     </LineIds>
   </POU>

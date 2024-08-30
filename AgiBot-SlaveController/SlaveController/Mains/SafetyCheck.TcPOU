@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SafetyCheck
 VAR
@@ -15,8 +15,17 @@ VAR
 	// setup robot joint data
 	m_setupJointsData AT %I* :ST_SetupJointData;
 	
+	// master robot data, input from master controller box
+	m_masterRobotData AT %I* : MSCommu_MasterStatus;
+	
 	// error check result
 	m_safetyCheckData AT %Q* :ST_SafetyData;
+	
+	// Output cart status
+	m_cartStatus AT%I* : ST_CartStatus;
+	
+	// cart joint data
+	m_cartJointsData AT %I* :ST_CartJointData;
 	
 	//emergency stop and stop botton
 	m_stopButton AT %I*: BOOL;
@@ -26,9 +35,6 @@ VAR
 	m_warningTone AT %Q*:ARRAY [1..4] OF BOOL;
 	
 	m_initFlag:bool;
-	m_cartCheck :FB_CartCheck;
-	m_setupArmCheck:FB_SetupArmCheck;
-	m_slaveArmCheck:FB_SlaveArmCheck;
 	
 	m_SafetyCheck : Fb_SafetyCheck;
 	m_checkVariable : ARRAY[1..g_maxNum] OF checkInputVariable;
@@ -36,12 +42,20 @@ VAR
 	m_errCode :ARRAY [1..3] OF UDINT;
 	i , j: INT;
 	
-	//TODO(Yang Xueyun)
-	m_slaveDriverInput :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF ST_MotorInputs; 
-	m_slaveDriverOutput :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF ST_MotorOutputs;
-	m_setupDriverInput :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF ST_MotorInputs; 
-	m_setupDriverOutput :ARRAY[1..g_sArmNum, 1..g_setupJntNum] OF ST_MotorOutputs;
- 
+	//error robot data record
+	m_dataRecord : Fb_dataRecord;
+	
+	// original position of remote center point when fisrt enter hold state
+	m_dsrRcpPos :ARRAY[1..g_sArmNum] OF Vec3d;
+	m_rcpPosErrCounts :ARRAY[1..g_sArmNum] OF INT := [4(0)];
+	m_rcpPosErr :ARRAY[1..g_sArmNum] OF Vec3d;		// rcp position error
+	m_curJntPosLast : ARRAY [1..g_maxArmNum] OF vec13d;  
+	m_armErrCodeRefreshLast : ARRAY [1..4] OF UINT;
+	
+	m_armsRS:ARRAY [1..g_maxArmNum,1..30] OF RS;//复位优先双稳态器
+	m_cartRS:ARRAY [1..30] OF RS;//复位优先双稳态器
+	m_scopeArmNoReady : BOOL;
+	m_joysticksTrigger : BOOL;
 	// wait time before robot init  for ethercat to be statble 
 	m_safetyCheckInitWaitTime : LREAL:=0;
 END_VAR
@@ -61,28 +75,51 @@ armSafetyCheckInputCast();
 
 armSafetyCheckAllowed();
 
+robotPromptMassageCast();
+
 // wait communication to be stable
-IF(m_safetyCheckInitWaitTime<g_robotInitWaitTime) THEN
+IF(m_safetyCheckInitWaitTime<g_robotSafetyCheckWaitTime) THEN
 	m_safetyCheckInitWaitTime := m_safetyCheckInitWaitTime+g_setupArmCtrlCycleTime;
 	RETURN;
 END_IF
 
-FOR i:=1  TO g_sArmNum DO
-	m_SafetyCheck.armsSafetyCheck(i,m_checkVariable);
-	
-	m_safetyCheckData.m_slaveErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
-	m_safetyCheckData.m_setupErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
+
+FOR i:=1  TO g_maxNum DO
+	m_SafetyCheck.systemSafetyCheck(i,m_checkVariable,m_cartJointsData,m_setupJointsData,m_slaveJointData);
 END_FOR
 
-m_SafetyCheck.errCodeUpdating();
-GVL_com_upper_PC.error_ID_type3:=m_SafetyCheck.o_ErrCode[3];
-GVL_com_upper_PC.error_ID_type2:=m_SafetyCheck.o_ErrCode[2];
-GVL_com_upper_PC.error_ID_type1:=m_SafetyCheck.o_ErrCode[1];
 
-IF GVL_com_upper_PC.clear_Cart_fault=1 THEN
+//error flag to control
+readErrFlag();
+
+//Fault code for UI
+m_SafetyCheck.errCodeUpdating();
+
+//The fault code is sent to the UI
+GVL_interactUI.g_errIdType3:=m_SafetyCheck.o_ErrCode[3];
+GVL_interactUI.g_errIdType2:=m_SafetyCheck.o_ErrCode[2];
+GVL_interactUI.g_errIdType1:=m_SafetyCheck.o_ErrCode[1];
+GVL_interactUI.g_popupErrorArm1 := m_SafetyCheck.m_armErrCodePopup[1];
+GVL_interactUI.g_popupErrorArm2 := m_SafetyCheck.m_armErrCodePopup[2];
+GVL_interactUI.g_popupErrorArm3 := m_SafetyCheck.m_armErrCodePopup[3];
+GVL_interactUI.g_popupErrorArm4 := m_SafetyCheck.m_armErrCodePopup[4];
+FOR i:=1  TO g_sArmNum DO
+	IF m_SafetyCheck.m_armErrCodeRefresh[i] <> m_armErrCodeRefreshLast[i] THEN
+		GVL_interactUI.g_popupRefresh[i] := 1;
+	END_IF
+	m_armErrCodeRefreshLast[i] := m_SafetyCheck.m_armErrCodeRefresh[i];
+END_FOR
+
+//clear fault
+IF GVL_interactUI.g_uiFaultReset=1 OR m_masterRobotData.m_uiResetFault = 1 THEN
 	m_SafetyCheck.errFlagReset();
-	GVL_com_upper_PC.clear_Cart_fault := 0;
+	GVL_interactUI.g_uiFaultReset := 0;
 END_IF
+
+//robot record information
+m_dataRecord.run(m_checkVariable , m_cartStatus , m_cartJointsData , m_setupStatus , m_slaveStatus , m_setupJointsData , m_slaveJointData );
+
+m_warningTone := warningTone();
 ]]></ST>
     </Implementation>
     <Method Name="armSafetyCheckAllowed" Id="{c2ebef6f-e712-49e3-9955-377a0083e93a}">
@@ -90,40 +127,49 @@ END_IF
 VAR_INPUT
 END_VAR
 VAR
-	i , j : UDINT; 
+	i , j : INT; 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 1 TO g_maxArmNum DO
+        <ST><![CDATA[FOR i := 1 TO g_maxArmNum DO
 	FOR j := 1 TO g_maxArmJoint DO
 		IF j > 5 THEN
 			//fault code 16#3003 
-			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_slaveDriverInput[i,j-g_setupJntNum].m_statusWord<>0;
+			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum].m_statusWord<>0;
 			//fault code 16#3002 
-			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] :=m_slaveDriverInput[i, j-g_setupJntNum].m_statusWord<>0 AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] :=m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum].m_statusWord<>0 ;
 			//fault code 16#2002
-			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_slaveDriverInput[i, j-g_setupJntNum].m_statusWord = DriverStatusWord_OP AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_checkVariable[i].m_slaveDriverInput[j-g_setupJntNum].m_statusWord = DriverStatusWord_OP ;
+			//fault code 16#200C
+			m_SafetyCheck.checkPermit[i].m_jntCurrentCtrlErr[j] := m_checkVariable[i].m_slaveDriverOutput[j-g_setupJntNum].m_opMode = DriverOPMode_Trq;
 		ELSE
 			//fault code 16#3003 
-			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_setupDriverInput[i, j].m_statusWord<>0;
+			m_SafetyCheck.checkPermit[i].m_linkEncErr[j] := m_checkVariable[i].m_setupDriverInput[j].m_statusWord<>0;
 			//fault code 16#3002
-			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] := m_setupDriverInput[i, j].m_statusWord<>0 AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_currentIsNotUpdate[j] := m_checkVariable[i].m_setupDriverInput[j].m_statusWord<>0 AND j > 2;
 			//fault code 16#2002
-			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_setupDriverInput[i, j].m_statusWord = DriverStatusWord_OP AND j > 2;
+			m_SafetyCheck.checkPermit[i].m_armJntFollowErr[j] := m_checkVariable[i].m_setupDriverInput[j].m_statusWord = DriverStatusWord_OP AND j > 2;
+			//fault code 16#200C
+			m_SafetyCheck.checkPermit[i].m_jntCurrentCtrlErr[j] := m_checkVariable[i].m_setupDriverOutput[j].m_opMode = DriverOPMode_Trq AND j > 2;
 			
 		END_IF
 		//fault code 16#3002
 		m_SafetyCheck.checkPermit[i].m_jntStatusErr[j] := TRUE;
 		//fault code 16#3004
 		m_SafetyCheck.checkPermit[i].m_driveErr[j] := TRUE;
-		
-		m_SafetyCheck.checkPermit[i].m_jntVelErr[j] := TRUE;
-		
+		//fault code 16#3005
 		m_SafetyCheck.checkPermit[i].m_armJntEncErr[j] := TRUE;
-		
+		//fault code 16#2003
+		m_SafetyCheck.checkPermit[i].m_jntVelErr[j] := TRUE;
+		//fault code 16#2004
+		m_SafetyCheck.checkPermit[i].m_spacePoseErr[j] := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave AND  norm(m_slaveStatus.m_masterSlavePoseError[i])<g_smallNum;
+		//fault code 16#2005
 		m_SafetyCheck.checkPermit[i].m_jntCurrentErr[j] := TRUE;
+		//fault code 16#2007
 		m_SafetyCheck.checkPermit[i].m_fixedPointErr := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
-		
+		//fault code 16#2008
+		m_SafetyCheck.checkPermit[i].m_cmdJntSaltation[j] := m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave;
+		//fault code 16#200F
+		m_SafetyCheck.checkPermit[i].m_instruOpenAngle := FALSE;
 	END_FOR
 END_FOR
 ]]></ST>
@@ -135,132 +181,334 @@ VAR_INPUT
 END_VAR
 
 VAR
-	i : UDINT; 
-	j : INT;
+	i , j: INT; 
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i := 1 TO g_maxArmNum DO
 	//emergency stop 、stop button and ui stop 
 	m_checkVariable[i].EmergencyStop := m_emergencyStopButton;
-	m_checkVariable[i].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[i].PCStopButton := GVL_interactUI.g_stopButtonFormUI;
 	m_checkVariable[i].SlaveStopButton := m_stopButton;
-	//m_SafetyCheck.AlarmVar[i].MasterStopButton
+	m_checkVariable[i].MasterStopButton := m_masterRobotData.m_masterStopButton;
 	
-	//setup arm safety check data input mapping
-	FOR j := 1 TO g_setupJntNum DO
-		m_checkVariable[i].m_curLinkPos[j] := m_setupJointsData.m_curLinkPos[i][j];
-		m_checkVariable[i].m_curJntPos[j] := m_setupJointsData.m_curJntPos[i][j];
-		m_checkVariable[i].m_driverErrorWordIO[j] := m_setupDriverInput[i, j].m_driverError;
-		m_checkVariable[i].m_linkEncoderIO[j] := m_setupDriverInput[i, j].m_linkEncoder;
-		m_checkVariable[i].m_jntStatusWordIO[j] := m_setupDriverInput[i, j].m_statusWord;
-		m_checkVariable[i].m_curJntTorqueIO[j] :=m_setupDriverInput[i, j].m_current;
-		m_checkVariable[i].m_motPhieErr[j] := m_SafetyCheck.electriAngleDev(m_setupDriverInput[i, j].m_electriAngleDev);
-		m_checkVariable[i].m_cmdJntPos[j] := m_setupJointsData.m_cmdJntPos[i][j];
-		m_checkVariable[i].m_curJntVel[j] := m_setupJointsData.m_curJntVel[i][j];
-		m_checkVariable[i].m_JntCurrent[j] := m_setupJointsData.m_rawJntCurrent[i][j];
-		m_checkVariable[i].m_EtherCATState[j] := m_EtherCATCheck[i,j].EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j]);
-
+	IF m_setupStatus.m_armState[i] <> SetupArmState_Hold THEN
+		m_dsrRcpPos[i] := m_setupStatus.m_rcPos[i];
+	END_IF
+	m_checkVariable[i].m_rcpCheck := m_SafetyCheck.rcpErrCheck(m_dsrRcpPos[i],  m_setupStatus.m_rcPos[i], m_rcpPosErrCounts[i] ,m_rcpPosErr[i]);
+	m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_simArmPose[i] );
+	
+	//slave robot input cast
+	FOR j:=1 TO  g_sJntNum DO 		
+		m_checkVariable[i].m_slaveDriverInput[j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs;
+		//3 joint drive error word at number 6 , move one bit to the right to align with the other joints
+		IF j = 3 THEN
+			m_checkVariable[i].m_slaveDriverInput[j].m_driverError := SHR(SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs.m_driverError,1);
+		END_IF
+		m_checkVariable[i].m_slaveDriverOutput[j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorOutputs;
+		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_EtherCATCheck[i,j+g_setupJntNum].EtherCATVerify(GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
+		m_checkVariable[i].m_motorEncoderSaltaValue[j+g_setupJntNum] := ABS(m_checkVariable[i].m_slaveDriverInput[j+g_setupJntNum].m_motorEncoder - m_curJntPosLast[i][j+g_setupJntNum]);
+		m_curJntPosLast[i][j+g_setupJntNum] := m_checkVariable[i].m_slaveDriverInput[j+g_setupJntNum].m_motorEncoder;
 	END_FOR
 	
-	//slave arm safety check data input mapping
-	FOR j := 1 TO g_sJntNum DO
-		m_checkVariable[i].m_curLinkPos[j+g_setupJntNum] := m_slaveJointData.m_curLinkPos[i][j];
-		m_checkVariable[i].m_curJntPos[j+g_setupJntNum] := m_slaveJointData.m_curJntPos[i][j];
-		m_checkVariable[i].m_driverErrorWordIO[j+g_setupJntNum] := m_slaveDriverInput[i, j].m_driverError;
-		m_checkVariable[i].m_linkEncoderIO[j+g_setupJntNum] := m_slaveDriverInput[i, j].m_linkEncoder;
-		m_checkVariable[i].m_jntStatusWordIO[j+g_setupJntNum] := m_slaveDriverInput[i, j].m_statusWord;
-		m_checkVariable[i].m_curJntTorqueIO[j+g_setupJntNum] :=m_slaveDriverInput[i, j].m_current;
-		m_checkVariable[i].m_motPhieErr[j+g_setupJntNum] := m_SafetyCheck.electriAngleDev(m_slaveDriverInput[i, j].m_electriAngleDev);
-		m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum] := m_slaveJointData.m_cmdJntPos[i][j];
-		m_checkVariable[i].m_curJntVel[j+g_setupJntNum] := m_slaveJointData.m_curJntVel[i][j];
-		m_checkVariable[i].m_JntCurrent[j+g_setupJntNum] := m_slaveJointData.m_rawJntCurrent[i][j];
-		m_checkVariable[i].m_EtherCATState[j+g_setupJntNum] := m_EtherCATCheck[i,j+g_setupJntNum].EtherCATVerify(g_ArmNetID[i],g_JointNetPort[j+g_setupJntNum]);
-		
-		//m_SafetyCheck.AlarmVar[i].FixedPointErrLength := 
-		m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_slaveStatus.m_cmdArmPose[i], m_slaveStatus.m_simArmPose[i] );
-		m_checkVariable[i].m_cmdSaltaValue[j+g_setupJntNum] := m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum] - m_checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum];
-		m_checkVariable[i].m_cmdJntPosLast[j+g_setupJntNum] := m_checkVariable[i].m_cmdJntPos[j+g_setupJntNum];
-		//m_SafetyCheck.AlarmVar[i].InstruPitch := m_slaveStatus.m_curArmPose[i].m_rot
+	//setup robot input cast
+	FOR j:=1 TO  g_setupJntNum DO 		
+		m_checkVariable[i].m_setupDriverInput[j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs;
+		m_checkVariable[i].m_setupDriverOutput[j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorOutputs;
+		m_checkVariable[i].m_EtherCATState[j] := m_EtherCATCheck[i,j].EtherCATVerify(GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[i],g_JointNetPort[j]);
+		m_checkVariable[i].m_motorEncoderSaltaValue[j] := m_checkVariable[i].m_setupDriverInput[j].m_motorEncoder - m_curJntPosLast[i][j];
+		m_curJntPosLast[i][j] := m_checkVariable[i].m_setupDriverInput[j].m_motorEncoder;
 	END_FOR
 
 END_FOR
 
-// copy driver data
-FOR i:=1 TO g_sArmNum DO 
-	FOR j:=1 TO  g_sJntNum DO 
-		m_slaveDriverInput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorInputs;
-		m_slaveDriverOutput[i,j] := SlaveArmControl.m_slaveRobot.m_slaveArms[i].m_joints[j].m_motorOutputs;
-	END_FOR
-	
-	FOR j:=1 TO  g_setupJntNum DO 
-		m_setupDriverInput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorInputs;
-		m_setupDriverOutput[i,j] := SetupArmControl.m_setupRobot.m_setupArms[i].m_joints[j].m_motorOutputs;
-	END_FOR
+//setup robot in-out variable cast
+FOR j:=1 TO  g_cartJntNum DO
+	m_checkVariable[5].EmergencyStop := m_emergencyStopButton;
+	m_checkVariable[5].PCStopButton := GVL_interactUI.g_stopButtonFormUI;
+	m_checkVariable[5].SlaveStopButton := m_stopButton;
+	m_checkVariable[5].m_cartDriverInput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorInputs;
+	m_checkVariable[5].m_cartDriverOutput[j] := CartControl.m_cartRobot.m_slaveCart.m_cartJoints[j].m_motorOutputs;
+	m_checkVariable[5].m_cartEtherCATState[j] := m_EtherCATCheck[5,j].EtherCATVerify(GVL_CartJointEncoderCaliData.g_slaveCartNetID,GVL_CartJointEncoderCaliData.g_slaveCartJointNetPort[j]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="joystickAdjust" Id="{38ce96d9-75fc-4e3b-9d39-89b30533a7ac}">
+      <Declaration><![CDATA[METHOD joystickAdjust : BOOL
+VAR_IN_OUT CONSTANT
+	i_joystickValue : vec8d;
+END_VAR
+
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO 4 DO
+	IF i_joystickValue[i] <> 512 THEN
+		joystickAdjust := TRUE;
+		EXIT;
+	END_IF
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="readErrFlag" Id="{c6c3fbb5-bc5f-41ea-91b5-687651d637ca}">
+      <Declaration><![CDATA[METHOD readErrFlag : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i:=1  TO g_sArmNum DO
+	m_safetyCheckData.m_slaveErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
+	m_safetyCheckData.m_setupErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
+END_FOR
+
+
+m_safetyCheckData.m_cartErrFlag := m_SafetyCheck.m_armErrFlag[g_cartNum,2] OR m_SafetyCheck.m_armErrFlag[g_cartNum,3];
+//cart stead foot error flag
+m_safetyCheckData.m_cartSteadyFootErr := m_SafetyCheck.m_jntErrFlag[g_cartNum,1,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,1,3] 
+																	OR m_SafetyCheck.m_jntErrFlag[g_cartNum,2,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,2,3] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2];
+//cart wheel error flag
+m_safetyCheckData.m_cartWheelErr := m_SafetyCheck.m_jntErrFlag[g_cartNum,3,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,3,3]
+																OR m_SafetyCheck.m_jntErrFlag[g_cartNum,4,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,4,3] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2];
+//cart stand column error flag
+m_safetyCheckData.m_cartStandColumnErr := m_SafetyCheck.m_jntErrFlag[g_cartNum,5,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,5,3] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2];
+//cart adjust joint contains 6, 7, and 8 joints
+m_safetyCheckData.m_cartAdjustErr := m_SafetyCheck.m_jntErrFlag[g_cartNum,6,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,6,3] 
+															OR m_SafetyCheck.m_jntErrFlag[g_cartNum,7,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,7,3]
+															OR m_SafetyCheck.m_jntErrFlag[g_cartNum,8,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,8,3] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2];
+//cart overhang error flag
+m_safetyCheckData.m_cartOverhangErr := m_SafetyCheck.m_jntErrFlag[g_cartNum,8,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,8,3] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2];
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="robotPromptMassageCast" Id="{4528e69f-5454-4a94-84aa-1a99d7ab54e4}">
+      <Declaration><![CDATA[METHOD robotPromptMassageCast : BOOL
+VAR_IN_OUT CONSTANT
+END_VAR
+
+VAR
+	i : UDINT;
+	m_uiCtrlAdjustFlag : BOOL;
+	m_uiCtrlJoystickEnable : BOOL;
+	instrument: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO 4 DO
+	//0*1021
+	m_armsRS[i,1](SET:= m_slaveStatus.m_panelClampErrId[i]=1, 
+							RESET1:= NOT m_slaveStatus.m_panelInstallStatus[i], 
+							Q1=> m_checkVariable[i].m_promptStatus[1]);
+	m_checkVariable[i].m_promptLocation[1] := i + 3;
+							
+	//0*1022		
+	m_armsRS[i,2](SET:= m_slaveStatus.m_panelClampErrId[i]=2, 
+							RESET1:= NOT m_slaveStatus.m_panelInstallStatus[i], 
+							Q1=> m_checkVariable[i].m_promptStatus[2]);
+	m_checkVariable[i].m_promptLocation[2] := i + 3;
+	
+	//0*1023				
+	m_armsRS[i,3](SET:= m_slaveStatus.m_instruReadErrId[i]=1, 
+							RESET1:= NOT m_armsRS[i,3].SET OR NOT m_slaveStatus.m_instruInstallStatus[i] , 
+							Q1=> m_checkVariable[i].m_promptStatus[3]);
+	m_checkVariable[i].m_promptLocation[3] := i + 3;
+						
+	//0*1024	
+	m_armsRS[i,4](SET:= m_slaveStatus.m_instruReadErrId[i]=2, 
+							RESET1:=NOT m_armsRS[i,4].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
+							Q1=> m_checkVariable[i].m_promptStatus[4]);
+	m_checkVariable[i].m_promptLocation[4] := i + 3;
+	
+	//0*1025
+	m_armsRS[i,5](SET:= m_slaveStatus.m_instruClampErrId[i]=1, 
+							RESET1:=NOT m_armsRS[i,5].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
+							Q1=> m_checkVariable[i].m_promptStatus[5]);
+	m_checkVariable[i].m_promptLocation[5] := i + 3;
+	
+	 //0*1026
+	m_armsRS[i,6](SET:= m_slaveStatus.m_instruClampErrId[i]=2, 
+							RESET1:=NOT m_armsRS[i,6].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
+							Q1=> m_checkVariable[i].m_promptStatus[6]);
+	m_checkVariable[i].m_promptLocation[6] := i + 3;
+	
+	//0*1027
+	m_armsRS[i,7](SET:= m_slaveStatus.m_instruReadErrId[i]=3, 
+							RESET1:=NOT m_armsRS[i,7].SET OR NOT m_slaveStatus.m_instruInstallStatus[i], 
+							Q1=> m_checkVariable[i].m_promptStatus[7]);
+	m_checkVariable[i].m_promptLocation[7] := i + 3;
+	
+	//0*1028	
+	m_armsRS[i,8](SET:=NOT m_slaveStatus.m_selfCheckPass[i] AND m_slaveStatus.m_panelInstallStatus[i], 
+							RESET1:= NOT m_armsRS[i,8].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[8]);
+	m_checkVariable[i].m_promptLocation[8] := i + 3;
+				
+	//0*1029
+	
+	 //0*102A
+	//m_armsRS[i,10](SET:= m_slaveStatus.m_instruInstallStatus[i] AND NOT m_slaveStatus.m_trocarOnFlag[i], 
+	//						RESET1:= NOT m_armsRS[i,10].SET, 
+	//						Q1=> m_checkVariable[i].m_promptStatus[10]);
+	//m_checkVariable[i].m_promptLocation[10] := i + 3;	
+	
+	 //0*102B
+	FOR j:=1 TO g_mArmNum DO 
+		IF i = m_masterRobotData.m_teleSlaveArmIdx[j] THEN
+			m_armsRS[i,11](SET:=m_slaveStatus.m_armState[i] = SlaveArmState_Disable AND m_masterRobotData.m_tryMSControl[j] =1, 
+									RESET1:= NOT m_armsRS[i,11].SET, 
+									Q1=> m_checkVariable[i].m_promptStatus[11]);
+			m_checkVariable[i].m_promptLocation[11] := i + 3;
+		ELSE
+			m_checkVariable[i].m_promptStatus[11] := FALSE;
+		END_IF
+	END_FOR
+	
+	//0*102C
+	FOR j:=1 TO g_mArmNum DO 
+		IF i = m_masterRobotData.m_teleSlaveArmIdx[j] THEN
+			m_armsRS[i,12](SET:=NOT (SlaveArmState_InstruReady<= m_slaveStatus.m_armState[i] AND m_slaveStatus.m_armState[i] <= SlaveArmState_EndoScope) AND m_masterRobotData.m_tryMSControl[j] =1 AND m_slaveStatus.m_instruStauts[i].m_ready, 
+									RESET1:= NOT m_armsRS[i,12].SET, 
+									Q1=> m_checkVariable[i].m_promptStatus[12]);
+			m_checkVariable[i].m_promptLocation[12] := i + 3;
+		END_IF
+	END_FOR
+	
+				
+	//0*102D
+	m_armsRS[i,13](SET:= norm(m_slaveStatus.m_masterSlavePoseError[i]) > g_smallNum AND m_slaveStatus.m_armState[i] = SlaveArmState_MasterSlave, 
+							RESET1:= NOT m_armsRS[i,13].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[13]);
+	m_checkVariable[i].m_promptLocation[13] := i + 3;
+	
+	
+	//0*102E
+	m_armsRS[i,14](SET:= NOT SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i] AND (m_masterRobotData.m_tryMSControl[1] =1 OR m_masterRobotData.m_tryMSControl[2] =1) AND m_slaveStatus.m_selfCheckPass[i],
+							RESET1:= NOT m_armsRS[i,14].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[14]);
+	m_checkVariable[i].m_promptLocation[14] := i + 3;		
+	
+	//0*102F
+	IF InstruType_endoscope = m_slaveStatus.m_instruStauts[i].m_type AND m_slaveStatus.m_endoscopeMounted THEN
+		m_scopeArmNoReady := m_slaveStatus.m_armState[i] <> SlaveArmState_ScopeReady AND m_slaveStatus.m_armState[i] <> SlaveArmState_EndoScope;
+		m_armsRS[i,15](SET:= (NOT m_slaveStatus.m_endoscopeMounted OR m_scopeArmNoReady) AND (m_masterRobotData.m_tryMSControl[1] =1 OR m_masterRobotData.m_tryMSControl[2] =1), 
+								RESET1:= NOT m_armsRS[i,15].SET, 
+								Q1=> m_checkVariable[i].m_promptStatus[15]);
+		m_checkVariable[i].m_promptLocation[15] := i + 3;	
+	ELSE
+		m_checkVariable[i].m_promptStatus[15] := FALSE;
+	END_IF
+END_FOR
+
+//0*102F		预留  没有卡接内窥镜时的检测	
+//m_cartRS[15](SET:= NOT m_slaveStatus.m_endoscopeMounted AND (m_masterStatus.m_tryMSControl[1] =1 OR m_masterStatus.m_tryMSControl[2] =1), 
+//						RESET1:= NOT m_cartRS[15].SET, 
+//						Q1=> m_checkVariable[g_cartNum].m_promptStatus[15]);
+//m_checkVariable[g_cartNum].m_promptLocation[15] := 16#0C;
+
+
+//0*1030			
+m_cartRS[16](SET:= NOT m_slaveStatus.m_masterOnLine, 
+						RESET1:= m_slaveStatus.m_masterOnLine, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[16]);
+m_checkVariable[g_cartNum].m_promptLocation[16] := 16#0C;
+
+//0*1031
+m_cartRS[17](SET:=m_cartStatus.m_cartDumpEnergy <= 30 , 
+						RESET1:= m_cartStatus.m_cartDumpEnergy>30, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[17]);
+m_checkVariable[g_cartNum].m_promptLocation[17] := g_cartNum + 3;
+
+//0*1032	
+
+//0*1033
+m_cartRS[19](SET:= m_cartStatus.m_sdrivingLeverSensorManualFlag, 
+						RESET1:=NOT m_cartStatus.m_sdrivingLeverSensorManualFlag, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[19]);
+m_checkVariable[g_cartNum].m_promptLocation[19] := g_cartNum + 3;
+
+ //0*1034
+m_uiCtrlJoystickEnable := m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_joystickEnable;
+m_joysticksTrigger :=  joystickAdjust(m_cartStatus.m_joystickValue);
+m_cartRS[20](SET:= m_cartStatus.m_trocarOnFlag=0 AND NOT m_uiCtrlJoystickEnable AND m_joysticksTrigger, 
+						RESET1:= NOT m_cartRS[20].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[20]);
+m_checkVariable[g_cartNum].m_promptLocation[20] := g_cartNum + 3;
+					
+//0*1035
+m_uiCtrlAdjustFlag := m_cartStatus.m_uiControl.m_cameraJoystickEnable OR m_cartStatus.m_uiControl.m_dockingEnable OR m_cartStatus.m_uiControl.m_drapingEnable
+							OR m_cartStatus.m_uiControl.m_joystickEnable OR m_cartStatus.m_uiControl.m_packageEnable;
+m_cartRS[21](SET:= m_cartStatus.m_trocarOnFlag>0 AND m_uiCtrlAdjustFlag, 
+						RESET1:= m_cartStatus.m_trocarOnFlag=0 OR NOT m_uiCtrlAdjustFlag, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[21]);
+m_checkVariable[g_cartNum].m_promptLocation[21] := g_cartNum + 3;
+
+//0*1036
+m_cartRS[22](SET:= m_cartStatus.m_uiControl.m_joystickEnable AND (m_cartStatus.m_jntPosReachLimit[5] OR m_cartStatus.m_jntPosReachLimit[6] OR m_cartStatus.m_jntPosReachLimit[7] OR m_cartStatus.m_jntPosReachLimit[8]), 
+						RESET1:= NOT m_cartRS[22].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[22]);
+m_checkVariable[g_cartNum].m_promptLocation[22] := g_cartNum + 3;
+
+						
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="warningTone" Id="{82112973-2b93-4990-831a-9a609be275a4}">
+      <Declaration><![CDATA[METHOD warningTone : vec4b
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF (GVL_interactUI.g_curErrType=3) THEN
+	warningTone[1] := TRUE;
+	warningTone[2] := FALSE;
+	warningTone[3] := FALSE;
+ELSIF (GVL_interactUI.g_curErrType=2) THEN
+	warningTone[1] := FALSE;
+	warningTone[2] := TRUE;
+	warningTone[3] := FALSE;
+ELSIF  (GVL_interactUI.g_curErrType=1) THEN
+	warningTone[1] := FALSE;
+	warningTone[2] := FALSE;
+	warningTone[3] := TRUE;
+ELSE
+	warningTone[1] := FALSE;
+	warningTone[2] := FALSE;
+	warningTone[3] := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="SafetyCheck">
-      <LineId Id="25" Count="0" />
-      <LineId Id="113" Count="6" />
-      <LineId Id="112" Count="0" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="101" Count="0" />
-      <LineId Id="105" Count="1" />
-      <LineId Id="243" Count="4" />
-      <LineId Id="242" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="129" Count="2" />
-      <LineId Id="111" Count="0" />
-      <LineId Id="122" Count="0" />
-      <LineId Id="121" Count="0" />
-      <LineId Id="123" Count="1" />
-      <LineId Id="102" Count="1" />
-      <LineId Id="125" Count="0" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="135" Count="0" />
+      <LineId Id="350" Count="58" />
       <LineId Id="66" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckAllowed">
-      <LineId Id="6" Count="1" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="65" Count="4" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="60" Count="4" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="52" Count="1" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="33" Count="2" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="15" Count="0" />
+      <LineId Id="80" Count="41" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckInputCast">
-      <LineId Id="95" Count="19" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="115" Count="3" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="119" Count="0" />
-      <LineId Id="122" Count="4" />
-      <LineId Id="128" Count="1" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="131" Count="8" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="176" Count="0" />
-      <LineId Id="165" Count="10" />
+      <LineId Id="190" Count="45" />
       <LineId Id="164" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.joystickAdjust">
+      <LineId Id="3" Count="5" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.readErrFlag">
+      <LineId Id="3" Count="22" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.robotPromptMassageCast">
+      <LineId Id="3" Count="155" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SafetyCheck.warningTone">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

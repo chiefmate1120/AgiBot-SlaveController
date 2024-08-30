@@ -33,6 +33,29 @@ STRUCT
 	// master slave pose error [position, angle*axis] in endoscope coordinate
 	m_masterSlavePoseError :ARRAY[1..g_sArmNum] OF Vec6d; 
 
+	//read instrument information error ID
+	m_instruReadErrId : ARRAY[1..g_sArmNum] OF INT;
+	
+	//instrument install status
+	m_instruInstallStatus : ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//instrument clamp error Id 
+	m_instruClampErrId : ARRAY[1..g_sArmNum] OF UINT;
+	
+	//panel install status
+	m_panelInstallStatus : ARRAY[1..g_sArmNum] OF BOOL;
+	
+	//panel clamp error ID
+	m_panelClampErrId : ARRAY[1..g_sArmNum] OF UINT;
+	
+	//trocar install status 
+	m_trocarOnFlag : ARRAY[1..g_sArmNum] OF BOOL;
+
+	// flag if master are connected
+	m_masterOnLine :BOOL ;
+	
+	// slave robot stop button trigger 
+	m_slaveStopButton : BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

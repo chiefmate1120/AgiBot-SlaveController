@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_SafetyLogData" Id="{a7b563da-8697-448d-a8a3-38789fd9e0df}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	g_maxNum:INT:=5;
+	g_maxArmNum:INT:=4;
+	g_maxArmJoint:INT:=13; g_maxCartJoint:INT:=8;
+	g_cartNum:UDINT:=5;
+	MAX_CSV_ROWS 			: UDINT := 10000;(*最大行数(任务周期为20ms)即10分钟的buffer*)
+	MAX_CSV_COLUMNS 		: UDINT := 130;(*最大列数*)
+	MAX_CSV_FIELD_LENGTH	: UDINT := 35;(*每个字段的字符长度*)
+	MAX_CSV_RING_BUFFER		: UDINT := 5;
+	g_JointNetPort:ARRAY[1..g_maxArmJoint] OF UINT :=[
+		1002,    1002,	1003,	1004,	1005,	1006,	1007,	1008,	2(1009),	3(1010)];
+END_VAR
+
+VAR_GLOBAL
+	g_arrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

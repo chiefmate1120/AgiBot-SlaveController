@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCtrlAdjust" Id="{673bb3aa-3c17-460e-a1b6-375536272abd}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAdjust EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -15,12 +15,15 @@ VAR
 	m_joystickVelInc: Vec8d;
 	m_actJntPos: Vec8d;
 	m_tarPosInc: Vec8d;
+	m_lastPosInc: Vec8d;
 	m_tarCartPos: Vec8d;
 	m_trajJntPos : Vec8d;
 	m_tarJntPos : Vec8d;
 	m_initActJntPos: Vec8d;
 	m_initActCartPos: Vec8d;
 	m_veiwAngle : LREAL;
+	m_jntPosReachLimit : Vec8b;
+	m_maxJntPos : vec8d;
 
 	m_carJntSoftwareLimit :ARRAY [5..8] OF LREAL := [0.005, 2*g_deg2Rad, 0.005, 2*g_deg2Rad];
 	
@@ -58,6 +61,7 @@ m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 1);
 m_actJntPos := i_slaveCart.curJntPos;
 m_actJntPos[7] := i_slaveCart.curJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos;
 m_veiwAngle := m_actJntPos[6] + m_actJntPos[8];
+m_jntEnableFlag := faultDetect();
 
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:= 1 TO 4 BY 1 DO
@@ -66,9 +70,8 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 		m_tarPosInc[i+4] := m_tarPosInc[i+4] + m_joystickVelInc[i+4] * g_cartCtrlCycleTime;
 	END_FOR
 	
-	
 	m_tarCartPos[5] := m_initActJntPos[5] + m_tarPosInc[5];
-	IF i_slaveCart.m_ctrlEnable.camera_joysticks_enable THEN
+	IF i_slaveCart.m_ctrlEnable.m_cameraJoystickEnable THEN
 		m_tarCartPos[6] := m_initActCartPos[6] + m_tarPosInc[6]*COS(m_veiwAngle)+m_tarPosInc[7]*SIN(m_veiwAngle);
 		m_tarCartPos[7] := m_initActCartPos[7] - m_tarPosInc[6]*SIN(m_veiwAngle)+m_tarPosInc[7]*COS(m_veiwAngle);
 	ELSE
@@ -77,7 +80,7 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	END_IF
 	m_tarCartPos[8] := m_initActJntPos[8] + m_tarPosInc[8];
 	
-	IF i_slaveCart.m_ctrlEnable.limit_height_adjusting THEN
+	IF i_slaveCart.m_ctrlEnable.m_heightLimitAdjustEnable THEN
 		m_trajJntPos[5] := m_tarCartPos[5];
 	ELSE
 		m_trajJntPos[5] := LIMIT(GVL_CartMotorParameters.g_minJntPos[5], m_tarCartPos[5], MAX(m_actJntPos[5],i_slaveCart.m_cartDataFromUI.m_standColumnHightLimit));
@@ -85,18 +88,53 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	m_trajJntPos[6] := atan2( m_tarCartPos[6], m_tarCartPos[7]);
 	m_trajJntPos[7] := m_tarCartPos[7]/COS(m_trajJntPos[6]) - GVL_CartControlParameters.g_curBeamStretchJntInitPos;
 	m_trajJntPos[8] := m_tarCartPos[8] -  (m_trajJntPos[6] - m_initActJntPos[6]);
+	m_jntPosReachLimit := calcCmdReachLimit();
 	
-	
-	
-	m_tarJntPos[5] := LIMIT(GVL_CartMotorParameters.g_minJntPos[5] + m_carJntSoftwareLimit[5], m_trajJntPos[5], GVL_CartMotorParameters.g_maxJntPos[5] - m_carJntSoftwareLimit[5]) ;
-	m_tarJntPos[6] := LIMIT(GVL_CartMotorParameters.g_minJntPos[6] + m_carJntSoftwareLimit[6], m_trajJntPos[6], GVL_CartMotorParameters.g_maxJntPos[6] - m_carJntSoftwareLimit[6]);
-	m_tarJntPos[7] := LIMIT(GVL_CartMotorParameters.g_minJntPos[7] + m_carJntSoftwareLimit[7], m_trajJntPos[7], GVL_CartMotorParameters.g_maxJntPos[7] - m_carJntSoftwareLimit[7]);
-	m_tarJntPos[8] := LIMIT(GVL_CartMotorParameters.g_minJntPos[8] + m_carJntSoftwareLimit[8], m_trajJntPos[8], GVL_CartMotorParameters.g_maxJntPos[8] - m_carJntSoftwareLimit[8]);
-	
-	FOR i := 5 TO 8 BY 1 DO
+	FOR i := 5 TO 8 DO 
+		m_tarJntPos[i] := LIMIT(GVL_CartMotorParameters.g_minJntPos[i] + m_carJntSoftwareLimit[i], m_trajJntPos[i], GVL_CartMotorParameters.g_maxJntPos[i] - m_carJntSoftwareLimit[i]) ;
 		m_jntOTG[i].run(i_targetPos:= m_tarJntPos[i], i_targetVel:= 0.0, o_cmdAcc=> , o_cmdVel=> , o_cmdPos=>m_cmdJntPos[i] );
 	END_FOR
 END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdReachLimit" Id="{e76fd30f-25e0-41dc-af4d-968e139e9a99}">
+      <Declaration><![CDATA[METHOD calcCmdReachLimit : vec8b
+VAR_INPUT
+END_VAR
+
+VAR
+	i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 5 TO g_cartJntNum DO
+	IF (GVL_CartMotorParameters.g_minJntPos[i] + m_carJntSoftwareLimit[i]) >= m_trajJntPos[i] THEN
+		IF (m_tarPosInc[i] - m_lastPosInc[i]) <0 THEN
+			m_tarPosInc[i] := m_lastPosInc[i];
+		END_IF
+		calcCmdReachLimit[i] := TRUE;
+	
+	ELSIF m_trajJntPos[i]>=(m_maxJntPos[i] - m_carJntSoftwareLimit[i]) THEN
+		IF (m_tarPosInc[i] - m_lastPosInc[i]) >0 THEN
+			m_tarPosInc[i] := m_lastPosInc[i];
+		END_IF
+		calcCmdReachLimit[i] := TRUE;
+	END_IF
+	m_lastPosInc[i] := m_tarPosInc[i];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="faultDetect" Id="{3eb1df66-8f34-4507-9d11-b4ccf2531ade}">
+      <Declaration><![CDATA[METHOD faultDetect : vec8i
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[faultDetect[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
+faultDetect[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+faultDetect[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{4b0bf65e-8ba0-42dd-a86b-a06390c00e49}">
@@ -119,10 +157,10 @@ END_VAR
 m_holdLastCmds := checkToHoldLastCmds(i_slaveCart);
 SUPER^.init(i_slaveCart,r_cartCtrlCmd);
 
-m_jntEnableFlag[5] :=1;
-m_jntEnableFlag[6] :=1;
-m_jntEnableFlag[7] :=1;
-m_jntEnableFlag[8] :=1;
+m_jntEnableFlag[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
+m_jntEnableFlag[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+m_jntEnableFlag[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+m_jntEnableFlag[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
 
 m_jntOPMode[5]:= DriverOPMode_cspMZ;
 m_jntOPMode[6]:= DriverOPMode_Pos;
@@ -132,6 +170,10 @@ m_jntOPMode[8]:= DriverOPMode_Pos;
 m_joystickSignal := g_zeroVec8d;
 m_tarPosInc := g_zeroVec8d;
 m_trajJntPos := g_zeroVec8d;
+m_jntPosReachLimit := g_zeroVec8b;
+
+m_maxJntPos := GVL_CartMotorParameters.g_maxJntPos;
+m_maxJntPos[5] := i_slaveCart.m_cartDataFromUI.m_standColumnHightLimit;
 
 m_initActJntPos:=m_cmdJntPos;//i_slaveCart.curJntPos;
 m_initActCartPos[6] := (m_initActJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos) * SIN(m_initActJntPos[6]);
@@ -146,73 +188,27 @@ m_adjustStartTime := 0;
 copyCmds(r_cartCtrlCmd);]]></ST>
       </Implementation>
     </Method>
+    <Property Name="jntPosReachLimit" Id="{51d24024-552f-4b38-b701-ac99486b032c}">
+      <Declaration><![CDATA[PROPERTY jntPosReachLimit : vec8b]]></Declaration>
+      <Get Name="Get" Id="{5e4c83bb-bb62-4b31-9724-5c08126a2d99}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntPosReachLimit := m_jntPosReachLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <LineIds Name="FB_CartCtrlAdjust">
       <LineId Id="52" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.calcCmdJntPos">
-      <LineId Id="12" Count="0" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="96" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="40" Count="3" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="112" Count="0" />
-      <LineId Id="110" Count="1" />
-      <LineId Id="84" Count="2" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="49" Count="1" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="68" Count="1" />
+      <LineId Id="123" Count="37" />
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.init">
-      <LineId Id="106" Count="0" />
-      <LineId Id="104" Count="1" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="75" Count="0" />
-      <LineId Id="77" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="58" Count="2" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="22" Count="1" />
+      <LineId Id="133" Count="32" />
       <LineId Id="21" Count="0" />
     </LineIds>
   </POU>
