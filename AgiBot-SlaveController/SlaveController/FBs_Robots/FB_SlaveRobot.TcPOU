@@ -255,9 +255,6 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 END_FOR
 
-//update arm light
-updateArmLight(i_slaveInputDataPool);
-
 // update arm status
 FOR i:=1 TO g_sArmNum DO
 	// update dynamic data
@@ -266,6 +263,9 @@ FOR i:=1 TO g_sArmNum DO
 	// update slave arm kinematics
 	m_slaveArms[i].updateStatus();
 END_FOR
+
+//update arm light
+updateArmLight(i_slaveInputDataPool);
 
 // state machine transition
 stateMachine(i_slaveInputDataPool);
@@ -788,14 +788,12 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="171" Count="0" />
       <LineId Id="173" Count="0" />
       <LineId Id="128" Count="1" />
-      <LineId Id="189" Count="0" />
-      <LineId Id="188" Count="0" />
-      <LineId Id="190" Count="0" />
       <LineId Id="198" Count="0" />
       <LineId Id="197" Count="0" />
       <LineId Id="201" Count="4" />
       <LineId Id="220" Count="0" />
       <LineId Id="200" Count="0" />
+      <LineId Id="229" Count="2" />
       <LineId Id="140" Count="0" />
       <LineId Id="19" Count="1" />
       <LineId Id="153" Count="0" />
