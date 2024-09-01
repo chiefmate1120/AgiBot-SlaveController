@@ -650,7 +650,7 @@ END_FOR]]></ST>
     </Method>
     <Method Name="updateArmLight" Id="{0d4d98a3-ae97-4bc5-8d05-6e3f5cc1e792}">
       <Declaration><![CDATA[METHOD updateArmLight : BOOL
-VAR_INPUT
+VAR_IN_OUT CONSTANT
 	i_slaveInputDataPool:ST_SlaveInputDataPool;
 END_VAR
 
