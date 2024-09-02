@@ -106,24 +106,6 @@ FOR i:=1 TO 4 DO
 		m_jntBacklash [i] := m_jntBacklash [i] +  2*m_jntMoveStep*sign(deltaAng);
 		m_instruLastCmdJntPos[i] := i_cmdInstruJntPos[i];
 	END_IF
-	
-	// limit compensated backslash angle
-	IF i<3 THEN 
-		IF g_instruBacklashDir[i] > 0 THEN
-			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(0, ABS(m_jntBacklash[i]), g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
-		ELSE
-			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(-g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx], ABS(m_jntBacklash[i]), 0);	
-		END_IF
-
-	ELSIF i=3 THEN
-		IF g_instruBacklashDir[i] > 0 THEN
-			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(0, ABS(m_jntBacklash[i]), g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
-		ELSE
-			m_jntBacklash [i] := g_instruBacklashDir[i] * LIMIT(-g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx], ABS(m_jntBacklash[i]), 0);	
-		END_IF
-	ELSE
-		m_jntBacklash [i]:=0;
-	END_IF
 END_FOR
 
 
@@ -157,6 +139,29 @@ ELSE
 	m_lastCmdYawAng := i_cmdYawPos;
 	m_lastReverseYawPos := i_cmdYawPos;
 END_IF
+
+// limit compensated backslash angle
+FOR i:=1 TO 4 DO
+
+	IF i<3 THEN 
+		IF g_instruBacklashDir[i] > 0 THEN
+			m_jntBacklash [i] := LIMIT(0, m_jntBacklash[i], g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]);		
+		ELSE
+			m_jntBacklash [i] := LIMIT(-g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx], m_jntBacklash[i], 0);	
+		END_IF
+
+	ELSIF i=3 THEN
+		IF g_instruBacklashDir[i] > 0 THEN
+			m_jntBacklash [i] := LIMIT(0, m_jntBacklash[i], g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx]);
+		ELSE
+			m_jntBacklash [i] := LIMIT(-g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx], m_jntBacklash[i], 0);	
+		END_IF
+	ELSE
+		m_jntBacklash [i]:=0;
+	END_IF
+	
+END_FOR
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -275,7 +280,10 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.calcBacklash">
-      <LineId Id="134" Count="58" />
+      <LineId Id="208" Count="7" />
+      <LineId Id="219" Count="32" />
+      <LineId Id="253" Count="20" />
+      <LineId Id="278" Count="1" />
       <LineId Id="60" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">

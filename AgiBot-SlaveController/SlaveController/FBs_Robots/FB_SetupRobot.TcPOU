@@ -50,20 +50,22 @@ VAR
 	i:int;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Controller transit
-IF m_nextSetupArmState[i]<> m_setupArmState[i] THEN
-	// reset current controller
-	m_armCtrl[i].reset();
-	
-	// transit to new controller
-	m_lastSetupArmState[i]:=m_setupArmState[i];
-	m_setupArmState[i]:=m_nextSetupArmState[i];
-	m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
-	
-	// init next controller
-	m_armCtrl[i].Init(m_setupArms[i],m_armCtrlCmds[i]);
-	m_setupArms[i].updateCmds(m_armCtrlCmds[i]);
-END_IF]]></ST>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO 
+	// Controller transit
+	IF m_nextSetupArmState[i]<> m_setupArmState[i] THEN
+		// reset current controller
+		m_armCtrl[i].reset();
+		
+		// transit to new controller
+		m_lastSetupArmState[i]:=m_setupArmState[i];
+		m_setupArmState[i]:=m_nextSetupArmState[i];
+		m_armCtrl[i]:=m_armCtrlFactory[i,m_setupArmState[i]];
+		
+		// init next controller
+		m_armCtrl[i].Init(m_setupArms[i],m_armCtrlCmds[i]);
+		m_setupArms[i].updateCmds(m_armCtrlCmds[i]);
+	END_IF
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="getStatus" Id="{87cb863f-d525-453d-a0db-af97bcb1e34e}">
@@ -289,7 +291,7 @@ END_FOR]]></ST>
       <LineId Id="33" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.controllerTransit">
-      <LineId Id="30" Count="12" />
+      <LineId Id="48" Count="14" />
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupRobot.getStatus">

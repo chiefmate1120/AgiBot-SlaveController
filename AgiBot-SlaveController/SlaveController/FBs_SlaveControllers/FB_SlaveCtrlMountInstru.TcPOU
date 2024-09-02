@@ -317,19 +317,27 @@ CASE m_instruMountStatus OF
 			m_targetMountPos[i+3]:=curJntPos[i+3] - m_instruZeroDeviation[i];
 		END_FOR
 		m_instruMountStatus :=3;
-		
-		
-	3:
-		m_isFinished:=TRUE;
+	
+	3: // make fingers is closed
+		m_instruMountStatus :=4;
 		FOR i:=1 TO 4 DO 
 			m_jntPosErr[i]:=m_targetMountPos[i+3]-curJntPos[i+3];
-			IF ABS(m_jntPosErr[i]) >GVL_SlaveControlParameters.g_jntCtrlAngTolHigh OR 
+			IF ABS(m_jntPosErr[i]) >GVL_SlaveControlParameters.g_jntCtrlAngTolLow OR 
 					ABS( i_slaveArm.linkSingle[i+3] - i_slaveArm.instrument.onChipData.m_InstruPos[i]) >5*g_deg2rad THEN
-				m_isFinished := FALSE;
+				m_instruMountStatus :=3;
 				EXIT;
 			END_IF
 		END_FOR
 		
+		IF m_instruMountStatus =4 AND NOT( i_slaveArm.instrument.m_isSingleFinger) THEN
+			m_targetMountPos[4] := curJntPos[4]+g_gripperCloseAng;
+			m_targetMountPos[5] := curJntPos[5]+g_gripperCloseAng;
+		END_IF
+		
+	4:
+		m_isFinished :=  ABS(m_targetMountPos[4]-curJntPos[4]) < GVL_SlaveControlParameters.g_jntCtrlAngTolLow AND
+			 ABS(m_targetMountPos[5]-curJntPos[5]) < GVL_SlaveControlParameters.g_jntCtrlAngTolLow;
+
 END_CASE
 
 // traj plan
@@ -457,11 +465,8 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
-      <LineId Id="204" Count="20" />
-      <LineId Id="294" Count="1" />
-      <LineId Id="297" Count="1" />
-      <LineId Id="296" Count="0" />
-      <LineId Id="225" Count="60" />
+      <LineId Id="307" Count="20" />
+      <LineId Id="329" Count="73" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountUltraKnife">
