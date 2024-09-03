@@ -392,8 +392,6 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 				m_panelMountedFlag[i] :=TRUE;
 				
-				// reset joints encoder data again
-				m_slaveArms[i].initJntPos();
 			// to standby
 			ELSIF NOT(m_slaveArms[i].panelOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
@@ -437,11 +435,7 @@ FOR i:=1 TO g_sArmNum DO
 				m_nextSlaveArmState[i]:=SlaveArmState_PanelReady;
 			ELSIF m_armCtrl[i].isFinished THEN
 				m_instrumentMountedFlag[i] :=TRUE;
-				// reset joints encoder data again
-				m_slaveArms[i].initJntPos();
 				
-				// record current joint position as offset for instrument
-				m_slaveArms[i].instrument.initInstruJntPos(m_slaveArms[i].curJntPos);
 				// to instrument invasion
 				IF m_instruInvasionEnableFlag[i] THEN
 					m_nextSlaveArmState[i] := SlaveArmState_InstruInvasion;
@@ -815,7 +809,10 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="795" Count="345" />
+      <LineId Id="795" Count="92" />
+      <LineId Id="890" Count="42" />
+      <LineId Id="935" Count="0" />
+      <LineId Id="938" Count="202" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateArmLight">

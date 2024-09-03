@@ -49,7 +49,7 @@ VAR_GLOBAL CONSTANT
 	
 	// instrument backslash
 	g_instruYawBacklash :ARRAY[1..g_instruTypesNum] OF LREAL :=[8.0*g_deg2rad, 8.0*g_deg2rad, 5.0*g_deg2rad, 5.0*g_deg2rad, 8.0*g_deg2rad, 8.0*g_deg2rad, 8.0*g_deg2rad, 8.0*g_deg2rad, 8.0*g_deg2rad,  10.0*g_deg2rad,  10.0*g_deg2rad,  0 , 0,  0 ];
-	g_instruPitchBacklash :ARRAY[1..g_instruTypesNum] OF LREAL :=[6.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 6.0*g_deg2rad, 6.0*g_deg2rad, 6.0*g_deg2rad, 4.0*g_deg2rad,  4.0*g_deg2rad,  4*g_deg2rad,  0 , 0,  0 ];
+	g_instruPitchBacklash :ARRAY[1..g_instruTypesNum] OF LREAL :=[7.0*g_deg2rad, 5.0*g_deg2rad, 5.0*g_deg2rad, 5.0*g_deg2rad, 5.0*g_deg2rad, 7.0*g_deg2rad, 5.0*g_deg2rad, 7.0*g_deg2rad, 5.0*g_deg2rad,  5.0*g_deg2rad,  5*g_deg2rad,  0 , 0,  0 ];
 	g_instruBacklashDir: ARRAY[1..g_instruTypesNum] OF INT :=[-1, -1, -1, 0, 0];
 	g_gripperCloseAng :LREAL := 2.0*g_deg2rad;
 	
