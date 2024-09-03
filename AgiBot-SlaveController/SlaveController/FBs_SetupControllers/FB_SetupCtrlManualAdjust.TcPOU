@@ -97,6 +97,9 @@ IF NOT(i_setupArm.manualAdjustOn) THEN
 		m_jntEnableFlag[i] := 0;
 		m_jntOPMode[i]:=DriverOPMode_Pos;
 	END_FOR
+	
+	// TODO: setup joint3 would "jump" a bit when transit from torque mode to position mode
+	m_jntOPMode[3] := DriverOPMode_Trq;
 	RETURN;
 ELSE
 	FOR i:=1 TO 4 DO
@@ -168,7 +171,11 @@ jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,
       <LineId Id="115" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.calcCmdJntTrq">
-      <LineId Id="146" Count="35" />
+      <LineId Id="146" Count="8" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="155" Count="26" />
       <LineId Id="123" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.init">

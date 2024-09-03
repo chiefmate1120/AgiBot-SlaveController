@@ -1864,6 +1864,7 @@
 				<Cpu CpuId="2" RtLimit="90"/>
 				<Cpu CpuId="3"/>
 				<Cpu CpuId="6" BaseTime="2500"/>
+				<Cpu CpuId="7"/>
 			</Settings>
 			<Licenses CacheOrCheckLicensesOnStartup="true">
 				<Target>
@@ -1880,7 +1881,7 @@
 				<Task Id="5" Priority="3" CycleTime="10000" AmsPort="352" Affinity="#x00000004" AdtTasks="true">
 					<Name>TaskSetupArmControl</Name>
 				</Task>
-				<Task Id="1" Priority="6" CycleTime="10000" AmsPort="353" AdtTasks="true">
+				<Task Id="1" Priority="6" CycleTime="10000" AmsPort="353" Affinity="#x00000080" AdtTasks="true">
 					<Name>TaskSafetyCheck</Name>
 				</Task>
 				<Task Id="7" Priority="4" CycleTime="10000" AmsPort="354" AdtTasks="true">

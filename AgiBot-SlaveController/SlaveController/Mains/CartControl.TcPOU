@@ -135,7 +135,7 @@ GVL_interactUI.g_cartOperation.m_setupSterileStateArm2 := BOOL_TO_UINT(m_aseptic
 GVL_interactUI.g_cartOperation.m_setupSterileStateArm3 := BOOL_TO_UINT(m_asepticInstalledFlag[3]); 
 GVL_interactUI.g_cartOperation.m_setupSterileStateArm4 := BOOL_TO_UINT(m_asepticInstalledFlag[4]); 
 
-GVL_interactUI.g_cartOperation.m_scopeInstalled := BOOL_TO_UINT(SlaveArmControl.m_slaveRobot.m_endoscopeMounted);
+GVL_interactUI.g_cartOperation.m_scopeInstalled := BOOL_TO_UINT(m_cartDataPool.m_slaveStatus.m_endoscopeMounted);
 
 FOR i := 1 TO 4 BY 1 DO
 	IF SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.Instrutype<>InstruType_endoscope THEN
@@ -176,7 +176,7 @@ END_IF
       <LineId Id="68" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIOutputProcess">
-      <LineId Id="131" Count="66" />
+      <LineId Id="203" Count="66" />
       <LineId Id="95" Count="0" />
     </LineIds>
   </POU>

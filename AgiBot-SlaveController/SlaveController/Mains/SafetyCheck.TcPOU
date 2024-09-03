@@ -258,11 +258,16 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i:=1  TO g_sArmNum DO
+        <ST><![CDATA[FOR i:=1  TO g_sArmNum DO
 	m_safetyCheckData.m_slaveErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
 	m_safetyCheckData.m_setupErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
 END_FOR
+
+
+GVL_interactUI.g_slaveRecoverErrFlag := BOOL_TO_INT((m_SafetyCheck.m_armErrFlag[1,2] OR m_SafetyCheck.m_armErrFlag[2,2] OR m_SafetyCheck.m_armErrFlag[3,2] OR m_SafetyCheck.m_armErrFlag[4,2]
+														OR m_SafetyCheck.m_armErrFlag[g_cartNum,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2]) AND GVL_interactUI.g_slaveRunAlone) ;
+
+
 
 
 m_safetyCheckData.m_cartErrFlag := m_SafetyCheck.m_armErrFlag[g_cartNum,2] OR m_SafetyCheck.m_armErrFlag[g_cartNum,3];
@@ -296,8 +301,7 @@ VAR
 	instrument: INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 1 TO 4 DO
+        <ST><![CDATA[FOR i := 1 TO 4 DO
 	//0*1021
 	m_armsRS[i,1](SET:= m_slaveStatus.m_panelClampErrId[i]=1, 
 							RESET1:= NOT m_slaveStatus.m_panelInstallStatus[i], 
@@ -361,15 +365,13 @@ FOR i := 1 TO 4 DO
 									RESET1:= NOT m_armsRS[i,11].SET, 
 									Q1=> m_checkVariable[i].m_promptStatus[11]);
 			m_checkVariable[i].m_promptLocation[11] := i + 3;
-		ELSE
-			m_checkVariable[i].m_promptStatus[11] := FALSE;
 		END_IF
 	END_FOR
 	
 	//0*102C
 	FOR j:=1 TO g_mArmNum DO 
 		IF i = m_masterRobotData.m_teleSlaveArmIdx[j] THEN
-			m_armsRS[i,12](SET:=NOT (SlaveArmState_InstruReady<= m_slaveStatus.m_armState[i] AND m_slaveStatus.m_armState[i] <= SlaveArmState_EndoScope) AND m_masterRobotData.m_tryMSControl[j] =1 AND m_slaveStatus.m_instruStauts[i].m_ready, 
+			m_armsRS[i,12](SET:=NOT (SlaveArmState_InstruReady<= m_slaveStatus.m_armState[i] AND m_slaveStatus.m_armState[i] <= SlaveArmState_EndoScope) AND m_masterRobotData.m_tryMSControl[j] =1 AND m_slaveStatus.m_instruStauts[i].m_ready AND m_slaveStatus.m_armState[i] <> SlaveArmState_Disable, 
 									RESET1:= NOT m_armsRS[i,12].SET, 
 									Q1=> m_checkVariable[i].m_promptStatus[12]);
 			m_checkVariable[i].m_promptLocation[12] := i + 3;
@@ -461,8 +463,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-IF (GVL_interactUI.g_curErrType=3) THEN
+        <ST><![CDATA[IF (GVL_interactUI.g_curErrType=3) THEN
 	warningTone[1] := TRUE;
 	warningTone[2] := FALSE;
 	warningTone[3] := FALSE;
@@ -471,9 +472,9 @@ ELSIF (GVL_interactUI.g_curErrType=2) THEN
 	warningTone[2] := TRUE;
 	warningTone[3] := FALSE;
 ELSIF  (GVL_interactUI.g_curErrType=1) THEN
-	warningTone[1] := FALSE;
-	warningTone[2] := FALSE;
-	warningTone[3] := TRUE;
+	warningTone[1] := TRUE;
+	warningTone[2] := TRUE;
+	warningTone[3] := FALSE;
 ELSE
 	warningTone[1] := FALSE;
 	warningTone[2] := FALSE;
@@ -499,15 +500,15 @@ END_IF
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.readErrFlag">
-      <LineId Id="3" Count="22" />
+      <LineId Id="29" Count="27" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.robotPromptMassageCast">
-      <LineId Id="3" Count="155" />
+      <LineId Id="168" Count="152" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.warningTone">
-      <LineId Id="3" Count="17" />
+      <LineId Id="24" Count="16" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
