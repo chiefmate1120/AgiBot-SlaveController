@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SetupCtrlManualAdjust" Id="{a66618bf-53b6-41ea-9ead-5a7cf0054c7f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Setup Arm Adjust
 FUNCTION_BLOCK PUBLIC FB_SetupCtrlManualAdjust EXTENDS FB_SetupArmCtrlBase
@@ -29,6 +29,13 @@ VAR
 	// time threshold to drive jnt5 after it's enabled
 	m_jnt5AdjustWaitTime :LREAL := 0.25;
 
+	// distance buffer from joint limit to start damp
+	m_limitBufferForDamp :LREAL :=0.05;
+	
+	// max damp
+	m_maxDamp :LREAL := 3000;
+	
+	m_limitBufferForCtrl : LREAL := 0.01;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -66,7 +73,7 @@ IF m_jnt5EnableTime>m_jnt5AdjustWaitTime THEN
 	
 	// joint limit
 	IF (m_cmdJntPos[5] > GVL_SetupMotorParameters.g_maxJntPos[i_setupArm.armIdx, 5] - g_setupJntPosLimitBuffer[5] AND m_cmdJntVel[5]>0) OR 
-		(m_cmdJntPos[5] < GVL_SetupMotorParameters.g_minJntPos[i_setupArm.armIdx, 5] - g_setupJntPosLimitBuffer[5] AND m_cmdJntVel[5]<0)  THEN
+		(m_cmdJntPos[5] < GVL_SetupMotorParameters.g_minJntPos[i_setupArm.armIdx, 5] + g_setupJntPosLimitBuffer[5] AND m_cmdJntVel[5]<0)  THEN
 		m_cmdJntVel[5] := 0;
 	END_IF
 	
@@ -86,6 +93,9 @@ VAR
 	vel :LREAL;
 	scale:LREAL;
 	ratio:LREAL;
+	dampScale :LREAL;
+	limitDis:LREAL;
+	dampOffset : LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// set joint torque to zero in default
@@ -97,6 +107,9 @@ IF NOT(i_setupArm.manualAdjustOn) THEN
 		m_jntEnableFlag[i] := 0;
 		m_jntOPMode[i]:=DriverOPMode_Pos;
 	END_FOR
+	
+	// TODO: setup joint3 would "jump" a bit when transit from torque mode to position mode
+	m_jntOPMode[3] := DriverOPMode_Trq;
 	RETURN;
 ELSE
 	FOR i:=1 TO 4 DO
@@ -121,9 +134,21 @@ ELSIF  vel > m_jnt3FrictionCompVelHigh THEN
 	m_frictionScale := m_frictionScaleHigh;
 END_IF
 
+// add damp near joint limit 
+IF (i_setupArm.curJntPos[3] > GVL_SetupMotorParameters.g_maxJntPos[1,3] - m_limitBufferForCtrl ) 
+	OR (i_setupArm.curJntPos[3] < GVL_SetupMotorParameters.g_minJntPos[1,3] + m_limitBufferForCtrl) OR CartControl.m_cartRobot.m_slaveCart.m_columnAdjustEnable  THEN
+	dampOffset:= 0;
+ELSIF (i_setupArm.curJntPos[3] > GVL_SetupMotorParameters.g_maxJntPos[1,3] - m_limitBufferForDamp AND  i_setupArm.curJntVel[3]> 0 ) 
+	OR (i_setupArm.curJntPos[3] < GVL_SetupMotorParameters.g_minJntPos[1,3] + m_limitBufferForDamp AND  i_setupArm.curJntVel[3]<0 )  THEN
+	limitDis := MIN(GVL_SetupMotorParameters.g_maxJntPos[1,3] - i_setupArm.curJntPos[3], i_setupArm.curJntPos[3]-GVL_SetupMotorParameters.g_minJntPos[1,3]);
+	dampScale  :=LIMIT(0, 1-limitDis/(m_limitBufferForDamp-m_limitBufferForCtrl),1);
+	dampOffset:= -dampScale * m_maxDamp * i_setupArm.curJntVel[3];
+END_IF
+
+
 // add friction compensation
 m_frictionScale := LIMIT(0, m_frictionScale, 1);
-m_cmdJntTrq[3]:= m_frictionScale * sign(i_setupArm.curJntVel[3])*jnt3Friction(i_setupArm.armIdx, i_setupArm.curJntPos[3]);
+m_cmdJntTrq[3]:= m_frictionScale * sign(i_setupArm.curJntVel[3])*jnt3Friction(i_setupArm.armIdx, i_setupArm.curJntPos[3]) + dampOffset;
 ]]></ST>
       </Implementation>
     </Method>
@@ -168,7 +193,15 @@ jnt3Friction:=GVL_SetupArmDynamics.g_setupJnt3FrictionParams[i_armIdx,1]*EXPT(q,
       <LineId Id="115" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.calcCmdJntTrq">
-      <LineId Id="146" Count="35" />
+      <LineId Id="146" Count="8" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="155" Count="22" />
+      <LineId Id="206" Count="1" />
+      <LineId Id="209" Count="8" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="178" Count="3" />
       <LineId Id="123" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupCtrlManualAdjust.init">

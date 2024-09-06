@@ -11,9 +11,6 @@ STRUCT
 	// safety information, import from safety check task
 	m_safetyData AT %I*: ST_SafetyData;
 	
-	// cart information, import from other task
-	m_cartStatus AT %I*:ST_CartStatus;
-	
 	// slave gravity
 	m_setupJnt3Gravity AT %I* : ARRAY[1..g_sArmNum] OF LREAL;
 	m_setupJnt5Gravity AT %I* :  ARRAY[1..g_sArmNum] of LREAL;

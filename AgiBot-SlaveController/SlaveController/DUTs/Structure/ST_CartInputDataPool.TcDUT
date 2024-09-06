@@ -4,9 +4,6 @@
     <Declaration><![CDATA[//TODO:  check if used
 TYPE ST_CartInputDataPool :
 STRUCT
-	// cart information, import from other task
-	m_cartStatus AT %I*:ST_CartStatus;
-	
 	// safety information, import from safety check task
 	m_safetyData AT %I*: ST_SafetyData;
 	

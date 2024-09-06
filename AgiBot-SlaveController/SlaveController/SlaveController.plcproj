@@ -124,7 +124,7 @@
     <Compile Include="DUTs\Enum\E_ArmLightCtrlWord.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_CartJointState.TcTLEO">
+    <Compile Include="DUTs\Enum\E_CartJointState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Enum\E_EndoscopeType.TcDUT">
@@ -425,6 +425,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_CartControlles\FB_CartCtrlSlowDown.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_CartControlles\FB_CartCtrlStandColuAdjust.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_CartControlles\FB_CartPinDeploy.TcPOU">

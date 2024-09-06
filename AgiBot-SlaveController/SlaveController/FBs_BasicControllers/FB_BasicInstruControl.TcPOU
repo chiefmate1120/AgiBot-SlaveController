@@ -72,7 +72,7 @@ VAR
  	m_gripYawCompAng :LREAL;
  	m_maxGripYawCompAng :LREAL;
 	m_lastCmdYawAng:LREAL;
-	m_jntMoveStep:LREAL := 1.0*g_deg2Rad;
+	m_jntMoveStep:LREAL := 0.5*g_deg2Rad;
 	
 END_VAR
 ]]></Declaration>
@@ -280,10 +280,7 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.calcBacklash">
-      <LineId Id="208" Count="7" />
-      <LineId Id="219" Count="32" />
-      <LineId Id="253" Count="20" />
-      <LineId Id="278" Count="1" />
+      <LineId Id="295" Count="63" />
       <LineId Id="60" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">

@@ -128,11 +128,18 @@ ELSE
 END_IF
 
 slaveOutputData.m_seflCheckPass:=  m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[1] AND  m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[2] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[3] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[4] ;
-slaveOutputData.m_asepticDeployCompletedFlag := m_slaveInputDataPool.m_cartStatus.m_asepticDeployCompletedFlag;
 slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
 slaveOutputData.m_endoscopePose.m_pos :=slaveStatus.m_endoscopePose.m_pos;
 slaveOutputData.m_endoscopePose.m_rot :=slaveStatus.m_endoscopePose.m_rot;
 slaveOutputData.m_slaveStopButton := NOT SafetyCheck.m_stopButton;
+
+FOR i := 1 TO g_sArmNum DO
+	slaveOutputData.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];	
+	IF NOT slaveOutputData.m_asepticDeployCompletedFlag THEN
+		EXIT;
+	END_IF
+END_FOR
+
 
 FOR i:= 1 TO g_sArmNum DO
 	slaveOutputData.m_armState[i] := slaveStatus.m_armState[i];
@@ -320,7 +327,11 @@ END_FOR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.slaveOutputDataCast">
-      <LineId Id="146" Count="29" />
+      <LineId Id="146" Count="7" />
+      <LineId Id="155" Count="3" />
+      <LineId Id="192" Count="6" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="159" Count="16" />
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIInputProcess">

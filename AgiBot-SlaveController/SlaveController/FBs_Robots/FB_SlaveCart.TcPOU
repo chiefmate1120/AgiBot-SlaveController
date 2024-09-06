@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
 VAR
@@ -65,6 +65,14 @@ VAR
 	m_joystickSignal:Vec8d;
 	m_cartDataFromUI : ST_CartUIData;
 	m_ctrlEnable : ST_uiControl;
+	m_surgicalStatusF : F_TRIG;
+	
+	//stand column adjust of setup joint 3
+	m_columnJntVel : LREAL;
+	m_columnAdjustEnable : BOOL;
+	m_limitBufferForCtrl : LREAL := 0.01;
+	m_midJntPos : LREAL := 0.1;
+	enableTon : ARRAY [1..4] OF FB_TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -120,12 +128,15 @@ END_VAR]]></Declaration>
         <ST><![CDATA[//check overhang rotation button
 m_rotaOverhangOnFlag := MAX( m_rotaButtonDetect[1].run(m_carRotaOverhangIO[1]), m_rotaButtonDetect[2].run(m_carRotaOverhangIO[2]),m_rotaButtonDetect[3].run(m_carRotaOverhangIO[3]),m_rotaButtonDetect[4].run(m_carRotaOverhangIO[4]));
 
-FOR i := 1 TO 4 BY 1 DO
+FOR i := 1 TO g_sArmNum BY 1 DO
 	//trocar in place monitor
 	m_trocarFlag[i] := m_trocarCheck[i].run(m_trocarIO[i] );
 END_FOR
 
-m_trocarOnFlag := BOOL_TO_INT(m_trocarFlag[1]) + BOOL_TO_INT(m_trocarFlag[2]) + BOOL_TO_INT(m_trocarFlag[3]) + BOOL_TO_INT(m_trocarFlag[4]);]]></ST>
+m_trocarOnFlag := BOOL_TO_INT(m_trocarFlag[1]) + BOOL_TO_INT(m_trocarFlag[2]) + BOOL_TO_INT(m_trocarFlag[3]) + BOOL_TO_INT(m_trocarFlag[4]);
+
+//setup robot joint 3 adjust and drive column movement
+m_columnAdjustEnable :=columnAdjustEnable(o_columnJntVel => m_columnJntVel  );]]></ST>
       </Implementation>
     </Method>
     <Property Name="cmdJntPos" Id="{488d680a-8342-457b-a395-401f6b755b10}" FolderPath="property\">
@@ -150,6 +161,70 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="columnAdjustEnable" Id="{4b81e009-8b8f-44ae-b179-17501f5dd10b}">
+      <Declaration><![CDATA[METHOD columnAdjustEnable : BOOL
+VAR_INPUT
+END_VAR
+
+VAR_OUTPUT
+	o_columnJntVel : LREAL;
+END_VAR
+
+VAR_STAT
+	curJntPos : vec4d;
+	curJntVel : vec4d;
+	columnJntVel : vec4d;
+	adjustStartFlag : vec4b;
+	m_columnAdjustEnable : vec4b;
+END_VAR
+VAR
+	i : INT;
+	armId : INT;
+	limitDis : vec4d;
+	m_adjustFlag : vec4b;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FOR i := 1 TO g_sArmNum DO
+	curJntPos[i] := SetupArmControl.m_setupRobot.m_setupArms[i].m_curJntPos[3];
+	curJntVel[i] := SetupArmControl.m_setupRobot.m_setupArms[i].m_curJntVel[3];
+	m_adjustFlag[i] := SetupArmControl.m_setupRobot.m_setupArms[i].m_manualAdjustOnFlag AND m_trocarOnFlag=0 AND SetupArmControl.m_setupRobot.m_setupArmState[i] = SetupArmState_ManualAdjust 
+									AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,0,2] AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,0,3] AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,3,3] AND NOT SafetyCheck.m_SafetyCheck.m_jntErrFlag[i,2,3] ;
+	
+	IF m_adjustFlag[i] THEN
+		limitDis[i] := MIN(GVL_SetupMotorParameters.g_maxJntPos[i,3] - curJntPos[i], curJntPos[i]-GVL_SetupMotorParameters.g_minJntPos[i,3]);
+		IF limitDis[i] < m_limitBufferForCtrl THEN
+			adjustStartFlag[i] := TRUE; 
+			columnJntVel[i] := sign(m_midJntPos - curJntPos[i]) * GVL_CartControlParameters.g_maxJntVel[5];
+		
+		ELSIF limitDis[i] >= m_limitBufferForCtrl AND NOT m_columnAdjustEnable[i] THEN
+			columnJntVel[i] := 0;
+			adjustStartFlag[i] := FALSE;
+			
+		ELSE
+			IF curJntVel[i] <> 0 AND adjustStartFlag[i] THEN
+				columnJntVel[i] := -LIMIT(-GVL_CartControlParameters.g_maxJntVel[5], curJntVel[i], GVL_CartControlParameters.g_maxJntVel[5]);
+			END_IF
+		END_IF
+		
+		armId := i;
+		enableTon[i](IN:= adjustStartFlag[i], PT:= T#3S, Q=> m_columnAdjustEnable[i], ET=> );
+		EXIT;
+	ELSE
+		adjustStartFlag[i] := FALSE;
+		columnJntVel[i] := 0;
+	END_IF
+	enableTon[i](IN:= adjustStartFlag[i], PT:= T#3S, Q=> m_columnAdjustEnable[i], ET=> );
+END_FOR
+
+//output stand column joint velocity and start adjust single
+IF armId > 0 THEN
+	o_columnJntVel := columnJntVel[armId];
+END_IF
+columnAdjustEnable := m_columnAdjustEnable[1] OR m_columnAdjustEnable[2] OR m_columnAdjustEnable[3] OR m_columnAdjustEnable[4];
+]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="ctrlEnable" Id="{a3baaf86-b572-478d-828a-8abd1832149b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY ctrlEnable : REFERENCE TO ST_uiControl]]></Declaration>
       <Get Name="Get" Id="{088e36f0-64b1-4fec-9db7-8ed59d586fe5}">
@@ -373,14 +448,18 @@ m_ctrlEnable:=i_UIData.m_ctrlEnableFromUI;
 
 m_cartDataFromUI.m_standColumnHightLimit := i_UIData.m_standColumnHightLimit;
 
-
 m_cartDataFromUI.m_cartSpecificPosDraping := GVL_CartControlParameters.g_surgicalDrapingPos;
 
-FOR i := 1 TO 4 BY 1 DO
+FOR i := 1 TO g_sArmNum BY 1 DO
 	IF i_UIData.m_surgicalSite > 0 AND i_UIData.m_surgicalLocation > 0 THEN
 		m_cartDataFromUI.m_cartSpecificPosDocking[i + 4] := GVL_CartControlParameters.g_surgicalOrientPos[i_UIData.m_surgicalSite, i_UIData.m_surgicalLocation,i];
 	END_IF
 END_FOR
+
+m_surgicalStatusF(CLK:= GVL_interactUI.g_surgicalStatus , Q=> );
+IF m_surgicalStatusF.Q THEN
+	cartDrapingState := 0;
+END_IF
 
 IF NOT (m_cartDataFromUI.m_surgicalSite = i_UIData.m_surgicalSite) OR NOT (m_cartDataFromUI.m_surgicalLocation = i_UIData.m_surgicalLocation) THEN
 	cartDockingState := 0;
@@ -491,12 +570,44 @@ END_FOR ]]></ST>
     <LineIds Name="FB_SlaveCart.checkIO">
       <LineId Id="60" Count="7" />
       <LineId Id="5" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="73" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.cmdJntPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.cmdJntVel.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.columnAdjustEnable">
+      <LineId Id="207" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="214" Count="2" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="208" Count="2" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="105" Count="2" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="115" Count="2" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="123" Count="2" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="66" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.ctrlEnable.Get">
       <LineId Id="2" Count="0" />
@@ -508,6 +619,9 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.curDHJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCart.curJntCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.curJntPos.Get">
@@ -568,7 +682,13 @@ END_FOR ]]></ST>
       <LineId Id="30" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.ProcessingUIData">
-      <LineId Id="53" Count="20" />
+      <LineId Id="53" Count="4" />
+      <LineId Id="59" Count="7" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="83" Count="2" />
+      <LineId Id="68" Count="5" />
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.status.Get">

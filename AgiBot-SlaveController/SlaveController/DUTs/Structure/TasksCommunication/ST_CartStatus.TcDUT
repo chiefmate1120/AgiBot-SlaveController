@@ -7,8 +7,6 @@ TYPE ST_CartStatus :
 STRUCT
 	m_CartState :E_CartJointState:=CartJointState_Error;
 	
-	m_asepticDeployCompletedFlag : BOOL;
-	
 	m_cartDumpEnergy :UINT;
 	
 	m_stabilizerDeployedFlag : BOOL;

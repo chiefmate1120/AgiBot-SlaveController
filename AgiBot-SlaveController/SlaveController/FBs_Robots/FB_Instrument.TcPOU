@@ -999,7 +999,7 @@ END_IF
 
 CASE m_useNumStep OF
 	0: 
-		m_Value := m_Value:=16#80000000; 
+		m_Value:=16#80000000; 
 		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_JointInstruAddr, nSubIndex:= 0, nIndex:= 16#6094, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
@@ -1020,7 +1020,6 @@ CASE m_useNumStep OF
 		
 	30://Verify the actual usage count and the usage count given by the UI
 		IF m_useNumReadResult = i_useNumFromUI THEN
-			m_onChipData.m_InstruUsageCounts:=m_useNumReadResult;
 			m_useNumSendToLED := LIMIT(0, m_useNumReadResult, 99);
 			m_useNumStep:=40;
 		ELSE
@@ -1028,14 +1027,15 @@ CASE m_useNumStep OF
 		END_IF
 		
 	40: 
-		m_Value:=ULINT_TO_UDINT(16#FFFF AND m_useNumSendToLED) ;
+		m_Value:=ULINT_TO_UDINT( m_useNumSendToLED) ;
 		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= 1004, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
+			m_onChipData.m_InstruUsageCounts:=m_useNumReadResult;
 			writeNumOfUseToChip := TRUE;
 			m_useNumStep:=-1;
 		END_IF
-	
+		
 END_CASE]]></ST>
       </Implementation>
     </Method>
@@ -1206,6 +1206,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
     <LineIds Name="FB_Instrument.instruName.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Instrument.instruNameCH.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Instrument.InstruSreiesFind">
       <LineId Id="34" Count="8" />
       <LineId Id="5" Count="0" />
@@ -1249,7 +1252,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="570" Count="125" />
+      <LineId Id="703" Count="125" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">
@@ -1312,7 +1315,6 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="32" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="37" Count="1" />
-      <LineId Id="56" Count="0" />
       <LineId Id="47" Count="0" />
       <LineId Id="41" Count="0" />
       <LineId Id="43" Count="1" />
@@ -1320,6 +1322,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="39" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="49" Count="3" />
+      <LineId Id="68" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="53" Count="0" />
       <LineId Id="48" Count="0" />

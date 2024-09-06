@@ -11,9 +11,6 @@ STRUCT
 	// safety information, import from safety check task
 	m_safetyData AT %I*: ST_SafetyData;
 	
-	// cart information, import from other task
-	m_cartStatus AT %I*:ST_CartStatus;
-	
 	// master robot status, copy from MSCommu_MasterStatus
 	m_masterStatus :ST_MasterStatus;
 	

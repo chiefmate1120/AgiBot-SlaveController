@@ -322,7 +322,7 @@ END_FOR
 
 // check if to enable instrument invasion 
 FOR i:=1 TO g_sArmNum DO
-	IF SlaveArmState_Adjust = m_slaveArmState[i] OR SlaveArmState_Cart = m_slaveArmState[i] OR
+	IF SlaveArmState_Adjust = m_slaveArmState[i] OR SlaveArmState_Cart = m_slaveArmState[i] OR i_slavesInputDataPool.m_setupStatus.m_armState[i] = SetupArmState_ManualAdjust OR
 	    m_slaveArms[i].instrument.instruType = InstruType_Endoscope	 THEN
 		m_instruInvasionEnableFlag[i]:=FALSE;
 		m_slaveArms[i].resetInstruDepth();
@@ -542,15 +542,6 @@ FOR i:=1 TO g_sArmNum DO
 			
 		// Cart
 		SlaveArmState_Cart:
-			IF NOT(i_slavesInputDataPool.m_cartStatus.m_inMotion) THEN
-				// to standby
-				IF m_selfCheckPass[i] THEN
-					m_nextSlaveArmState[i] :=SlaveArmState_Standby;
-				// to init
-				ELSE
-					m_nextSlaveArmState[i] :=SlaveArmState_Init;
-				END_IF
-			END_IF
 		
 		// Gravity Calibration
 		SlaveArmState_GravityCali:
@@ -625,11 +616,6 @@ FOR i:=1 TO g_sArmNum DO
 		(SlaveArmState_InstruReady = m_nextSlaveArmState[i] OR SlaveArmState_MasterSlave = m_nextSlaveArmState[i]
 		 OR SlaveArmState_ScopeReady = m_nextSlaveArmState[i] OR SlaveArmState_EndoScope = m_nextSlaveArmState[i]) THEN
 		m_nextSlaveArmState[i]:=SlaveArmState_Standby;
-	END_IF
-	
-	// to cart
-	IF i_slavesInputDataPool.m_cartStatus.m_inMotion AND m_nextSlaveArmState[i] > SlaveArmState_Init THEN
-		m_nextSlaveArmState[i] := SlaveArmState_Cart;
 	END_IF
 	
 	// arm disable
@@ -812,7 +798,9 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="795" Count="92" />
       <LineId Id="890" Count="42" />
       <LineId Id="935" Count="0" />
-      <LineId Id="938" Count="202" />
+      <LineId Id="938" Count="105" />
+      <LineId Id="1053" Count="74" />
+      <LineId Id="1133" Count="7" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateArmLight">

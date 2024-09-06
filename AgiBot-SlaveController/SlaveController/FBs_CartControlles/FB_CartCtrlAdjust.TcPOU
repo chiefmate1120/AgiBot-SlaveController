@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_CartCtrlAdjust" Id="{673bb3aa-3c17-460e-a1b6-375536272abd}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCtrlAdjust EXTENDS FB_CartCtrlBase
 VAR_INPUT
@@ -61,7 +61,6 @@ m_adjustStartTime :=LIMIT(0, m_adjustStartTime + g_cartCtrlCycleTime, 1);
 m_actJntPos := i_slaveCart.curJntPos;
 m_actJntPos[7] := i_slaveCart.curJntPos[7] + GVL_CartControlParameters.g_curBeamStretchJntInitPos;
 m_veiwAngle := m_actJntPos[6] + m_actJntPos[8];
-m_jntEnableFlag := faultDetect();
 
 IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	FOR i:= 1 TO 4 BY 1 DO
@@ -89,7 +88,7 @@ IF m_adjustStartTime > m_cartAdjustStartWaitTime THEN
 	m_trajJntPos[7] := m_tarCartPos[7]/COS(m_trajJntPos[6]) - GVL_CartControlParameters.g_curBeamStretchJntInitPos;
 	m_trajJntPos[8] := m_tarCartPos[8] -  (m_trajJntPos[6] - m_initActJntPos[6]);
 	m_jntPosReachLimit := calcCmdReachLimit();
-	
+	m_jntEnableFlag := faultDetect(i_slaveCart.curJntPos);
 	FOR i := 5 TO 8 DO 
 		m_tarJntPos[i] := LIMIT(GVL_CartMotorParameters.g_minJntPos[i] + m_carJntSoftwareLimit[i], m_trajJntPos[i], GVL_CartMotorParameters.g_maxJntPos[i] - m_carJntSoftwareLimit[i]) ;
 		m_jntOTG[i].run(i_targetPos:= m_tarJntPos[i], i_targetVel:= 0.0, o_cmdAcc=> , o_cmdVel=> , o_cmdPos=>m_cmdJntPos[i] );
@@ -128,13 +127,23 @@ END_FOR
     <Method Name="faultDetect" Id="{3eb1df66-8f34-4507-9d11-b4ccf2531ade}">
       <Declaration><![CDATA[METHOD faultDetect : vec8i
 VAR_INPUT
+	curJntPos : vec8d;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[faultDetect[5] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartStandColumnErr);
 faultDetect[6] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
 faultDetect[7] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
-faultDetect[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);]]></ST>
+faultDetect[8] := BOOL_TO_INT( NOT SafetyCheck.m_safetyCheckData.m_cartAdjustErr);
+
+IF SafetyCheck.m_safetyCheckData.m_cartStandColumnErr THEN
+	m_trajJntPos[5] :=curJntPos[5];
+END_IF
+IF SafetyCheck.m_safetyCheckData.m_cartAdjustErr THEN
+	m_trajJntPos[6] :=curJntPos[6];
+	m_trajJntPos[7] :=curJntPos[7];
+	m_trajJntPos[8] :=curJntPos[8];
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{4b0bf65e-8ba0-42dd-a86b-a06390c00e49}">
@@ -204,12 +213,31 @@ END_VAR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.calcCmdJntPos">
-      <LineId Id="123" Count="37" />
+      <LineId Id="123" Count="4" />
+      <LineId Id="129" Count="31" />
       <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlAdjust.calcCmdReachLimit">
+      <LineId Id="3" Count="15" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlAdjust.faultDetect">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="15" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCtrlAdjust.init">
       <LineId Id="133" Count="32" />
       <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCtrlAdjust.jntPosReachLimit.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

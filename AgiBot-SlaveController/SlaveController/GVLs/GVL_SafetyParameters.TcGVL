@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[//{attribute 'qualified_only'}
 {attribute 'global_init_slot' := '49991'}
@@ -28,7 +28,7 @@ VAR_GLOBAL CONSTANT
 	g_minJntPos: ARRAY[1..g_sArmNum,  1..13] OF LREAL:=[ (-140-50)*g_deg2Rad, 0.779-0.36,0.00,-1.2351,-1.6, -2.7,	-1.5-pi/2,	0.23, 5(-g_largeNum),
 																	(-115-50)*g_deg2Rad, 0.607-0.36,0.00,-1.2351,-1.6, -2.7,	-1.5-pi/2,	0.23, 5(-g_largeNum),
 																	(-65-50)*g_deg2Rad, 0.607-0.36,0.00,-1.2351,-1.6, -2.7,	-1.5-pi/2,	0.23, 5(-g_largeNum),
-																	(-40-50)*g_deg2Rad, 0.779-0.36,0.00,-1.2351,-1.6 -2.7,	-1.5-pi/2,	0.23, 5(-g_largeNum)];	
+																	(-40-50)*g_deg2Rad, 0.779-0.36,0.00,-1.2351,-1.6, -2.7,	-1.5-pi/2,	0.23, 5(-g_largeNum)];	
 	g_maxJntPos: ARRAY[1..g_sArmNum,  1..13] OF LREAL:=[ (-140+50)*g_deg2Rad, 0.779,0.200,4.5579,1.6, 2.7,	1.13-pi/2, 	0.58, 5(g_largeNum),
 																	(-115+50)*g_deg2Rad, 0.607,0.200,4.5579,1.6, 2.7,	1.13-pi/2, 	0.58, 5(g_largeNum),
 																	(-65+50)*g_deg2Rad, 0.607,0.200,4.5579,1.6, 2.7,	1.13-pi/2, 	0.58, 5(g_largeNum),

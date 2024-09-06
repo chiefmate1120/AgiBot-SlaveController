@@ -39,6 +39,7 @@ VAR
 	m_cartAdjust :FB_CartCtrlAdjust;
 	m_cartRotaOverhang :FB_CartCtrlRotaOverhang;
 	m_cartSlowStop : FB_CartCtrlSlowDown;
+	m_cartStandColuAdjust : FB_CartCtrlStandColuAdjust;
 	
 	// cart controller interface
 	m_cartCtrl : I_CartJointCtrl;
@@ -69,13 +70,6 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[r_cartStatus.m_CartState :=m_cartState;
-FOR i := 1 TO g_sArmNum DO
-	r_cartStatus.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];	
-	IF NOT r_cartStatus.m_asepticDeployCompletedFlag THEN
-		EXIT;
-	END_IF
-END_FOR
-
 
 r_cartStatus.m_uiControl := GVL_interactUI.g_uiCtrl;
 r_cartStatus.m_cartDumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
@@ -129,6 +123,7 @@ m_cartCtrlFactory[CartJointState_HangAdjust] := m_cartAdjust;
 m_cartCtrlFactory[CartJointState_AsepticDeployment] := m_cartAsepticDeploy;
 m_cartCtrlFactory[CartJointState_RotaOverhang] := m_cartRotaOverhang;
 m_cartCtrlFactory[CartJointState_SlowStop] := m_cartSlowStop;
+m_cartCtrlFactory[CartJointState_StandColuAdjust] := m_cartStandColuAdjust;
 
 // assign controller
 m_cartCtrl:=m_cartCtrlFactory[m_cartState];
@@ -241,6 +236,9 @@ CASE m_cartState OF
 			
 		ELSIF m_rotaOverhangAllowed THEN
 			m_nextCartState := CartJointState_RotaOverhang;
+			
+		ELSIF m_slaveCart.m_trocarOnFlag=0 AND  m_slaveCart.m_columnAdjustEnable  THEN
+			m_nextCartState := CartJointState_StandColuAdjust;
 		END_IF
 		
 	
@@ -286,7 +284,11 @@ CASE m_cartState OF
 			m_nextCartState :=CartJointState_Ready;
 		END_IF
 		
-		
+	CartJointState_StandColuAdjust:
+		IF (m_slaveCart.m_trocarOnFlag<>0 OR i_cartDataPool.m_safetyData.m_cartStandColumnErr) OR  NOT m_slaveCart.m_columnAdjustEnable  THEN
+			m_nextCartState :=CartJointState_SlowStop;
+		END_IF	
+	
 	CartJointState_SlowStop:
 		IF m_cartCtrl.isFinished  THEN
 			m_nextCartState :=CartJointState_Ready;
@@ -315,7 +317,8 @@ END_IF
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.getStatus">
-      <LineId Id="35" Count="22" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="43" Count="14" />
       <LineId Id="15" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.init">
@@ -325,16 +328,27 @@ END_IF
       <LineId Id="115" Count="1" />
       <LineId Id="118" Count="2" />
       <LineId Id="122" Count="1" />
+      <LineId Id="130" Count="0" />
       <LineId Id="102" Count="3" />
       <LineId Id="74" Count="0" />
       <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartRobot.laserIO">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.run">
       <LineId Id="67" Count="19" />
       <LineId Id="51" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartRobot.stateMachine">
-      <LineId Id="165" Count="106" />
+      <LineId Id="165" Count="39" />
+      <LineId Id="279" Count="2" />
+      <LineId Id="205" Count="44" />
+      <LineId Id="283" Count="2" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="251" Count="20" />
       <LineId Id="22" Count="0" />
     </LineIds>
   </POU>

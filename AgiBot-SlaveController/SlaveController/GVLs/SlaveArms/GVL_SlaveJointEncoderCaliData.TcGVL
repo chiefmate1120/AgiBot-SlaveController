@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SlaveJointEncoderCaliData" Id="{7eae507e-05dd-426e-b2d5-321e9d64d4f5}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot3 --joints parameters of slave arms
@@ -21,7 +21,7 @@ VAR_GLOBAL CONSTANT
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF DINT :=
 		[8162412, 8169482, 14570432, 15377856,15482848, 7058832, 6935120, 7155184,
-		 3932766, 16478880, 1613344, 15324752, 15485488, 7135776, 7032592, 6946704,
+		 3932766, 16656494, 1613344, 15324752, 15485488, 7135776, 7032592, 6946704,
 		 8248074, 16595424, 7701984, 15349408, 15361392, 7017904, 6757296, 7028608,
 		 12196142, 3807946, 1671808, 15274368, 15387696, 6812992, 7016768, 7073088];
 	

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_CartJointState" Id="{5b3e26ea-76aa-4e76-aec8-fbec7ae650b2}">
+    <Declaration><![CDATA[TYPE E_CartJointState :
+(
+	CartJointState_Error := 1,
+	CartJointState_Init := 2,
+	CartJointState_SelfCheck := 3,
+	CartJointState_Standby := 4,
+	CartJointState_Ready := 5,
+	CartJointState_InSurgery := 6,
+	CartJointState_SteadyFootDeployment := 7,
+	CartJointState_Movement := 8,
+	CartJointState_HangAdjust := 9,
+	CartJointState_AsepticDeployment := 10,
+	CartJointState_RotaOverhang := 11,
+	CartJointState_SlowStop := 12,
+	CartJointState_StandColuAdjust := 13,
+	
+	CartJointState_totalNum := CartJointState_StandColuAdjust
+);
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>
