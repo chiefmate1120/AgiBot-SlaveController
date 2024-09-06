@@ -1886,7 +1886,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{AC2EC13D-7701-B07A-0603-022DD95DE233}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{816E17F8-C3BA-6003-0AE5-56A34FAECCC9}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2778,14 +2778,14 @@
 							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
 						</Var>
 						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{E5235AA0-33C1-132B-056A-4B3DFE761C22}">ST_CartStatus</Type>
-						</Var>
-						<Var>
 							<Name>SafetyCheck.m_cartJointsData</Name>
 							<Comment><![CDATA[ cart joint data]]></Comment>
 							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[ Output cart status]]></Comment>
+							<Type GUID="{E5235AA0-33C1-132B-056A-4B3DFE761C22}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">

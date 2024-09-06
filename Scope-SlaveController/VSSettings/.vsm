@@ -6,7 +6,7 @@
     <Node>
       <Title>SetupGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\PR\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SetupGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -514,7 +514,7 @@
     <Node>
       <Title>SlaveGravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\PR\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveGravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -1022,7 +1022,7 @@
     <Node>
       <Title>SlaveJointData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\PR\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-SlaveController\Scope-SlaveController\SlaveJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
