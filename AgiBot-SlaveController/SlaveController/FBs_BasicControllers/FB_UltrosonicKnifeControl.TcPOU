@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_UltrosonicKnifeControl" Id="{675f3909-c472-4838-a346-da9f4950f3d4}" SpecialFunc="None">
     <Declaration><![CDATA[// instrument joints control
 FUNCTION_BLOCK FB_UltrosonicKnifeControl
@@ -13,15 +13,11 @@ VAR
 	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.25)];
 	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
 	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
-	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[5(200.0)];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(120.0), 200.0];
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
-	m_maxGripCurrent:LREAL:=180.0;
-	
-	// max gripper finger control force/current(mA)
-	m_maxGripCtrlForce:LREAL;
-	m_maxGripCtrlCurrent:LREAL:=220.0;
+	m_maxGripCurrent:LREAL:=200.0;
 	
 	// PID for instrument joint position
 	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
@@ -63,7 +59,6 @@ END_VAR]]></Declaration>
 // init controller
 currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
 m_maxGripForce := m_maxGripCurrent * currentRatioMotor2Jnt;
-m_maxGripCtrlForce := m_maxGripCtrlCurrent * currentRatioMotor2Jnt;
 FOR i:=1 TO 5 DO
 	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
@@ -129,7 +124,7 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
     </LineIds>
     <LineIds Name="FB_UltrosonicKnifeControl.init">
       <LineId Id="102" Count="2" />
-      <LineId Id="114" Count="2" />
+      <LineId Id="114" Count="1" />
       <LineId Id="105" Count="0" />
       <LineId Id="107" Count="5" />
       <LineId Id="101" Count="0" />
