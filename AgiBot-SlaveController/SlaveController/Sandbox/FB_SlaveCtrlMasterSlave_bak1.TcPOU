@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="FB_SlaveCtrlMasterSlave_backup" Id="{a24fb4ec-8c26-4821-8801-f7179d004e59}" SpecialFunc="None">
+  <POU Name="FB_SlaveCtrlMasterSlave_bak1" Id="{a24fb4ec-8c26-4821-8801-f7179d004e59}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
-FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_backup EXTENDS FB_SlaveArmCtrlBase
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_bak1 EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR
 VAR_OUTPUT
@@ -526,10 +526,10 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcCmdJntPos">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.calcCmdJntPos">
       <LineId Id="380" Count="0" />
       <LineId Id="463" Count="0" />
       <LineId Id="459" Count="3" />
@@ -660,7 +660,7 @@ END_VAR
       <LineId Id="519" Count="0" />
       <LineId Id="206" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcCmdJntTrq">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.calcCmdJntTrq">
       <LineId Id="70" Count="3" />
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
@@ -677,7 +677,7 @@ END_VAR
       <LineId Id="52" Count="0" />
       <LineId Id="54" Count="1" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.calcMSErrInScope">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.calcMSErrInScope">
       <LineId Id="41" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="104" Count="0" />
@@ -696,7 +696,7 @@ END_VAR
       <LineId Id="26" Count="0" />
       <LineId Id="28" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.gripperControl">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.gripperControl">
       <LineId Id="25" Count="0" />
       <LineId Id="15" Count="1" />
       <LineId Id="30" Count="0" />
@@ -712,7 +712,7 @@ END_VAR
       <LineId Id="42" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.init">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.init">
       <LineId Id="13" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="114" Count="0" />
@@ -741,13 +741,13 @@ END_VAR
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.limitInstruDofs">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.limitInstruDofs">
       <LineId Id="5" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave_backup.masterSlavePoseErr.Get">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak1.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />
     </LineIds>
   </POU>

@@ -1,17 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="FB_SlaveCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
+  <POU Name="FB_SlaveCtrlMasterSlave_bak2" Id="{bf89541a-832d-43a4-ae83-c597339fc78d}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm MasterSlave controller
-FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave EXTENDS FB_SlaveArmCtrlBase
+FUNCTION_BLOCK PUBLIC FB_SlaveCtrlMasterSlave_bak2 EXTENDS FB_SlaveArmCtrlBase
 VAR_INPUT
 END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// pose track control kp
-	m_posTrackKp :REAL := 0;
-	m_oriTrackKp :REAL := 200;
-	
 	// minimum distance between instrument tip and remote center
 	m_minInstruRCDis:LREAL := 0.05;
 	
@@ -46,7 +42,6 @@ VAR
 	// flag if reach joint limit
 	m_reachMacroJntLimit :BOOL;
 	m_reachWristJntLimit :BOOL;
-	m_jntLimitFlag :Vec6b;
 	
 	// master/slave origin pose when first enter master-slave control
 	m_masterOriginPose : ST_Frame;
@@ -97,6 +92,7 @@ VAR
 	m_masterSlavePoseError :Vec6d;
 	
 	// velocity for slave to track master motion
+	m_slaveTrackTwist :Vec6d;
 	m_slaveCmdVel, m_slaveCmdWVel : Vec3d;
 	
 	// flag to start gripper control
@@ -123,7 +119,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="calcCmdJntPos" Id="{b549ed00-ec1a-412a-94d0-63a741bf9608}">
+    <Method Name="calcCmdJntPos" Id="{98fb9de5-9c7e-47d3-9a40-86b89d0cb828}">
       <Declaration><![CDATA[METHOD PROTECTED calcCmdJntPos : BOOL
 VAR_IN_OUT CONSTANT
 	i_endoscopePose : ST_Frame;
@@ -139,14 +135,15 @@ VAR
 	
 	masterVelInScope, masterWVelInScope :Vec3d;
 	masterVelInCart, masterWVelInCart :Vec3d;
-	masterFFVel, masterFFWVel :Vec3d;
 
 	cmdVelScale :LREAL;
 	invJaco :Mat6d;
+	DHJntCmdDeltaPos :Vec6d;
 	armJntJaco,armJntJacoInv, wristJntJaco :Mat3d;
 	velByWristJnt,velByArmJnt : Vec3d;
 	armDHJntVel, wristDHJntVel :Vec3d;
 	tmpFrame : ST_Frame;
+	slaveSimDHJntPos :Vec6d;
 	jnt3Limit :LREAL;
 END_VAR
 ]]></Declaration>
@@ -214,33 +211,40 @@ IF ABS(m_errAngle)>m_safetyOriErr THEN
 END_IF
 
 // pose track control
-vecMultiNum(m_slavePosErr, m_posTrackKp, m_slaveCmdVel);
-vecMultiNum(m_errAxis, m_errAngle*m_oriTrackKp, m_slaveCmdWVel);
+vecMultiNum(m_slavePosErr, g_slaveArmCtrlFreq, m_slaveCmdVel);
+vecMultiNum(m_errAxis, m_errAngle*g_slaveArmCtrlFreq, m_slaveCmdWVel);
 FOR i:=1 TO 3 DO 
-	m_cmdCartTwist[i] := m_slaveCmdVel[i];
-	m_cmdCartTwist[i+3] := m_slaveCmdWVel[i];
+	m_slaveTrackTwist[i] := m_slaveCmdVel[i];
+	m_slaveTrackTwist[i+3] := m_slaveCmdWVel[i];
 END_FOR
-
-// check wrist limit
-m_reachWristJntLimit:=FALSE;
-m_jntLimitFlag :=g_zeroVec6b;
-m_reachWristJntLimit:=wristLimitCheck(i_slaveArm);
 
 // compute command velocity for DH joints
 invJaco := i_slaveArm.simJacoInv;
-matMultiVec(invJaco, m_cmdCartTwist, m_simDHJointVel);
+matMultiVec(invJaco, m_slaveTrackTwist, m_simDHJointVel);
 
 // limit instrument wrist dofs
 limitInstruDofs(i_slaveArm, m_simDHJointVel);
 
-// limit instrument wrist joint position
-FOR i:=4 TO 6 DO
-	IF m_jntLimitFlag[i] OR  (m_simDHJointVel[i] > 0 AND i_slaveArm.simDHJntPos[i] + m_simDHJointVel[i] * g_slaveArmCtrlCycleTime > i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i-3]) OR 
-		(m_simDHJointVel[i]<0 AND i_slaveArm.simDHJntPos[i] + m_simDHJointVel[i] * g_slaveArmCtrlCycleTime < i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i-3])  THEN
-		m_simDHJointVel[i]:=0;
-		m_reachWristJntLimit:=TRUE;
-	END_IF
+FOR i:=1 TO 3 DO
+	armDHJntVel[i]:=m_simDHJointVel[i];
+	wristDHJntVel[i]:=m_simDHJointVel[i+3];
 END_FOR
+
+// limit instrument wrist joint position
+IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_jntLimitOriErr) THEN
+	wristDHJntVel:=g_zeroVec3d;
+	m_reachWristJntLimit:=TRUE;
+ELSE
+	m_reachWristJntLimit :=FALSE;
+	FOR i:=1 TO 3 DO
+		IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i]) OR 
+			(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i])  THEN
+			wristDHJntVel:=g_zeroVec3d;
+			m_reachWristJntLimit:=TRUE;
+			CONTINUE;
+		END_IF
+	END_FOR
+END_IF
 
 // modify arm joints velocity to compensate wrist joint motion
 FOR i:=1 TO 3 DO
@@ -248,9 +252,6 @@ FOR i:=1 TO 3 DO
 		armJntJaco[i,j]:=i_slaveArm.simJaco[i,j];
 		wristJntJaco[i,j]:=i_slaveArm.simJaco[i,j+3];
 	END_FOR
-	armDHJntVel[i]:=m_simDHJointVel[i];
-	wristDHJntVel[i]:=m_simDHJointVel[i+3];
-	m_slaveCmdVel[i] := m_cmdCartTwist[i];
 END_FOR
 invMat3(armJntJaco, armJntJacoInv);
 matMultiVec(wristJntJaco, wristDHJntVel, velByWristJnt);
@@ -258,9 +259,10 @@ vecSub(m_slaveCmdVel, velByWristJnt, velByArmJnt);
 matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
 
 // limit arm joint position
+m_reachMacroJntLimit :=FALSE;
 FOR i:=1 TO 3 DO
-	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i] * g_slaveArmCtrlCycleTime > GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
-		(armDHJntVel[i] <0 AND	i_slaveArm.simDHJntPos[i] + armDHJntVel[i] * g_slaveArmCtrlCycleTime < GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
+	IF (armDHJntVel[i] > 0 AND  i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime> GVL_SlaveMotorParameters.g_maxDHJntPos[i]) OR 
+		(armDHJntVel[i] <0 and	i_slaveArm.simDHJntPos[i] + armDHJntVel[i]*g_slaveArmCtrlCycleTime< GVL_SlaveMotorParameters.g_minDHJntPos[i]) THEN
 		armDHJntVel[i]:=0;
 		m_reachMacroJntLimit:=TRUE;
 	END_IF
@@ -269,21 +271,26 @@ END_FOR
 // joint 3 up limit to remote center
 jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength+i_slaveArm.instrument.kinematicParameters.m_headLength
 											+ i_slaveArm.instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
-IF (armDHJntVel[3] > 0 AND i_slaveArm.simDHJntPos[3] + armDHJntVel[3] * g_slaveArmCtrlCycleTime > jnt3Limit) THEN
+IF (armDHJntVel[3] > 0 AND i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
 	armDHJntVel[3]:=0;
 	m_reachMacroJntLimit:=TRUE;
 END_IF
 
 // limit DH joints velocity 
 FOR i:=1 TO 3 DO
-	m_simDHJointVel[i]:=LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i], armDHJntVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
-	m_simDHJointVel[i+3]:=LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i+3], wristDHJntVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i+3]);
+	m_simDHJointVel[i]:=armDHJntVel[i];
+	m_simDHJointVel[i+3]:=wristDHJntVel[i];
 END_FOR
+cmdVelScale := 1;
+FOR i:=1 TO g_cartDofs DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
 
 // integrate command DH joint position
-FOR i:=1 TO 6 DO
-	m_simDHJntPos[i] := i_slaveArm.simDHJntPos[i] + m_simDHJntPos[i]*g_slaveArmCtrlCycleTime;
-END_FOR
+vecMultiNum(m_simDHJointVel, g_slaveArmCtrlCycleTime, DHJntCmdDeltaPos);
+slaveSimDHJntPos:=i_slaveArm.simDHJntPos;
+vecAdd(slaveSimDHJntPos, DHJntCmdDeltaPos, m_simDHJntPos);
 
 // gripper angle/force control
 gripperControl(i_slaveArm);
@@ -304,7 +311,7 @@ m_lastCmdJntPos:=m_cmdJntPos;
 m_codeTime(START:=FALSE);]]></ST>
       </Implementation>
     </Method>
-    <Method Name="calcCmdJntTrq" Id="{7e4ee3d4-b523-42da-85be-6cc39e889508}">
+    <Method Name="calcCmdJntTrq" Id="{fded0b86-1da4-488b-b4ce-6aac5fd63398}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntTrq : BOOL
 VAR_IN_OUT CONSTANT
@@ -346,7 +353,7 @@ FOR i:=1 TO 5 DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
-    <Method Name="calcMSErrInScope" Id="{8aa5791b-55f8-4144-9eaf-602bf102631f}">
+    <Method Name="calcMSErrInScope" Id="{492e9552-64ba-4308-be6f-37be1612aab2}">
       <Declaration><![CDATA[METHOD calcMSErrInScope : BOOL
 VAR_IN_OUT CONSTANT
 	i_endoscopePose : ST_Frame;
@@ -390,7 +397,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
+    <Method Name="gripperControl" Id="{8a028d87-390a-4302-a3a8-200ea0ce0142}">
       <Declaration><![CDATA[METHOD gripperControl : BOOL
 VAR_IN_OUT CONSTANT
 	i_slaveArm :FB_SlaveArm;
@@ -418,7 +425,7 @@ ELSE
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Method Name="init" Id="{1bea1de4-0538-46fc-be44-e671d6da03c3}">
+    <Method Name="init" Id="{8395058b-06d1-425e-85be-72c7ccead1ee}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
 	i_slaveArm	:FB_SlaveArm;
@@ -443,7 +450,7 @@ m_jntOPMode[6] := DriverOPMode_Trq;
 m_jntOPMode[7] := DriverOPMode_Trq;
 m_jntOPMode[8] := DriverOPMode_Trq;
 m_firstIn :=TRUE;
-m_gripperCtrlFlag :=FALSE;
+m_gripperCtrlFlag :=false;
 
 // init gripper angle
 m_slaveCmdGripAngle := i_slaveArm.curGripAngle;
@@ -472,7 +479,7 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="limitInstruDofs" Id="{87cb5679-565b-4d30-9ae7-60a574a7b888}">
+    <Method Name="limitInstruDofs" Id="{5bf6f6e0-d934-40a7-bf87-2c1faacb7c47}">
       <Declaration><![CDATA[// limit specific joint dofs based on instrument types
 METHOD PRIVATE limitInstruDofs : BOOL
 VAR_IN_OUT CONSTANT
@@ -490,7 +497,7 @@ END_VAR
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Method Name="masterPoseInterploate" Id="{87f63227-64b7-47f4-901e-5d3267b5224a}">
+    <Method Name="masterPoseInterploate" Id="{9333261c-12fb-468d-9035-0e5ee262ea73}">
       <Declaration><![CDATA[// every some cycles the data from master robots would be miss, so add this interpolation
 METHOD masterPoseInterploate : BOOL
 VAR_INPUT
@@ -552,9 +559,9 @@ m_curInterpolateCylce:= m_curInterpolateCylce+1;
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="masterSlavePoseErr" Id="{87b704e0-4215-4360-b95f-fd5590f5f115}">
+    <Property Name="masterSlavePoseErr" Id="{4d154ab9-eeb2-48cb-a190-97da328f730f}">
       <Declaration><![CDATA[PROPERTY masterSlavePoseErr : REFERENCE to Vec6d]]></Declaration>
-      <Get Name="Get" Id="{1ddbef06-84f8-4aa0-a258-43dd88acef2a}">
+      <Get Name="Get" Id="{fe956856-aae3-46a4-8910-527d97723f54}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -563,68 +570,130 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="wristLimitCheck" Id="{c70fa8fe-1dd4-478f-914d-e766c2627136}">
-      <Declaration><![CDATA[// remove local wrist velocity which violate joint limit
-METHOD wristLimitCheck : BOOL
-VAR_IN_OUT CONSTANT
-	i_slaveArm :FB_SlaveArm;
-END_VAR
-
-VAR
-	wVel, wVelLocal:Vec3d;
-	i,j:INT;
-	tmpMat3d:Mat3d;
-	singleAxisVelLocal, singleAxisVelWrd:Vec3d;
-	singleAxisDHJntVel:Vec3d;
-	wristJacoInv:Mat3d;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[wristLimitCheck :=FALSE;
-FOR i:=1 TO 3 DO 
-	wVel[i]:= m_cmdCartTwist[i+3];
-	FOR j:=1 TO 3 DO
-		wristJacoInv[i,j] := i_slaveArm.simJacoInv[i+3,j+3];
-	END_FOR
-END_FOR
-matTranspose(i_slaveArm.simCartPose.m_rot, tmpMat3d);
-matMultiVec(tmpMat3d, wVel, wVelLocal);
-
-FOR i:= 1 TO 3  DO
-	singleAxisVelLocal := g_zeroVec3d;
-	singleAxisVelLocal[i] := wVelLocal[i];
-	matMultiVec(i_slaveArm.simCartPose.m_rot, singleAxisVelLocal, singleAxisVelWrd);
-	matMultiVec(wristJacoInv,singleAxisVelWrd, singleAxisDHJntVel);
-	FOR j:=1 TO 3 DO
-		IF (singleAxisDHJntVel[j] > 0 AND i_slaveArm.simDHJntPos[j+3] > i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[j]) OR 
-			(singleAxisDHJntVel[j]<0 AND i_slaveArm.simDHJntPos[j+3] < i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[j])  THEN
-			wVelLocal[i]:=0;
-			wristLimitCheck:=TRUE;
-			EXIT;
-		END_IF
-	END_FOR
-END_FOR
-
-matMultiVec(i_slaveArm.simCartPose.m_rot, wVelLocal, wVel);
-FOR i:=1 TO 3 DO
-	 m_cmdCartTwist[i+3] := wVel[i];
-END_FOR]]></ST>
-      </Implementation>
-    </Method>
-    <LineIds Name="FB_SlaveCtrlMasterSlave">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="1486" Count="32" />
-      <LineId Id="1534" Count="0" />
-      <LineId Id="1679" Count="4" />
-      <LineId Id="1539" Count="29" />
-      <LineId Id="1570" Count="20" />
-      <LineId Id="1592" Count="39" />
-      <LineId Id="1684" Count="2" />
-      <LineId Id="1635" Count="16" />
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.calcCmdJntPos">
+      <LineId Id="380" Count="0" />
+      <LineId Id="463" Count="0" />
+      <LineId Id="459" Count="3" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="1255" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="1257" Count="0" />
+      <LineId Id="1256" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="151" Count="1" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="1022" Count="0" />
+      <LineId Id="1024" Count="1" />
+      <LineId Id="1023" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="321" Count="3" />
+      <LineId Id="1188" Count="0" />
+      <LineId Id="326" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="447" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="448" Count="0" />
+      <LineId Id="450" Count="2" />
+      <LineId Id="449" Count="0" />
+      <LineId Id="681" Count="0" />
+      <LineId Id="680" Count="0" />
+      <LineId Id="682" Count="0" />
+      <LineId Id="1190" Count="0" />
+      <LineId Id="1189" Count="0" />
+      <LineId Id="1192" Count="1" />
+      <LineId Id="1195" Count="0" />
+      <LineId Id="1194" Count="0" />
+      <LineId Id="639" Count="0" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="754" Count="1" />
+      <LineId Id="835" Count="2" />
+      <LineId Id="834" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="1227" Count="1" />
+      <LineId Id="1226" Count="0" />
+      <LineId Id="1154" Count="3" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="1158" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="796" Count="0" />
+      <LineId Id="1089" Count="0" />
+      <LineId Id="1127" Count="0" />
+      <LineId Id="1091" Count="1" />
+      <LineId Id="1120" Count="6" />
+      <LineId Id="1119" Count="0" />
+      <LineId Id="1090" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="366" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="798" Count="0" />
+      <LineId Id="278" Count="3" />
+      <LineId Id="799" Count="0" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="1053" Count="0" />
+      <LineId Id="1052" Count="0" />
+      <LineId Id="1060" Count="1" />
+      <LineId Id="1055" Count="0" />
+      <LineId Id="1057" Count="1" />
+      <LineId Id="1054" Count="0" />
+      <LineId Id="1287" Count="1" />
+      <LineId Id="1297" Count="2" />
+      <LineId Id="1296" Count="0" />
+      <LineId Id="1289" Count="4" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="379" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="945" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="946" Count="1" />
+      <LineId Id="309" Count="0" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="758" Count="0" />
+      <LineId Id="757" Count="0" />
+      <LineId Id="759" Count="2" />
+      <LineId Id="872" Count="0" />
+      <LineId Id="520" Count="0" />
+      <LineId Id="517" Count="1" />
+      <LineId Id="516" Count="0" />
+      <LineId Id="519" Count="0" />
       <LineId Id="206" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.calcCmdJntTrq">
       <LineId Id="70" Count="3" />
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
@@ -641,7 +710,7 @@ END_FOR]]></ST>
       <LineId Id="52" Count="0" />
       <LineId Id="54" Count="1" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.calcMSErrInScope">
       <LineId Id="41" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="104" Count="0" />
@@ -660,7 +729,7 @@ END_FOR]]></ST>
       <LineId Id="26" Count="0" />
       <LineId Id="28" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.gripperControl">
       <LineId Id="23" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="24" Count="0" />
@@ -672,7 +741,7 @@ END_FOR]]></ST>
       <LineId Id="42" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.init">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.init">
       <LineId Id="13" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="114" Count="0" />
@@ -703,13 +772,13 @@ END_FOR]]></ST>
       <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.limitInstruDofs">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.limitInstruDofs">
       <LineId Id="5" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.masterPoseInterploate">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.masterPoseInterploate">
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="8" Count="0" />
@@ -739,29 +808,8 @@ END_FOR]]></ST>
       <LineId Id="55" Count="0" />
       <LineId Id="49" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
+    <LineIds Name="FB_SlaveCtrlMasterSlave_bak2.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.wristLimitCheck">
-      <LineId Id="51" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="27" Count="2" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="30" Count="3" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="40" Count="2" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="48" Count="2" />
     </LineIds>
   </POU>
 </TcPlcObject>

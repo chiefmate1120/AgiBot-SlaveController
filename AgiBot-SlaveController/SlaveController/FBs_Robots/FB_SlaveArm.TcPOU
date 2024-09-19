@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -31,9 +31,6 @@ VAR
 	m_trocarOnFlag :BOOL :=FALSE;
 	m_adjustFallEdge :BOOL:=false;
 	m_adjustFallEdgeDetect : F_TRIG;
-	
-	//arm light out to drive
-	m_lightIO AT %Q* :DINT;
 	
 	//endoscope type and posture switch
 	m_endoscopeTypeSwitch : FB_IOToggleCheck;
@@ -92,16 +89,7 @@ VAR
 	
 	// code execute time measure
 	m_codeTime : Profiler;
-
-	// output arm light
-	m_SdoWrite:ARRAY [1..2] OF FB_EcCoESdoWrite;
 	
-	//IP of operating arm
-	m_armNetId:T_AmsNetId; 	
-	
-	//Joint port number
-	m_jointAddrJ8:UINT;	
-	m_jointAddrPbox:UINT;	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -272,33 +260,6 @@ IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) AND m_in
 	ELSE
 		m_instrument.nextScopePosture := EndoScopePosture_HeadDown;
 	END_IF
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="checkLight" Id="{f01081ee-1e3d-4082-9296-257b5773b0af}">
-      <Declaration><![CDATA[METHOD checkLight : BOOL
-VAR_INPUT
-	i_lightCtrlWord : UDINT;
-END_VAR
-
-VAR
-	lightCtrlWord : UDINT;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// to PDO
-m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
-
-// trig sdo write
-lightCtrlWord := SHL(i_lightCtrlWord,16);
-m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
-
-// disable sdo write
-IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
-	m_SdoWrite[1](bExecute:=FALSE);
-	m_SdoWrite[2](bExecute:=FALSE);
 END_IF
 ]]></ST>
       </Implementation>
@@ -618,11 +579,6 @@ END_FOR
 
 // instrument init
 m_instrument.init(i_armIdx);
-
-//init arm netID and adrr
-m_armNetId := GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
-m_jointAddrJ8 := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,3];
-m_jointAddrPbox := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];
 
 // endosocpe toggle button check
 m_endoscopeTypeSwitch.init(0, 500);
@@ -1182,15 +1138,6 @@ END_FOR
       <LineId Id="74" Count="0" />
       <LineId Id="45" Count="0" />
     </LineIds>
-    <LineIds Name="FB_SlaveArm.checkLight">
-      <LineId Id="38" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="48" Count="2" />
-      <LineId Id="52" Count="1" />
-      <LineId Id="64" Count="4" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="63" Count="0" />
-    </LineIds>
     <LineIds Name="FB_SlaveArm.cmdCartPose.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1282,11 +1229,6 @@ END_FOR
       <LineId Id="208" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="209" Count="0" />
-      <LineId Id="229" Count="0" />
-      <LineId Id="228" Count="0" />
-      <LineId Id="230" Count="0" />
-      <LineId Id="232" Count="0" />
-      <LineId Id="231" Count="0" />
       <LineId Id="220" Count="0" />
       <LineId Id="218" Count="0" />
       <LineId Id="217" Count="0" />

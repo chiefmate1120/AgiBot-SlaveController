@@ -1252,7 +1252,10 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="703" Count="125" />
+      <LineId Id="837" Count="1" />
+      <LineId Id="705" Count="38" />
+      <LineId Id="836" Count="0" />
+      <LineId Id="745" Count="83" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">

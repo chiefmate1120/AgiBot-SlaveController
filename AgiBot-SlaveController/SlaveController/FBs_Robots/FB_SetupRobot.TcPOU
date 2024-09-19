@@ -10,6 +10,9 @@ VAR
 	// setup arms, responsible for arm kinematic and control
 	m_setupArms :ARRAY[1..g_sArmNum] OF FB_SetupArm;
 	
+	// arm light control word
+	m_lightCrlWord :ARRAY [1..g_sArmNum] OF UDINT;
+	
 	// arm state
 	m_setupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
 	m_lastSetupArmState:ARRAY[1..g_sArmNum] OF E_setupArmState:=[4(E_setupArmState.SetupArmState_Error)];
@@ -172,6 +175,9 @@ END_FOR
 // state machine transition
 stateMachine(i_setupInputDataPool);
 
+//update arm light
+updateArmLight(i_setupInputDataPool);
+
 // controller transition
 controllerTransit();
 
@@ -285,6 +291,51 @@ END_VAR]]></Declaration>
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="updateArmLight" Id="{0d4d98a3-ae97-4bc5-8d05-6e3f5cc1e792}">
+      <Declaration><![CDATA[METHOD updateArmLight : BOOL
+VAR_IN_OUT CONSTANT
+	i_setupInputDataPool:ST_SetupInputDataPool;
+END_VAR
+
+VAR
+	i : INT;
+	slaveArmState :E_SlaveArmState;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//*******************机械臂与动力盒上的灯光写入********************
+//不可恢复性故障-----红色常亮
+//可恢复故障----琥珀色-先闪烁5s、再进行常亮
+//正处于器械控制或者端口控制状态-----蓝色闪烁
+//该手术臂正在执行一项需要用户短时间等待的活动、例如器械卡接----蓝色-脉动闪烁
+//工具更换引导正在进行中-----绿色闪烁
+//未通电、已禁用、已收起----------关
+//系统正常运行-----蓝色常亮
+//灯光颜色--0-灯灭、1蓝灯常亮、2蓝灯闪烁、3琥珀色闪烁、4红灯闪烁、5绿灯常亮、6绿灯闪烁、7红灯常亮、8琥珀色常亮、9蓝灯脉动式闪烁
+FOR i := 1 TO g_sArmNum BY 1 DO
+	slaveArmState := i_setupInputDataPool.m_slaveStatus.m_armState[i];
+	IF slaveArmState = SlaveArmState_Error OR m_setupArmState[i] = SlaveArmState_Error THEN
+		IF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,3] THEN
+			m_lightCrlWord[i] := ArmLight_RedBlink;
+		ELSIF SafetyCheck.m_SafetyCheck.m_armErrFlag[i,2] THEN
+			m_lightCrlWord[i] := ArmLight_AmberBlink;
+		END_IF
+	ELSIF slaveArmState = SlaveArmState_MountPanel OR slaveArmState = SlaveArmState_MountInstru THEN
+		m_lightCrlWord[i] := ArmLight_BluePulse;
+	ELSIF slaveArmState = SlaveArmState_InstruRetract OR slaveArmState = SlaveArmState_Adjust OR m_setupArmState[i] = SetupArmState_ManualAdjust THEN
+		m_lightCrlWord[i] := ArmLight_BlueBlink;
+	ELSIF slaveArmState = SlaveArmState_InstruInvasion THEN
+		m_lightCrlWord[i] := ArmLight_GreenBlink;
+	ELSIF slaveArmState = SlaveArmState_Disable THEN
+		m_lightCrlWord[i] := ArmLight_Off;
+	ELSE
+		m_lightCrlWord[i] := ArmLight_BlueOn;
+	END_IF
+
+	m_setupArms[i].checkLight(m_lightCrlWord[i]);
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SetupRobot">
       <LineId Id="60" Count="0" />
       <LineId Id="9" Count="0" />
@@ -322,6 +373,8 @@ END_FOR]]></ST>
       <LineId Id="132" Count="0" />
       <LineId Id="113" Count="0" />
       <LineId Id="19" Count="1" />
+      <LineId Id="152" Count="1" />
+      <LineId Id="151" Count="0" />
       <LineId Id="143" Count="1" />
       <LineId Id="142" Count="0" />
       <LineId Id="21" Count="0" />
@@ -340,6 +393,13 @@ END_FOR]]></ST>
     <LineIds Name="FB_SetupRobot.stateMachine">
       <LineId Id="457" Count="82" />
       <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SetupRobot.updateArmLight">
+      <LineId Id="87" Count="8" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="98" Count="19" />
+      <LineId Id="17" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

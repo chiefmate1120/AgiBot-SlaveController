@@ -82,6 +82,9 @@
     <Compile Include="AgiMaths\MatrixLib\matSelfAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecDot.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSelfAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -302,6 +305,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec8b.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Vec6b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
@@ -837,7 +843,10 @@
     <Compile Include="SafetyCheck\FB_Writer.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_backup.TcPOU">
+    <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_bak2.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_bak1.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskCartControl.TcTTO">

@@ -1886,7 +1886,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{816E17F8-C3BA-6003-0AE5-56A34FAECCC9}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{FE6409F7-2DE7-416C-B652-3BC2EB77A896}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2172,11 +2172,6 @@
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_lightIO</Name>
-							<Comment><![CDATA[arm light out to drive]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
@@ -2207,11 +2202,6 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[8].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_lightIO</Name>
-							<Comment><![CDATA[arm light out to drive]]></Comment>
-							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[1].m_motorOutputs</Name>
@@ -2246,11 +2236,6 @@
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_lightIO</Name>
-							<Comment><![CDATA[arm light out to drive]]></Comment>
-							<Type>DINT</Type>
-						</Var>
-						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
@@ -2281,11 +2266,6 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[8].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_lightIO</Name>
-							<Comment><![CDATA[arm light out to drive]]></Comment>
-							<Type>DINT</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
@@ -2487,6 +2467,11 @@
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[1].m_lightIO</Name>
+							<Comment><![CDATA[arm light out to drive]]></Comment>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
@@ -2505,6 +2490,11 @@
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_joints[5].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[2].m_lightIO</Name>
+							<Comment><![CDATA[arm light out to drive]]></Comment>
+							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_joints[1].m_motorOutputs</Name>
@@ -2527,6 +2517,11 @@
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[3].m_lightIO</Name>
+							<Comment><![CDATA[arm light out to drive]]></Comment>
+							<Type>DINT</Type>
+						</Var>
+						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[1].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
 						</Var>
@@ -2545,6 +2540,11 @@
 						<Var>
 							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_joints[5].m_motorOutputs</Name>
 							<Type GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>SetupArmControl.m_setupRobot.m_setupArms[4].m_lightIO</Name>
+							<Comment><![CDATA[arm light out to drive]]></Comment>
+							<Type>DINT</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
@@ -2778,14 +2778,14 @@
 							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
 						</Var>
 						<Var>
-							<Name>SafetyCheck.m_cartJointsData</Name>
-							<Comment><![CDATA[ cart joint data]]></Comment>
-							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
-						</Var>
-						<Var>
 							<Name>SafetyCheck.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
 							<Type GUID="{E5235AA0-33C1-132B-056A-4B3DFE761C22}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartJointsData</Name>
+							<Comment><![CDATA[ cart joint data]]></Comment>
+							<Type GUID="{F079E416-EB88-2AD4-306B-2196CCAAFF93}">ST_CartJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="4" AreaNo="65">
@@ -2885,6 +2885,22 @@
 						<OwnerA Name="InputDst" Prefix="TIPC^SlaveController^SlaveController Instance" Type="1">
 							<OwnerB Name="TIPC^SlaveController^SlaveController Instance">
 								<Link VarA="SlaveArmControl.m_slaveInputDataPool.m_cartStatus" TypeA="ST_CartStatus" InOutA="0" GuidA="{E5235AA0-33C1-132B-056A-4B3DFE761C22}" VarB="TaskCartControl Outputs^CartControl.m_cartStatus" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-09-06T17:14:22">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^SlaveController^SlaveController Instance" Type="2">
+							<OwnerB Name="TIID^SlaveArm1^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_lightIO" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="RxPdoMappingCspCsv^Target velocity" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm2^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_lightIO" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="RxPdoMappingCspCsv^Target velocity" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm3^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_lightIO" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="RxPdoMappingCspCsv^Target velocity" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^SlaveArm4^SlaveJoint2">
+								<Link VarA="SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_lightIO" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="RxPdoMappingCspCsv^Target velocity" RestoreInfo="ANotFound"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -8993,6 +9009,7 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SlaveJoint2">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[1]" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskSetupArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[1].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9001,7 +9018,6 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
-				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm1^SlaveJoint3">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[1]" VarB="TxPdoMappingCspCsv^digital input"/>
@@ -9104,6 +9120,7 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SlaveJoint2">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[2]" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskSetupArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[2].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9112,7 +9129,6 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
-				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[2].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm2^SlaveJoint3">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[2]" VarB="TxPdoMappingCspCsv^digital input"/>
@@ -9215,6 +9231,7 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint2">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[3]" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskSetupArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[3].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9223,7 +9240,6 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
-				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[3].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm3^SlaveJoint3">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[3]" VarB="TxPdoMappingCspCsv^digital input"/>
@@ -9326,6 +9342,7 @@
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SlaveJoint2">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_carRotaOverhangIO[4]" VarB="TxPdoMappingCspCsv^digital input"/>
+				<Link VarA="TaskSetupArmControl Outputs^SetupArmControl.m_setupRobot.m_setupArms[4].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskSlaveArmControl Inputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
@@ -9334,7 +9351,6 @@
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
 				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_joints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
-				<Link VarA="TaskSlaveArmControl Outputs^SlaveArmControl.m_slaveRobot.m_slaveArms[4].m_lightIO" VarB="RxPdoMappingCspCsv^Target velocity"/>
 			</OwnerB>
 			<OwnerB Name="TIID^SlaveArm4^SlaveJoint3">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_cartRobot.m_slaveCart.m_trocarIO[4]" VarB="TxPdoMappingCspCsv^digital input"/>
