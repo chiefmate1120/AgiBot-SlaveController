@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="invMat2" Id="{cd7ce9f4-0918-4836-a745-950b9fce39b9}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION invMat2 : bool
+VAR_IN_OUT CONSTANT
+	mat :Mat2d;
+END_VAR
+VAR_IN_OUT
+	invMat : Mat2d;
+END_VAR
+VAR
+	matDet:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[matDet := mat[1,1]*mat[2,2]-mat[1,2]*mat[2,1];
+
+IF ABS(matDet)<g_smallNum THEN
+	invMat2 := FALSE;
+	RETURN;
+END_IF
+
+invMat[1,1]:= mat[2,2]/matDet;
+invMat[1,2]:= -mat[1,2]/matDet;
+invMat[2,1]:= -mat[2,1]/matDet;
+invMat[2,2]:= mat[1,1]/matDet;
+ 
+invMat2:=TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="invMat2">
+      <LineId Id="316" Count="0" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="359" Count="0" />
+      <LineId Id="358" Count="0" />
+      <LineId Id="361" Count="2" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

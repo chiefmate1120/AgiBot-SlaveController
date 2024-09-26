@@ -45,6 +45,19 @@ VAR
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_setupJntNum] OF FB_PID;
 	
+	//arm light out to drive
+	m_lightIO AT %Q* :DINT;
+	
+	// output arm light
+	m_SdoWrite:ARRAY [1..2] OF FB_EcCoESdoWrite;
+	
+	//IP of operating arm
+	m_armNetId:T_AmsNetId; 	
+	
+	//Joint port number
+	m_jointAddrJ8:UINT;	
+	m_jointAddrPbox:UINT;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -71,6 +84,33 @@ END_VAR
         <ST><![CDATA[// check manual and auto adjust button
 m_manualAdjustOnFlag := m_manualAdjustDetect.run(m_adjustIO);
 m_jnt5AdjustDir := m_jnt5AdjustDetect.run(m_adjustIO);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="checkLight" Id="{bd15e90e-7362-4cca-a66a-2b7a8c5d2239}">
+      <Declaration><![CDATA[METHOD checkLight : BOOL
+VAR_INPUT
+	i_lightCtrlWord : UDINT;
+END_VAR
+
+VAR
+	lightCtrlWord : UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// to PDO
+m_lightIO := UDINT_TO_DINT(i_lightCtrlWord);
+
+// trig sdo write
+lightCtrlWord := SHL(i_lightCtrlWord,16);
+m_SdoWrite[1](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrJ8, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:=ADR(lightCtrlWord) , cbBufLen:=SIZEOF(lightCtrlWord) , bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+m_SdoWrite[2](sNetId:= m_armNetId, nSlaveAddr:= m_jointAddrPbox, nSubIndex:= 0, nIndex:= 16#6097, pSrcBuf:= ADR(lightCtrlWord), cbBufLen:= SIZEOF(lightCtrlWord), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+
+// disable sdo write
+IF NOT m_SdoWrite[1].bBusy AND  NOT m_SdoWrite[2].bBusy THEN
+	m_SdoWrite[1](bExecute:=FALSE);
+	m_SdoWrite[2](bExecute:=FALSE);
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -337,7 +377,12 @@ FOR i:=1 TO g_setupJntNum DO
 	m_jntPIDCtrl[i].init(g_setupArmCtrlCycleTime,GVL_SetupControlParameters.g_posKp[i],GVL_SetupControlParameters.g_posKd[i],
 		GVL_SetupControlParameters.g_posKi[i], GVL_SetupControlParameters.g_posKiLimit[i]* currentRatioMotor2Jnt,
 		GVL_SetupControlParameters.g_posCtrlLimit[i]*currentRatioMotor2Jnt);
-END_FOR]]></ST>
+END_FOR
+
+//init arm netID and adrr
+m_armNetId := GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
+m_jointAddrJ8 := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,3];
+m_jointAddrPbox := GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];]]></ST>
       </Implementation>
     </Method>
     <Method Name="isEnabled" Id="{b985692a-f6f7-460a-be8e-c41aacfdf6d5}">
@@ -508,6 +553,10 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="21" Count="2" />
       <LineId Id="13" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SetupArm.checkLight">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SetupArm.cmdJntCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -586,13 +635,7 @@ forwardKinematic(m_curJntPos,m_curCartPose,m_rcPos);
       <LineId Id="50" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.init">
-      <LineId Id="159" Count="1" />
-      <LineId Id="162" Count="2" />
-      <LineId Id="186" Count="0" />
-      <LineId Id="166" Count="1" />
-      <LineId Id="193" Count="5" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="206" Count="6" />
+      <LineId Id="220" Count="26" />
       <LineId Id="205" Count="0" />
     </LineIds>
     <LineIds Name="FB_SetupArm.isEnabled">
