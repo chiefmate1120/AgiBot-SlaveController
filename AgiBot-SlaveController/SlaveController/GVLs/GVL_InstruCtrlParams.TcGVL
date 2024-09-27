@@ -33,8 +33,9 @@ VAR_GLOBAL CONSTANT
 	
 	g_instruMaxGripAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[45*g_deg2Rad, 40*g_deg2Rad, 40*g_deg2Rad, 40*g_deg2Rad, 40*g_deg2Rad, PI/2, 55*g_deg2Rad, 55*g_deg2Rad, PI/3, PI/6, PI/6,0,PI/4,PI/4];
 	
-	g_instruMaxPitchAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[11(75*g_deg2Rad), 3(0)];
-	g_instruMaxYawAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[9(PI/2), 90*g_deg2Rad, 90*g_deg2Rad, 3(0)];
+	g_instruMaxRollAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[12(5.5), 2(g_largeNum)];
+	g_instruMaxPitchAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[11(75*g_deg2Rad), 3(1)];
+	g_instruMaxYawAngle:ARRAY[1..g_instruTypesNum] OF LREAL:=[9(PI/2), 90*g_deg2Rad, 90*g_deg2Rad, 3(1)];
 	
 
 	// master gripper angle limit

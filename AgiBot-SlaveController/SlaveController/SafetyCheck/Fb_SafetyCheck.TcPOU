@@ -693,22 +693,23 @@ FOR i:=1 TO g_sJntNum-5 BY 1 DO
 END_FOR
 
 
+// TODO: replaced with cartesin twist check
 //笛卡尔空间指令与位置偏差检测
-FOR i:=1 TO 6 BY 1 DO
-	m_checkDelay[i_ArmId].T_spacePoseErr[i](IN:= i_safetyCheckVar[i_ArmId].m_spacePoseErr[i]> g_maxCartPoseErr[i] AND m_checkPermit[i_ArmId].m_spacePoseErr[i], PT:=m_checkDelayTime.Ti_spacePoseErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_spacePoseErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, 1, i, 16#2004, m_rcvLevel );
-	END_IF
-END_FOR
+//FOR i:=1 TO 6 BY 1 DO
+//	m_checkDelay[i_ArmId].T_spacePoseErr[i](IN:= i_safetyCheckVar[i_ArmId].m_spacePoseErr[i]> g_maxCartPoseErr[i] AND m_checkPermit[i_ArmId].m_spacePoseErr[i], PT:=m_checkDelayTime.Ti_spacePoseErr , Q=> , ET=> );
+//	IF m_checkDelay[i_ArmId].T_spacePoseErr[i].Q THEN
+//		errCodeAssign(i_ArmId, i_ArmId+3, 1, i, 16#2004, m_rcvLevel );
+//	END_IF
+//END_FOR
 
 
 //电流超限监测
-FOR i:=1 TO g_sJntNum BY 1 DO
-	m_checkDelay[i_ArmId].T_jntCurrentErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_rawJntCurrent[i_armId][i])>g_maxJntCurrent[i+g_setupJntNum] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_jntCurrentErr[i+g_setupJntNum].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2005, m_rcvLevel );
-	END_IF
-END_FOR
+//FOR i:=1 TO g_sJntNum BY 1 DO
+//	m_checkDelay[i_ArmId].T_jntCurrentErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_rawJntCurrent[i_armId][i])>g_maxJntCurrent[i+g_setupJntNum] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
+//	IF m_checkDelay[i_ArmId].T_jntCurrentErr[i+g_setupJntNum].Q THEN
+//		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2005, m_rcvLevel );
+//	END_IF
+//END_FOR
 
 
 //Ethercat通讯检测
@@ -733,7 +734,7 @@ END_FOR
 
 //Deviation between command current and feedback current
 FOR i:=1 TO g_sJntNum BY 1 DO
-	IF ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i+g_setupJntNum].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i+g_setupJntNum].m_current)> g_jntCurrentCtrlLimit[i+g_setupJntNum]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i+g_setupJntNum] THEN
+	IF ABS(i_safetyCheckVar[i_armId].m_slaveDriverOutput[i].m_cmdCurrent-i_safetyCheckVar[i_armId].m_slaveDriverInput[i].m_current)> g_jntCurrentCtrlLimit[i+g_setupJntNum]  AND m_checkPermit[i_armId].m_jntCurrentCtrlErr[i+g_setupJntNum] THEN
 		errCodeAssign(i_armId, i_armId+3, 0, i+g_setupJntNum, 16#200B, m_rcvLevel );
 	END_IF
 END_FOR
@@ -1112,7 +1113,7 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">
-      <LineId Id="439" Count="143" />
+      <LineId Id="744" Count="144" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.systemSafetyCheck">

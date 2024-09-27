@@ -36,7 +36,10 @@ VAR
 	m_instruZeroDeviation :Vec5d;
 	
 	//ultrasound knife Reduce the current rotation Angle  J3
-	m_ultraKnifeRotaAngleJ3 :LREAL := 3*g_deg2Rad;
+	m_ultraKnifeRotaAngleJ3 :LREAL := 30*g_deg2Rad;
+	
+	// ultrasound knife rotate angle zero position
+	m_ultraKnifeRotAngZeroPos :LREAL := 4.50567;
 	
 	// joint position error
 	m_jntPosErr :Vec5d;
@@ -406,7 +409,7 @@ CASE m_ultrasoundMountStatus OF
 		//m_jntOPMode[8] := DriverOPMode_Trq;
 		// calculation deviates from the instrument zero position
 		m_instruZeroDeviation[3] :=  m_ultraKnifeRotaAngleJ3;
-		m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - i_slaveArm.instrument.onChipData.m_InstruPos[4];
+		m_instruZeroDeviation[4] :=  i_slaveArm.linkSingle[7] - m_ultraKnifeRotAngZeroPos;
 		m_ultrasoundMountStatus :=2;
 		
 	2:// move back to zero position
@@ -425,6 +428,9 @@ CASE m_ultrasoundMountStatus OF
 		m_ultrasoundMountStatus :=3;
 
 	3:
+		// joint8 in passive mode
+		m_jntOPMode[8] := DriverOPMode_Trq;
+		
 		m_isFinished:=TRUE;
 		FOR i:=3 TO 4 DO 
 			m_jntPosErr[i]:=m_targetMountPos[i+3]-curJntPos[i+3];
@@ -482,9 +488,7 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountUltraKnife">
-      <LineId Id="3" Count="66" />
-      <LineId Id="86" Count="2" />
-      <LineId Id="70" Count="6" />
+      <LineId Id="184" Count="79" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

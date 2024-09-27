@@ -158,6 +158,8 @@ IF m_instruTypeIdx > 0 THEN
 	m_kinematicParameters.m_headLength := GVL_InstruCtrlParams.g_instruHeadLength[m_instruTypeIdx];
 	m_kinematicParameters.m_fingerLength := GVL_InstruCtrlParams.g_instruFingerLength[m_instruTypeIdx];
 
+	m_kinematicParameters.m_wristMinDHJntPos[1]:=-GVL_InstruCtrlParams.g_instruMaxRollAngle[m_instruTypeIdx];
+	m_kinematicParameters.m_wristMaxDHJntPos[1]:=GVL_InstruCtrlParams.g_instruMaxRollAngle[m_instruTypeIdx];
 	m_kinematicParameters.m_wristMinDHJntPos[2]:=-GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx]-pi/2;
 	m_kinematicParameters.m_wristMaxDHJntPos[2]:=GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx]-pi/2;
 	m_kinematicParameters.m_wristMinDHJntPos[3]:=-GVL_InstruCtrlParams.g_instruMaxYawAngle[m_instruTypeIdx];
@@ -242,6 +244,7 @@ IF i_masterGripAng < g_masterGripForceStartAng THEN
 ELSE
 	o_instruGripAngle := (g_maxMasterGripAngle - i_masterGripAng)/(g_maxMasterGripAngle - g_masterGripForceStartAng);
 	o_instruGripAngle :=m_kinematicParameters.m_maxGripAngle - o_instruGripAngle * (m_kinematicParameters.m_maxGripAngle - m_kinematicParameters.m_minGripAngle);
+	o_instruGripAngle := LIMIT(m_kinematicParameters.m_minGripAngle, o_instruGripAngle, m_kinematicParameters.m_maxGripAngle );
 	o_instruGripForceLevel:=0;
 END_IF]]></ST>
       </Implementation>
@@ -327,6 +330,7 @@ IF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_Ultra
 	r_DHJntPos[4]:=-(i_jntPos[8]-m_jntPosOffset[8])/m_kinematicParameters.kx;
 	r_DHJntPos[5]:=-pi/2;
 	r_DHJntPos[6]:=0;
+	r_gripAngle:=ultrasoundKnifeGripAngleFK(i_jntPos[6]-m_jntPosOffset[6]);
 	RETURN;
 END_IF
 
@@ -362,10 +366,6 @@ IF (InstruType_ProGraspForceps=m_instruType) THEN//细齿无创抓钳
 
 ELSIF (InstruType_CauteryHook = m_instruType) THEN//单级电钩
 	r_gripAngle:=0;
-	
-ELSIF InstruType_UltrasoundKnifeS = onChipData.m_InstruID OR InstruType_UltrasoundKnifeU = onChipData.m_InstruID THEN
-	r_gripAngle:=ultrasoundKnifeGripAngleFK(jntPosL3);
-	
 ELSE
 	r_gripAngle:=gripAngle;
 END_IF
@@ -947,7 +947,7 @@ END_VAR
     </Property>
     <Method Name="ultrasoundKnifeGripAngleFK" Id="{1dc50a9a-b451-47d4-9f26-74d3cb81d7ff}">
       <Declaration><![CDATA[METHOD ultrasoundKnifeGripAngleFK : LREAL
-VAR_IN_OUT CONSTANT
+VAR_INPUT
 	// motor joint position of slave arm
 	i_jntPos :LREAL;
 END_VAR
@@ -1134,7 +1134,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.checkInstruType">
-      <LineId Id="274" Count="56" />
+      <LineId Id="337" Count="58" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.curScopePosture.Get">
@@ -1150,17 +1150,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.gripAngleMap">
-      <LineId Id="80" Count="0" />
-      <LineId Id="83" Count="3" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="26" Count="3" />
+      <LineId Id="103" Count="17" />
       <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.init">
@@ -1180,12 +1170,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="11" Count="1" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruFK">
-      <LineId Id="319" Count="14" />
-      <LineId Id="394" Count="3" />
-      <LineId Id="401" Count="0" />
-      <LineId Id="403" Count="2" />
-      <LineId Id="393" Count="0" />
-      <LineId Id="334" Count="39" />
+      <LineId Id="425" Count="60" />
       <LineId Id="159" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruIDRecord">

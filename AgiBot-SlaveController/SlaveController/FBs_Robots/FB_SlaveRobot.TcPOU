@@ -301,6 +301,9 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 	IF m_slaveArms[i].instruOn = FALSE THEN
 		m_instrumentMountedFlag[i]:=FALSE;
+		
+		// clear instrument backlash compensation
+		m_armMasterSlave[i].clearInstruBacklash();			
 	END_IF
 END_FOR
 
@@ -709,12 +712,7 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="795" Count="92" />
-      <LineId Id="890" Count="42" />
-      <LineId Id="935" Count="0" />
-      <LineId Id="938" Count="105" />
-      <LineId Id="1053" Count="74" />
-      <LineId Id="1133" Count="7" />
+      <LineId Id="1492" Count="328" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">
