@@ -257,13 +257,13 @@ q1:=i_jntPos[1]; q2:=i_jntPos[2]; q3:=i_jntPos[3]; q4:=i_jntPos[4]; q5:=i_jntPos
 
 //**********************DH parameters*************************//
 IF (m_armIdx=1) THEN
-	a2:=0.019; d4:=0.3545;
+	a2:=0.019; d4:=0.5205;
 	
 ELSIF (m_armIdx=2) THEN
 	a2:=0.136; d4:=0.3545;
 	
 ELSIF (m_armIdx=3) THEN	
-	a2:=0.136; d4:=0.5205;
+	a2:=0.136; d4:=0.3545;
 	
 ELSIF (m_armIdx=4) THEN	
 	a2:=0.1825; d4:=0.5205;
