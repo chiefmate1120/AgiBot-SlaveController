@@ -661,8 +661,6 @@ IF m_jntLimitFlag[4] AND NOT(m_jntLimitFlag[5]) AND NOT(m_jntLimitFlag[6]) THEN
 	// pinv partJaco
 	matTranspose(partJaco, partJacoT);
 	matMultiply(partJacoT, partJaco, JtJ);
-	JtJ[1,1] := JtJ[1,1];
-	JtJ[2,2] := JtJ[2,2];
 	IF NOT(invMat2(JtJ, JtJInv)) THEN
 		m_simDHJointVel[5] :=0;
 		m_simDHJointVel[6] := 0;
@@ -695,8 +693,6 @@ IF m_jntLimitFlag[5] AND NOT(m_jntLimitFlag[4]) AND NOT(m_jntLimitFlag[6]) THEN
 	// pinv partJaco
 	matTranspose(partJaco, partJacoT);
 	matMultiply(partJacoT, partJaco, JtJ);
-	JtJ[1,1] := JtJ[1,1];
-	JtJ[2,2] := JtJ[2,2];
 	IF NOT(invMat2(JtJ, JtJInv)) THEN
 		m_simDHJointVel[4] :=0;
 		m_simDHJointVel[6] := 0;
@@ -735,8 +731,6 @@ IF m_jntLimitFlag[6] AND NOT(m_jntLimitFlag[4]) AND NOT(m_jntLimitFlag[5]) THEN
 	// pinv partJaco
 	matTranspose(partJaco, partJacoT);
 	matMultiply(partJacoT, partJaco, JtJ);
-	JtJ[1,1] := JtJ[1,1];
-	JtJ[2,2] := JtJ[2,2];
 	IF NOT(invMat2(JtJ, JtJInv)) THEN
 		m_simDHJointVel[4] :=0;
 		m_simDHJointVel[5] := 0;
@@ -911,9 +905,12 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.wristLimitSolve">
       <LineId Id="3" Count="9" />
-      <LineId Id="16" Count="87" />
+      <LineId Id="16" Count="36" />
+      <LineId Id="55" Count="31" />
+      <LineId Id="89" Count="14" />
       <LineId Id="105" Count="1" />
-      <LineId Id="108" Count="99" />
+      <LineId Id="108" Count="20" />
+      <LineId Id="131" Count="76" />
       <LineId Id="210" Count="5" />
       <LineId Id="2" Count="0" />
     </LineIds>
