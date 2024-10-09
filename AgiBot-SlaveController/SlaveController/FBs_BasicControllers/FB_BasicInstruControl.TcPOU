@@ -188,6 +188,7 @@ currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMoto
 m_maxGripForce := m_maxGripCurrent * currentRatioMotor2Jnt;
 m_maxGripCtrlForce := m_maxGripCtrlCurrent * currentRatioMotor2Jnt;
 FOR i:=1 TO 4 DO
+	m_jntBacklash[i] := 0;
 	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	
 	m_instruCmdJntVel[i]:=0;
@@ -199,17 +200,6 @@ FOR i:=1 TO 4 DO
 END_FOR
 m_instruYawCtrl.init(g_slaveArmCtrlCycleTime,m_yawKp[1],m_yawKd[1],m_yawKi[1],m_yawKiLimit*currentRatioMotor2Jnt, m_yawCtrlLimit*currentRatioMotor2Jnt);
 ]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="resetBacklash" Id="{2cf06ef5-0bca-420e-8316-c4390ea84d74}">
-      <Declaration><![CDATA[METHOD resetBacklash : BOOL
-VAR
-	i:INT;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[FOR i:=1 TO 5 DO
-	m_jntBacklash[i] := 0;
-END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{7565c7b3-97d9-43dd-bc18-57a80d3fc9eb}">
@@ -257,7 +247,7 @@ FOR i:=1 TO 4 DO
 	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
 	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
-	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i]+m_jntBacklash[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
+	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i] + m_jntBacklash[i] ,m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
 END_FOR
 m_instruJntCtrlTrq[5]:=0;
 
@@ -299,16 +289,12 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <LineId Id="60" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">
-      <LineId Id="150" Count="14" />
-      <LineId Id="166" Count="1" />
+      <LineId Id="202" Count="15" />
+      <LineId Id="219" Count="1" />
       <LineId Id="113" Count="0" />
     </LineIds>
-    <LineIds Name="FB_BasicInstruControl.resetBacklash">
-      <LineId Id="5" Count="0" />
-      <LineId Id="8" Count="1" />
-    </LineIds>
     <LineIds Name="FB_BasicInstruControl.run">
-      <LineId Id="968" Count="41" />
+      <LineId Id="1040" Count="41" />
       <LineId Id="70" Count="0" />
     </LineIds>
   </POU>

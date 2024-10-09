@@ -105,6 +105,9 @@ VAR
 	// flag to start gripper control
 	m_gripperCtrlFlag :BOOL;
 	
+	// instrument tyep
+	m_instruType : E_InstrumentType;
+	
 	//################# variable to interpolate master pose ##############
 	m_firstInterpolate :BOOL :=TRUE;
 	m_lastMasterPose : ST_Frame;
@@ -404,15 +407,6 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="clearInstruBacklash" Id="{e6aa4609-d216-4169-bd45-cd8e613f86ab}">
-      <Declaration><![CDATA[METHOD clearInstruBacklash : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[m_basicInstruController.resetBacklash();]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
       <Declaration><![CDATA[METHOD gripperControl : BOOL
 VAR_IN_OUT CONSTANT
@@ -485,6 +479,7 @@ m_cmdYawVelLpf.init(1, m_microCmdJntPosLpfCutoffFreq, g_slaveArmCtrlFreq);
 // init controller
 m_basicInstruController.init(i_slaveArm);
 m_usKnifeController.init(i_slaveArm);
+m_instruType := i_slaveArm.instrument.instruType;
 
 // init interpolation data
 m_firstInterpolate :=TRUE;
@@ -495,6 +490,21 @@ copyCmds(r_slaveArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="InstruBacklash" Id="{36c2eae9-d34a-4d78-a1ca-ae4b84eb11b6}">
+      <Declaration><![CDATA[PROPERTY InstruBacklash : Vec5d]]></Declaration>
+      <Get Name="Get" Id="{a50be6d4-ea37-4d42-9226-d0fdbcd75516}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_UltrasoundKnifeU THEN
+	instruBacklash := g_zeroVec5d;
+ELSE
+	instruBacklash := m_basicInstruController.m_jntBacklash;
+END_IF]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="limitInstruDofs" Id="{87cb5679-565b-4d30-9ae7-60a574a7b888}">
       <Declaration><![CDATA[// limit specific joint dofs based on instrument types
 METHOD PRIVATE limitInstruDofs : BOOL
@@ -825,28 +835,12 @@ END_FOR
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
-      <LineId Id="70" Count="3" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="35" Count="3" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="101" Count="1" />
-      <LineId Id="117" Count="0" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="118" Count="0" />
-      <LineId Id="120" Count="1" />
-      <LineId Id="119" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="54" Count="1" />
+      <LineId Id="173" Count="22" />
+      <LineId Id="55" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
       <LineId Id="158" Count="23" />
       <LineId Id="28" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveCtrlMasterSlave.clearInstruBacklash">
-      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
       <LineId Id="23" Count="0" />
@@ -861,8 +855,12 @@ END_FOR
       <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.init">
-      <LineId Id="283" Count="37" />
+      <LineId Id="331" Count="38" />
       <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.InstruBacklash.Get">
+      <LineId Id="3" Count="3" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.limitInstruDofs">
       <LineId Id="5" Count="0" />

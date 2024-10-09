@@ -152,7 +152,8 @@ END_VAR]]></Declaration>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
-b:=m_instrument.kinematicParameters.m_fingerLength;
+//b:=m_instrument.kinematicParameters.m_fingerLength;
+b:=0;
 
 q3:=i_DHJntPos[3];
 c1:=COS(i_DHJntPos[1]);
@@ -491,11 +492,11 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-d1:=GVL_SlaveArmKinematic.g_d1;
+        <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
-b:=m_instrument.kinematicParameters.m_fingerLength;
+//b:=m_instrument.kinematicParameters.m_fingerLength;
+b:=0;
 
 q3:=i_DHJntPos[3];
 c1:=COS(i_DHJntPos[1]);
@@ -757,7 +758,8 @@ END_VAR]]></Declaration>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
 L:=m_instrument.kinematicParameters.m_rodLength;
 a:=m_instrument.kinematicParameters.m_headLength;
-b:=m_instrument.kinematicParameters.m_fingerLength;
+//b:=m_instrument.kinematicParameters.m_fingerLength;
+b:=0;
 
 q2 := i_DHJntPos[2];
 IF q2 < m_Jnt2PosThres THEN
@@ -881,7 +883,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.kinematicParameters.m_rodLength-m_instrument.kinematicParameters.m_headLength
-						- m_instrument.kinematicParameters.m_fingerLength;]]></ST>
+						- m_instrument.kinematicParameters.m_fingerLength * cos(m_curDHJntPos[6]);]]></ST>
       </Implementation>
     </Method>
     <Property Name="simCartPose" Id="{6426ffc4-f74f-4984-ac32-a9f9d8b8c8ca}" FolderPath="property\">
@@ -1017,17 +1019,15 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//IF m_instrument.ready THEN
-	// instrument kinematic
-	m_instrument.instruFK(m_simJntPos, m_simDHJntPos, m_simGripAngle);
+        <ST><![CDATA[// instrument kinematic
+m_instrument.instruFK(m_simJntPos, m_simDHJntPos, m_simGripAngle);
 
-	// simulated cartesion pose 
-	forwardKinematic(m_simDHJntPos,m_simCartPose);
-	
-	// simulated jacobian
-	modifyJaco(m_simDHJntPos,m_simJaco);
-	m_isSingularity:=NOT(invMat6(m_simJaco, m_simJacoInv));
-//END_IF
+// simulated cartesion pose 
+forwardKinematic(m_simDHJntPos,m_simCartPose);
+
+// simulated jacobian
+modifyJaco(m_simDHJntPos,m_simJaco);
+m_isSingularity:=NOT(invMat6(m_simJaco, m_simJacoInv));
 
 ]]></ST>
       </Implementation>
@@ -1062,24 +1062,21 @@ FOR i:=1 TO g_sJntNum DO
 	m_cmdJntCurrent[i]:=m_joints[i].cmdCurrent;
 END_FOR 
 
-// only update carteisn data when instrument is ready
-//IF m_instrument.ready THEN
-	
-	// instrument kinematic
-	m_instrument.instruFK(m_curJntPos, m_curDHJntPos, m_curGripAngle);
+// instrument kinematic
+m_instrument.instruFK(m_curJntPos, m_curDHJntPos, m_curGripAngle);
 
-	// cartesion pose
-	forwardKinematic(m_curDHJntPos,m_curCartPose);
-	
-	// jacobian
-	calcJaco(m_curDHJntPos,m_jaco);
-	
-	// DH joint velocity
-	m_instrument.instruJntVelFK(m_curJntVel, m_curDHJntVel);
-	
-	// cartesian twist
-	matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
-//END_IF
+// cartesion pose
+forwardKinematic(m_curDHJntPos,m_curCartPose);
+
+// jacobian
+calcJaco(m_curDHJntPos,m_jaco);
+
+// DH joint velocity
+m_instrument.instruJntVelFK(m_curJntVel, m_curDHJntVel);
+
+// cartesian twist
+matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -1096,17 +1093,7 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.calcJaco">
-      <LineId Id="248" Count="0" />
-      <LineId Id="338" Count="1" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="340" Count="0" />
-      <LineId Id="254" Count="0" />
-      <LineId Id="327" Count="10" />
-      <LineId Id="265" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="266" Count="40" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="80" Count="0" />
+      <LineId Id="358" Count="62" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.checkIO">
@@ -1195,27 +1182,7 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.forwardKinematic">
-      <LineId Id="151" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="152" Count="3" />
-      <LineId Id="222" Count="0" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="99" Count="2" />
-      <LineId Id="173" Count="0" />
-      <LineId Id="103" Count="1" />
-      <LineId Id="106" Count="2" />
-      <LineId Id="111" Count="2" />
-      <LineId Id="157" Count="13" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="240" Count="0" />
-      <LineId Id="239" Count="0" />
-      <LineId Id="243" Count="0" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="261" Count="0" />
-      <LineId Id="263" Count="2" />
-      <LineId Id="269" Count="1" />
-      <LineId Id="266" Count="0" />
-      <LineId Id="241" Count="0" />
+      <LineId Id="290" Count="47" />
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.init">
@@ -1262,22 +1229,7 @@ END_FOR
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.modifyJaco">
-      <LineId Id="248" Count="0" />
-      <LineId Id="338" Count="1" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="403" Count="0" />
-      <LineId Id="402" Count="0" />
-      <LineId Id="404" Count="0" />
-      <LineId Id="414" Count="1" />
-      <LineId Id="340" Count="0" />
-      <LineId Id="254" Count="0" />
-      <LineId Id="379" Count="3" />
-      <LineId Id="327" Count="10" />
-      <LineId Id="265" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="266" Count="40" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="80" Count="0" />
+      <LineId Id="436" Count="71" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.panelOn.Get">
@@ -1293,7 +1245,8 @@ END_FOR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.setInstruDepth">
-      <LineId Id="5" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="6" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">
       <LineId Id="2" Count="0" />
@@ -1351,42 +1304,11 @@ END_FOR
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateSimStatus">
-      <LineId Id="18" Count="0" />
-      <LineId Id="30" Count="1" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="7" Count="3" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="19" Count="0" />
+      <LineId Id="50" Count="9" />
       <LineId Id="24" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.updateStatus">
-      <LineId Id="14" Count="0" />
-      <LineId Id="26" Count="2" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="63" Count="1" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="81" Count="3" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="118" Count="1" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="90" Count="4" />
-      <LineId Id="149" Count="2" />
-      <LineId Id="95" Count="1" />
-      <LineId Id="152" Count="0" />
-      <LineId Id="88" Count="0" />
+      <LineId Id="204" Count="35" />
       <LineId Id="47" Count="0" />
     </LineIds>
   </POU>

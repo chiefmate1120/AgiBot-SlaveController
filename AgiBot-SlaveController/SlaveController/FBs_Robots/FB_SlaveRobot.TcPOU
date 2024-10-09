@@ -300,10 +300,7 @@ FOR i:=1 TO g_sArmNum DO
 		m_panelMountedFlag[i]:=FALSE;
 	END_IF
 	IF m_slaveArms[i].instruOn = FALSE THEN
-		m_instrumentMountedFlag[i]:=FALSE;
-		
-		// clear instrument backlash compensation
-		m_armMasterSlave[i].clearInstruBacklash();			
+		m_instrumentMountedFlag[i]:=FALSE;			
 	END_IF
 END_FOR
 
@@ -461,9 +458,10 @@ FOR i:=1 TO g_sArmNum DO
 			// to Adjust
 			IF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
-			// to standby
+			// to stop
 			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] OR m_armCtrl[i].isFinished THEN
-				m_nextSlaveArmState[i]:=SlaveArmState_Standby;
+				m_nextSlaveArmState[i]:=SlaveArmState_Stop;
+				m_armStop[i].setInstruBacklash(m_armMasterSlave[i].InstruBacklash);
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
@@ -712,7 +710,7 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="1492" Count="328" />
+      <LineId Id="1828" Count="326" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">
