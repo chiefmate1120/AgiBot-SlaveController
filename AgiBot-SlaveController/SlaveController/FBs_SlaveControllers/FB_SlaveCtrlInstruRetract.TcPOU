@@ -17,6 +17,12 @@ VAR
 	m_retractVel: LREAL:= 0.1;
 	m_retractAcc: LREAL:= 0.2;
 	
+	// instrument joint motion planning
+	m_instruJntOTG :ARRAY[1..5] OF FB_secOrdTrajFilter;
+	m_instruJntTargetPos :Vec5d;
+	m_instruJntVel :LREAL := 2*PI;
+	m_instruJntAcc : LREAL := 4*PI;
+	
 	
 END_VAR
 ]]></Declaration>
@@ -36,6 +42,7 @@ END_VAR
 VAR 
 	i :INT;
 	trackErr:LREAL;
+	curJntVel:Vec8d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// if instrument is on again, wait and re-plan the traj
@@ -45,6 +52,9 @@ IF i_slaveArm.instruNear THEN
 	
 	// init traj filter
 	m_jnt3OTG.init(m_cmdJntPos[3], 0, m_retractVel, m_retractAcc, g_slaveArmCtrlCycleTime);
+	FOR i:=1 TO 5 DO
+		m_instruJntOTG[i].init(m_cmdJntPos[i+3], 0,m_instruJntVel, m_instruJntAcc, g_slaveArmCtrlCycleTime);
+	END_FOR
 
 	m_timePeriod := 0;
 	RETURN;
@@ -57,11 +67,18 @@ END_IF
 
 // traj plan
 m_jnt3OTG.run(m_jnt3TargetPos, 0.0, o_cmdAcc=>m_cmdJntAcc[3],o_cmdVel=>m_cmdJntVel[3],o_cmdPos=>m_cmdJntPos[3]);
+FOR i:=1 TO 5 DO
+	m_instruJntOTG[i].run(m_instruJntTargetPos[i], 0.0, o_cmdAcc=>m_cmdJntAcc[i+3],o_cmdVel=>m_cmdJntVel[i+3],o_cmdPos=>m_cmdJntPos[i+3]);
+END_FOR
 
 // reach target check
-trackErr := ABS(i_slaveArm.curJntPos[3] - m_jnt3TargetPos);
-
-m_isFinished := (ABS(m_cmdJntPos[3] - m_jnt3TargetPos) <g_cartCtrlPosTolHigh AND abs(i_slaveArm.curJntVel[3]) <g_jntStaticVelThres);
+trackErr :=0;
+FOR i:=1 TO 5 DO 
+	trackErr := MAX(trackErr, ABS(m_cmdJntPos[i+3]-m_instruJntTargetPos[i]));
+END_FOR
+curJntVel := i_slaveArm.curJntVel;
+m_isFinished := (ABS(m_cmdJntPos[3] - m_jnt3TargetPos) <g_cartCtrlPosTolLow AND trackErr < g_jntCtrlAngTolLoW 
+			AND norm(curJntVel) <g_jntStaticVelThres);
 ]]></ST>
       </Implementation>
     </Method>
@@ -98,6 +115,13 @@ ELSE
 	m_waitTime :=1.0;
 END_IF
 
+// decide instrument joint zero position and init traj filter
+FOR i:=1 TO 5 DO
+	cycleNum := FLOOR(i_slaveArm.curJntPos[i+3]/g_2pi);
+	m_instruJntTargetPos[i]:=cycleNum* g_2Pi;
+	m_instruJntOTG[i].init(m_cmdJntPos[i+3], 0,m_instruJntVel, m_instruJntAcc, g_slaveArmCtrlCycleTime);
+END_FOR
+
 // update commands to arm
 copyCmds(r_slaveArmCtrlCmd);]]></ST>
       </Implementation>
@@ -111,6 +135,9 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="159" Count="0" />
       <LineId Id="196" Count="0" />
       <LineId Id="198" Count="1" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="224" Count="0" />
       <LineId Id="162" Count="0" />
       <LineId Id="171" Count="0" />
       <LineId Id="203" Count="0" />
@@ -120,11 +147,17 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="121" Count="0" />
       <LineId Id="139" Count="1" />
       <LineId Id="190" Count="2" />
+      <LineId Id="230" Count="1" />
+      <LineId Id="229" Count="0" />
       <LineId Id="141" Count="0" />
       <LineId Id="123" Count="0" />
       <LineId Id="205" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="234" Count="0" />
       <LineId Id="208" Count="0" />
       <LineId Id="211" Count="0" />
+      <LineId Id="236" Count="0" />
       <LineId Id="98" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruRetract.init">
@@ -140,6 +173,11 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="224" Count="0" />
       <LineId Id="226" Count="1" />
       <LineId Id="225" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="242" Count="1" />
+      <LineId Id="248" Count="1" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="241" Count="0" />
       <LineId Id="189" Count="2" />
     </LineIds>
   </POU>
