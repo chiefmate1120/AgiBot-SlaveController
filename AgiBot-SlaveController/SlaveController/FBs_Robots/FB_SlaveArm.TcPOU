@@ -248,20 +248,24 @@ m_instrument.readParameters(startFlag);
 
 
 // check endoscope type and posture 
-IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
-	IF m_instrument.curScopeType = EndoScopeType_30 THEN
-		m_instrument.nextScopeType := EndoscopeType_0;
-	ELSE
-		m_instrument.nextScopeType := EndoscopeType_30;
+// only check when electric Knife is off 
+IF SlaveArmControl.m_masterRobotData.m_electricKnifePedalTrigger[1] = 0 AND SlaveArmControl.m_masterRobotData.m_electricKnifePedalTrigger[2] = 0 THEN
+	IF m_endoscopeTypeSwitch.check((m_panelInstrumentOnIO AND 16#20)=32) THEN
+		IF m_instrument.curScopeType = EndoScopeType_30 THEN
+			m_instrument.nextScopeType := EndoscopeType_0;
+		ELSE
+			m_instrument.nextScopeType := EndoscopeType_30;
+		END_IF
+	END_IF
+	IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) AND m_instrument.curScopeType = EndoScopeType_30  THEN
+		IF m_instrument.curScopePosture = EndoScopePosture_HeadDown THEN
+			m_instrument.nextScopePosture := EndoscopePosture_HeadUp;
+		ELSE
+			m_instrument.nextScopePosture := EndoScopePosture_HeadDown;
+		END_IF
 	END_IF
 END_IF
-IF m_endoscopePostureSwitch.check((m_panelInstrumentOnIO AND 16#10)=16) AND m_instrument.curScopeType = EndoScopeType_30  THEN
-	IF m_instrument.curScopePosture = EndoScopePosture_HeadDown THEN
-		m_instrument.nextScopePosture := EndoscopePosture_HeadUp;
-	ELSE
-		m_instrument.nextScopePosture := EndoScopePosture_HeadDown;
-	END_IF
-END_IF
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -1116,12 +1120,9 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="114" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="125" Count="0" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="95" Count="0" />
-      <LineId Id="76" Count="0" />
-      <LineId Id="98" Count="5" />
+      <LineId Id="141" Count="1" />
+      <LineId Id="145" Count="12" />
+      <LineId Id="143" Count="1" />
       <LineId Id="74" Count="0" />
       <LineId Id="45" Count="0" />
     </LineIds>
