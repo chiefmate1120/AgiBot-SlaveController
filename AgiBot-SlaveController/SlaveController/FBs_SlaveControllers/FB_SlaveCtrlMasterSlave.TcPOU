@@ -245,16 +245,13 @@ matMultiVec(invJaco, m_cmdCartTwist, m_simDHJointVel);
 // limit instrument wrist dofs
 limitInstruDofs(i_slaveArm, m_simDHJointVel);
 
-// limit DH joints velocity 
-cmdVelScale := 1;
-FOR i:=1 TO g_cartDofs DO 
-	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
-END_FOR
-vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
-vecSelfMultiNum(m_cmdCartTwist, 1.0/cmdVelScale);
-
 // limit instrument wrist joint velocity
 wristLimitSolve(i_slaveArm);
+
+// limit DH joints velocity 
+FOR i:=4 TO 6 DO 
+	m_simDHJointVel[i] := LIMIT(GVL_SlaveMotorParameters.g_maxJntVel[i], m_simDHJointVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
+END_FOR
 
 // modify arm joints velocity to compensate wrist joint motion
 FOR i:=1 TO 3 DO
@@ -270,17 +267,6 @@ invMat3(armJntJaco, armJntJacoInv);
 matMultiVec(wristJntJaco, wristDHJntVel, velByWristJnt);
 vecSub(m_slaveCmdVel, velByWristJnt, velByArmJnt);
 matMultiVec(armJntJacoInv, velByArmJnt, armDHJntVel);
-
-// limit DH joints velocity 
-FOR i:=1 TO 3 DO
-	m_simDHJointVel[i]:=armDHJntVel[i];
-	m_simDHJointVel[i+3]:=wristDHJntVel[i];
-END_FOR
-cmdVelScale := 1;
-FOR i:=1 TO g_cartDofs DO 
-	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
-END_FOR
-vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
 
 // limit arm joint position
 m_reachMacroJntLimit:=false;
@@ -299,6 +285,17 @@ FOR i:=1 TO 3 DO
 		m_reachMacroJntLimit:=TRUE;
 	END_IF
 END_FOR
+
+// limit DH joints velocity 
+FOR i:=1 TO 3 DO
+	m_simDHJointVel[i]:=armDHJntVel[i];
+	m_simDHJointVel[i+3]:=wristDHJntVel[i];
+END_FOR
+cmdVelScale := 1;
+FOR i:=1 TO g_cartDofs DO 
+	cmdVelScale:=MAX(cmdVelScale, ABS(m_simDHJointVel[i]/GVL_SlaveMotorParameters.g_maxJntVel[i]));
+END_FOR
+vecSelfMultiNum(m_simDHJointVel, 1.0/cmdVelScale);
 
 // integrate command DH joint position
 FOR i:=1 TO 6 DO
@@ -831,7 +828,17 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="1711" Count="163" />
+      <LineId Id="1711" Count="86" />
+      <LineId Id="1806" Count="2" />
+      <LineId Id="1902" Count="1" />
+      <LineId Id="1905" Count="0" />
+      <LineId Id="1910" Count="0" />
+      <LineId Id="1907" Count="0" />
+      <LineId Id="1809" Count="14" />
+      <LineId Id="1835" Count="17" />
+      <LineId Id="1913" Count="9" />
+      <LineId Id="1911" Count="0" />
+      <LineId Id="1853" Count="21" />
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
