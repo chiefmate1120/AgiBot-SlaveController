@@ -13,11 +13,11 @@ VAR
 	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.25)];
 	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
 	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
-	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(120.0), 200.0];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(55.0), 200.0];
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
-	m_maxGripCurrent:LREAL:=200.0;
+	m_maxGripCurrent:LREAL:=55.0;
 	
 	// PID for instrument joint position
 	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
