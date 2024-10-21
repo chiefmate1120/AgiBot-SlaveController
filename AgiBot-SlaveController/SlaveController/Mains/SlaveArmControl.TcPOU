@@ -200,9 +200,6 @@ ELSIF m_slaveRobot.m_endoScopeType = EndoscopeType_30  THEN
 	GVL_interactUI.g_scopeType := 30;
 END_IF
 
-//control software version
-GVL_interactUI.g_plcVersion:='1(1.0.0.1)';
-
 //arm state machine
 GVL_interactUI.g_armStateMachine.m_stateMachineArm1:=m_slaveStatus.m_armState[1];
 GVL_interactUI.g_armStateMachine.m_stateMachineArm2:=m_slaveStatus.m_armState[2];
@@ -339,7 +336,8 @@ END_FOR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="263" Count="94" />
+      <LineId Id="263" Count="5" />
+      <LineId Id="272" Count="85" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>
