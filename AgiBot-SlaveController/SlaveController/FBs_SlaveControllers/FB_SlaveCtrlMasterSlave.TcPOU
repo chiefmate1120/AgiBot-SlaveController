@@ -250,7 +250,7 @@ wristLimitSolve(i_slaveArm);
 
 // limit DH joints velocity 
 FOR i:=4 TO 6 DO 
-	m_simDHJointVel[i] := LIMIT(GVL_SlaveMotorParameters.g_maxJntVel[i], m_simDHJointVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
+	m_simDHJointVel[i] := LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i], m_simDHJointVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
 END_FOR
 
 // modify arm joints velocity to compensate wrist joint motion
