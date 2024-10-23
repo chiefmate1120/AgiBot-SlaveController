@@ -457,6 +457,15 @@
     <Compile Include="FBs_CartControlles\I_CartJointCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_CartCollisionDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_SetupCollisionDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_SlaveCollisionDetect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_RobotDynamics\FB_SlaveDynamic.TcPOU">
       <SubType>Code</SubType>
     </Compile>

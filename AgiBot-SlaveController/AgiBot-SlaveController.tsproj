@@ -1340,8 +1340,8 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}" AutoDeleteType="true">ST_SetupJointData</Name>
-			<BitSize>11200</BitSize>
+			<Name GUID="{83F75DB7-B21E-D5E1-6102-A24D8635F0A4}" AutoDeleteType="true">ST_SetupJointData</Name>
+			<BitSize>12800</BitSize>
 			<SubItem>
 				<Name>m_curMotorPos</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
@@ -1393,9 +1393,20 @@
 					<LBound>1</LBound>
 					<Elements>5</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ current joint position ]]></Comment>
+				<Comment><![CDATA[ current joint velocity ]]></Comment>
 				<BitSize>1600</BitSize>
 				<BitOffs>6400</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntVel</Name>
+				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>5</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ command joint velocity]]></Comment>
+				<BitSize>1600</BitSize>
+				<BitOffs>8000</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_rawJntCurrent</Name>
@@ -1406,7 +1417,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ raw joint current  ]]></Comment>
 				<BitSize>1600</BitSize>
-				<BitOffs>8000</BitOffs>
+				<BitOffs>9600</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntCurrent</Name>
@@ -1417,7 +1428,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ command joint current ]]></Comment>
 				<BitSize>1600</BitSize>
-				<BitOffs>9600</BitOffs>
+				<BitOffs>11200</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1886,7 +1897,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{E96ABC3C-F8C2-BA33-7B0A-014E0929F328}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{4133D31E-AF7E-765C-EA95-2F16754C6FED}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2278,7 +2289,7 @@
 						<Var>
 							<Name>RobotDynamics.m_setupJointData</Name>
 							<Comment><![CDATA[ setup joint5 position]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+							<Type GUID="{83F75DB7-B21E-D5E1-6102-A24D8635F0A4}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
 							<Name>RobotDynamics.m_instruInfo</Name>
@@ -2549,7 +2560,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
 							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+							<Type GUID="{83F75DB7-B21E-D5E1-6102-A24D8635F0A4}">ST_SetupJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
@@ -2625,6 +2636,11 @@
 							<Name>CartControl.m_cartRobot.m_slaveCart.m_cartJoints[8].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
 							<Type GUID="{CC09E5C4-B5B4-D7CD-B4FE-AA9C379B3C8A}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_cartRobot.m_slaveCart.m_collisionDetection.m_jnt5Current</Name>
+							<Comment><![CDATA[ joint5 Current]]></Comment>
+							<Type>INT</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartRobot.m_carHandChassisDriveUnlock</Name>
@@ -2770,7 +2786,7 @@
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
 							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+							<Type GUID="{83F75DB7-B21E-D5E1-6102-A24D8635F0A4}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterRobotData</Name>

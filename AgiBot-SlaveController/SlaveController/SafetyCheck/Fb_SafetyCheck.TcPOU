@@ -468,9 +468,7 @@ VAR
 	k:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-
-//驱动器状态监测、驱动器未连接
+        <ST><![CDATA[//驱动器状态监测、驱动器未连接
 FOR i:=1 TO g_setupJntNum BY 1 DO
 	m_checkDelay[i_ArmId].T_jntStatusErr[i](IN:= (i_safetyCheckVar[i_ArmId].m_setupDriverInput[i].m_statusWord=0 AND m_checkPermit[i_ArmId].m_jntStatusErr[i]), PT:=m_checkDelayTime.Ti_jntStatusErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_jntStatusErr[i].Q THEN
@@ -537,7 +535,7 @@ END_FOR
 //关节跟随误差过大
 FOR i:=1 TO g_setupJntNum BY 1 DO
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i](IN:= ABS(i_setupJointData.m_cmdJntPos[i_armId][i]- i_setupJointData.m_curJntPos[i_armId][i])>g_armMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i].Q THEN
+	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i].Q OR RobotDynamics.m_setupCollisionFlag[i_armId] THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2002, m_rcvLevel );
 	END_IF
 END_FOR
@@ -678,7 +676,7 @@ END_FOR
 //关节跟随误差过大
 FOR i:=1 TO g_sJntNum BY 1 DO
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_cmdJntPos[i_armId][i]- i_slaveJointData.m_curJntPos[i_armId][i])>g_armMaxJntFollowErr[i+g_setupJntNum]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
-	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum].Q THEN
+	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum].Q OR RobotDynamics.m_slaveCollisionFlag[i_armId] THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2002, m_rcvLevel );
 	END_IF
 END_FOR
@@ -1050,66 +1048,7 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="45" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.setupSafetyCheck">
-      <LineId Id="115" Count="0" />
-      <LineId Id="231" Count="3" />
-      <LineId Id="236" Count="0" />
-      <LineId Id="335" Count="0" />
-      <LineId Id="239" Count="0" />
-      <LineId Id="230" Count="0" />
-      <LineId Id="241" Count="0" />
-      <LineId Id="312" Count="0" />
-      <LineId Id="244" Count="4" />
-      <LineId Id="250" Count="1" />
-      <LineId Id="243" Count="0" />
-      <LineId Id="252" Count="5" />
-      <LineId Id="259" Count="1" />
-      <LineId Id="242" Count="0" />
-      <LineId Id="240" Count="0" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="27" Count="1" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="74" Count="5" />
-      <LineId Id="81" Count="1" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="338" Count="3" />
-      <LineId Id="343" Count="0" />
-      <LineId Id="345" Count="1" />
-      <LineId Id="337" Count="0" />
-      <LineId Id="382" Count="0" />
-      <LineId Id="384" Count="7" />
-      <LineId Id="383" Count="0" />
-      <LineId Id="95" Count="5" />
-      <LineId Id="102" Count="1" />
-      <LineId Id="94" Count="0" />
-      <LineId Id="105" Count="5" />
-      <LineId Id="112" Count="1" />
-      <LineId Id="104" Count="0" />
-      <LineId Id="116" Count="0" />
-      <LineId Id="327" Count="0" />
-      <LineId Id="117" Count="4" />
-      <LineId Id="123" Count="1" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="136" Count="3" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="143" Count="1" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="147" Count="2" />
-      <LineId Id="347" Count="0" />
-      <LineId Id="152" Count="0" />
-      <LineId Id="154" Count="1" />
-      <LineId Id="157" Count="1" />
-      <LineId Id="367" Count="5" />
-      <LineId Id="317" Count="0" />
-      <LineId Id="291" Count="0" />
-      <LineId Id="288" Count="0" />
-      <LineId Id="401" Count="4" />
-      <LineId Id="279" Count="0" />
-      <LineId Id="275" Count="0" />
-      <LineId Id="415" Count="5" />
-      <LineId Id="276" Count="0" />
+      <LineId Id="430" Count="129" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">

@@ -250,7 +250,7 @@ wristLimitSolve(i_slaveArm);
 
 // limit DH joints velocity 
 FOR i:=4 TO 6 DO 
-	m_simDHJointVel[i] := LIMIT(GVL_SlaveMotorParameters.g_maxJntVel[i], m_simDHJointVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
+	m_simDHJointVel[i] := LIMIT(-GVL_SlaveMotorParameters.g_maxJntVel[i], m_simDHJointVel[i], GVL_SlaveMotorParameters.g_maxJntVel[i]);
 END_FOR
 
 // modify arm joints velocity to compensate wrist joint motion
@@ -828,17 +828,7 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntPos">
-      <LineId Id="1711" Count="86" />
-      <LineId Id="1806" Count="2" />
-      <LineId Id="1902" Count="1" />
-      <LineId Id="1905" Count="0" />
-      <LineId Id="1910" Count="0" />
-      <LineId Id="1907" Count="0" />
-      <LineId Id="1809" Count="14" />
-      <LineId Id="1835" Count="17" />
-      <LineId Id="1913" Count="9" />
-      <LineId Id="1911" Count="0" />
-      <LineId Id="1853" Count="21" />
+      <LineId Id="2134" Count="160" />
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">

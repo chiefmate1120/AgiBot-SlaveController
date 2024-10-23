@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveCart
 VAR
@@ -38,7 +38,7 @@ VAR
 	m_standColumnEnableDetect : FB_cartJntEnableDetect;
 	m_standColumnDisenableDetect : FB_cartJntDisenableDetect;
 
-		// arm joint data
+	// arm joint data
 	m_curMotorPos :Vec8d;
 	m_curLinkPos :Vec8d;
 	m_curLinkSingle :Vec8d;
@@ -73,6 +73,10 @@ VAR
 	m_limitBufferForCtrl : LREAL := 0.01;
 	m_midJntPos : LREAL := 0.1;
 	enableTon : ARRAY [1..4] OF FB_TON;
+	
+	// collision detection
+	m_collisionDetection : FB_CartCollisionDetect;
+	m_collisionFlag :BOOL:=false;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -518,7 +522,10 @@ FOR i:=1 TO g_sJntNum DO
 	ELSIF DriverOPMode_csvMZ = i_cartCtrlCmd.m_jntOPMode[i] THEN
 		m_cartJoints[i].updateCmd(DriverOPMode_csvMZ,m_cmdJntPos[i],m_cmdJntTrq[i],m_cmdJntVel[i]);
 	END_IF
-END_FOR]]></ST>
+END_FOR
+
+// collision check
+m_collisionFlag := m_collisionDetection.run(m_rawJntCurrent, m_cmdJntPos, m_curJntVel);]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
@@ -695,22 +702,8 @@ END_FOR ]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.updateCmds">
-      <LineId Id="26" Count="2" />
-      <LineId Id="32" Count="2" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="36" Count="2" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="42" Count="1" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="50" Count="2" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="59" Count="1" />
-      <LineId Id="67" Count="1" />
-      <LineId Id="40" Count="1" />
+      <LineId Id="75" Count="30" />
+      <LineId Id="41" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCart.updateStatus">
       <LineId Id="24" Count="2" />

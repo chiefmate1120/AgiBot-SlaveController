@@ -155,6 +155,8 @@ FOR i:=1 TO g_sArmNum DO
 	r_slaveJointsData.m_curLinkPos[i]:=m_slaveArms[i].curLinkPos;
 	r_slaveJointsData.m_curJntPos[i]:=m_slaveArms[i].curJntPos;
 	r_slaveJointsData.m_curJntVel[i]:=m_slaveArms[i].curJntVel;
+	r_slaveJointsData.m_rawJntCurrent[i]:=m_slaveArms[i].rawJntCurrent;
+	r_slaveJointsData.m_cmdJntCurrent[i]:=m_slaveArms[i].cmdJntCurrent;
 	
 	// command info
 	// cartesion
@@ -673,7 +675,7 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.getStatus">
-      <LineId Id="186" Count="33" />
+      <LineId Id="233" Count="35" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.Init">
