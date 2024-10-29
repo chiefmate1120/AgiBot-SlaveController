@@ -680,6 +680,12 @@ IF m_jntLimitFlag[4] AND NOT(m_jntLimitFlag[5]) AND NOT(m_jntLimitFlag[6]) THEN
 	dsrWVel[2] := dsrWVel[2] - wristJaco[2,1] * m_simDHJointVel[4];
 	dsrWVel[3] := dsrWVel[3] - wristJaco[3,1] * m_simDHJointVel[4];
 	
+	//NOTE: special handle for roll limit. avoiding joint5/6 motion caused by roll limit
+	matTranspose(i_slaveArm.simCartPose.m_rot, matT);
+	matMultiVec(matT, dsrWVel, wVelLocal);
+	wVelLocal[3]:=0;
+	matMultiVec(i_slaveArm.simCartPose.m_rot, wVelLocal, dsrWVel);
+	
 	// solve
 	matMultiVec(partJacoPinv, dsrWVel, optJntVel);
 	m_simDHJointVel[5] :=optJntVel[1];
@@ -911,7 +917,11 @@ END_FOR
     <LineIds Name="FB_SlaveCtrlMasterSlave.wristLimitSolve">
       <LineId Id="3" Count="9" />
       <LineId Id="16" Count="36" />
-      <LineId Id="55" Count="31" />
+      <LineId Id="55" Count="10" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="243" Count="3" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="66" Count="20" />
       <LineId Id="89" Count="14" />
       <LineId Id="105" Count="1" />
       <LineId Id="108" Count="20" />

@@ -101,7 +101,7 @@ FOR i:=1 TO 4 DO
 	// integral compensated backslash angle
 	deltaAng:=i_cmdInstruJntPos[i]-m_instruLastCmdJntPos[i];
 	IF ABS(deltaAng)>m_jntMoveStep THEN
-		m_jntBacklash [i] := m_jntBacklash [i] +  2*m_jntMoveStep*sign(deltaAng);
+		m_jntBacklash [i] := m_jntBacklash [i] +  m_jntMoveStep*sign(deltaAng);
 		m_instruLastCmdJntPos[i] := i_cmdInstruJntPos[i];
 	END_IF
 END_FOR
