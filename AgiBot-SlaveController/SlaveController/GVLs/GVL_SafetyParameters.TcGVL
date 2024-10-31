@@ -11,6 +11,9 @@ VAR_GLOBAL CONSTANT
 	g_armMaxJntEncErr :vec13d:=[g_largeNum, g_largeNum, 0.010, 4(3*g_deg2Rad), 0.010, 5(10*g_deg2Rad)];
 	g_armMaxJntFollowErr :vec13d:=[g_largeNum, g_largeNum, 0.010, 4(5*g_deg2Rad), 0.010, 5(170*g_deg2Rad)];
 	
+	//soft stiff control error---1028
+	g_armMaxJntFollowErrSoftStiff :vec13d:=[g_largeNum, g_largeNum, 0.010, 2(5*g_deg2Rad),2(20*g_deg2Rad), 0.010, 5(170*g_deg2Rad)];
+	
 	//arm joint link encoder maximum and minimum values
 	g_maxLinkEnc : vec13di:=[16777215, 2(67108863), 10(16777215)];
 	g_minLinkEnc : vec13di:=[13(0)];

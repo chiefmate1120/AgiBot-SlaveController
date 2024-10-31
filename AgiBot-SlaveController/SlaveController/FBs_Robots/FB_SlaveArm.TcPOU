@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -90,6 +90,9 @@ VAR
 	// code execute time measure
 	m_codeTime : Profiler;
 	
+	//Stiffness adjustment flag---1028
+	m_stiffFlag:Vec8i;
+	m_stiffFlagLast:Vec8i;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -335,6 +338,42 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="controlParamUpdate" Id="{f6e7c2a9-3473-486a-8f84-4a257fe19392}">
+      <Declaration><![CDATA[METHOD controlParamUpdate : BOOL
+VAR_INPUT
+	i_jntId:INT;
+	i_stiffFlag:INT;
+END_VAR
+
+VAR
+	i :INT ;
+	currentRatioMotor2Jnt: LREAL;
+	g_posKp,g_posKd,g_posKi:LREAL;
+	g_posKiLimit,g_posCtrlLimit:LREAL; // define in current
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+i:=i_jntId;
+
+IF (i_stiffFlag=0) THEN
+	g_posKp:=GVL_slaveControlParameters.g_posKp[i];
+	g_posKd:=GVL_slaveControlParameters.g_posKd[i];
+	g_posKi:=GVL_slaveControlParameters.g_posKi[i];
+	g_posKiLimit:=GVL_slaveControlParameters.g_posKiLimit[i];
+	g_posCtrlLimit:=GVL_slaveControlParameters.g_posCtrlLimit[i];
+ELSE
+	g_posKp:=GVL_slaveControlParameters.g_posKpLowStiff[i];
+	g_posKd:=GVL_slaveControlParameters.g_posKdLowStiff[i];
+	g_posKi:=GVL_slaveControlParameters.g_posKiLowStiff[i];
+	g_posKiLimit:=GVL_slaveControlParameters.g_posKiLimitLowStiff[i];
+	g_posCtrlLimit:=GVL_slaveControlParameters.g_posCtrlLimitLowStiff[i];
+END_IF
+
+currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[i]*GVL_SlaveMotorParameters.g_motorReduction[i]/1000;
+m_jntPIDCtrl[i].init(g_slaveArmCtrlCycleTime,g_posKp,g_posKd,	g_posKi, g_posKiLimit* currentRatioMotor2Jnt,
+	g_posCtrlLimit*currentRatioMotor2Jnt);]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="curCartPose" Id="{d18be23c-99e5-435e-8688-90e0fb3be9ca}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY curCartPose : REFERENCE TO ST_Frame]]></Declaration>
       <Get Name="Get" Id="{013b03f6-adb7-4855-b0fe-353f77f67094}">
@@ -980,6 +1019,15 @@ updateSimStatus();
 // enable/disable joints
 enable(i_armCtrlCmd.m_jntEnableFlag);
 
+//Adjust joint stiffness---1028
+m_stiffFlag:=i_armCtrlCmd.m_stiffFlag;
+FOR i:=1 TO g_sJntNum DO
+	IF (m_stiffFlagLast[i]<>m_stiffFlag[i]) THEN
+		controlParamUpdate(i_jntId:= i, i_stiffFlag:= m_stiffFlag[i]);
+	END_IF
+END_FOR
+m_stiffFlagLast:=m_stiffFlag;
+
 m_codeTime(START:=TRUE, RESET:=TRUE);
 // position/torque control
 FOR i:=1 TO g_sJntNum DO 
@@ -1144,6 +1192,19 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
     <LineIds Name="FB_SlaveArm.cmdJntVel.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveArm.controlParamUpdate">
+      <LineId Id="7" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="41" Count="3" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="45" Count="3" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveArm.curCartPose.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1276,6 +1337,9 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
       <LineId Id="52" Count="0" />
       <LineId Id="43" Count="0" />
       <LineId Id="42" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="129" Count="6" />
+      <LineId Id="127" Count="0" />
       <LineId Id="85" Count="0" />
       <LineId Id="53" Count="0" />
       <LineId Id="36" Count="0" />

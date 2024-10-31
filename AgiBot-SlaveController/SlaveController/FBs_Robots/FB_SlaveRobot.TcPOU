@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveRobot
 VAR_INPUT
@@ -79,6 +79,9 @@ VAR
 	m_armCtrl :ARRAY[1..g_sArmNum] OF I_SlaveArmCtrl;
 	m_armCtrlCmds :ARRAY[1..g_sArmNum] OF ST_SlaveArmCtrlCmds;
 
+	//soft stiff control
+	m_stiffChange:BOOL:=FALSE;	
+	m_stiffChanged:ARRAY[1..g_sArmNum] OF BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -86,6 +89,42 @@ END_VAR
 
 ]]></ST>
     </Implementation>
+    <Method Name="adjustJntStiff" Id="{bc6f9c2f-3719-4a2a-8c0d-b1b6b4a13c3d}">
+      <Declaration><![CDATA[METHOD adjustJntStiff : BOOL
+VAR_INPUT
+	i_armId:INT;
+END_VAR
+
+VAR
+	i:INT;
+	
+	m_Standard:Vec8i:=[0,0,0,0,0,0,0,0];
+	m_Soft:Vec8i:=[1,1,0,0,0,0,0,0];
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Determine if any surgical arm has entered the master-slave state
+IF (m_slaveArmState[1]=SlaveArmState_MasterSlave) OR (m_slaveArmState[2]=SlaveArmState_MasterSlave) OR (m_slaveArmState[3]=SlaveArmState_MasterSlave) OR (m_slaveArmState[4]=SlaveArmState_MasterSlave)THEN
+	m_stiffChange:=TRUE;
+ELSE
+	m_stiffChange:=FALSE;
+END_IF
+
+//In the master-slave state, the stiffness of the backup arm should be reduced
+IF (m_stiffChange=TRUE) AND (m_slaveArmState[i_armId]=SlaveArmState_PanelReady) AND (m_instrumentMountedFlag[i_armId]=FALSE)THEN
+	IF (m_stiffChanged[i_armId]=FALSE) THEN
+		m_armCtrlCmds[i_armId].m_stiffFlag:=m_Soft;
+		m_stiffChanged[i_armId]:=TRUE;
+	END_IF
+END_IF
+
+//After exiting the master-slave mode, restore the stiffness of the backup arm
+IF (m_stiffChange=FALSE) AND (m_stiffChanged[i_armId]=TRUE) THEN
+	m_armCtrlCmds[i_armId].m_stiffFlag:=m_Standard;
+	m_stiffChanged[i_armId]:=FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="controllerTransit" Id="{8f288ee3-c1dd-4604-a493-d121fbcd6b66}">
       <Declaration><![CDATA[METHOD PROTECTED controllerTransit : BOOL
 VAR_INPUT
@@ -230,7 +269,7 @@ VAR_IN_OUT CONSTANT
 	i_slaveInputDataPool:ST_SlaveInputDataPool;
 END_VAR
 VAR
-	i:INT;
+	i:INT;	
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motionScale := i_slaveInputDataPool.m_masterStatus.m_motionScale;
@@ -276,6 +315,11 @@ FOR i:=1 TO g_sArmNum DO
 	m_armCtrl[i].run(m_endoscopePose, i_slaveInputDataPool.m_MasterStatus,
 					i_slaveInputDataPool.m_setupStatus, m_SlaveArms[i],m_armCtrlCmds[i]);
 
+	//Adjust joint stiffness---1028
+	IF (g_allowLowStiff=TRUE) THEN
+		adjustJntStiff(i_armId:= i);
+	END_IF	
+	
 	// update commands to drivers
 	m_slaveArms[i].updateCmds(m_armCtrlCmds[i]);
 END_FOR
@@ -666,6 +710,25 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="9" Count="0" />
       <LineId Id="33" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveRobot.adjustJntStiff">
+      <LineId Id="30" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveRobot.controllerTransit">
       <LineId Id="21" Count="0" />
       <LineId Id="6" Count="12" />
@@ -706,7 +769,11 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.run">
-      <LineId Id="238" Count="46" />
+      <LineId Id="238" Count="41" />
+      <LineId Id="291" Count="3" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="281" Count="3" />
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">

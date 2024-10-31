@@ -17,7 +17,7 @@ STRUCT
 	m_cmdCartPose : ST_Frame;
 	m_cmdCartTwist : Vec6d;
 	m_FFJntTrq :Vec8d:=g_zeroVec8d;
-	
+	m_stiffFlag:Vec8i; //---1028
 END_STRUCT
 END_TYPE
 ]]></Declaration>

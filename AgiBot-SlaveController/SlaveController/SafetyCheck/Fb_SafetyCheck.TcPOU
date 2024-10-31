@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="Fb_SafetyCheck" Id="{d7e5b419-2971-4dae-96a7-39fe3a1a6245}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK Fb_SafetyCheck
 VAR_INPUT
@@ -37,6 +37,8 @@ VAR
 	m_PromptFlag:ARRAY[1..g_maxNum,1..30] OF UINT;
 	m_deleteCode:UDINT;
 	
+	//joint control error
+	m_followErrLimit:vec13d:=[g_largeNum, g_largeNum, 0.010, 4(5*g_deg2Rad), 0.010, 5(170*g_deg2Rad)];
 END_VAR
 
 
@@ -675,12 +677,27 @@ FOR i:=1 TO g_sJntNum BY 1 DO
 END_FOR
 
 
-//关节跟随误差过大
+//关节跟随误差过大---1028
 FOR i:=1 TO g_sJntNum BY 1 DO
+	(*
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_cmdJntPos[i_armId][i]- i_slaveJointData.m_curJntPos[i_armId][i])>g_armMaxJntFollowErr[i+g_setupJntNum]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum].Q THEN
 		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2002, m_rcvLevel );
 	END_IF
+	*)
+	
+	//update the control error limit
+	IF (SlaveArmControl.m_slaveRobot.m_stiffChanged[i_ArmId]=TRUE) THEN
+		m_followErrLimit:=g_armMaxJntFollowErrSoftStiff;
+	ELSE
+		m_followErrLimit:=g_armMaxJntFollowErr;
+	END_IF
+	
+	//check
+	m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum](IN:= ABS(i_slaveJointData.m_cmdJntPos[i_armId][i]- i_slaveJointData.m_curJntPos[i_armId][i])>m_followErrLimit[i+g_setupJntNum]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i+g_setupJntNum], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
+	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i+g_setupJntNum].Q THEN
+		errCodeAssign(i_ArmId, i_ArmId+3,  0, i+g_setupJntNum, 16#2002, m_rcvLevel );
+	END_IF	
 END_FOR
 
 
@@ -1113,7 +1130,13 @@ vecB[0]:=i_newData;]]></ST>
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.slaveSafetyCheck">
-      <LineId Id="894" Count="144" />
+      <LineId Id="894" Count="65" />
+      <LineId Id="1048" Count="0" />
+      <LineId Id="960" Count="3" />
+      <LineId Id="1044" Count="1" />
+      <LineId Id="1049" Count="10" />
+      <LineId Id="1046" Count="0" />
+      <LineId Id="964" Count="74" />
       <LineId Id="145" Count="0" />
     </LineIds>
     <LineIds Name="Fb_SafetyCheck.systemSafetyCheck">
