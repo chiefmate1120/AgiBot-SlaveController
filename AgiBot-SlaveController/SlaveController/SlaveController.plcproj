@@ -858,6 +858,12 @@
     <Compile Include="SafetyCheck\FB_Writer.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sandbox\FB_SetupArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_SlaveArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_bak1.TcPOU">
       <SubType>Code</SubType>
     </Compile>
