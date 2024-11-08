@@ -323,7 +323,7 @@ CASE m_instruMountStatus OF
 		END_FOR
 		m_instruMountStatus :=3;
 	
-	3: // make fingers is closed
+	3: // move to zero position
 		m_instruMountStatus :=4;
 		FOR i:=1 TO 4 DO 
 			m_jntPosErr[i]:=m_targetMountPos[i+3]-curJntPos[i+3];
@@ -337,14 +337,8 @@ CASE m_instruMountStatus OF
 		// record current joint position as offset for instrument
 		i_slaveArm.instrument.initInstruJntPos(i_slaveArm.curJntPos);
 		
-		IF m_instruMountStatus =4 AND NOT( i_slaveArm.instrument.m_isSingleFinger) THEN
-			m_targetMountPos[4] := curJntPos[4]+g_gripperCloseAng;
-			m_targetMountPos[5] := curJntPos[5]+g_gripperCloseAng;
-		END_IF
-		
 	4:
-		m_isFinished :=  ABS(m_targetMountPos[4]-curJntPos[4]) < GVL_SlaveControlParameters.g_jntCtrlAngTolLow AND
-			 ABS(m_targetMountPos[5]-curJntPos[5]) < GVL_SlaveControlParameters.g_jntCtrlAngTolLow;
+		m_isFinished :=  TRUE;
 
 END_CASE
 
@@ -483,8 +477,9 @@ END_FOR]]></ST>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
       <LineId Id="307" Count="20" />
       <LineId Id="329" Count="56" />
-      <LineId Id="411" Count="2" />
-      <LineId Id="386" Count="16" />
+      <LineId Id="411" Count="1" />
+      <LineId Id="390" Count="2" />
+      <LineId Id="394" Count="8" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountUltraKnife">

@@ -52,7 +52,7 @@ VAR_GLOBAL CONSTANT
 	g_instruYawBacklash :ARRAY[1..g_instruTypesNum] OF LREAL :=[4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad, 4.0*g_deg2rad,  8.0*g_deg2rad,  8.0*g_deg2rad,  0 , 0,  0 ];
 	g_instruPitchBacklash :ARRAY[1..g_instruTypesNum] OF LREAL :=[3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad, 3.0*g_deg2rad,  3.0*g_deg2rad,  3*g_deg2rad,  0 , 0,  0 ];
 	g_instruBacklashDir: ARRAY[1..g_instruTypesNum] OF INT :=[-1, -1, -1, 0, 0];
-	g_gripperCloseAng :LREAL := 2.0*g_deg2rad;
+	g_gripperCloseAng :ARRAY[1..g_instruTypesNum] OF LREAL :=[2.0*g_deg2rad, 4(1.0*g_deg2rad), 5*g_deg2rad, 2.0*g_deg2rad, 2.0*g_deg2rad, 6(0.0)];
 	
 	// instrument grip yaw compensation
 	g_instruGripYawCompAng :ARRAY[1..4] OF LREAL := [ 2*g_deg2rad,  4*g_deg2rad,  6*g_deg2rad,  8*g_deg2rad];

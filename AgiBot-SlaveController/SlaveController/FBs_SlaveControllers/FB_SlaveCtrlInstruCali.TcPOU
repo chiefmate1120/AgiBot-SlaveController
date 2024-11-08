@@ -33,7 +33,7 @@ VAR
 	m_jointMounted :ARRAY[1..8] OF BOOL := [5(FALSE)];
 	
 	// instrument mount motion range
-	m_mountMotionAng :LREAL :=pi;
+	m_mountMotionAng :LREAL :=30*g_deg2Rad;
 	
 	// command mount motion
 	m_targetMountPos :Vec8d;
@@ -342,105 +342,169 @@ END_VAR]]></Declaration>
         <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
 
 CASE m_yawJntCaliStatus OF
-	// joint4 roll clockwise
+	// buckle joint4 and joint5 by moving toward limit
 	0:
 		//buckle panel with instrument
 		// check if buckled 
-		IF i_slaveArm.filtJntCurrent[4]< -m_maxJntCurrent THEN 
+		IF i_slaveArm.filtJntCurrent[4]<- m_maxJntCurrent THEN 
 			m_jointMounted[4]:=TRUE;
 			m_targetMountPos[4]:=curJntPos[4];
 			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
 		END_IF
+		IF i_slaveArm.filtJntCurrent[5]<- m_maxJntCurrent THEN 
+			m_jointMounted[5]:=TRUE;
+			m_targetMountPos[5]:=curJntPos[5];
+			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+		END_IF
 		
-		// transit
-		IF m_jointMounted[4] THEN
-			m_jntLimitPos1 := curJntPos[4];
-			m_yawJntCaliStatus := 1;
-			m_jointMounted[4]:=FALSE;
 		// set target joint position
-		ELSE
+		IF FALSE = m_jointMounted[4] THEN
 			m_targetMountPos[4]:=curJntPos[4]-m_mountMotionAng;
 		END_IF
-	
-	// joint5 roll clockwise
+		IF FALSE = m_jointMounted[5] THEN
+			m_targetMountPos[5]:=curJntPos[5]-m_mountMotionAng;
+		END_IF
+
+		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+			m_yawJntCaliStatus := 1;
+			m_jointMounted[4]:=FALSE;
+			m_jointMounted[5]:=FALSE;
+		END_IF
+	// close finger
 	1:
 		//buckle panel with instrument
 		// check if buckled 
+		IF i_slaveArm.filtJntCurrent[4]> m_maxJntCurrent THEN 
+			m_jointMounted[4]:=TRUE;
+			m_targetMountPos[4]:=curJntPos[4];
+			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+		END_IF
 		IF i_slaveArm.filtJntCurrent[5]> m_maxJntCurrent THEN 
 			m_jointMounted[5]:=TRUE;
 			m_targetMountPos[5]:=curJntPos[5];
 			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
 		END_IF
 		
-		// transit
-		IF m_jointMounted[5] THEN
-			m_jntLimitPos2 := curJntPos[5];
-			m_yawJntCaliStatus := 2;
-			m_jointMounted[5]:=FALSE;
 		// set target joint position
-		ELSE
+		IF FALSE = m_jointMounted[4] THEN
+			m_targetMountPos[4]:=curJntPos[4]+m_mountMotionAng;
+		END_IF
+		IF FALSE = m_jointMounted[5] THEN
 			m_targetMountPos[5]:=curJntPos[5]+m_mountMotionAng;
 		END_IF
 
-	// joint5 roll anticlockwise
-	2:
-		IF i_slaveArm.filtJntCurrent[5]< -m_maxJntCurrent THEN 
-			m_jointMounted[5]:=TRUE;
-			m_targetMountPos[5]:=curJntPos[5];
-			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
-		END_IF	
-		
-		// transit
-		IF m_jointMounted[5] THEN
-			m_jntLimitPos4 := curJntPos[5];
-			m_yawJntCaliStatus :=3;
-			m_jointMounted[5]:=FALSE;
-		ELSE
-		// set target joint position
-			m_targetMountPos[5]:=curJntPos[5]-m_mountMotionAng;
-		END_IF
-	
-		// joint4 roll anticlockwise
-	3:
-		IF i_slaveArm.filtJntCurrent[4] > m_maxJntCurrent THEN 
-			m_jointMounted[4]:=TRUE;
-			m_targetMountPos[4]:=curJntPos[4];
-			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
-		END_IF	
-		
-		// transit
-		IF m_jointMounted[4] THEN
-			m_jntLimitPos3 := curJntPos[4];
-			m_yawJntCaliStatus :=4;
+		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+			m_yawJntCaliStatus := 2;
 			m_jointMounted[4]:=FALSE;
-		ELSE
-		// set target joint position
-			m_targetMountPos[4]:=curJntPos[4]+m_mountMotionAng;
+			m_jointMounted[5]:=FALSE;
 		END_IF
 		
-	4:// calculate center/calibarted position
+	2:// move joint5 to open gripper
+		m_targetMountPos[4] := curJntPos[4]-g_instruMaxGripAngle[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
+		m_targetMountPos[5] := curJntPos[5]-g_instruMaxGripAngle[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
+		m_yawJntCaliStatus := 3;
+
+	3:
+		IF ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
+			m_yawJntCaliStatus := 4;
+		END_IF
+			
+	// roll clockwise to reach limit
+	4:
+		IF NOT(m_jointMounted[4]) THEN  
+			// set target joint position
+			m_targetMountPos[4]:=curJntPos[4]-m_mountMotionAng;
+			// check if reach limit 
+			IF i_slaveArm.filtJntCurrent[4]< -m_maxJntCurrent THEN 
+				m_jointMounted[4]:=TRUE;
+				m_jntLimitPos1 := curJntPos[4];
+				m_targetMountPos[4]:=curJntPos[4];
+				m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			END_IF
+		END_IF
+		IF NOT(m_jointMounted[5]) THEN 
+			// set target joint position
+			m_targetMountPos[5]:=curJntPos[5]+m_mountMotionAng;
+			// check if reach limit 
+			IF i_slaveArm.filtJntCurrent[5]> m_maxJntCurrent THEN 
+				m_jointMounted[5]:=TRUE;
+				m_jntLimitPos2 := curJntPos[5];
+				m_targetMountPos[5]:=curJntPos[5];
+				m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			END_IF	
+		END_IF
+		
+		// transit
+		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+			m_yawJntCaliStatus := 5;
+			m_jointMounted[4]:=FALSE;
+			m_jointMounted[5]:= FALSE;
+		END_IF
+		
+	5:// move joint5 to open gripper
+		m_targetMountPos[5] := curJntPos[5]-m_mountMotionAng;
+		m_yawJntCaliStatus := 6;
+
+	6:
+		IF ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
+			m_yawJntCaliStatus := 7;
+		END_IF
+
+	// roll anticlockwise to reach limit
+	7:
+		IF NOT(m_jointMounted[4]) THEN  
+			// set target joint position
+			m_targetMountPos[4]:=curJntPos[4]+m_mountMotionAng;
+			// check if reach limit 
+			IF i_slaveArm.filtJntCurrent[4]>m_maxJntCurrent THEN 
+				m_jointMounted[4]:=TRUE;
+				m_jntLimitPos3 := curJntPos[4];
+				m_targetMountPos[4]:=curJntPos[4];
+				m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			END_IF
+		END_IF
+		IF NOT(m_jointMounted[5]) THEN 
+			// set target joint position
+			m_targetMountPos[5]:=curJntPos[5]-m_mountMotionAng;
+			// check if reach limit 
+			IF i_slaveArm.filtJntCurrent[5]<- m_maxJntCurrent THEN 
+				m_jointMounted[5]:=TRUE;
+				m_jntLimitPos4 := curJntPos[5];
+				m_targetMountPos[5]:=curJntPos[5];
+				m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			END_IF	
+		END_IF
+		
+		// transit
+		IF m_jointMounted[4] AND m_jointMounted[5] THEN
+			m_yawJntCaliStatus := 8;
+			m_jointMounted[4]:=FALSE;
+			m_jointMounted[5]:= FALSE;
+		END_IF
+		
+	8:// calculate center/calibarted position
 		m_targetMountPos[4] := (m_jntLimitPos1 + m_jntLimitPos3)/2-g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
 		m_targetMountPos[5] := (m_jntLimitPos2 + m_jntLimitPos4)/2+g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
-		m_yawJntCaliStatus := 5;
+		m_yawJntCaliStatus := 9;
 
-	5:
+	9:
 		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
 			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
 			m_targetMountPos[4] := curJntPos[4]+g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx];
-			m_yawJntCaliStatus := 6;
+			m_yawJntCaliStatus := 10;
 		END_IF
 		
 	// close finger	
-	6:
+	10:
 		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
 			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
-				m_targetMountPos[4] := curJntPos[4]+g_gripperCloseAng;
-				m_targetMountPos[5] := curJntPos[5]+g_gripperCloseAng;
-			m_yawJntCaliStatus := 7;
+				m_targetMountPos[4] := curJntPos[4]+g_gripperCloseAng[i_slaveArm.instrument.m_instruTypeIdx];
+				m_targetMountPos[5] := curJntPos[5]+g_gripperCloseAng[i_slaveArm.instrument.m_instruTypeIdx];
+			m_yawJntCaliStatus := 11;
 		END_IF
 		
 
-	7:
+	11:
 		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
 			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
 			m_yawJntCaliStatus := -1;
@@ -542,37 +606,7 @@ m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cm
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_gripper">
-      <LineId Id="357" Count="11" />
-      <LineId Id="374" Count="0" />
-      <LineId Id="382" Count="2" />
-      <LineId Id="386" Count="1" />
-      <LineId Id="500" Count="0" />
-      <LineId Id="498" Count="1" />
-      <LineId Id="389" Count="0" />
-      <LineId Id="466" Count="0" />
-      <LineId Id="468" Count="3" />
-      <LineId Id="477" Count="5" />
-      <LineId Id="490" Count="1" />
-      <LineId Id="493" Count="1" />
-      <LineId Id="496" Count="0" />
-      <LineId Id="503" Count="0" />
-      <LineId Id="501" Count="1" />
-      <LineId Id="467" Count="0" />
-      <LineId Id="390" Count="2" />
-      <LineId Id="398" Count="4" />
-      <LineId Id="411" Count="0" />
-      <LineId Id="524" Count="0" />
-      <LineId Id="412" Count="0" />
-      <LineId Id="414" Count="1" />
-      <LineId Id="417" Count="0" />
-      <LineId Id="521" Count="0" />
-      <LineId Id="523" Count="0" />
-      <LineId Id="522" Count="0" />
-      <LineId Id="418" Count="0" />
-      <LineId Id="525" Count="0" />
-      <LineId Id="527" Count="15" />
-      <LineId Id="526" Count="0" />
-      <LineId Id="419" Count="36" />
+      <LineId Id="701" Count="178" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
