@@ -281,7 +281,7 @@ FOR i:=1 TO 3 DO
 	jntDynaLB := MIN( 0, (GVL_SlaveMotorParameters.g_minDHJntPos[i] - i_slaveArm.simDHJntPos[i])/g_slaveArmCtrlCycleTime);
 	
 	IF m_simDHJointVel[i] >= jntDynaUB OR m_simDHJointVel[i]<= jntDynaLB THEN
-		m_simDHJointVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
+		armDHJntVel[i]:=LIMIT(jntDynaLB, m_simDHJointVel[i], jntDynaUB);
 		m_reachMacroJntLimit:=TRUE;
 	END_IF
 END_FOR
