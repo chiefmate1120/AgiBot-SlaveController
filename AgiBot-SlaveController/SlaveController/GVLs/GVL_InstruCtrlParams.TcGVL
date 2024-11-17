@@ -13,6 +13,7 @@ VAR_GLOBAL CONSTANT
 	
 	// instrument name
 	g_instruNullName :STRING := 'NULL';
+	g_instruTotalLife : ARRAY[1..g_instruTypesNum] OF UINT := [11(20),100,1,1];
 	g_instruNameString:ARRAY[1..g_instruTypesNum] OF STRING:=['Cadiere Forceps','Large Needle Driver','Mega SutureCut Needle Driver','Large SutureCut Needle Driver',	
 															'RoundTip Scissors','Prograsp',	'Maryland Bipolar Forceps','Fenestrated Bipolar Forceps', 'Monopolar Curved Scissors',
 															'Permanent Cautery Hook','Permanent Cautery Spatula','Camera','Ultrasonic Scalpel 45cm','Ultrasonic Scalpel 55cm'];

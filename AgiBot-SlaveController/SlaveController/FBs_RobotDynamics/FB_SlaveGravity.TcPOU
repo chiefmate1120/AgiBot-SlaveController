@@ -130,8 +130,7 @@ FOR i:=1 TO 3 DO
 	FOR j:=1 TO 5 DO
 		run[i]:=run[i]+regMat[i,j]*m_armParams[j];
 	END_FOR
-END_FOR
-]]></ST>
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveGravity">
@@ -168,7 +167,6 @@ END_FOR
       <LineId Id="31" Count="11" />
       <LineId Id="49" Count="7" />
       <LineId Id="70" Count="0" />
-      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

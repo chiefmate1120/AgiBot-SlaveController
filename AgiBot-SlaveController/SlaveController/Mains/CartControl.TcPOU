@@ -22,7 +22,7 @@ VAR
 	
 	m_workHeartTon0 : TON;
 	m_workHeartTon1 : TON;
-	m_dumpEnergy : UINT:=51;
+	
 	m_cartInSterileStateTon :Ton;
 	m_cartInSterileState :BOOL;
 	//Aseptic sleeve is installed flag
@@ -85,7 +85,6 @@ GVL_interactUI.g_heightLimit :=LREAL_TO_UINT (m_cartRobot.m_slaveCart.curJntPos[
 m_cartDataPool.m_UIData.m_surgicalSite := GVL_interactUI.g_surgicalSite;
 m_cartDataPool.m_UIData.m_surgicalLocation := GVL_interactUI.g_surgicalLocation;
 
-m_dumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
 ]]></ST>
       </Implementation>
     </Method>
@@ -138,7 +137,7 @@ GVL_interactUI.g_cartOperation.m_scopeInstalled := BOOL_TO_UINT(m_cartDataPool.m
 
 FOR i := 1 TO 4 BY 1 DO
 	IF SlaveArmControl.m_slaveRobot.m_slaveArms[i].instrument.Instrutype<>InstruType_endoscope THEN
-		IF SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i] AND SlaveArmControl.m_slaveRobot.m_endoscopeMounted THEN
+		IF SlaveArmControl.m_slaveRobot.m_instrumentMountedFlag[i] AND SlaveArmControl.m_slaveRobot.m_endoscopeMounted AND GVL_interactUI.g_cartOperation.m_setupSterileState = 1 THEN
 			GVL_interactUI.g_cartOperation.m_inSurgicalAllowed := 1;
 			EXIT;
 		ELSE
@@ -171,14 +170,11 @@ END_IF
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIInputProcess">
-      <LineId Id="82" Count="20" />
+      <LineId Id="110" Count="19" />
       <LineId Id="68" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIOutputProcess">
-      <LineId Id="203" Count="15" />
-      <LineId Id="220" Count="2" />
-      <LineId Id="275" Count="0" />
-      <LineId Id="224" Count="45" />
+      <LineId Id="281" Count="65" />
       <LineId Id="95" Count="0" />
     </LineIds>
   </POU>

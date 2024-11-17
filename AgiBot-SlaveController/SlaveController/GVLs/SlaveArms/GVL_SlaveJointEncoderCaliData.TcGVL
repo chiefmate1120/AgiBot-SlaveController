@@ -40,6 +40,7 @@ VAR_GLOBAL CONSTANT
 		1006,	1007,	1008,	2(1009),	3(1010),
 		1006,	1007,	1008,	2(1009),	3(1010),
 		1006,	1007,	1008,	2(1009),	3(1010)];
+	g_slaveLEDNetPort:ARRAY[1..g_sArmNum] OF UINT :=[4(1004)];
 		
 //################ DO NOT modify parameters below ###########################
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position

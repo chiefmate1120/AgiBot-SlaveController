@@ -269,7 +269,7 @@ CASE m_instruMountStatus OF
 		//buckle panel with instrument
 		FOR i:=1 TO 4 DO
 			// check if buckled 
-			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent[i] THEN 
+			IF ABS(i_slaveArm.filtJntCurrent[i+3])> m_maxJntCurrent[i] AND ABS(i_slaveArm.curJntVel[i+3])<1.0*g_deg2Rad THEN 
 				m_jointMounted[i]:=TRUE;
 				m_targetMountPos[i+3]:=curJntPos[i+3];
 				m_jntOTG[i].init(m_targetMountPos[i+3], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
@@ -333,11 +333,11 @@ CASE m_instruMountStatus OF
 				EXIT;
 			END_IF
 		END_FOR
-		
+	
+	4:
 		// record current joint position as offset for instrument
 		i_slaveArm.instrument.initInstruJntPos(i_slaveArm.curJntPos);
 		
-	4:
 		m_isFinished :=  TRUE;
 
 END_CASE
@@ -476,9 +476,12 @@ END_FOR]]></ST>
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountInstrument">
       <LineId Id="307" Count="20" />
-      <LineId Id="329" Count="56" />
-      <LineId Id="411" Count="1" />
-      <LineId Id="390" Count="2" />
+      <LineId Id="329" Count="55" />
+      <LineId Id="390" Count="1" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="424" Count="0" />
+      <LineId Id="392" Count="0" />
       <LineId Id="394" Count="8" />
       <LineId Id="5" Count="0" />
     </LineIds>

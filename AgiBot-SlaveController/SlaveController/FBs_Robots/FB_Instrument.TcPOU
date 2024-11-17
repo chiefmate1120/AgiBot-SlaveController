@@ -33,6 +33,9 @@ VAR
 	
 	//Joint port number
 	m_jointInstruAddr:UINT;	
+	
+	//LED port number
+	m_LEDAddr:UINT;	
 
 	//Arm LED Prot	
 	m_LEDPortAddr:UINT;		
@@ -79,7 +82,7 @@ VAR
 	m_signL1,m_signL2,m_signL3:UDINT;
 	m_UsageReadResult:ULINT;
 	m_InstruUsageToLED:ULINT;
-	m_InstruSeriesRecord:ARRAY [1..100] OF ULINT;
+	
 	m_HaveRecord:BOOL;
 	m_SdoWrite:FB_EcCoESdoWrite;
 	m_SdoRead:FB_EcCoESdoRead;
@@ -128,6 +131,7 @@ END_IF
 m_instruType := m_onChipData.m_InstruID;
 m_instruName :=GVL_InstruCtrlParams.g_instruNameString[m_instruTypeIdx];
 m_instruNameCH := GVL_InstruCtrlParams.g_instruNameStringCH[m_instruTypeIdx];
+m_onChipData.m_InstrumaxUsageCounts := GVL_InstruCtrlParams.g_instruTotalLife[m_instruTypeIdx];
 
 // check if instrument has one finger
 m_isSingleFinger :=  (m_instruType = InstruType_CauteryHook OR  m_instruType = InstruType_CauterySpatula );
@@ -262,6 +266,7 @@ END_VAR
         <ST><![CDATA[//Update the IP and port number of the operating arm
 m_armNetId:=GVL_SlaveJointEncoderCaliData.g_slaveArmNetID[armIdx];
 m_jointInstruAddr:=GVL_SlaveJointEncoderCaliData.g_slaveJointNetPort[armIdx,4];
+m_LEDAddr := GVL_SlaveJointEncoderCaliData.g_slaveLEDNetPort[armIdx];
 
 // init joint motion range
 FOR i:=1 TO 3 DO
@@ -842,23 +847,25 @@ CASE m_Step OF
 		
 	100://将器械使用次数写入LED
 		m_Value:=ULINT_TO_UDINT(16#FFFF AND m_InstruUsageToLED) ;
-		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= 1004, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_LEDAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
 			m_Step:=110;
 		END_IF
 		
-	110://处理当器械使用次数达到上限后、在同一场手术中还能使用
-		IF m_onChipData.m_InstruusageCounts=m_onChipData.m_InstrumaxUsageCounts THEN		
+	110:
+		// check instrument type and relative data
+		m_onChipData.m_InstruReadSucceed:=checkInstruType();
+		//处理当器械使用次数达到上限后、在同一场手术中还能使用
+		IF m_onChipData.m_InstruusageCounts=(m_onChipData.m_InstrumaxUsageCounts -1) THEN		
 			//TODO: check this part
-			m_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_onChipData.m_InstruusageCounts, i_ArrayData:= m_InstruSeriesRecord);
+			GVL_interactUI.g_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_onChipData.m_InstruseriesNum, i_ArrayData:= GVL_interactUI.g_InstruSeriesRecord);
 		END_IF
 		m_Step:=120;
 		
 		
 	120://结果诊断
 		m_onChipData.m_ErrorID:=0;
-		m_onChipData.m_InstruReadSucceed:=checkInstruType();
 		IF NOT(m_onChipData.m_InstruReadSucceed) THEN
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=1;
@@ -868,12 +875,12 @@ CASE m_Step OF
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=3;
 			
-		ELSIF m_onChipData.m_InstruusageCounts>m_onChipData.m_InstrumaxUsageCounts AND m_onChipData.m_InstruID<>20 THEN
-			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=m_InstruSeriesRecord );
+		ELSIF m_onChipData.m_InstruusageCounts>(m_onChipData.m_InstrumaxUsageCounts -1) AND m_onChipData.m_InstruID<>InstruType_Endoscope THEN
+			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=GVL_interactUI.g_InstruSeriesRecord );
 			IF m_HaveRecord THEN
 				//
 			ELSE
-				m_onChipData.m_InstruReadSucceed := FALSE;
+				m_onChipData.m_InstruReadSucceed := FALSE; 
 				m_onChipData.m_Error:=TRUE;
 				m_onChipData.m_ErrorID:=2;
 			END_IF
@@ -924,7 +931,7 @@ m_nextEndoscopePosture :=EndoscopePosture_HeadDown;
 //arm LED reset
 IF m_resetArmLEDFlag THEN
 	m_Value:=0 ;
-	m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= 1004, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+	m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_LEDAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 END_IF
 IF NOT m_SdoWrite.bBusy THEN
 	m_SdoWrite(bExecute:=FALSE);
@@ -989,8 +996,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-writeNumOfUseToChip := FALSE;
+        <ST><![CDATA[writeNumOfUseToChip := FALSE;
 m_writeLDP(CLK:= startFlag, Q=> );
 m_ReadNumDelay(IN:= m_useNumStep = 10, PT:= m_DealyTime, Q=> , ET=> );
 IF m_writeLDP.Q THEN
@@ -1028,7 +1034,7 @@ CASE m_useNumStep OF
 		
 	40: 
 		m_Value:=ULINT_TO_UDINT( m_useNumSendToLED) ;
-		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= 1004, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
+		m_SdoWrite(sNetId:= m_ArmNetId, nSlaveAddr:= m_LEDAddr, nSubIndex:= 06, nIndex:= 16#6090, pSrcBuf:= ADR(m_Value), cbBufLen:= SIZEOF(m_Value), bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> );
 		IF NOT m_SdoWrite.bBusy THEN
 			m_SdoWrite(bExecute:=FALSE);
 			m_onChipData.m_InstruUsageCounts:=m_useNumReadResult;
@@ -1134,7 +1140,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.checkInstruType">
-      <LineId Id="337" Count="58" />
+      <LineId Id="468" Count="59" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.curScopePosture.Get">
@@ -1156,6 +1162,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
     <LineIds Name="FB_Instrument.init">
       <LineId Id="7" Count="1" />
       <LineId Id="5" Count="0" />
+      <LineId Id="30" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="17" Count="0" />
@@ -1237,7 +1244,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="703" Count="125" />
+      <LineId Id="1095" Count="127" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">
@@ -1281,37 +1288,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.writeNumOfUseToChip">
-      <LineId Id="54" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="6" Count="2" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="17" Count="1" />
-      <LineId Id="20" Count="3" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="28" Count="1" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="30" Count="1" />
-      <LineId Id="33" Count="3" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="37" Count="1" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="49" Count="3" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="46" Count="0" />
+      <LineId Id="74" Count="45" />
       <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.writeZeroPosToChip">

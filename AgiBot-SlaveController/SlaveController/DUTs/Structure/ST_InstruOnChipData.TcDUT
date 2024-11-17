@@ -12,7 +12,7 @@ STRUCT
 	
 	// current and max usage counts
 	m_InstruUsageCounts :ULINT;
-	m_InstrumaxUsageCounts :ULINT:=20;
+	m_InstrumaxUsageCounts :UINT:=20;
 	
 	//Instrument Zero augular offset
 	m_InstruPos:Vec5d;

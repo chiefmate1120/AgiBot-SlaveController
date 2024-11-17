@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveCtrlSelfCheck" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Slave Arm Run Self-check Trajectory
 FUNCTION_BLOCK PUBLIC FB_SlaveCtrlSelfCheck EXTENDS FB_SlaveArmCtrlBase
@@ -86,14 +86,23 @@ END_VAR
 VAR
 	i,j :INT;
 	startJntPos,endJntPos :Vec8d;
+	baseJntPos:Vec8d;
+	cycleNum :LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_slaveArm,r_slaveArmCtrlCmd);
-m_jntEnableFlag :=g_zeroVec8i;
+//m_jntEnableFlag :=g_zeroVec8i;
 
 //set different wait time for each arm, so the arms would run self-check successively
 m_enableWaitTime := i_slaveArm.armIdx-1;
+
+// determine base joint position for instrument joint
+baseJntPos :=g_zeroVec8d;
+FOR i:=4 TO g_sJntNum DO
+	cycleNum := FLOOR(i_slaveArm.curJntPos[i]/g_2pi);
+	baseJntPos[i]:=cycleNum* g_2Pi;
+END_FOR
 
 // traj plan
 // fisrt segment
@@ -102,7 +111,7 @@ m_selfCheckTrajIdx :=1;
 startJntPos:=i_slaveArm.curJntPos;
 endJntPos:=startJntPos;
 FOR j:=3 TO g_sJntNum DO 
-	endJntPos[j]:=m_selfCheckPosture[1,j];
+	endJntPos[j]:=baseJntPos[j]+m_selfCheckPosture[1,j];
 END_FOR
 m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
 
@@ -110,8 +119,8 @@ m_slefCheckPlanner[1].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfChe
 IF m_selfCheckMotionNum>= 2 THEN
 	FOR i:=2 TO m_selfCheckMotionNum DO 
 		FOR j:=1 TO 7 DO 
-			startJntPos[j]:=m_selfCheckPosture[i-1,j];
-			endJntPos[j]:=m_selfCheckPosture[i,j];
+			startJntPos[j]:=baseJntPos[j]+m_selfCheckPosture[i-1,j];
+			endJntPos[j]:=baseJntPos[j]+m_selfCheckPosture[i,j];
 		END_FOR
 		m_slefCheckPlanner[i].init(startJntPos,endJntPos,m_selfCheckMaxjntVel, m_selfCheckMaxjntAcc,m_selfCheckMaxjntJerk);
 	END_FOR
@@ -148,30 +157,7 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="96" Count="2" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlSelfCheck.init">
-      <LineId Id="57" Count="0" />
-      <LineId Id="218" Count="0" />
-      <LineId Id="199" Count="2" />
-      <LineId Id="121" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="172" Count="0" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="185" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="86" Count="0" />
-      <LineId Id="99" Count="0" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="137" Count="0" />
-      <LineId Id="131" Count="2" />
-      <LineId Id="126" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="154" Count="1" />
+      <LineId Id="245" Count="35" />
       <LineId Id="152" Count="0" />
     </LineIds>
   </POU>

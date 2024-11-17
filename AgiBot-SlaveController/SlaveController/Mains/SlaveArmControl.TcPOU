@@ -127,19 +127,27 @@ ELSE
 	slaveOutputData.m_heartBeat :=slaveOutputData.m_heartBeat+1;
 END_IF
 
+FOR i := 1 TO g_sArmNum DO
+	slaveOutputData.m_asepticDeployCompletedFlag :=SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];	
+	IF NOT slaveOutputData.m_asepticDeployCompletedFlag THEN
+		EXIT;
+	END_IF
+END_FOR
+IF slaveOutputData.m_asepticDeployCompletedFlag AND m_slaveInputDataPool.m_UIData.m_dumpEnergy < 30 THEN
+	slaveOutputData.m_asepticDeployCompletedFlag := FALSE;
+	FOR i:=1 TO g_sArmNum DO
+		IF slaveStatus.m_armState[i] = SlaveArmState_MasterSlave THEN
+			slaveOutputData.m_asepticDeployCompletedFlag := TRUE;
+			EXIT;
+		END_IF
+	END_FOR
+END_IF
+
 slaveOutputData.m_seflCheckPass:=  m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[1] AND  m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[2] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[3] AND m_slaveInputDataPool.m_UIData.m_armSelfCheckFinshed[4] ;
 slaveOutputData.m_endoscopeMounted :=slaveStatus.m_endoscopeMounted;
 slaveOutputData.m_endoscopePose.m_pos :=slaveStatus.m_endoscopePose.m_pos;
 slaveOutputData.m_endoscopePose.m_rot :=slaveStatus.m_endoscopePose.m_rot;
 slaveOutputData.m_slaveStopButton := NOT SafetyCheck.m_stopButton;
-
-FOR i := 1 TO g_sArmNum DO
-	slaveOutputData.m_asepticDeployCompletedFlag := SlaveArmControl.m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[i] OR SlaveArmControl.m_slaveRobot.m_panelMountedFlag[i];	
-	IF NOT slaveOutputData.m_asepticDeployCompletedFlag THEN
-		EXIT;
-	END_IF
-END_FOR
-
 
 FOR i:= 1 TO g_sArmNum DO
 	slaveOutputData.m_armState[i] := slaveStatus.m_armState[i];
@@ -177,6 +185,8 @@ END_FOR
 IF GVL_interactUI.g_armIsDisable >0 AND GVL_interactUI.g_armIsDisable<= g_sArmNum THEN
 	m_slaveInputDataPool.m_UIData.m_slaveArmDisableFlag[GVL_interactUI.g_armIsDisable]:= TRUE;
 END_IF
+
+m_slaveInputDataPool.m_UIData.m_dumpEnergy := GVL_interactUI.g_dumpEnergyUPS;
 ]]></ST>
       </Implementation>
     </Method>
@@ -276,11 +286,11 @@ FOR i := 1 TO g_sArmNum DO
 	END_IF
 	m_InstruUsageCountsLast[i] :=m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruUsageCounts;
 	
-	IF GVL_interactUI.g_instruInformatiom[i].m_useLifeplc + 1 =  GVL_interactUI.g_instruInformatiom[i].m_useLifeUi AND m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruReadSucceed  THEN
-		//read-write instrument number of use
-		m_slaveRobot.m_slaveArms[i].m_instrument.writeNumOfUseToChip(m_slaveInputDataPool.m_UIData.m_instruUsageWrite[i], GVL_interactUI.g_instruInformatiom[i].m_useLifeUi);
-	END_IF
-	
+	//read-write instrument number of use
+	m_slaveRobot.m_slaveArms[i].m_instrument.writeNumOfUseToChip(GVL_interactUI.g_instruInformatiom[i].m_useLifeplc + 1 =  GVL_interactUI.g_instruInformatiom[i].m_useLifeUi AND m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruReadSucceed, GVL_interactUI.g_instruInformatiom[i].m_useLifeUi);
+
+	//intrument total number of use
+	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.m_onChipData.m_InstrumaxUsageCounts;
 	//The coordinates of the instrument relative to the endoscope for UI display
 END_FOR
 
@@ -324,20 +334,15 @@ END_FOR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.slaveOutputDataCast">
-      <LineId Id="146" Count="7" />
-      <LineId Id="155" Count="3" />
-      <LineId Id="192" Count="6" />
-      <LineId Id="191" Count="0" />
-      <LineId Id="159" Count="16" />
+      <LineId Id="260" Count="44" />
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIInputProcess">
-      <LineId Id="45" Count="6" />
+      <LineId Id="59" Count="8" />
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="263" Count="5" />
-      <LineId Id="272" Count="85" />
+      <LineId Id="368" Count="91" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>

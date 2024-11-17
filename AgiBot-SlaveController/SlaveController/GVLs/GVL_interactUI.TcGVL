@@ -113,6 +113,9 @@ VAR_GLOBAL
 	
 	//arm is adjustment
 	g_armIsAdjustment : ARRAY [1..4] OF UINT;
+	
+	//instrument max used record
+	g_InstruSeriesRecord:ARRAY [1..100] OF ULINT;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
