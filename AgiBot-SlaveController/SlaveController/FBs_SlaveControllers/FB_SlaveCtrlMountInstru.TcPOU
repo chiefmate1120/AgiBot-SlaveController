@@ -259,7 +259,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
 
 // joint4 stay still if instrument has only on finger
-IF i_slaveArm.instrument.m_isSingleFinger THEN
+IF i_slaveArm.instrument.instruTypeInfo.m_isSingleFinger THEN
 	m_jointMounted[1]:=TRUE;
 END_IF
 

@@ -253,8 +253,8 @@ IF  (m_reachWristJntLimit AND ABS(m_errAngle)>m_maxOriTrackErr) THEN
 ELSE
 	m_reachWristJntLimit :=FALSE;
 	FOR i:=1 TO 3 DO
-		IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> i_slaveArm.instrument.kinematicParameters.m_wristMaxDHJntPos[i]) OR 
-			(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< i_slaveArm.instrument.kinematicParameters.m_wristMinDHJntPos[i])  THEN
+		IF (wristDHJntVel[i] > 0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime> i_slaveArm.instrument.instruTypeInfo.m_wristMaxDHJntPos[i]) OR 
+			(wristDHJntVel[i]<0 AND i_slaveArm.simDHJntPos[i+3] + wristDHJntVel[i]*g_slaveArmCtrlCycleTime< i_slaveArm.instrument.instruTypeInfo.m_wristMinDHJntPos[i])  THEN
 			wristDHJntVel:=g_zeroVec3d;
 			m_reachWristJntLimit:=TRUE;
 			CONTINUE;
@@ -292,8 +292,8 @@ FOR i:=1 TO 3 DO
 END_FOR
 
 // joint 3 up limit to remote center
-jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength+i_slaveArm.instrument.kinematicParameters.m_headLength
-											+ i_slaveArm.instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
+jnt3Limit := i_slaveArm.instrument.instruTypeInfo.m_rodLength+i_slaveArm.instrument.instruTypeInfo.m_headLength
+											+ i_slaveArm.instrument.instruTypeInfo.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
 IF (armDHJntVel[3] > 0 AND i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
 	armDHJntVel[3]:=0;
 	m_reachMacroJntLimit:=TRUE;
@@ -441,8 +441,8 @@ IF m_gripperCtrlFlag THEN
 ELSE
 	//m_gripperCtrlFlag := (ABS(m_masterGripAngleVel) >masterGripVelThres) AND  (m_masterGripAngleVel * (matchedSlaveGripAngle-i_slaveArm.curGripAngle)>0);
 	m_gripperCtrlFlag := ABS(matchedSlaveGripAngle-i_slaveArm.curGripAngle)<m_gripperMatchAngThres OR 
-	     (matchedSlaveGripAngle>=i_SlaveArm.instrument.kinematicParameters.m_maxGripAngle - m_gripperMatchAngThres AND i_slaveArm.curGripAngle>=matchedSlaveGripAngle) OR 
-		(matchedSlaveGripAngle<=i_SlaveArm.instrument.kinematicParameters.m_minGripAngle + m_gripperMatchAngThres AND i_slaveArm.curGripAngle<=matchedSlaveGripAngle);
+	     (matchedSlaveGripAngle>=i_SlaveArm.instrument.instruTypeInfo.m_maxGripAngle - m_gripperMatchAngThres AND i_slaveArm.curGripAngle>=matchedSlaveGripAngle) OR 
+		(matchedSlaveGripAngle<=i_SlaveArm.instrument.instruTypeInfo.m_minGripAngle + m_gripperMatchAngThres AND i_slaveArm.curGripAngle<=matchedSlaveGripAngle);
 END_IF]]></ST>
       </Implementation>
     </Method>

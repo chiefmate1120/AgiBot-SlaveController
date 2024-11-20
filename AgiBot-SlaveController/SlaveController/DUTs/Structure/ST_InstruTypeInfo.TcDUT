@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_InstruTypeInfo" Id="{406fd853-9e39-4da6-8bc8-c685aa856465}">
+    <Declaration><![CDATA[TYPE ST_InstruTypeInfo :
+STRUCT
+	//ID
+	m_InstruID: INT:=0;
+	
+	// has one or two finger
+	m_isSingleFinger:BOOL;
+	
+	// energy type
+	m_energyType:UINT:=0;
+	
+	// name
+	m_instruName : STRING:='null';
+	m_instruNameCH : WSTRING:="无效器械";
+	
+	// max use number
+	m_maxUseNum :UINT :=20;
+	
+	// instrument geometric parameters
+	m_rodLength:LREAL:=0.5392;
+	m_headLength:LREAL :=0.01;
+	m_fingerLength:LREAL :=0;
+	m_maxGripAngle :LREAL := 50.0 * g_deg2Rad;
+	
+	// instrument reduction parameters
+	m_k1:LREAL:=1;
+	m_k2:LREAL:=1;
+	m_k3:LREAL:=1;
+	
+	// instrument wrist DH joint limit
+	m_rollLimit:LREAL:=5.5;
+	m_pitchLimit:LREAL:=75*g_deg2Rad;
+	m_yawLimit:LREAL:=PI/2;
+	
+	// instrument backlash
+	m_instruYawBacklash :LREAL:=0.0;
+	m_instruPitchBachlash :LREAL :=0.0;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

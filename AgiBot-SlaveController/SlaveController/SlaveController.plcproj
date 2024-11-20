@@ -172,6 +172,9 @@
     <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\ST_InstruTypeInfo.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\ST_SetupArmCtrlCmds.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -224,9 +227,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_SlaveInputDataPool.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\ST_InstruKinematicParam.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\UICommunication\ST_cartOperation.TcDUT">
@@ -722,10 +722,6 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_InstruCtrlParams.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
     <Compile Include="GVLs\GVL_interactUI.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -769,6 +765,14 @@
     </Compile>
     <Compile Include="FBs_SlaveControllers\I_SlaveArmCtrl.TcIO">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Instrument\GVL_InstruCtrlParams.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Instrument\GVL_InstruTypeDefine.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\SetupArms\GVL_SetupArmDynamics.TcGVL">
       <SubType>Code</SubType>
@@ -916,6 +920,7 @@
     <Folder Include="GVLs\configs\robot3" />
     <Folder Include="GVLs\configs\robot5" />
     <Folder Include="GVLs\configs\robot4" />
+    <Folder Include="GVLs\Instrument" />
     <Folder Include="GVLs\SetupArms" />
     <Folder Include="GVLs\SlaveArms" />
     <Folder Include="FBs_Auxiliary" />

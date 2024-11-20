@@ -6,10 +6,8 @@ FUNCTION_BLOCK PUBLIC FB_SlaveCtrlInstruCali EXTENDS FB_SlaveArmCtrlBase
 VAR
 	// mount motion planning
 	m_jntOTG :ARRAY[1..8] OF FB_secOrdTrajFilter;
-	m_instruMountVelFast :LREAL := 2*PI;
-	m_instruMountAccFast :LREAL := 4*PI;
-	m_instruMountVelSlow :LREAL := 1*PI;
-	m_instruMountAccSlow :LREAL := 2*PI;
+	m_instruMountVel :LREAL := 1*PI;
+	m_instruMountAcc :LREAL := 2*PI;
 	
 	// 	cali status
 	m_rollJntCaliStatus :INT := 0;
@@ -40,6 +38,11 @@ VAR
 	
 	// instrument zero position
 	m_instruZeroPosition :Vec5d;
+	
+	// angle to close finger
+	m_baseCloseAngle :LREAL := 1*g_deg2Rad;
+	m_bipolarCloseAngle :LREAL := 5*g_deg2Rad;
+	m_proGraspCloseAngle:LREAL := 25*g_deg2Rad;
 	
 END_VAR
 ]]></Declaration>
@@ -86,7 +89,7 @@ IF m_rollJntCaliStatus <> -1 THEN
 ELSIF m_pitchJntCaliStatus <> -1 THEN
 	pitchJntCali(i_slaveArm);
 ELSIF m_yawJntCaliStatus <> -1 THEN
-	IF  i_slaveArm.instrument.m_isSingleFinger THEN
+	IF  i_slaveArm.instrument.InstruTypeInfo.m_isSingleFinger THEN
 		yawJntCali_finger(i_slaveArm);
 	ELSE
 		yawJntCali_gripper(i_slaveArm);
@@ -127,14 +130,9 @@ m_jntOPMode[6] := DriverOPMode_PosTrq;
 m_jntOPMode[7] := DriverOPMode_PosTrq;
 m_jntOPMode[8] := DriverOPMode_PosTrq;
 
-FOR i:=4 TO 6 DO
+FOR i:=4 TO 8 DO
 	m_targetMountPos[i]:=m_cmdJntPos[i];
-	m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
-	m_jointMounted[i]:=FALSE;
-END_FOR
-FOR i:=7 TO 8 DO
-	m_targetMountPos[i]:=m_cmdJntPos[i];
-	m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVelFast, m_instruMountAccFast, g_slaveArmCtrlCycleTime);
+	m_jntOTG[i].init(m_targetMountPos[i], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 	m_jointMounted[i]:=FALSE;
 END_FOR
 
@@ -173,7 +171,7 @@ CASE m_pitchJntCaliStatus OF
 		IF i_slaveArm.filtJntCurrent[jntIdx]> m_maxJntCurrent THEN 
 			m_jntLimitPos1 := curJntPos[jntIdx];
 			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
-			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			m_pitchJntCaliStatus := 1;
 		END_IF
 		
@@ -185,12 +183,12 @@ CASE m_pitchJntCaliStatus OF
 		IF i_slaveArm.filtJntCurrent[jntIdx]<- m_maxJntCurrent THEN 
 			m_jntLimitPos2 := curJntPos[jntIdx];
 			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
-			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			m_pitchJntCaliStatus := 2;
 		END_IF
 	
 	2:// calculate center/calibarted position
-		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2+g_instruPitchBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
+		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2+ i_slaveArm.instrument.instruTypeInfo.m_instruPitchBachlash/2.0;
 		m_pitchJntCaliStatus := 3;
 
 	3:
@@ -229,10 +227,10 @@ CASE m_rollJntCaliStatus OF
 		m_targetMountPos[jntIdx]:=curJntPos[jntIdx]+m_mountMotionAng;
 	
 		//buckle  joint
-		IF i_slaveArm.filtJntCurrent[jntIdx]> m_maxJntCurrent THEN 
+		IF i_slaveArm.filtJntCurrent[jntIdx]> m_maxJntCurrent AND ABS(i_slaveArm.curJntVel[jntIdx]) < 1*g_deg2rad  THEN 
 			m_jntLimitPos1 := curJntPos[jntIdx];
 			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
-			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVelFast, m_instruMountAccFast, g_slaveArmCtrlCycleTime);
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			m_rollJntCaliStatus := 1;
 		END_IF
 		
@@ -241,10 +239,10 @@ CASE m_rollJntCaliStatus OF
 		m_targetMountPos[jntIdx]:=curJntPos[jntIdx]-m_mountMotionAng;
 	
 		//buckle  joint
-		IF i_slaveArm.filtJntCurrent[jntIdx]<- m_maxJntCurrent THEN 
+		IF i_slaveArm.filtJntCurrent[jntIdx]<- m_maxJntCurrent AND ABS(i_slaveArm.curJntVel[jntIdx]) < 1*g_deg2rad   THEN 
 			m_jntLimitPos2 := curJntPos[jntIdx];
 			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
-			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVelFast, m_instruMountAccFast, g_slaveArmCtrlCycleTime);
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			m_rollJntCaliStatus := 2;
 		END_IF
 	
@@ -291,7 +289,7 @@ CASE m_yawJntCaliStatus OF
 		IF i_slaveArm.filtJntCurrent[jntIdx]> m_maxJntCurrent THEN 
 			m_jntLimitPos1 := curJntPos[jntIdx];
 			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
-			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			m_yawJntCaliStatus := 1;
 		END_IF
 		
@@ -303,12 +301,12 @@ CASE m_yawJntCaliStatus OF
 		IF i_slaveArm.filtJntCurrent[jntIdx]<- m_maxJntCurrent THEN 
 			m_jntLimitPos2 := curJntPos[jntIdx];
 			m_targetMountPos[jntIdx]:=curJntPos[jntIdx];
-			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[jntIdx].init(m_targetMountPos[jntIdx], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			m_yawJntCaliStatus := 2;
 		END_IF
 	
 	2:// calculate center/calibarted positio
-		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2+g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;;
+		m_targetMountPos[jntIdx] :=  (m_jntLimitPos1 + m_jntLimitPos2)/2+i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash/2.0;;
 		m_yawJntCaliStatus := 3;
 
 	3:
@@ -333,13 +331,21 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR 
-	i :INT;
 	curJntPos :Vec8d;
-	jntRange:LREAL;
-	jntIdx :INT;
+	gripCloseAng:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[curJntPos := i_slaveArm.curJntPos;
+
+// determin finger close angle
+IF i_slaveArm.instrument.instruType = InstruType_MarylandForceps OR i_slaveArm.instrument.instruType = InstruType_FenestratedForceps
+	OR i_slaveArm.instrument.instruType = InstruType_CurvedBipolarDissector OR i_slaveArm.instrument.instruType = InstruType_MicroBipolarForceps THEN
+	gripCloseAng := m_bipolarCloseAngle;
+ELSIF i_slaveArm.instrument.instruType = InstruType_ProGraspForceps OR i_slaveArm.instrument.instruType = InstruType_ForceBipolar THEN
+	gripCloseAng := m_proGraspCloseAngle;
+ELSE
+	gripCloseAng := m_baseCloseAngle;
+END_IF
 
 CASE m_yawJntCaliStatus OF
 	// buckle joint4 and joint5 by moving toward limit
@@ -349,12 +355,12 @@ CASE m_yawJntCaliStatus OF
 		IF i_slaveArm.filtJntCurrent[4]<- m_maxJntCurrent THEN 
 			m_jointMounted[4]:=TRUE;
 			m_targetMountPos[4]:=curJntPos[4];
-			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 		END_IF
 		IF i_slaveArm.filtJntCurrent[5]<- m_maxJntCurrent THEN 
 			m_jointMounted[5]:=TRUE;
 			m_targetMountPos[5]:=curJntPos[5];
-			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 		END_IF
 		
 		// set target joint position
@@ -377,12 +383,12 @@ CASE m_yawJntCaliStatus OF
 		IF i_slaveArm.filtJntCurrent[4]> m_maxJntCurrent THEN 
 			m_jointMounted[4]:=TRUE;
 			m_targetMountPos[4]:=curJntPos[4];
-			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 		END_IF
 		IF i_slaveArm.filtJntCurrent[5]> m_maxJntCurrent THEN 
 			m_jointMounted[5]:=TRUE;
 			m_targetMountPos[5]:=curJntPos[5];
-			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+			m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 		END_IF
 		
 		// set target joint position
@@ -400,8 +406,8 @@ CASE m_yawJntCaliStatus OF
 		END_IF
 		
 	2:// move joint5 to open gripper
-		m_targetMountPos[4] := curJntPos[4]-g_instruMaxGripAngle[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
-		m_targetMountPos[5] := curJntPos[5]-g_instruMaxGripAngle[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
+		m_targetMountPos[4] := curJntPos[4]-i_slaveArm.instrument.instruTypeInfo.m_maxGripAngle/4.0;
+		m_targetMountPos[5] := curJntPos[5]-i_slaveArm.instrument.instruTypeInfo.m_maxGripAngle/4.0;
 		m_yawJntCaliStatus := 3;
 
 	3:
@@ -419,7 +425,7 @@ CASE m_yawJntCaliStatus OF
 				m_jointMounted[4]:=TRUE;
 				m_jntLimitPos1 := curJntPos[4];
 				m_targetMountPos[4]:=curJntPos[4];
-				m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+				m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			END_IF
 		END_IF
 		IF NOT(m_jointMounted[5]) THEN 
@@ -430,7 +436,7 @@ CASE m_yawJntCaliStatus OF
 				m_jointMounted[5]:=TRUE;
 				m_jntLimitPos2 := curJntPos[5];
 				m_targetMountPos[5]:=curJntPos[5];
-				m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+				m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			END_IF	
 		END_IF
 		
@@ -442,7 +448,7 @@ CASE m_yawJntCaliStatus OF
 		END_IF
 		
 	5:// move joint5 to open gripper
-		m_targetMountPos[5] := curJntPos[5]-m_mountMotionAng;
+		m_targetMountPos[5] := curJntPos[5]-i_slaveArm.instrument.instruTypeInfo.m_maxGripAngle/2.0;
 		m_yawJntCaliStatus := 6;
 
 	6:
@@ -460,7 +466,7 @@ CASE m_yawJntCaliStatus OF
 				m_jointMounted[4]:=TRUE;
 				m_jntLimitPos3 := curJntPos[4];
 				m_targetMountPos[4]:=curJntPos[4];
-				m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+				m_jntOTG[4].init(m_targetMountPos[4], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			END_IF
 		END_IF
 		IF NOT(m_jointMounted[5]) THEN 
@@ -471,7 +477,7 @@ CASE m_yawJntCaliStatus OF
 				m_jointMounted[5]:=TRUE;
 				m_jntLimitPos4 := curJntPos[5];
 				m_targetMountPos[5]:=curJntPos[5];
-				m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVelSlow, m_instruMountAccSlow, g_slaveArmCtrlCycleTime);
+				m_jntOTG[5].init(m_targetMountPos[5], 0,m_instruMountVel, m_instruMountAcc, g_slaveArmCtrlCycleTime);
 			END_IF	
 		END_IF
 		
@@ -483,14 +489,14 @@ CASE m_yawJntCaliStatus OF
 		END_IF
 		
 	8:// calculate center/calibarted position
-		m_targetMountPos[4] := (m_jntLimitPos1 + m_jntLimitPos3)/2-g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
-		m_targetMountPos[5] := (m_jntLimitPos2 + m_jntLimitPos4)/2+g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx]/2.0;
+		m_targetMountPos[4] := (m_jntLimitPos1 + m_jntLimitPos3)/2-i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash/2.0;
+		m_targetMountPos[5] := (m_jntLimitPos2 + m_jntLimitPos4)/2+i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash/2.0;
 		m_yawJntCaliStatus := 9;
 
 	9:
 		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
 			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
-			m_targetMountPos[4] := curJntPos[4]+g_instruYawBacklash[i_slaveArm.instrument.m_instruTypeIdx];
+			m_targetMountPos[4] := curJntPos[4]+i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash;
 			m_yawJntCaliStatus := 10;
 		END_IF
 		
@@ -498,8 +504,8 @@ CASE m_yawJntCaliStatus OF
 	10:
 		IF ABS(m_targetMountPos[4]-curJntPos[4]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  AND
 			ABS(m_targetMountPos[5]-curJntPos[5]) <GVL_SlaveControlParameters.g_jntCtrlAngTolLow  THEN
-				m_targetMountPos[4] := curJntPos[4]+g_gripperCloseAng[i_slaveArm.instrument.m_instruTypeIdx];
-				m_targetMountPos[5] := curJntPos[5]+g_gripperCloseAng[i_slaveArm.instrument.m_instruTypeIdx];
+				m_targetMountPos[4] := curJntPos[4]+gripCloseAng;
+				m_targetMountPos[5] := curJntPos[5]+gripCloseAng;
 			m_yawJntCaliStatus := 11;
 		END_IF
 		
@@ -562,51 +568,31 @@ m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cm
       <LineId Id="478" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.init">
-      <LineId Id="174" Count="14" />
-      <LineId Id="232" Count="3" />
-      <LineId Id="231" Count="0" />
-      <LineId Id="207" Count="0" />
-      <LineId Id="206" Count="0" />
-      <LineId Id="208" Count="1" />
-      <LineId Id="220" Count="0" />
-      <LineId Id="192" Count="3" />
+      <LineId Id="246" Count="23" />
       <LineId Id="92" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.pitchJntCali">
-      <LineId Id="231" Count="43" />
+      <LineId Id="284" Count="43" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.rollJntCali">
-      <LineId Id="177" Count="0" />
-      <LineId Id="171" Count="0" />
-      <LineId Id="170" Count="0" />
-      <LineId Id="71" Count="2" />
-      <LineId Id="146" Count="1" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="77" Count="0" />
-      <LineId Id="149" Count="0" />
-      <LineId Id="79" Count="1" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="152" Count="9" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="174" Count="1" />
-      <LineId Id="126" Count="1" />
-      <LineId Id="131" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="135" Count="0" />
-      <LineId Id="137" Count="3" />
-      <LineId Id="142" Count="3" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_finger">
       <LineId Id="187" Count="43" />
       <LineId Id="5" Count="0" />
     </LineIds>
+    <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_finger">
+      <LineId Id="240" Count="43" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_gripper">
-      <LineId Id="701" Count="178" />
+      <LineId Id="890" Count="0" />
+      <LineId Id="1079" Count="0" />
+      <LineId Id="1078" Count="0" />
+      <LineId Id="1080" Count="0" />
+      <LineId Id="1095" Count="0" />
+      <LineId Id="1081" Count="0" />
+      <LineId Id="1083" Count="3" />
+      <LineId Id="1082" Count="0" />
+      <LineId Id="891" Count="177" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

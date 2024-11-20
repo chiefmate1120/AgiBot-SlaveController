@@ -154,7 +154,7 @@ FOR i:= 1 TO g_sArmNum DO
 	slaveOutputData.m_instruStauts[i].m_fingerAngle := slaveStatus.m_instruStauts[i].m_fingerAngle;
 	slaveOutputData.m_instruStauts[i].m_ready := slaveStatus.m_instruStauts[i].m_ready;
 	slaveOutputData.m_instruStauts[i].m_type := slaveStatus.m_instruStauts[i].m_type;
-	slaveOutputData.m_instruEnergyType[i] := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType;
+	slaveOutputData.m_instruEnergyType[i] := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_energyType;
 	slavePoseInCart := transform(setupStatus.m_curEndPose[i], slaveStatus.m_curArmPose[i]);
 	tmpFrame :=invFrame(slaveStatus.m_endoscopePose);
 	slavePoseInScope := transform(tmpFrame, slavePoseInCart);
@@ -249,14 +249,14 @@ FOR i := 1 TO g_sArmNum DO
 		GVL_interactUI.g_instruInformatiom[i].m_instruType := 4;
 		GVL_interactUI.g_scopeGravityAngle := m_slaveRobot.m_slaveArms[i].curDHJntPos[4];
 	ELSE
-		GVL_interactUI.g_instruInformatiom[i].m_instruType := m_slaveRobot.m_slaveArms[i].m_instrument.isEnergyType;
+		GVL_interactUI.g_instruInformatiom[i].m_instruType := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_energyType;
 	END_IF
 	
 	GVL_interactUI.g_instruInformatiom[i].m_armId := i;
 	GVL_interactUI.g_instruInformatiom[i].m_instruSerialNum :=  m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruseriesNum;
 	GVL_interactUI.g_instruInformatiom[i].m_instruID := m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruID;
-	GVL_interactUI.g_instruInformatiom[i].m_nameEn := m_slaveRobot.m_slaveArms[i].m_instrument.instruName;
-	GVL_interactUI.g_instruInformatiom[i].m_nameCh := m_slaveRobot.m_slaveArms[i].m_instrument.instruNameCH;
+	GVL_interactUI.g_instruInformatiom[i].m_nameEn := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_instruName;
+	GVL_interactUI.g_instruInformatiom[i].m_nameCh := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_instruNameCH;
 	
 	//instrument pedal hover and pedal active
 	GVL_interactUI.g_instruInformatiom[i].m_pedalHover:=FALSE;
@@ -269,7 +269,7 @@ FOR i := 1 TO g_sArmNum DO
 				GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalHover:=FALSE;
 			END_IF
 			
-			IF m_slaveRobot.m_slaveArms[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_instrument.isEnergyType > 0 THEN
+			IF m_slaveRobot.m_slaveArms[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_instrument.instruTypeInfo.m_energyType > 0 THEN
 				IF m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j] = 1 THEN 
 					GVL_interactUI.g_instruInformatiom[m_slaveInputDataPool.m_masterStatus.m_teleSlaveArmIdx[j]].m_pedalActive := 1;
 				ELSIF m_slaveInputDataPool.m_masterStatus.m_electricKnifePedalTrigger[j] = 2 THEN 
@@ -290,7 +290,7 @@ FOR i := 1 TO g_sArmNum DO
 	m_slaveRobot.m_slaveArms[i].m_instrument.writeNumOfUseToChip(GVL_interactUI.g_instruInformatiom[i].m_useLifeplc + 1 =  GVL_interactUI.g_instruInformatiom[i].m_useLifeUi AND m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruReadSucceed, GVL_interactUI.g_instruInformatiom[i].m_useLifeUi);
 
 	//intrument total number of use
-	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.m_onChipData.m_InstrumaxUsageCounts;
+	GVL_interactUI.g_instruInformatiom[i].m_instruTotalLife := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_maxUseNum;
 	//The coordinates of the instrument relative to the endoscope for UI display
 END_FOR
 

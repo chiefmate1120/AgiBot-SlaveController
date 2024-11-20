@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_InstruTypeDefine" Id="{7c418002-6a90-4805-b196-d8de45d720d1}">
+    <Declaration><![CDATA[// NOTICE：this file would be defined as config file later
+{attribute 'global_init_slot' := '49991'}
+VAR_GLOBAL CONSTANT
+	InstruTypeInfo_CadiereForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=7, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Cadiere Forceps', m_instruNameCH:="无创抓钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0089, m_fingerLength:=0.0195, m_maxGripAngle:=45*g_deg2Rad,
+	 m_k1:= 0.859649123, m_k2:=0.947368421, m_k3:=0.775510204,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	InstruTypeInfo_NeedleDriver :ST_InstruTypeInfo :=
+	(m_InstruID:=8, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Large Needle Driver', m_instruNameCH:="持针钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0089, m_fingerLength:=0.0096, m_maxGripAngle:=40*g_deg2Rad,
+	 m_k1:= 0.824561404, m_k2:=0.947368421, m_k3:=0.808510638,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	InstruTypeInfo_MegaSCNeedleDriver :ST_InstruTypeInfo :=
+	(m_InstruID:=9, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Mega SutureCut Needle Driver', m_instruNameCH:="大号带剪刀持针钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01, m_fingerLength:=0.0109, m_maxGripAngle:=40*g_deg2Rad,
+	 m_k1:= 1.070175439, m_k2:=0.947368421, m_k3:=0.590163934,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_SCNeedleDriver :ST_InstruTypeInfo :=
+	(m_InstruID:=10, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Large SutureCut Needle Driver', m_instruNameCH:="带剪刀持针钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01, m_fingerLength:=0.011, m_maxGripAngle:=40*g_deg2Rad,
+	 m_k1:= 1.070175439, m_k2:=0.947368421, m_k3:=0.590163934,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_RoundTipScissors :ST_InstruTypeInfo :=
+	(m_InstruID:=11, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='RoundTip Scissors', m_instruNameCH:="圆头直剪", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0089, m_fingerLength:=0.01102, m_maxGripAngle:=40*g_deg2Rad,
+	 m_k1:= 0.842105263, m_k2:=0.947368421, m_k3:=0.791666667,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_ProGraspForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=12, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Prograsp', m_instruNameCH:="细齿无创抓钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.02773, m_maxGripAngle:=44.5*g_deg2rad,
+	 m_k1:= 1.342105263, m_k2:=0.947368421, m_k3:=0.496732026,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_MarylandForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=13, m_isSingleFinger:=FALSE, m_energyType:=2, m_instruName:='Maryland Bipolar Forceps', m_instruNameCH:="双极弧形电凝钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.0195, m_maxGripAngle:=55*g_deg2Rad,
+	 m_k1:= 1.070175439, m_k2:=0.947368421, m_k3:=0.590163934,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_FenestratedForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=14, m_isSingleFinger:=FALSE, m_energyType:=2, m_instruName:='Fenestrated Bipolar Forceps', m_instruNameCH:="双极鸭嘴电凝钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.0207, m_maxGripAngle:=55*g_deg2Rad,
+	 m_k1:= 1.070175439, m_k2:=0.947368421, m_k3:=0.590163934,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_CurvedScissors :ST_InstruTypeInfo :=
+	(m_InstruID:=15, m_isSingleFinger:=FALSE, m_energyType:=1, m_instruName:='Monopolar Curved Scissors', m_instruNameCH:="单极弧剪", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0091, m_fingerLength:=0.0130, m_maxGripAngle:=PI/3,
+	 m_k1:= 0.842105263, m_k2:=0.947368421, m_k3:=0.75,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_CauteryHook :ST_InstruTypeInfo :=
+	(m_InstruID:=16, m_isSingleFinger:=TRUE, m_energyType:=1, m_instruName:='Permanent Cautery Hook', m_instruNameCH:="单极电钩", m_maxUseNum:=20,
+	 m_rodLength:=0.5432, m_headLength:=0.00935, m_fingerLength:=0.01668, m_maxGripAngle:=0,
+	 m_k1:= 0.964912281, m_k2:= 0.877192982, m_k3:=-0.663636364,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=8*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_CauterySpatula :ST_InstruTypeInfo :=
+	(m_InstruID:=17, m_isSingleFinger:=TRUE, m_energyType:=1, m_instruName:='Permanent Cautery Spatula', m_instruNameCH:="单极电铲", m_maxUseNum:=20,
+	 m_rodLength:=0.5432, m_headLength:=0.00935, m_fingerLength:=0.01905, m_maxGripAngle:=0,
+	 m_k1:= 0.964912281, m_k2:= 0.877192982, m_k3:=-0.663636364,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=8*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_Endoscope :ST_InstruTypeInfo :=
+	(m_InstruID:=20, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Camera', m_instruNameCH:="内窥镜", m_maxUseNum:=100,
+	 m_rodLength:=0.49, m_headLength:=0, m_fingerLength:=0, m_maxGripAngle:=0,
+	 m_k1:= 1, m_k2:= 1, m_k3:=1,
+	 m_rollLimit:=5.5, m_pitchLimit:=1*g_deg2Rad, m_yawLimit:=1*g_deg2Rad,
+	 m_instruYawBacklash:=0, m_instruPitchBachlash:=0);
+	 
+	 InstruTypeInfo_UltrasoundKnifeS :ST_InstruTypeInfo :=
+	(m_InstruID:=42, m_isSingleFinger:=FALSE, m_energyType:=3, m_instruName:='Ultrasonic Scalpel 45cm', m_instruNameCH:="超声刀 46cm", m_maxUseNum:=1,
+	 m_rodLength:=0.46463, m_headLength:=0, m_fingerLength:=0, m_maxGripAngle:=PI/4,
+	 m_k1:= 1, m_k2:= 1, m_k3:=1,
+	 m_rollLimit:=g_largeNum, m_pitchLimit:=1*g_deg2Rad, m_yawLimit:=1*g_deg2Rad,
+	 m_instruYawBacklash:=0, m_instruPitchBachlash:=0);
+	 
+	 InstruTypeInfo_UltrasoundKnifeU :ST_InstruTypeInfo :=
+	(m_InstruID:=42, m_isSingleFinger:=FALSE, m_energyType:=3, m_instruName:='Ultrasonic Scalpel 55cm', m_instruNameCH:="超声刀 55cm", m_maxUseNum:=1,
+	 m_rodLength:=0.55225, m_headLength:=0, m_fingerLength:=0, m_maxGripAngle:=PI/4,
+	 m_k1:= 1, m_k2:= 1, m_k3:=1,
+	 m_rollLimit:=g_largeNum, m_pitchLimit:=1*g_deg2Rad, m_yawLimit:=1*g_deg2Rad,
+	 m_instruYawBacklash:=0, m_instruPitchBachlash:=0);
+	 
+	 InstruTypeInfo_TipUpFenestratedGrasper :ST_InstruTypeInfo :=
+	(m_InstruID:=44, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Tip-Up Fenestrated Grasper', m_instruNameCH:="鸭嘴抓钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.032, m_maxGripAngle:=PI/3,
+	 m_k1:= 1.29824561403509, m_k2:=0.947368421052632, m_k3:=0.513513513513513,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_MegaNeedleDriver :ST_InstruTypeInfo :=
+	(m_InstruID:=45, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Mega Needle Driver', m_instruNameCH:="大号持针钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.011, m_fingerLength:=0.0130, m_maxGripAngle:=PI/6,
+	 m_k1:=1.28070175438596 , m_k2:=0.929824561403509, m_k3:=0.520547945205479,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_DeBakeyForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=46, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='DeBakey Forceps', m_instruNameCH:="微型抓钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0089, m_fingerLength:=0.0120, m_maxGripAngle:=PI/6,
+	 m_k1:= 0.824561403508772, m_k2:=0.947368421052632, m_k3:=0.808510638297872,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_BlackDiamondForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=47, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Black Diamond Micro Forceps', m_instruNameCH:="黑钻微型钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0089, m_fingerLength:=0.010, m_maxGripAngle:=PI/6,
+	 m_k1:= 0.8245614035087, m_k2:=0.947368421052632, m_k3:=0.808510638297872,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_PottsScissors :ST_InstruTypeInfo :=
+	(m_InstruID:=48, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Potts Scissors', m_instruNameCH:="波茨手术剪", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.0089, m_fingerLength:=0.0110, m_maxGripAngle:=22*g_deg2Rad,
+	 m_k1:= 0.824561403508772, m_k2:=0.947368421052632, m_k3:=0.808510638297872,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_CurvedBipolarDissector :ST_InstruTypeInfo :=
+	(m_InstruID:=49, m_isSingleFinger:=FALSE, m_energyType:=2, m_instruName:='Curved Bipolar Dissector', m_instruNameCH:="双极分离电凝钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.022, m_maxGripAngle:=PI/4,
+	 m_k1:= 1.07017543859649, m_k2:=0.947368421052632, m_k3:=0.59016393442623,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_MicroBipolarForceps :ST_InstruTypeInfo :=
+	(m_InstruID:=50, m_isSingleFinger:=FALSE, m_energyType:=2, m_instruName:='Micro Bipolar Forceps', m_instruNameCH:="双极微型镊", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.014, m_maxGripAngle:=PI/4,
+	 m_k1:= 1.07017543859649, m_k2:=0.947368421052632, m_k3:=0.59016393442623,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_ForceBipolar :ST_InstruTypeInfo :=
+	(m_InstruID:=51, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Force Bipolar', m_instruNameCH:="强力双极电凝钳", m_maxUseNum:=20,
+	 m_rodLength:=0.5438, m_headLength:=0.01065, m_fingerLength:=0.024, m_maxGripAngle:=42*g_deg2Rad,
+	 m_k1:= 1.28947368421053, m_k2:=0.947368421052632, m_k3:=0.517006802721088,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=4*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 InstruTypeInfo_MicroCauteryHook :ST_InstruTypeInfo :=
+	(m_InstruID:=52, m_isSingleFinger:=FALSE, m_energyType:=0, m_instruName:='Micro Permanent Cautery Hook', m_instruNameCH:="小号单极电钩", m_maxUseNum:=20,
+	 m_rodLength:=0.5432, m_headLength:=0.00935, m_fingerLength:=0.01668, m_maxGripAngle:=0,
+	 m_k1:= 0.964912281, m_k2:= 0.877192982, m_k3:=-0.663636364,
+	 m_rollLimit:=5.5, m_pitchLimit:=75*g_deg2Rad, m_yawLimit:=PI/2,
+	 m_instruYawBacklash:=8*g_deg2Rad, m_instruPitchBachlash:=3*g_deg2Rad);
+	 
+	 g_instruTypeNum :INT :=23;
+	 g_instruTypePool :ARRAY[1..g_instruTypeNum] OF ST_InstruTypeInfo :=
+	 [InstruTypeInfo_CadiereForceps, 	InstruTypeInfo_NeedleDriver,  		InstruTypeInfo_MegaSCNeedleDriver, 	InstruTypeInfo_SCNeedleDriver,
+	  InstruTypeInfo_RoundTipScissors,	InstruTypeInfo_ProGraspForceps,		InstruTypeInfo_MarylandForceps,		InstruTypeInfo_FenestratedForceps,
+	  InstruTypeInfo_CurvedScissors,	InstruTypeInfo_CauteryHook,	 		InstruTypeInfo_CauterySpatula, 		InstruTypeInfo_Endoscope,
+	  InstruTypeInfo_UltrasoundKnifeS, 	InstruTypeInfo_UltrasoundKnifeU,	InstruTypeInfo_TipUpFenestratedGrasper, 		InstruTypeInfo_MegaNeedleDriver, 
+	  InstruTypeInfo_DeBakeyForceps, 	InstruTypeInfo_BlackDiamondForceps, 	InstruTypeInfo_PottsScissors, 	InstruTypeInfo_CurvedBipolarDissector,
+	  InstruTypeInfo_MicroBipolarForceps,InstruTypeInfo_ForceBipolar, InstruTypeInfo_MicroCauteryHook];
+
+	 
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

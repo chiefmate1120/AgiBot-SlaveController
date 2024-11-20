@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_SlaveArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_SlaveArm
 VAR_INPUT
@@ -150,9 +150,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
-L:=m_instrument.kinematicParameters.m_rodLength;
-a:=m_instrument.kinematicParameters.m_headLength;
-//b:=m_instrument.kinematicParameters.m_fingerLength;
+L:=m_instrument.instruTypeInfo.m_rodLength;
+a:=m_instrument.instruTypeInfo.m_headLength;
+//b:=m_instrument.instruTypeInfo.m_fingerLength;
 b:=0;
 
 q3:=i_DHJntPos[3];
@@ -497,9 +497,9 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
-L:=m_instrument.kinematicParameters.m_rodLength;
-a:=m_instrument.kinematicParameters.m_headLength;
-//b:=m_instrument.kinematicParameters.m_fingerLength;
+L:=m_instrument.instruTypeInfo.m_rodLength;
+a:=m_instrument.instruTypeInfo.m_headLength;
+//b:=m_instrument.instruTypeInfo.m_fingerLength;
 b:=0;
 
 q3:=i_DHJntPos[3];
@@ -659,8 +659,8 @@ END_VAR
 	RETURN;
 END_IF
 
-instruReady := m_curJntPos[3] < (m_instrument.kinematicParameters.m_rodLength+m_instrument.kinematicParameters.m_headLength
-									+ m_instrument.kinematicParameters.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
+instruReady := m_curJntPos[3] < (m_instrument.instruTypeInfo.m_rodLength+m_instrument.instruTypeInfo.m_headLength
+									+ m_instrument.instruTypeInfo.m_fingerLength - GVL_SlaveArmKinematic.g_minInstruRCDis+checkBuffer);
 ]]></ST>
       </Implementation>
     </Method>
@@ -760,9 +760,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[d1:=GVL_SlaveArmKinematic.g_d1;
-L:=m_instrument.kinematicParameters.m_rodLength;
-a:=m_instrument.kinematicParameters.m_headLength;
-//b:=m_instrument.kinematicParameters.m_fingerLength;
+L:=m_instrument.instruTypeInfo.m_rodLength;
+a:=m_instrument.instruTypeInfo.m_headLength;
+//b:=m_instrument.instruTypeInfo.m_fingerLength;
 b:=0;
 
 q2 := i_DHJntPos[2];
@@ -865,10 +865,19 @@ END_VAR
 VAR
 	// check buffer
 	checkBuffer :LREAL := 0.01;
+	i:INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[readyForInstruMount := (m_curJntPos[3]> GVL_SlaveMotorParameters.g_maxDHJntPos[3]-checkBuffer AND m_panelOnFlag);]]></ST>
+        <ST><![CDATA[readyForInstruMount := (m_curJntPos[3]> GVL_SlaveMotorParameters.g_maxDHJntPos[3]-checkBuffer AND m_panelOnFlag);
+
+// make sure instrument joint at zero position
+FOR i:=4 TO 8 DO
+	IF m_curLinkSingle[i]>1*g_deg2rad AND m_curLinkSingle[i]< g_2pi - 1*g_deg2rad THEN
+		readyForInstruMount:=FALSE;
+		EXIT;
+	END_IF
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="resetInstruDepth" Id="{442cf664-eb0b-4d84-a453-ceda2815dd97}">
@@ -886,8 +895,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.kinematicParameters.m_rodLength-m_instrument.kinematicParameters.m_headLength
-						- m_instrument.kinematicParameters.m_fingerLength * cos(m_curDHJntPos[6]);]]></ST>
+        <ST><![CDATA[m_instruInvasionDepth := m_curJntPos[3]-m_instrument.instruTypeInfo.m_rodLength -
+			COS(m_curDHJntPos[5]+pi/2) *( m_instrument.instruTypeInfo.m_headLength + m_instrument.instruTypeInfo.m_fingerLength * COS(m_curDHJntPos[6]));]]></ST>
       </Implementation>
     </Method>
     <Property Name="simCartPose" Id="{6426ffc4-f74f-4984-ac32-a9f9d8b8c8ca}" FolderPath="property\">
@@ -1241,13 +1250,21 @@ matMultiVec(m_jaco, m_curDHJntVel, m_curCartTwist);
     </LineIds>
     <LineIds Name="FB_SlaveArm.readyForInstruMount">
       <LineId Id="49" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="64" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.resetInstruDepth">
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.setInstruDepth">
       <LineId Id="10" Count="0" />
-      <LineId Id="6" Count="0" />
+      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArm.simCartPose.Get">
       <LineId Id="2" Count="0" />

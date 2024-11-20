@@ -101,7 +101,7 @@ FOR i:=1 TO 3 DO
 END_FOR
 
 // joint 3 up limit to remote center
-jnt3Limit := i_slaveArm.instrument.kinematicParameters.m_rodLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
+jnt3Limit := i_slaveArm.instrument.instruTypeInfo.m_rodLength - GVL_SlaveArmKinematic.g_minInstruRCDis;
 IF (armDHJntVel[3] > 0 AND  i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveArmCtrlCycleTime> jnt3Limit) THEN
 	armDHJntVel[3]:=0;
 END_IF
@@ -217,7 +217,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[RCDis := ABS(i_slaveArm.curJntPos[3] - i_slaveArm.instrument.kinematicParameters.m_rodLength);
+        <ST><![CDATA[RCDis := ABS(i_slaveArm.curJntPos[3] - i_slaveArm.instrument.instruTypeInfo.m_rodLength);
 
 IF RCDis < GVL_SlaveArmKinematic.g_minInstruRCDis THEN
 	motionScale := m_minSingMotionScale;

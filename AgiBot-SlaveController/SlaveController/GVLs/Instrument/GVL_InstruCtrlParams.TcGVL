@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_InstruCtrlParams" Id="{f4067b3b-1600-41bf-bbfc-2a09113afeea}">
+    <Declaration><![CDATA[// NOTICE： Use m_instruTypeIdx in FB_Instrument as the array index to get data below
+{attribute 'global_init_slot' := '49991'}
+VAR_GLOBAL CONSTANT
+	// master gripper angle limit
+	g_maxMasterGripAngle :LREAL := 30*g_deg2Rad;
+	g_minMasterGripAngle : LREAL :=0.0;
+	g_masterGripForceStartAng :LREAL :=5*g_deg2Rad;
+	
+	// gripper angle corresponding to g_masterGripForceStartAng
+	// make sure fingers are fully closed and have a initial force
+	g_minSlaveGripAngle :LREAL := -20 * g_deg2Rad; 
+	
+	//ultrasound knife kinematics parameter
+	g_uknifeGripTravel :LREAL:= 0.00353;
+	g_uknifeGripDividAngle : LREAL := 17 * g_deg2Rad;
+	g_uknifeMotorLead : LREAL := 0.025;
+	g_uknifeLeverRatio : LREAL := 13.0/18.5;
+	
+	// prograsp kinematic parameters
+	g_proGraspAB :LREAL :=2.8;
+	g_proGraspBC :LREAL :=5.26;
+	g_proGraspInitA :LREAL :=16.6*g_deg2Rad;;
+	g_proGraspInitC :LREAL :=8.75*g_deg2Rad;
+	
+	g_proGrasp2AB :LREAL :=2.7;
+	g_proGrasp2BC :LREAL :=5.337;
+	g_proGrasp2InitA :LREAL :=26.39*g_deg2Rad;;
+	g_proGrasp2InitC :LREAL :=12.9*g_deg2Rad;
+	
+	// instrument grip yaw compensation
+	g_instruBacklashDir: ARRAY[1..5] OF INT :=[-1, -1, -1, 0, 0];
+	g_instruGripYawCompAng :ARRAY[1..4] OF LREAL := [ 2*g_deg2rad,  4*g_deg2rad,  6*g_deg2rad,  8*g_deg2rad];
+	g_instruGripYawCompForceLevel  :ARRAY[1..4] OF INT := [ 20, 40, 70, 101];
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

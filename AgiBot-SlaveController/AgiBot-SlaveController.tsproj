@@ -858,7 +858,7 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{1A257946-3A85-B71C-7DA0-89EE82AD3A80}" AutoDeleteType="true">E_InstrumentType</Name>
+			<Name GUID="{E225A539-8B42-F28E-736A-121416CA5E46}" AutoDeleteType="true">E_InstrumentType</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -927,12 +927,41 @@
 				<Enum>43</Enum>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[InstruType_First]]></Text>
-				<Enum>7</Enum>
+				<Text><![CDATA[InstruType_TipUpFenestratedGrasper]]></Text>
+				<Enum>44</Enum>
+				<Comment><![CDATA[TODO: add A7 instrument]]></Comment>
 			</EnumInfo>
 			<EnumInfo>
-				<Text><![CDATA[InstruType_Last]]></Text>
-				<Enum>43</Enum>
+				<Text><![CDATA[InstruType_MegaNeedleDriver]]></Text>
+				<Enum>45</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_DeBakeyForceps]]></Text>
+				<Enum>46</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_BlackDiamondForceps]]></Text>
+				<Enum>47</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_PottsScissors]]></Text>
+				<Enum>48</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_CurvedBipolarDissector]]></Text>
+				<Enum>49</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_MicroBipolarForceps]]></Text>
+				<Enum>50</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_ForceBipolar]]></Text>
+				<Enum>51</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[InstruType_MicroCauteryHook]]></Text>
+				<Enum>52</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -941,7 +970,7 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{F16B7A88-F011-C351-7C8E-15C08FED6589}" AutoDeleteType="true">ST_InstruStatus</Name>
+			<Name GUID="{2CEBA193-14F7-69CA-6E4B-CA2D35C1AB3C}" AutoDeleteType="true">ST_InstruStatus</Name>
 			<BitSize>128</BitSize>
 			<SubItem>
 				<Name>m_ready</Name>
@@ -954,7 +983,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>m_type</Name>
-				<Type GUID="{1A257946-3A85-B71C-7DA0-89EE82AD3A80}">E_InstrumentType</Type>
+				<Type GUID="{E225A539-8B42-F28E-736A-121416CA5E46}">E_InstrumentType</Type>
 				<BitSize>16</BitSize>
 				<BitOffs>16</BitOffs>
 				<Default>
@@ -981,7 +1010,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{80BCB830-5D1A-3520-FB55-3F1A447A3CAB}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{76AE3EB5-C5C1-421E-33CA-631DD99E975F}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>12544</BitSize>
@@ -1045,7 +1074,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>m_instruStauts</Name>
-				<Type GUID="{F16B7A88-F011-C351-7C8E-15C08FED6589}">ST_InstruStatus</Type>
+				<Type GUID="{2CEBA193-14F7-69CA-6E4B-CA2D35C1AB3C}">ST_InstruStatus</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -1421,9 +1450,9 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{D3C8B48E-F653-3067-FD16-7E6A63F1A9CA}" AutoDeleteType="true">ARRAY [1..4] OF ST_InstruStatus</Name>
+			<Name GUID="{446672DA-4B57-BB50-E534-9D7ED1AD3622}" AutoDeleteType="true">ARRAY [1..4] OF ST_InstruStatus</Name>
 			<BitSize>512</BitSize>
-			<BaseType GUID="{F16B7A88-F011-C351-7C8E-15C08FED6589}">ST_InstruStatus</BaseType>
+			<BaseType GUID="{2CEBA193-14F7-69CA-6E4B-CA2D35C1AB3C}">ST_InstruStatus</BaseType>
 			<ArrayInfo>
 				<LBound>1</LBound>
 				<Elements>4</Elements>
@@ -1886,7 +1915,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{92F0E3C1-2549-1D68-E11D-E909B4746E13}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{4F6E3FAF-76F7-BBFD-A970-C519C1D2247C}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2132,7 +2161,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot status, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{80BCB830-5D1A-3520-FB55-3F1A447A3CAB}">ST_SlaveStatus</Type>
+							<Type GUID="{76AE3EB5-C5C1-421E-33CA-631DD99E975F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
@@ -2283,7 +2312,7 @@
 						<Var>
 							<Name>RobotDynamics.m_instruInfo</Name>
 							<Comment><![CDATA[ instrument info]]></Comment>
-							<Type GUID="{D3C8B48E-F653-3067-FD16-7E6A63F1A9CA}">ARRAY [1..4] OF ST_InstruStatus</Type>
+							<Type GUID="{446672DA-4B57-BB50-E534-9D7ED1AD3622}">ARRAY [1..4] OF ST_InstruStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="1" AreaNo="17">
@@ -2427,7 +2456,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{80BCB830-5D1A-3520-FB55-3F1A447A3CAB}">ST_SlaveStatus</Type>
+							<Type GUID="{76AE3EB5-C5C1-421E-33CA-631DD99E975F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SetupArmControl.m_setupInputDataPool.m_safetyData</Name>
@@ -2639,7 +2668,7 @@
 						<Var>
 							<Name>CartControl.m_cartDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave status, import from slave control task]]></Comment>
-							<Type GUID="{80BCB830-5D1A-3520-FB55-3F1A447A3CAB}">ST_SlaveStatus</Type>
+							<Type GUID="{76AE3EB5-C5C1-421E-33CA-631DD99E975F}">ST_SlaveStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
@@ -2751,7 +2780,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{80BCB830-5D1A-3520-FB55-3F1A447A3CAB}">ST_SlaveStatus</Type>
+							<Type GUID="{76AE3EB5-C5C1-421E-33CA-631DD99E975F}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
@@ -8815,36 +8844,36 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500800010403}" Id="#x020300f0"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500800010403}" Id="#x020300d0"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500800205008}" Id="#x020301b0"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500880000403}" Id="#x02030130"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008A0000403}" Id="#x020300a0"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030010"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500880000403}" Id="#x02030110"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-5008A0000403}" Id="#x02030090"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-5008C0000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008E0000403}" Id="#x02030170"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500811000403}" Id="#x02030050"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500821000403}" Id="#x02030160"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500821010403}" Id="#x02030080"/>
-		<MappingInfo Identifier="{00000000-2003-0850-0220-500831000403}" Id="#x02030090"/>
+		<MappingInfo Identifier="{00000000-2003-0850-0220-500811000403}" Id="#x02030070"/>
+		<MappingInfo Identifier="{00000000-2003-0850-0220-500821000403}" Id="#x020301f0"/>
+		<MappingInfo Identifier="{00000000-2003-0850-0220-500821010403}" Id="#x020300c0"/>
+		<MappingInfo Identifier="{00000000-2003-0850-0220-500831000403}" Id="#x02030100"/>
 		<MappingInfo Identifier="{00000000-2005-0850-0020-500800205008}" Id="#x02030280"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0320-500841000403}" Id="#x020300e0"/>
-		<MappingInfo Identifier="{00000000-2005-0850-0320-500860000403}" Id="#x02030070"/>
+		<MappingInfo Identifier="{00000000-2005-0850-0320-500841000403}" Id="#x02030150"/>
+		<MappingInfo Identifier="{00000000-2005-0850-0320-500860000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x020300d0" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030010" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500804205008}" Id="#x02030190" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500803205008}" Id="#x02030120" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-0100-0304-0020-500800010403}" Id="#x02030100" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502003-0100-0304-0020-500800010403}" Id="#x020300e0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500804205008}" Id="#x020301d0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-2005-0850-0220-500803205008}" Id="#x020301c0" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x020300b0" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x020300a0" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030050" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00E0-0304-0020-5008E0000403}" Id="#x02030180" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502004-0040-0304-0020-500840000403}" Id="#x020301f0" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502004-0040-0304-0020-500840000403}" Id="#x02030160" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502004-0080-0304-0020-500880000403}" Id="#x02030140" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-0100-0304-0020-500800010403}" Id="#x02030110" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-0100-0304-0020-500800010403}" Id="#x020300f0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502005-2004-0850-0320-500804205008}" Id="#x020301e0" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502005-0080-0304-0020-500880000403}" Id="#x02030150" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502005-00A0-0304-0020-5008A0000403}" Id="#x020300c0" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-0080-0304-0020-500880000403}" Id="#x02030130" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502005-00A0-0304-0020-5008A0000403}" Id="#x020300b0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502005-00C0-0304-0020-5008C0000403}" Id="#x02030060" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502005-00E0-0304-0020-5008E0000403}" Id="#x020301a0" Watchdog="00000000000000000000000000000000"/>
 		<OwnerA Name="TIPC^SlaveController^SlaveController Instance">

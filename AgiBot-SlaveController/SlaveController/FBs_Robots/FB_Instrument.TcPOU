@@ -11,18 +11,11 @@ VAR
 	// instrument type
 	m_instruType : 	E_InstrumentType := InstruType_UNKNOWM;
 	
-	// instrument name
-	m_instruName : STRING:= g_instruNullName;
-	m_instruNameCH : WSTRING;
+	// instrument type info
+	m_instruTypeInfo : 	ST_InstruTypeInfo;
 	
-	// instrument type index, which is used to get relative parameters from global variable arrays
-	m_instruTypeIdx :INT:=0;
-	
-	// flag if instrument is singer finger
-	m_isSingleFinger:BOOL:= FALSE;
-	
-	//flag if instrument is energy type 
-	m_isEnergyType : UINT :=0;
+	//The state and parameters readed from the instrument
+	m_onChipData:ST_InstruOnChipData;
 	
 	// current and max allowed read tries
 	m_curReadTries :INT :=0;
@@ -34,20 +27,15 @@ VAR
 	//Joint port number
 	m_jointInstruAddr:UINT;	
 	
-	//LED port number
-	m_LEDAddr:UINT;	
+	//LED port address
+	m_LEDAddr:UINT;		
 
-	//Arm LED Prot	
-	m_LEDPortAddr:UINT;		
-	
-	//The state and parameters readed from the instrument
-	m_onChipData:ST_InstruOnChipData;
-	
-	// instrument kinematic parameters
-	m_kinematicParameters:ST_InstruKinematicParam; 
-	
 	// joint position when instrument is at ZERO posture
 	m_jntPosOffset:Vec8d;
+	
+	// instrument wrist DH joint limit
+	m_wristMinDHJntPos :Vec3d;
+	m_wristMaxDHJntPos :Vec3d;
 	
 	// reduction from motor joint to endoscope rotate joint
 	m_endoscopeRotateReduction :LREAL := 2.0/3.0;
@@ -113,64 +101,28 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// search instrument type
-m_instruTypeIdx:=0;
-FOR i:=1 TO g_instruTypesNum DO
-	IF g_instruIDs[i] = m_onChipData.m_InstruID THEN
-		m_instruTypeIdx := i;
+checkInstruType :=FALSE;
+FOR i:=1 TO g_instruTypeNum DO 
+	IF g_instruTypePool[i].m_InstruID = m_onChipData.m_InstruID THEN
+		checkInstruType:=TRUE;
+		m_instruTypeInfo := g_instruTypePool[i];
 		EXIT;
 	END_IF
 END_FOR
 
 // return directly if instrument ID is invalid
-checkInstruType := m_instruTypeIdx >0;
 IF NOT(checkInstruType) THEN
 	RETURN;
 END_IF
-
-// instrument type and name
 m_instruType := m_onChipData.m_InstruID;
-m_instruName :=GVL_InstruCtrlParams.g_instruNameString[m_instruTypeIdx];
-m_instruNameCH := GVL_InstruCtrlParams.g_instruNameStringCH[m_instruTypeIdx];
-m_onChipData.m_InstrumaxUsageCounts := GVL_InstruCtrlParams.g_instruTotalLife[m_instruTypeIdx];
 
-// check if instrument has one finger
-m_isSingleFinger :=  (m_instruType = InstruType_CauteryHook OR  m_instruType = InstruType_CauterySpatula );
-
-// check the type of energy instrument
-IF m_instruType = InstruType_CurvedScissors OR m_instruType = InstruType_CauteryHook OR m_instruType = InstruType_CauterySpatula THEN
-	m_isEnergyType := 1;
-ELSIF m_instruType = InstruType_MarylandForceps OR m_instruType = InstruType_FenestratedForceps THEN
-	m_isEnergyType := 2;
-ELSIF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_UltrasoundKnifeU THEN
-	m_isEnergyType := 3;
-ELSE
-	m_isEnergyType := 0;
-END_IF
-
-
-// update instrument kinematic parameters based on readed info
-IF m_instruTypeIdx > 0 THEN
-	m_kinematicParameters.m_maxGripAngle := g_instruMaxGripAngle[m_instruTypeIdx];
-	
-	m_kinematicParameters.k13:=k13[m_instruTypeIdx];
-	m_kinematicParameters.k23:=k23[m_instruTypeIdx];
-	m_kinematicParameters.kx:=kx[m_instruTypeIdx];
-	m_kinematicParameters.ky:=ky[m_instruTypeIdx];
-	m_kinematicParameters.kz:=kz[m_instruTypeIdx];
-			
-	m_kinematicParameters.m_rodLength := GVL_InstruCtrlParams.g_instruRodLength[m_instruTypeIdx] - GVL_SlaveArmKinematic.g_panelHeight;
-	m_kinematicParameters.m_headLength := GVL_InstruCtrlParams.g_instruHeadLength[m_instruTypeIdx];
-	m_kinematicParameters.m_fingerLength := GVL_InstruCtrlParams.g_instruFingerLength[m_instruTypeIdx];
-
-	m_kinematicParameters.m_wristMinDHJntPos[1]:=-GVL_InstruCtrlParams.g_instruMaxRollAngle[m_instruTypeIdx];
-	m_kinematicParameters.m_wristMaxDHJntPos[1]:=GVL_InstruCtrlParams.g_instruMaxRollAngle[m_instruTypeIdx];
-	m_kinematicParameters.m_wristMinDHJntPos[2]:=-GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx]-pi/2;
-	m_kinematicParameters.m_wristMaxDHJntPos[2]:=GVL_InstruCtrlParams.g_instruMaxPitchAngle[m_instruTypeIdx]-pi/2;
-	m_kinematicParameters.m_wristMinDHJntPos[3]:=-GVL_InstruCtrlParams.g_instruMaxYawAngle[m_instruTypeIdx];
-	m_kinematicParameters.m_wristMaxDHJntPos[3]:=GVL_InstruCtrlParams.g_instruMaxYawAngle[m_instruTypeIdx];
-
-END_IF
-
+// update DH joint limit
+m_wristMinDHJntPos[1]:=-m_instruTypeInfo.m_rollLimit;
+m_wristMaxDHJntPos[1]:=m_instruTypeInfo.m_rollLimit;
+m_wristMinDHJntPos[2]:=-m_instruTypeInfo.m_pitchLimit-pi/2;
+m_wristMaxDHJntPos[2]:=m_instruTypeInfo.m_pitchLimit-pi/2;
+m_wristMinDHJntPos[3]:=-m_instruTypeInfo.m_yawLimit;
+m_wristMaxDHJntPos[3]:=m_instruTypeInfo.m_yawLimit;
 
 ]]></ST>
       </Implementation>
@@ -233,7 +185,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// suppose finger is  closed and zero force if instrument has only one finger
-IF m_isSingleFinger THEN
+IF m_instruTypeInfo.m_isSingleFinger THEN
 	o_instruGripAngle := 0;
 	o_instruGripForceLevel:= 0;
 	RETURN;
@@ -241,14 +193,14 @@ END_IF
 
 // finger closed and force applied
 IF i_masterGripAng < g_masterGripForceStartAng THEN
-	o_instruGripAngle := m_kinematicParameters.m_minGripAngle;
+	o_instruGripAngle := g_minSlaveGripAngle;
 	// NOTE: force is applied from 50%，as minimum gripper angle already apply some sort of force
 	o_instruGripForceLevel := 50+50*(g_masterGripForceStartAng - i_masterGripAng)/(g_masterGripForceStartAng - g_minMasterGripAngle);
 // finger open
 ELSE
 	o_instruGripAngle := (g_maxMasterGripAngle - i_masterGripAng)/(g_maxMasterGripAngle - g_masterGripForceStartAng);
-	o_instruGripAngle :=m_kinematicParameters.m_maxGripAngle - o_instruGripAngle * (m_kinematicParameters.m_maxGripAngle - m_kinematicParameters.m_minGripAngle);
-	o_instruGripAngle := LIMIT(m_kinematicParameters.m_minGripAngle, o_instruGripAngle, m_kinematicParameters.m_maxGripAngle );
+	o_instruGripAngle :=m_instruTypeInfo.m_maxGripAngle - o_instruGripAngle * (m_instruTypeInfo.m_maxGripAngle - g_minSlaveGripAngle);
+	o_instruGripAngle := LIMIT(g_minSlaveGripAngle, o_instruGripAngle, m_instruTypeInfo.m_maxGripAngle );
 	o_instruGripForceLevel:=0;
 END_IF]]></ST>
       </Implementation>
@@ -270,8 +222,8 @@ m_LEDAddr := GVL_SlaveJointEncoderCaliData.g_slaveLEDNetPort[armIdx];
 
 // init joint motion range
 FOR i:=1 TO 3 DO
-	m_kinematicParameters.m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
-	m_kinematicParameters.m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
+	m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
+	m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
 END_FOR
 ]]></ST>
       </Implementation>
@@ -286,8 +238,7 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR i := 4 TO 8 BY 1 DO
+        <ST><![CDATA[FOR i := 4 TO 8 BY 1 DO
 	m_jntPosOffset[i]:=m_curJntPos[i];
 END_FOR]]></ST>
       </Implementation>
@@ -311,12 +262,22 @@ END_VAR
 VAR
 	jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5 :LREAL;
 	gripAngle:LREAL;
+	kx,ky,kz, k13, k23,openAngleDir:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[r_DHJntPos[1]:=i_jntPos[1];
 r_DHJntPos[2]:=i_jntPos[2];
 r_DHJntPos[3]:=i_jntPos[3];
+
+// kinematic variables
+openAngleDir:=-1;
+kx:=-1;
+ky:=m_instruTypeInfo.m_k2;
+kz:=m_instruTypeInfo.m_k1;
+k13:=m_instruTypeInfo.m_k3;
+k23:=m_instruTypeInfo.m_k3;
+
 
 // ################## endoscope ############################
 IF m_instruType = InstruType_endoscope THEN
@@ -332,7 +293,7 @@ END_IF
 
 // ################## ultrosonic knief ############################
 IF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_UltrasoundKnifeU THEN
-	r_DHJntPos[4]:=-(i_jntPos[8]-m_jntPosOffset[8])/m_kinematicParameters.kx;
+	r_DHJntPos[4]:=-(i_jntPos[8]-m_jntPosOffset[8])/kx;
 	r_DHJntPos[5]:=-pi/2;
 	r_DHJntPos[6]:=0;
 	r_gripAngle:=ultrasoundKnifeGripAngleFK(i_jntPos[6]-m_jntPosOffset[6]);
@@ -349,27 +310,27 @@ jntPosL4:=-(i_jntPos[7]-m_jntPosOffset[7]);
 jntPosL5:=-(i_jntPos[8]-m_jntPosOffset[8]);
 
 // diable L1 if instrument is single finger
-IF m_isSingleFinger THEN
+IF m_instruTypeInfo.m_isSingleFinger THEN
 	jntPosL1 := -jntPosL2;
 END_IF
 
 // instrument FK in local coordinate
-r_DHJntPos[4]:=jntPosL4/m_kinematicParameters.kx;
-r_DHJntPos[5]:=jntPosL3/m_kinematicParameters.ky;
-r_DHJntPos[6]:=(jntPosL1-jntPosL2-2*r_DHJntPos[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
+r_DHJntPos[4]:=jntPosL4/kx;
+r_DHJntPos[5]:=jntPosL3/ky;
+r_DHJntPos[6]:=(jntPosL1-jntPosL2-2*r_DHJntPos[5]*k13*kz)/(2*openAngleDir*kz);
 
 // convert instrument rotation to arm DH joint position
 r_DHJntPos[5]:=-r_DHJntPos[5]-pi/2;
 r_DHJntPos[6]:=-r_DHJntPos[6];
 
 // grip angle
-gripAngle:=(jntPosL1+jntPosL2)/(m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
+gripAngle:=(jntPosL1+jntPosL2)/(openAngleDir*kz);
 
 //################### gripper angle handle #################
-IF (InstruType_ProGraspForceps=m_instruType) THEN//细齿无创抓钳
+IF (InstruType_ProGraspForceps=m_instruType OR InstruType_ForceBipolar=m_instruType) THEN//细齿无创抓钳
 	proGrsapForcepsGripAngleFK(frontAngle:= gripAngle, endAngle=> r_gripAngle);
 
-ELSIF (InstruType_CauteryHook = m_instruType) THEN//单级电钩
+ELSIF (InstruType_CauteryHook = m_instruType OR InstruType_CauterySpatula = m_instruType) THEN//单级电钩
 	r_gripAngle:=0;
 ELSE
 	r_gripAngle:=gripAngle;
@@ -390,8 +351,7 @@ VAR
 	Have_Data:BOOL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-FOR k1:= 1 TO 100 BY 1 DO
+        <ST><![CDATA[FOR k1:= 1 TO 100 BY 1 DO
 	IF i_NewValue=i_ArrayData[k1] THEN
 		Have_Data:=TRUE;
 		EXIT;
@@ -431,21 +391,23 @@ VAR
 	rot_z:lreal;
 
 	kx,ky,kz,k13,k23:LREAL;
-	open_direction:INT;
-	
 	d,ra:LREAL;
-	AngleOffsetL3:LREAL;
-	m_targetOffsetL3:LREAL;
-	m_actOffsetL3:LREAL;
 	
 	m_gripAnglePbox:Vec8d;
 
-	L3Offset:LREAL:=-3;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[o_jntPos[1] := i_DHJntPos[1];
 o_jntPos[2] := i_DHJntPos[2];
 o_jntPos[3] := i_DHJntPos[3];
+
+// kinematic variables
+d:=-1;
+kx:=-1;
+ky:=m_instruTypeInfo.m_k2;
+kz:=m_instruTypeInfo.m_k1;
+k13:=m_instruTypeInfo.m_k3;
+k23:=m_instruTypeInfo.m_k3;
 
 // ################## endoscope ############################
 IF m_instruType = InstruType_endoscope THEN
@@ -458,10 +420,10 @@ IF m_instruType = InstruType_endoscope THEN
 END_IF
 
 //################### gripper angle handle #################
-IF (12=onChipData.m_InstruID) THEN//细齿无创抓钳
+IF (InstruType_ProGraspForceps=m_instruType OR InstruType_ForceBipolar=m_instruType) THEN//细齿无创抓钳
 	proGrsapForcepsGripAngleIK(endAngle:= i_gripAngle, frontAngle=> gripAngle);
 	
-ELSIF 16 = onChipData.m_InstruID THEN//单级电钩\电铲
+ELSIF (InstruType_CauteryHook = m_instruType OR InstruType_CauterySpatula = m_instruType)  THEN//单级电钩\电铲
 	gripAngle:=0;
 	
 ELSE
@@ -473,14 +435,6 @@ END_IF
 rot_x:=i_DHJntPos[4];
 rot_y:=-i_DHJntPos[5]-pi/2;
 rot_z:=-i_DHJntPos[6];
-
-// instrument IK in local coordinate
-k13:=m_kinematicParameters.k13;
-k23:=m_kinematicParameters.k23;
-kx:=m_kinematicParameters.kx;
-ky:=m_kinematicParameters.ky;
-kz:=m_kinematicParameters.kz;
-d:=m_kinematicParameters.m_openAngleDir;
 
 // ################## ultrosonic knief ############################
 IF InstruType_UltrasoundKnifeS = onChipData.m_InstruID OR InstruType_UltrasoundKnifeU = onChipData.m_InstruID THEN
@@ -522,8 +476,7 @@ VAR_IN_OUT
 END_VAR
 
 VAR
-	jntPosL1,jntPosL2,jntPosL3,jntPosL4,jntPosL5 :LREAL;
-	gripAngle:LREAL;
+	kx,ky,kz, k13, k23,openAngleDir:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -531,35 +484,21 @@ END_VAR
 r_DHJntVel[2]:=i_jntVel[2];
 r_DHJntVel[3]:=i_jntVel[3];
 
-r_DHJntVel[4]:=-i_jntVel[7]/m_kinematicParameters.kx;
-r_DHJntVel[5]:=i_jntVel[6]/m_kinematicParameters.ky;
-r_DHJntVel[6]:=(i_jntVel[4]-i_jntVel[5]-2*r_DHJntVel[5]*m_kinematicParameters.k13*m_kinematicParameters.kz)/(2*m_kinematicParameters.m_openAngleDir*m_kinematicParameters.kz);
+// kinematic variables
+openAngleDir:=-1;
+kx:=-1;
+ky:=m_instruTypeInfo.m_k2;
+kz:=m_instruTypeInfo.m_k1;
+k13:=m_instruTypeInfo.m_k3;
+k23:=m_instruTypeInfo.m_k3;
+
+r_DHJntVel[4]:=-i_jntVel[7]/kx;
+r_DHJntVel[5]:=i_jntVel[6]/ky;
+r_DHJntVel[6]:=(i_jntVel[4]-i_jntVel[5]-2*r_DHJntVel[5]*k13*kz)/(2*openAngleDir*kz);
 r_DHJntVel[5]:=-r_DHJntVel[5];
 r_DHJntVel[6]:=-r_DHJntVel[6];]]></ST>
       </Implementation>
     </Method>
-    <Property Name="instruName" Id="{483b355d-6396-4702-92b6-d3c009619627}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY instruName : String]]></Declaration>
-      <Get Name="Get" Id="{3c4e31c2-6928-4ddc-bd08-7af3cec37927}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[instruName := m_instruName;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="instruNameCH" Id="{fe4ca7cf-bcad-49ba-86fd-3ae926574c61}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY instruNameCH : WSTRING]]></Declaration>
-      <Get Name="Get" Id="{27367f18-af3a-4bb4-875f-a9cbdbda8e9f}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[instruNameCH := m_instruNameCH;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
     <Method Name="InstruSreiesFind" Id="{f880300d-e9dd-456f-88b6-72b1cc8bd3d5}">
       <Declaration><![CDATA[METHOD PROTECTED InstruSreiesFind : BOOL
 VAR_INPUT
@@ -585,7 +524,7 @@ END_FOR
       </Implementation>
     </Method>
     <Property Name="instruType" Id="{dee9b466-61c8-4830-8c3c-8317ba8d7fb1}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY PUBLIC instruType : INT]]></Declaration>
+      <Declaration><![CDATA[PROPERTY PUBLIC instruType : E_InstrumentType]]></Declaration>
       <Get Name="Get" Id="{49e23c7c-bb55-4631-aecb-7cce8ba4d643}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -595,26 +534,14 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="isEnergyType" Id="{7287771d-2f2c-4934-9b23-a12078d9e1e2}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY isEnergyType : UINT
-]]></Declaration>
-      <Get Name="Get" Id="{0252a723-f3c1-41a2-b14a-db4932941c3c}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[isEnergyType := m_isEnergyType;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="kinematicParameters" Id="{e7ad17bd-82e9-477e-9e66-6a8feac51534}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY kinematicParameters :REFERENCE TO ST_InstruKinematicParam]]></Declaration>
+    <Property Name="instruTypeInfo" Id="{e7ad17bd-82e9-477e-9e66-6a8feac51534}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY instruTypeInfo :REFERENCE TO ST_InstruTypeInfo]]></Declaration>
       <Get Name="Get" Id="{d0447347-931d-4e2e-81b2-c8e4acc99fd6}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[kinematicParameters ref=m_kinematicParameters;]]></ST>
+          <ST><![CDATA[instruTypeInfo ref=m_instruTypeInfo;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -677,36 +604,39 @@ VAR_OUTPUT
 	Succeed:BOOL;
 END_VAR
 VAR
-	minFrontAng :LREAL  := 16.6*2*g_deg2Rad;
-	maxFrontAng :LREAL := 49.18*2*g_deg2Rad;
+	// prograsp data
 	AB :LREAL := 2.8;
 	BC:LREAL := 5.26;
-	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
-	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
+	initA:LREAL := 16.6 * g_deg2Rad; 
+	initC:LREAL := 8.75*g_deg2Rad;
+	
+	SIN_C,Angle_Inc_C,Angle_C,Angle_A,Angle_Inc_A:LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//**************已知：器械前端开合角，求解：末端开合角***************//
-
-//输入合法性判断，物理极限是[16.6*2，49.18*2]度
-frontAngle := LIMIT(minFrontAng, frontAngle, maxFrontAng);
-
-
-SIN_C:=AB*SIN(Angle_Initial_A)/BC;
-Angle_Initial_C:=ASIN(SIN_C);
+        <ST><![CDATA[//**************已知：器械前端开合角，求解：末端开合角***************//
+// determine prograsp type data
+IF InstruType_ProGraspForceps=m_instruType THEN
+	AB:=g_proGraspAB;
+	BC:=g_proGraspBC;
+	initA := g_proGraspInitA;
+	initC := g_proGraspInitC;
+ELSIF InstruType_ForceBipolar=m_instruType THEN
+	AB:=g_proGrasp2AB;
+	BC:=g_proGrasp2BC;
+	initA := g_proGrasp2InitA;
+	initC := g_proGrasp2InitC;
+END_IF
 
 Angle_Inc_A:=frontAngle/2;
-Angle_A:=Angle_Initial_A+Angle_Inc_A;
+Angle_A:=initA+Angle_Inc_A;
+Angle_A := LIMIT(0.0, Angle_A, pi);
 
 SIN_C:=AB*SIN(Angle_A)/BC;
 Angle_C:=ASIN(SIN_C);
 
-Angle_Inc_C:=Angle_C-Angle_Initial_C;
-endAngle:=Angle_Inc_C*2;
-
-
-]]></ST>
+Angle_Inc_C:=Angle_C-initC;
+endAngle:=Angle_Inc_C*2;]]></ST>
       </Implementation>
     </Method>
     <Method Name="proGrsapForcepsGripAngleIK" Id="{d41bf91a-0d5c-464e-b520-ee71cb3a1637}">
@@ -719,35 +649,36 @@ VAR_OUTPUT
 	Succeed:BOOL;
 END_VAR
 VAR
-	minEndAng :LREAL  := 0;
-	maxEndAng :LREAL := 38*g_deg2Rad;
 	AB :LREAL := 2.8;
 	BC:LREAL := 5.26;
-	Angle_Initial_A:LREAL := 16.6 * g_deg2Rad; 
-	
-	SIN_C,Angle_Initial_C,End_Angle_Single,Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
+	initA:LREAL := 16.6 * g_deg2Rad; 
+	initC:LREAL := 8.75*g_deg2Rad;
+	Angle_Inc_C,Angle_C,SIN_A,Angle_A,Angle_Inc_A:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//***************已知：器械末端开合角，求解：前端开合角********************//
+        <ST><![CDATA[//***************已知：器械末端开合角，求解：前端开合角********************//
+// determine prograsp type data
+IF InstruType_ProGraspForceps=m_instruType THEN
+	AB:=g_proGraspAB;
+	BC:=g_proGraspBC;
+	initA := g_proGraspInitA;
+	initC := g_proGraspInitC;
+ELSIF InstruType_ForceBipolar=m_instruType THEN
+	AB:=g_proGrasp2AB;
+	BC:=g_proGrasp2BC;
+	initA := g_proGrasp2InitA;
+	initC := g_proGrasp2InitC;
+END_IF
 
-//输入合法性判断，物理极限是[0,30]度
-endAngle:= LIMIT(minEndAng, endAngle, maxEndAng);
-
-SIN_C:=AB*SIN(Angle_Initial_A)/BC;
-Angle_Initial_C:=ASIN(SIN_C);
-
-End_Angle_Single:=endAngle/2;
-Angle_Inc_C:=End_Angle_Single;
-Angle_C:=Angle_Initial_C+Angle_Inc_C;
+Angle_Inc_C:=endAngle/2;
+Angle_C:=initC+Angle_Inc_C;
+Angle_C := LIMIT(0, Angle_C, pi);
 
 SIN_A:=BC*SIN(Angle_C)/AB;
 Angle_A:=ASIN(SIN_A);
 
-Angle_Inc_A:=Angle_A-Angle_Initial_A;
-frontAngle:=Angle_Inc_A*2;
-
-]]></ST>
+Angle_Inc_A:=Angle_A-initA;
+frontAngle:=Angle_Inc_A*2;]]></ST>
       </Implementation>
     </Method>
     <Method Name="readParameters" Id="{fafb5a79-7caf-47d4-9d2f-b3dbd95048cf}">
@@ -854,17 +785,10 @@ CASE m_Step OF
 		END_IF
 		
 	110:
-		// check instrument type and relative data
+		// get insturment typeinfo
 		m_onChipData.m_InstruReadSucceed:=checkInstruType();
-		//处理当器械使用次数达到上限后、在同一场手术中还能使用
-		IF m_onChipData.m_InstruusageCounts=(m_onChipData.m_InstrumaxUsageCounts -1) THEN		
-			//TODO: check this part
-			GVL_interactUI.g_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_onChipData.m_InstruseriesNum, i_ArrayData:= GVL_interactUI.g_InstruSeriesRecord);
-		END_IF
-		m_Step:=120;
 		
-		
-	120://结果诊断
+		//结果诊断
 		m_onChipData.m_ErrorID:=0;
 		IF NOT(m_onChipData.m_InstruReadSucceed) THEN
 			m_onChipData.m_Error:=TRUE;
@@ -875,7 +799,7 @@ CASE m_Step OF
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=3;
 			
-		ELSIF m_onChipData.m_InstruusageCounts>(m_onChipData.m_InstrumaxUsageCounts -1) AND m_onChipData.m_InstruID<>InstruType_Endoscope THEN
+		ELSIF m_onChipData.m_InstruusageCounts>(m_instruTypeInfo.m_maxUseNum -1) AND m_instruType<>InstruType_Endoscope THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=GVL_interactUI.g_InstruSeriesRecord );
 			IF m_HaveRecord THEN
 				//
@@ -885,6 +809,13 @@ CASE m_Step OF
 				m_onChipData.m_ErrorID:=2;
 			END_IF
 		END_IF
+		
+		//处理当器械使用次数达到上限后、在同一场手术中还能使用
+		IF m_onChipData.m_InstruReadSucceed AND m_onChipData.m_InstruusageCounts=(m_instruTypeInfo.m_maxUseNum -1) THEN		
+			//TODO: check this part
+			GVL_interactUI.g_InstruSeriesRecord:=InstruIDRecord(i_NewValue:= m_onChipData.m_InstruseriesNum, i_ArrayData:= GVL_interactUI.g_InstruSeriesRecord);
+		END_IF
+		
 		m_Step :=-1;
 		m_curReadTries := m_curReadTries +1;
 	
@@ -906,11 +837,7 @@ m_onChipData.m_InstruseriesNum :=0;
 m_onChipData.m_Error:=FALSE;
 m_onChipData.m_ErrorID:=0;
 m_onChipData.m_InstruReadSucceed:=FALSE;
-m_isSingleFinger:=FALSE;
-m_isEnergyType := 0;
 m_instruType:=InstruType_UNKNOWM;
-m_instruName := g_instruNullName;
-m_instruTypeIdx := 0 ;
 
 FOR i:= 4 TO 8 BY 1 DO
 	m_jntPosOffset[i]:=0;
@@ -918,8 +845,8 @@ END_FOR
 
 // init joint motion range
 FOR i:=1 TO 3 DO
-	m_kinematicParameters.m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
-	m_kinematicParameters.m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
+	m_wristMinDHJntPos[i]:=GVL_SlaveMotorParameters.g_minDHJntPos[i+3];
+	m_wristMaxDHJntPos[i]:=GVL_SlaveMotorParameters.g_maxDHJntPos[i+3];
 END_FOR
 
 // reset endoscope type and posture
@@ -963,8 +890,7 @@ VAR
 	m_jntPos : LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-m_jntPos := i_jntPos;
+        <ST><![CDATA[m_jntPos := i_jntPos;
 
 m_jntPos := LIMIT (-20*g_deg2Rad,m_jntPos,70*g_deg2Rad);
 
@@ -982,8 +908,7 @@ VAR
 	m_gripAngle : LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-m_gripAngle := i_gripAngle;
+        <ST><![CDATA[m_gripAngle := i_gripAngle;
 
 ultrasoundKnifeGripAngleIK := (g_uknifeGripTravel * (SIN(g_uknifeGripDividAngle) - SIN(g_uknifeGripDividAngle - m_gripAngle))/(g_uknifeMotorLead*g_uknifeLeverRatio/(2*pi)));]]></ST>
       </Implementation>
@@ -1140,7 +1065,19 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.checkInstruType">
-      <LineId Id="468" Count="59" />
+      <LineId Id="468" Count="0" />
+      <LineId Id="541" Count="0" />
+      <LineId Id="534" Count="1" />
+      <LineId Id="537" Count="0" />
+      <LineId Id="539" Count="1" />
+      <LineId Id="538" Count="0" />
+      <LineId Id="536" Count="0" />
+      <LineId Id="476" Count="1" />
+      <LineId Id="479" Count="2" />
+      <LineId Id="542" Count="0" />
+      <LineId Id="503" Count="1" />
+      <LineId Id="518" Count="5" />
+      <LineId Id="527" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.curScopePosture.Get">
@@ -1172,34 +1109,40 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.initInstruJntPos">
-      <LineId Id="9" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="1" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruFK">
-      <LineId Id="425" Count="60" />
+      <LineId Id="425" Count="2" />
+      <LineId Id="507" Count="0" />
+      <LineId Id="506" Count="0" />
+      <LineId Id="510" Count="0" />
+      <LineId Id="508" Count="0" />
+      <LineId Id="511" Count="3" />
+      <LineId Id="509" Count="0" />
+      <LineId Id="428" Count="57" />
       <LineId Id="159" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruIDRecord">
-      <LineId Id="12" Count="16" />
+      <LineId Id="13" Count="15" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruIK">
-      <LineId Id="589" Count="61" />
+      <LineId Id="589" Count="2" />
+      <LineId Id="682" Count="6" />
+      <LineId Id="681" Count="0" />
+      <LineId Id="592" Count="26" />
+      <LineId Id="627" Count="23" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.instruJntVelFK">
       <LineId Id="131" Count="0" />
       <LineId Id="134" Count="1" />
+      <LineId Id="239" Count="6" />
+      <LineId Id="238" Count="0" />
       <LineId Id="200" Count="3" />
       <LineId Id="159" Count="0" />
       <LineId Id="220" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.instruName.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.instruNameCH.Get">
-      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruSreiesFind">
       <LineId Id="34" Count="8" />
@@ -1208,10 +1151,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
     <LineIds Name="FB_Instrument.instruType.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Instrument.isEnergyType.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Instrument.kinematicParameters.Get">
+    <LineIds Name="FB_Instrument.instruTypeInfo.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.nextScopePosture.Get">
@@ -1230,21 +1170,38 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.proGrsapForcepsGripAngleFK">
-      <LineId Id="6" Count="3" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="20" Count="12" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="69" Count="3" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="74" Count="2" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="25" Count="5" />
     </LineIds>
     <LineIds Name="FB_Instrument.proGrsapForcepsGripAngleIK">
-      <LineId Id="12" Count="3" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="24" Count="13" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="73" Count="10" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="31" Count="5" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="1095" Count="127" />
+      <LineId Id="1095" Count="93" />
+      <LineId Id="1239" Count="2" />
+      <LineId Id="1238" Count="0" />
+      <LineId Id="1200" Count="19" />
+      <LineId Id="1242" Count="0" />
+      <LineId Id="1244" Count="3" />
+      <LineId Id="1243" Count="0" />
+      <LineId Id="1248" Count="0" />
+      <LineId Id="1220" Count="2" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">
@@ -1252,10 +1209,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="1" />
       <LineId Id="11" Count="1" />
       <LineId Id="16" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="79" Count="0" />
       <LineId Id="59" Count="0" />
-      <LineId Id="124" Count="1" />
       <LineId Id="26" Count="0" />
       <LineId Id="22" Count="1" />
       <LineId Id="21" Count="0" />
@@ -1280,11 +1234,11 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.ultrasoundKnifeGripAngleFK">
-      <LineId Id="3" Count="4" />
+      <LineId Id="4" Count="3" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.ultrasoundKnifeGripAngleIK">
-      <LineId Id="3" Count="2" />
+      <LineId Id="4" Count="1" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.writeNumOfUseToChip">

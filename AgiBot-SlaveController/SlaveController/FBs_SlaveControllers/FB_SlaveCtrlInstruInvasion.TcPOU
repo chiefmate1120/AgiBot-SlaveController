@@ -41,8 +41,8 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_cmdJntPos[3]:=i_slaveArm.curJntPos[3];
 // compute current instrument depth
-curInstruDepth := i_slaveArm.curJntPos[3]-i_slaveArm.instrument.kinematicParameters.m_rodLength-i_slaveArm.instrument.kinematicParameters.m_headLength
-						- i_slaveArm.instrument.kinematicParameters.m_fingerLength-m_instruInvasionDepthSafetyBuffer;
+curInstruDepth := i_slaveArm.curJntPos[3]-i_slaveArm.instrument.instruTypeInfo.m_rodLength-i_slaveArm.instrument.instruTypeInfo.m_headLength
+						- i_slaveArm.instrument.instruTypeInfo.m_fingerLength-m_instruInvasionDepthSafetyBuffer;
 
 m_invasionDis:=curInstruDepth-i_slaveArm.m_instruInvasionDepth;
 						
