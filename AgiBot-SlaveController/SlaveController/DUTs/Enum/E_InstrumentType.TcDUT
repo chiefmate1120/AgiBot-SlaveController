@@ -18,7 +18,6 @@
 	InstruType_Endoscope := 20,
 	InstruType_UltrasoundKnifeS :=42,
 	InstruType_UltrasoundKnifeU :=43,
-	//TODO: add A7 instrument
 	InstruType_TipUpFenestratedGrasper :=44,
 	InstruType_MegaNeedleDriver :=45,
 	InstruType_DeBakeyForceps :=46,
@@ -28,7 +27,6 @@
 	InstruType_MicroBipolarForceps :=50,
 	InstruType_ForceBipolar :=51,
 	InstruType_MicroCauteryHook :=52
-
 );
 END_TYPE
 ]]></Declaration>

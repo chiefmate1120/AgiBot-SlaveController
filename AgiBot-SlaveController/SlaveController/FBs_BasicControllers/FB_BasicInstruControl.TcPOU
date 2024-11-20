@@ -165,9 +165,7 @@ FOR i:=1 TO 4 DO
 		m_jntBacklash [i]:=0;
 	END_IF
 	
-END_FOR
-
-]]></ST>
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{ad68ad31-14f3-42f4-bf27-26d385743fba}">
@@ -285,8 +283,7 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.calcBacklash">
-      <LineId Id="402" Count="70" />
-      <LineId Id="60" Count="0" />
+      <LineId Id="402" Count="69" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">
       <LineId Id="202" Count="15" />

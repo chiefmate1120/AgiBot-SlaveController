@@ -142,9 +142,7 @@ m_yawJntCaliStatus :=0;
 m_zeroPosWritten := false;
 
 // update commands to arm
-copyCmds(r_slaveArmCtrlCmd);
-
-]]></ST>
+copyCmds(r_slaveArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
     <Method Name="pitchJntCali" Id="{e9c6d1cd-4c78-4bd5-b668-b8facd8b1f86}">
@@ -199,11 +197,7 @@ CASE m_pitchJntCaliStatus OF
 END_CASE
 
 // traj plan
-m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);
-
-
-
-]]></ST>
+m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);]]></ST>
       </Implementation>
     </Method>
     <Method Name="rollJntCali" Id="{6fecbb26-dee3-460d-8ebc-c5e9758738f5}">
@@ -258,11 +252,7 @@ CASE m_rollJntCaliStatus OF
 END_CASE
 
 // traj plan
-m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);
-
-
-
-]]></ST>
+m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);]]></ST>
       </Implementation>
     </Method>
     <Method Name="yawJntCali_finger" Id="{367337ae-1143-4558-b119-2ddaf442a22f}">
@@ -317,11 +307,7 @@ CASE m_yawJntCaliStatus OF
 END_CASE
 
 // traj plan
-m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);
-
-
-
-]]></ST>
+m_jntOTG[jntIdx].run(m_targetMountPos[jntIdx],0.0, o_cmdAcc=>m_cmdJntAcc[jntIdx],o_cmdVel=>m_cmdJntVel[jntIdx],o_cmdPos=>m_cmdJntPos[jntIdx]);]]></ST>
       </Implementation>
     </Method>
     <Method Name="yawJntCali_gripper" Id="{98a7face-4e61-461c-9585-b9ec777fc235}">
@@ -520,11 +506,7 @@ END_CASE
 
 // traj plan
 m_jntOTG[4].run(m_targetMountPos[4],0.0, o_cmdAcc=>m_cmdJntAcc[4],o_cmdVel=>m_cmdJntVel[4],o_cmdPos=>m_cmdJntPos[4]);
-m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cmdJntVel[5],o_cmdPos=>m_cmdJntPos[5]);
-
-
-
-]]></ST>
+m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cmdJntVel[5],o_cmdPos=>m_cmdJntPos[5]);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_SlaveCtrlInstruCali">
@@ -568,20 +550,16 @@ m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cm
       <LineId Id="478" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.init">
-      <LineId Id="246" Count="23" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="246" Count="22" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.pitchJntCali">
-      <LineId Id="284" Count="43" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="284" Count="40" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.rollJntCali">
-      <LineId Id="187" Count="43" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="187" Count="40" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_finger">
-      <LineId Id="240" Count="43" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="240" Count="40" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlInstruCali.yawJntCali_gripper">
       <LineId Id="890" Count="0" />
@@ -592,8 +570,7 @@ m_jntOTG[5].run(m_targetMountPos[5],0.0, o_cmdAcc=>m_cmdJntAcc[5],o_cmdVel=>m_cm
       <LineId Id="1081" Count="0" />
       <LineId Id="1083" Count="3" />
       <LineId Id="1082" Count="0" />
-      <LineId Id="891" Count="177" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="891" Count="174" />
     </LineIds>
   </POU>
 </TcPlcObject>
