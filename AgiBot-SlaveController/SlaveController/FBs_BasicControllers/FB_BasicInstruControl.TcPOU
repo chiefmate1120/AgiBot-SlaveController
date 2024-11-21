@@ -131,9 +131,9 @@ IF m_graspForceLevel >0  THEN
 	IF ABS(i_cmdYawPos - m_lastCmdYawAng) > m_jntMoveStep  THEN
 		// determin  compensated yaw  angle
 		IF (i_cmdYawPos - m_lastCmdYawAng) * m_gripYawCompAng <= 0 THEN
-			m_gripYawCompAng := m_gripYawCompAng + 4*m_jntMoveStep * (i_cmdYawPos-m_lastCmdYawAng);
+			m_gripYawCompAng := m_gripYawCompAng + 4*m_jntMoveStep * sign(i_cmdYawPos-m_lastCmdYawAng);
 		ELSE
-			m_gripYawCompAng := m_gripYawCompAng + 2*m_jntMoveStep * (i_cmdYawPos-m_lastCmdYawAng);
+			m_gripYawCompAng := m_gripYawCompAng + 2*m_jntMoveStep * sign(i_cmdYawPos-m_lastCmdYawAng);
 		END_IF
 		m_lastCmdYawAng := i_cmdYawPos;
 	END_IF
@@ -196,8 +196,7 @@ FOR i:=1 TO 4 DO
 	
 	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
 END_FOR
-m_instruYawCtrl.init(g_slaveArmCtrlCycleTime,m_yawKp[1],m_yawKd[1],m_yawKi[1],m_yawKiLimit*currentRatioMotor2Jnt, m_yawCtrlLimit*currentRatioMotor2Jnt);
-]]></ST>
+m_instruYawCtrl.init(g_slaveArmCtrlCycleTime,m_yawKp[1],m_yawKd[1],m_yawKi[1],m_yawKiLimit*currentRatioMotor2Jnt, m_yawCtrlLimit*currentRatioMotor2Jnt);]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{7565c7b3-97d9-43dd-bc18-57a80d3fc9eb}">
@@ -274,7 +273,6 @@ IF m_graspForceLevel >0  THEN
 	m_instruJntCtrlTrq[2]:=LIMIT(-m_maxGripForce/10.0,m_instruJntCtrlTrq[2], m_maxGripCtrlForce);
 END_IF
 
-
 o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       </Implementation>
     </Method>
@@ -288,10 +286,10 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
     <LineIds Name="FB_BasicInstruControl.init">
       <LineId Id="202" Count="15" />
       <LineId Id="219" Count="1" />
-      <LineId Id="113" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.run">
-      <LineId Id="1040" Count="41" />
+      <LineId Id="1040" Count="39" />
+      <LineId Id="1081" Count="0" />
       <LineId Id="70" Count="0" />
     </LineIds>
   </POU>
