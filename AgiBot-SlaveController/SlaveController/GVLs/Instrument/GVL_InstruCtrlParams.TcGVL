@@ -26,9 +26,9 @@ VAR_GLOBAL CONSTANT
 	g_proGraspInitC :LREAL :=8.75*g_deg2Rad;
 	
 	g_proGrasp2AB :LREAL :=2.7;
-	g_proGrasp2BC :LREAL :=5.337;
-	g_proGrasp2InitA :LREAL :=26.39*g_deg2Rad;;
-	g_proGrasp2InitC :LREAL :=12.9*g_deg2Rad;
+	g_proGrasp2BC :LREAL :=5.245;
+	g_proGrasp2InitA :LREAL :=16.13*g_deg2Rad;;
+	g_proGrasp2InitC :LREAL :=8.21*g_deg2Rad;
 	
 	// instrument grip yaw compensation
 	g_instruBacklashDir: ARRAY[1..5] OF INT :=[-1, -1, -1, 0, 0];
