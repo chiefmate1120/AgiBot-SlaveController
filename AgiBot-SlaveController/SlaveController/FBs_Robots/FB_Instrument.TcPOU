@@ -117,14 +117,13 @@ END_IF
 m_instruType := m_onChipData.m_InstruID;
 
 // update DH joint limit
+m_instruTypeInfo.m_rodLength := m_instruTypeInfo.m_rodLength - GVL_SlaveArmKinematic.g_panelHeight;
 m_wristMinDHJntPos[1]:=-m_instruTypeInfo.m_rollLimit;
 m_wristMaxDHJntPos[1]:=m_instruTypeInfo.m_rollLimit;
 m_wristMinDHJntPos[2]:=-m_instruTypeInfo.m_pitchLimit-pi/2;
 m_wristMaxDHJntPos[2]:=m_instruTypeInfo.m_pitchLimit-pi/2;
 m_wristMinDHJntPos[3]:=-m_instruTypeInfo.m_yawLimit;
-m_wristMaxDHJntPos[3]:=m_instruTypeInfo.m_yawLimit;
-
-]]></ST>
+m_wristMaxDHJntPos[3]:=m_instruTypeInfo.m_yawLimit;]]></ST>
       </Implementation>
     </Method>
     <Property Name="curScopePosture" Id="{c327ac7d-1ff6-4f6a-8d7d-377863afa9ff}" FolderPath="property\">
@@ -1076,9 +1075,8 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="479" Count="2" />
       <LineId Id="542" Count="0" />
       <LineId Id="503" Count="1" />
+      <LineId Id="549" Count="0" />
       <LineId Id="518" Count="5" />
-      <LineId Id="527" Count="0" />
-      <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.curScopePosture.Get">
       <LineId Id="2" Count="0" />
