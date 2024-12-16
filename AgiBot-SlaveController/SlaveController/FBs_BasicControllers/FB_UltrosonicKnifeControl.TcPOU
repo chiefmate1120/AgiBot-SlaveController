@@ -13,11 +13,11 @@ VAR
 	m_instruKd:ARRAY[1..5] OF LREAL:=[5(0.25)];
 	m_instruKi:ARRAY[1..5] OF LREAL:=[5(10.0)];
 	m_instruKiLimit:ARRAY[1..5] OF LREAL:=[5(50.0)];
-	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(55.0), 200.0];
+	m_instruCtrlLimit:ARRAY[1..5] OF LREAL:=[4(150.0), 200.0];
 	
 	// max grip force/current(mA)
 	m_maxGripForce:LREAL;
-	m_maxGripCurrent:LREAL:=55.0;
+	m_maxGripCurrent:LREAL:=150.0;
 	
 	// PID for instrument joint position
 	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
@@ -36,6 +36,10 @@ VAR
 	
 	// instrument joint control torque(when gripper is open)
 	m_instruJntCtrlTrq:Vec5d:=[5(0.0)];
+	
+	// minimum grip angle to apply grip force; convert grasp force level to minus grip angle
+	m_minGripAngle :LREAL := -60*g_deg2Rad;
+	m_gripForceAngle:LREAL;
 
 END_VAR
 ]]></Declaration>
@@ -95,11 +99,13 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel ,  100)	;
+        <ST><![CDATA[// convert force level to grip angle
+m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel , 100);
+m_gripForceAngle:=m_minGripAngle*m_graspForceLevel/100;
 
 // joint position control
 FOR i:=1 TO 5 DO	
-	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i]+m_gripForceAngle;
 	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
 	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
@@ -110,12 +116,11 @@ m_instruJntCtrlTrq[2]:=0;
 m_instruJntCtrlTrq[4]:=0;
 
 // exert grip force 
-IF m_graspForceLevel >0  THEN
-	m_instruJntCtrlTrq[3]:= -m_maxGripForce*m_graspForceLevel/100.0;	
-END_IF
+//IF m_graspForceLevel >0  THEN
+//	m_instruJntCtrlTrq[3]:= -m_maxGripForce*m_graspForceLevel/100.0;	
+//END_IF
 
-o_cmdJntTrq := m_instruJntCtrlTrq;
-]]></ST>
+o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_UltrosonicKnifeControl">
@@ -130,22 +135,8 @@ o_cmdJntTrq := m_instruJntCtrlTrq;
       <LineId Id="101" Count="0" />
     </LineIds>
     <LineIds Name="FB_UltrosonicKnifeControl.run">
-      <LineId Id="77" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="46" Count="1" />
-      <LineId Id="223" Count="1" />
-      <LineId Id="178" Count="0" />
-      <LineId Id="49" Count="0" />
-      <LineId Id="52" Count="1" />
-      <LineId Id="404" Count="2" />
-      <LineId Id="362" Count="0" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="403" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="255" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="70" Count="0" />
+      <LineId Id="430" Count="2" />
+      <LineId Id="434" Count="18" />
     </LineIds>
   </POU>
 </TcPlcObject>
