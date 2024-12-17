@@ -105,10 +105,13 @@ m_gripForceAngle:=m_minGripAngle*m_graspForceLevel/100;
 
 // joint position control
 FOR i:=1 TO 5 DO	
-	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i]+m_gripForceAngle;
+	m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i];
 	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
 	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
+	IF i=3 THEN
+		m_instruCmdJntPos[i]:=i_cmdInstruJntPos[i]+m_gripForceAngle;
+	END_IF
 	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i],m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
 END_FOR
 m_instruJntCtrlTrq[1]:=0;
@@ -136,7 +139,9 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
     </LineIds>
     <LineIds Name="FB_UltrosonicKnifeControl.run">
       <LineId Id="430" Count="2" />
-      <LineId Id="434" Count="18" />
+      <LineId Id="434" Count="6" />
+      <LineId Id="476" Count="2" />
+      <LineId Id="441" Count="11" />
     </LineIds>
   </POU>
 </TcPlcObject>
