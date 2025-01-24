@@ -17,6 +17,7 @@ END_VAR
 
 VAR_GLOBAL
 	g_arrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
+	g_zeroInstruRecord :ARRAY [1..100] OF ULINT;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

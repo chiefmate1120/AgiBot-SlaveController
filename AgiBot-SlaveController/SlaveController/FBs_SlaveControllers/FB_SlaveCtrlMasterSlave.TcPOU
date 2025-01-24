@@ -352,6 +352,9 @@ END_FOR
 m_cmdYawAngle := m_cmdYawAngLpf.run(m_simDHJntPos[6]);
 m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
 
+// check if to exert larger grip force
+setMaxGripTrq(i_masterStatus, i_slaveArm);
+
 IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
 	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
 ELSE
@@ -593,6 +596,38 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="setMaxGripTrq" Id="{087dc9a4-dc23-4f2d-af36-96ccef498f41}">
+      <Declaration><![CDATA[METHOD setMaxGripTrq : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterStatus :ST_MasterStatus;
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	i:INT;
+	peakGripTrqScale :LREAL := 2;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// only valid for ForceBipolar
+IF i_slaveArm.instrument.instruType <> InstruType_ForceBipolar THEN
+	RETURN;
+END_IF
+
+// only trigger grip force switch when no grip force exerted currently
+IF m_slaveCmdGripForceLevel > g_smallNum  THEN
+	RETURN;
+END_IF; 
+// decide matched master arm index
+FOR i:=1 TO g_mArmNum DO 
+	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
+		IF i_masterStatus.m_pedalHover[i] AND i_masterStatus.m_electricKnifePedalTrigger[i] =1 THEN
+			m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq * peakGripTrqScale);
+		ELSE
+			m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq);
+		END_IF
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="wristLimitSolve" Id="{c70fa8fe-1dd4-478f-914d-e766c2627136}">
       <Declaration><![CDATA[// calculate optimized wrist joint velocity when joint limit is violated
 METHOD wristLimitSolve : BOOL
@@ -848,7 +883,11 @@ END_FOR
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
-      <LineId Id="173" Count="22" />
+      <LineId Id="173" Count="13" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="187" Count="8" />
       <LineId Id="55" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
@@ -913,6 +952,16 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.masterSlavePoseErr.Get">
       <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.setMaxGripTrq">
+      <LineId Id="3" Count="3" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="30" Count="2" />
+      <LineId Id="8" Count="2" />
+      <LineId Id="12" Count="4" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.wristLimitSolve">
       <LineId Id="3" Count="9" />

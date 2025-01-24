@@ -33,6 +33,9 @@ VAR
 	m_maxGripCtrlForce:LREAL;
 	m_maxGripCtrlCurrent:LREAL:=250.0;
 	
+	// ratio convert motor current to joint troque
+	m_currentRatioMotor2Jnt:LREAL;
+	
 	// PID for instrument joint position
 	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
 
@@ -176,15 +179,15 @@ END_VAR
 
 VAR
 	i,j:INT;
-	currentRatioMotor2Jnt:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_graspForceLevel:=0;
 
 // init controller
-currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
-m_maxGripForce := m_maxGripCurrent * currentRatioMotor2Jnt;
-m_maxGripCtrlForce := m_maxGripCtrlCurrent * currentRatioMotor2Jnt;
+m_maxGripCurrent:= i_slaveArm.instrument.instruTypeInfo.m_normGripTrq;
+m_currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;
+m_maxGripCtrlForce := m_maxGripCtrlCurrent * m_currentRatioMotor2Jnt;
 FOR i:=1 TO 4 DO
 	m_jntBacklash[i] := 0;
 	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
@@ -192,11 +195,11 @@ FOR i:=1 TO 4 DO
 	m_instruCmdJntVel[i]:=0;
 	
 	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
-		m_instruKiLimit[i]* currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*currentRatioMotor2Jnt);
+		m_instruKiLimit[i]* m_currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*m_currentRatioMotor2Jnt);
 	
 	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
 END_FOR
-m_instruYawCtrl.init(g_slaveArmCtrlCycleTime,m_yawKp[1],m_yawKd[1],m_yawKi[1],m_yawKiLimit*currentRatioMotor2Jnt, m_yawCtrlLimit*currentRatioMotor2Jnt);]]></ST>
+m_instruYawCtrl.init(g_slaveArmCtrlCycleTime,m_yawKp[1],m_yawKd[1],m_yawKi[1],m_yawKiLimit*m_currentRatioMotor2Jnt, m_yawCtrlLimit*m_currentRatioMotor2Jnt);]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{7565c7b3-97d9-43dd-bc18-57a80d3fc9eb}">
@@ -276,6 +279,17 @@ END_IF
 o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="setMaxGripTrq" Id="{706b708e-8243-42e7-8f22-9cefa55af9b4}">
+      <Declaration><![CDATA[METHOD PUBLIC setMaxGripTrq : BOOL
+VAR_INPUT
+	i_maxGripTrq:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_maxGripCurrent := i_maxGripTrq;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_BasicInstruControl">
       <LineId Id="53" Count="0" />
       <LineId Id="9" Count="0" />
@@ -284,13 +298,17 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <LineId Id="402" Count="69" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">
-      <LineId Id="202" Count="15" />
-      <LineId Id="219" Count="1" />
+      <LineId Id="229" Count="17" />
+      <LineId Id="220" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.run">
       <LineId Id="1040" Count="39" />
       <LineId Id="1081" Count="0" />
       <LineId Id="70" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_BasicInstruControl.setMaxGripTrq">
+      <LineId Id="2" Count="0" />
+      <LineId Id="7" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

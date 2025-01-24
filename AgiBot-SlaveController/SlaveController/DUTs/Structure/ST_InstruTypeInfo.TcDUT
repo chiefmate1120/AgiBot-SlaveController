@@ -35,6 +35,8 @@ STRUCT
 	m_pitchLimit:LREAL:=75*g_deg2Rad;
 	m_yawLimit:LREAL:=PI/2;
 	
+	// grip force (mA)
+	m_normGripTrq :LREAL := 150;
 	// instrument backlash
 	m_instruYawBacklash :LREAL:=0.0;
 	m_instruPitchBachlash :LREAL :=0.0;

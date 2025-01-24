@@ -798,7 +798,8 @@ CASE m_Step OF
 			m_onChipData.m_Error:=TRUE;
 			m_onChipData.m_ErrorID:=3;
 			
-		ELSIF m_onChipData.m_InstruusageCounts>(m_instruTypeInfo.m_maxUseNum -1) AND m_instruType<>InstruType_Endoscope THEN
+//		ELSIF m_onChipData.m_InstruusageCounts>(m_instruTypeInfo.m_maxUseNum -1) AND m_instruType<>InstruType_Endoscope THEN
+		ELSIF m_onChipData.m_InstruusageCounts>100 AND m_instruType<>InstruType_Endoscope THEN
 			m_HaveRecord:=InstruSreiesFind(i_NewValue:=m_onChipData.m_InstruseriesNum , i_ArrayData:=GVL_interactUI.g_InstruSeriesRecord );
 			IF m_HaveRecord THEN
 				//
@@ -1191,15 +1192,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="31" Count="5" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="1095" Count="93" />
-      <LineId Id="1239" Count="2" />
-      <LineId Id="1238" Count="0" />
-      <LineId Id="1200" Count="19" />
-      <LineId Id="1242" Count="0" />
-      <LineId Id="1244" Count="3" />
-      <LineId Id="1243" Count="0" />
-      <LineId Id="1248" Count="0" />
-      <LineId Id="1220" Count="2" />
+      <LineId Id="1256" Count="128" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">

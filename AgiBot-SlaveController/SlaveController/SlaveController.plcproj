@@ -877,6 +877,21 @@
     <Compile Include="Sandbox\FB_SlaveCtrlMasterSlave_bak2.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sandbox\knifeCmdPoseTest\atan2_function.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\knifeCmdPoseTest\FB_CSVWrite.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\knifeCmdPoseTest\knifePoseSelect.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\knifeCmdPoseTest\tr_to_rpy.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\knifeCmdPoseTest\tr_to_space_vector.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TaskCartControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
@@ -927,6 +942,7 @@
     <Folder Include="SafetyCheck\ErrRecord" />
     <Folder Include="Sandbox" />
     <Folder Include="SafetyCheck" />
+    <Folder Include="Sandbox\knifeCmdPoseTest" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />
   </ItemGroup>

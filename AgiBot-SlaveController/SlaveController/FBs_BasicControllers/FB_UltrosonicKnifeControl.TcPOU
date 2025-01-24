@@ -21,11 +21,18 @@ VAR
 	
 	// PID for instrument joint position
 	m_instruJntCtrl:ARRAY[1..5] OF FB_PID;
+	
+	// ratio convert motor current to joint troque
+	m_currentRatioMotor2Jnt:LREAL;
 
 	// command instrument joint position and velocity
 	m_instruCmdJntPos:Vec5d;
 	m_instruLastCmdJntPos:Vec5d;
 	m_instruCmdJntVel:Vec5d;
+	
+	// backlash compensation variables
+	m_jntBacklash:ARRAY[1..5] OF LREAL:=[5(0)];
+	m_jntMoveStep:LREAL := 0.5*g_deg2Rad;
 	
 	// current instrument joint position and velocity
 	m_instruCurJntPos: Vec5d;
@@ -47,6 +54,51 @@ END_VAR
       <ST><![CDATA[
 	]]></ST>
     </Implementation>
+    <Method Name="calcBacklash" Id="{aab45778-dc4d-45b7-982f-1304e391e20f}">
+      <Declaration><![CDATA[METHOD calcBacklash : BOOL
+VAR_IN_OUT CONSTANT
+	// instrument joint command position
+	i_cmdInstruJntPos :Vec5d;
+	
+	// slave arm data
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+
+VAR
+	i:INT;
+	deltaAng:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// backslash compensation
+FOR i:=3 TO 3 DO
+	// integral compensated backslash angle
+	deltaAng:=i_cmdInstruJntPos[i]-m_instruLastCmdJntPos[i];
+	IF ABS(deltaAng)>m_jntMoveStep THEN
+		m_jntBacklash [i] := m_jntBacklash [i] + m_jntMoveStep*sign(deltaAng);
+		m_instruLastCmdJntPos[i] := i_cmdInstruJntPos[i];
+	END_IF
+END_FOR
+
+
+// exert grip force 
+IF m_graspForceLevel >0  THEN
+	
+	// max grip finger backlash
+	m_jntBacklash [3]:=-i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash;
+	
+END_IF
+
+// limit compensated backslash angle
+FOR i:=3 TO 3 DO
+	IF g_instruBacklashDir[i] > 0 THEN
+		m_jntBacklash [i] := LIMIT(0, m_jntBacklash[i], i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash);
+	ELSE
+		m_jntBacklash [i] := LIMIT(-i_slaveArm.instrument.instruTypeInfo.m_instruYawBacklash, m_jntBacklash[i], 0);	
+	END_IF
+	
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{6e920412-a4cf-4cf4-9a5a-71c3a35e14a6}">
       <Declaration><![CDATA[METHOD init : BOOL
 VAR_IN_OUT CONSTANT
@@ -55,21 +107,21 @@ END_VAR
 
 VAR
 	i,j:INT;
-	currentRatioMotor2Jnt:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_graspForceLevel:=0;
 
 // init controller
-currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
-m_maxGripForce := m_maxGripCurrent * currentRatioMotor2Jnt;
+m_instruCtrlLimit[3] := i_slaveArm.instrument.instruTypeInfo.m_normGripTrq;
+m_currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMotorParameters.g_motorReduction[4]/1000;
+m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;
 FOR i:=1 TO 5 DO
 	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruLastCmdJntPos[i]:=m_instruCmdJntPos[i];
 	m_instruCmdJntVel[i]:=0;
 	
 	m_instruJntCtrl[i].init(g_slaveArmCtrlCycleTime,m_instruKp[i],m_instruKd[i],m_instruKi[i],
-		m_instruKiLimit[i]* currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*currentRatioMotor2Jnt);
+		m_instruKiLimit[i]* m_currentRatioMotor2Jnt,	m_instruCtrlLimit[i]*m_currentRatioMotor2Jnt);
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -99,7 +151,10 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// convert force level to grip angle
+        <ST><![CDATA[// calculate instrument backlash
+calcBacklash(i_cmdInstruJntPos, i_slaveArm);
+
+// convert force level to grip angle
 m_graspForceLevel:=LIMIT(0,i_cmdGripForceLevel , 100);
 m_gripForceAngle:=m_minGripAngle*m_graspForceLevel/100;
 
@@ -130,14 +185,22 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       <LineId Id="53" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl.calcBacklash">
+      <LineId Id="3" Count="26" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_UltrosonicKnifeControl.init">
       <LineId Id="102" Count="2" />
+      <LineId Id="123" Count="0" />
       <LineId Id="114" Count="1" />
       <LineId Id="105" Count="0" />
       <LineId Id="107" Count="5" />
       <LineId Id="101" Count="0" />
     </LineIds>
     <LineIds Name="FB_UltrosonicKnifeControl.run">
+      <LineId Id="503" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="504" Count="0" />
       <LineId Id="430" Count="2" />
       <LineId Id="434" Count="6" />
       <LineId Id="476" Count="2" />
