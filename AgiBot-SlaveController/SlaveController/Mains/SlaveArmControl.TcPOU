@@ -254,7 +254,7 @@ FOR i := 1 TO g_sArmNum DO
 	
 	GVL_interactUI.g_instruInformatiom[i].m_armId := i;
 	GVL_interactUI.g_instruInformatiom[i].m_instruSerialNum :=  m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruseriesNum;
-	GVL_interactUI.g_instruInformatiom[i].m_instruID := m_slaveRobot.m_slaveArms[i].m_instrument.onChipData.m_InstruID;
+	GVL_interactUI.g_instruInformatiom[i].m_instruID := m_slaveRobot.m_slaveArms[i].m_instrument.instruType;
 	GVL_interactUI.g_instruInformatiom[i].m_nameEn := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_instruName;
 	GVL_interactUI.g_instruInformatiom[i].m_nameCh := m_slaveRobot.m_slaveArms[i].m_instrument.instruTypeInfo.m_instruNameCH;
 	
@@ -342,7 +342,7 @@ END_FOR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="SlaveArmControl.UIOutputProcess">
-      <LineId Id="368" Count="91" />
+      <LineId Id="470" Count="91" />
       <LineId Id="34" Count="0" />
     </LineIds>
   </POU>

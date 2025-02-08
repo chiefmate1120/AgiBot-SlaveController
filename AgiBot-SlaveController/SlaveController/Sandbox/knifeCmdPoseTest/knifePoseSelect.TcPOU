@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="knifePoseSelect" Id="{43332510-3a93-4a91-8586-095ebad37440}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM knifePoseSelect
+VAR
+	isCollect: BOOL;
+	dataCont: INT;
+	knifeCmdPose:ARRAY[0..29,0..5]OF LREAL := [180(0)]; // 第一列 ENC 第二列 SEC
+	fileName:T_MaxString:='C:\Users\wl\encoderData\knifeCmdPos.csv';
+	init: BOOL:= FALSE;
+	i: INT;
+	j: INT;
+	dataWrite: FB_CSVWrite;
+	saveData: BOOL:=FALSE;
+	initWritter: BOOL:= FALSE;
+	isWritting :BOOL := FALSE;
+	poseMatrixTmp:ARRAY[1..4,1..4] OF LREAL:=[1,0,0,0,
+											  0,1,0,0,
+											  0,0,1,0,
+											  0,0,0,1];
+	tr2rpy :tr_to_space_vector;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF init THEN
+	FOR i:= 0 TO 29 DO
+		FOR j := 0 TO 5 DO
+			knifeCmdPose[i,j] := 0;
+		END_FOR
+	END_FOR
+	init := FALSE;
+END_IF
+
+IF isCollect THEN
+	IF saveData AND dataCont <30THEN
+		FOR i := 1 TO 3 DO
+			FOR j := 1 TO 3 DO				
+				poseMatrixTmp[i,j] := SlaveArmControl.m_slaveStatus.m_curArmPose[2].m_rot[i,j];
+			END_FOR
+			poseMatrixTmp[i,4] := SlaveArmControl.m_slaveStatus.m_curArmPose[2].m_pos[i];
+		END_FOR
+		tr2rpy(
+			tr:= poseMatrixTmp , 
+			x=> , 
+			y=> , 
+			z=> , 
+			rx=> , 
+			ry=> ,
+			rz=> , 
+			Space_Vector=> );
+		FOR i:= 0 TO 5 DO
+			knifeCmdPose[dataCont,i] := tr2rpy.Space_Vector[i+1];
+		END_FOR
+		
+		saveData := FALSE;
+		dataCont := dataCont +1;
+	END_IF
+ELSE
+		dataCont := 0; 			
+END_IF
+
+IF initWritter THEN	
+dataWrite.init(sFileName:=fileName, data:=knifeCmdPose );
+initWritter := FALSE;
+END_IF
+
+IF isWritting THEN	
+	dataWrite.run(bWrite:=isWritting );
+	IF dataWrite.isSucceed() THEN
+		isWritting := FALSE;
+	END_IF
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="knifePoseSelect">
+      <LineId Id="17" Count="6" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="63" Count="7" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="32" Count="17" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

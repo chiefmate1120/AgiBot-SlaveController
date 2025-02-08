@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_CSVWrite" Id="{c67f8638-1103-4bf8-8f06-b19ab409fe23}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CSVWrite
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR  
+	mdatabase		: ARRAY[0..29, 0..5 ] OF STRING(100);
+	mbWrite:BOOL:=FALSE;;
+	sNetId			: T_AmsNetId := '';	(* TwinCAT system network address *)
+	msFileName:T_MaxString ;
+	sCSVLine		: T_MaxString := '';(* Single CSV text line (row, record), we are using string as record buffer (your are able to see created fields) *)
+	sCSVField		: T_MaxString := '';(* Single CSV field value (column, record field) *)
+	bBusy			: BOOL;
+	bError			: BOOL;
+	nErrId			: UDINT;
+	nRow	 		: UDINT 	:= 0;(* Row number (record) *)
+	nColumn			: UDINT 	:= 0;(* Column number (record field) *)
+	hFile			: UINT		:= 0;(* File handle of the source file *)
+	step			: DWORD 	:= 0;
+	fbFileOpen		: FB_FileOpen;(* Opens file *)
+	fbFileClose		: FB_FileClose;(* Closes file *)
+	fbFilePuts		: FB_FilePuts;(* Writes one record (line) *)
+	fbWriter		: FB_CSVMemBufferWriter;(* Helper function block used to create CSV data bytes (single record line) *)
+	m_MAX_CSV_ROWS:UDINT := 29;
+	m_MAX_CSV_COLUMNS:UDINT := 5;
+	msucceed :bool;
+END_VAR
+ 
+VAR CONSTANT
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{fdea3a48-2df8-4c5b-a1b7-0dd498445789}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	
+	sFileName		: T_MaxString ;(* CSV destination file path and name *)
+	data:ARRAY[0..29, 0..5 ] OF LREAL;
+END_VAR
+
+VAR
+	i: UDINT;
+	j: UDINT;
+	row: DINT;
+	col: DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_MAX_CSV_ROWS :=29;
+m_MAX_CSV_COLUMNS := 5;
+FOR i :=0 TO m_MAX_CSV_ROWS DO
+	FOR j := 0 TO m_MAX_CSV_COLUMNS DO
+		mdatabase[i,j] := LREAL_TO_STRING(data[i,j]);
+	END_FOR
+END_FOR
+
+msFileName := sFileName;
+msucceed := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isSucceed" Id="{b4ad8d05-80cf-4df0-8b23-77897f8c77a2}">
+      <Declaration><![CDATA[METHOD isSucceed : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+isSucceed := msucceed;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{81132c2c-b946-4580-bb3e-378550d547aa}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	bWrite			: BOOL := FALSE;(* Rising edge starts program execution *)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mbWrite := bWrite;
+CASE step OF
+	0:	(* Wait for rising edge at bWrite variable *)
+		IF mbWrite THEN
+			mbWrite 	:= FALSE;
+			bBusy 	:= TRUE;
+			bError	:= FALSE;
+			nErrId	:= 0;
+			hFile	:= 0;
+			nRow	:= 0;
+			nColumn	:= 0;
+			step 	:= 1;
+		END_IF
+
+	1:	(* Open source file *)
+		fbFileOpen(  bExecute := FALSE  );
+		fbFileOpen( sNetId := sNetId, sPathName := msFileName, nMode := FOPEN_MODEWRITE OR FOPEN_MODETEXT,(* Open file in TEXT mode! *)
+					ePath := PATH_GENERIC, bExecute := TRUE );
+		step := 2;
+
+	2:(* Wait until open not busy *)
+		fbFileOpen( bExecute := FALSE, bError => bError, nErrID => nErrID, hFile => hFile );
+		IF NOT fbFileOpen.bBusy THEN
+			IF NOT fbFileOpen.bError THEN
+				step := 3;
+			ELSE(* Error: file not found? *)
+				step := 100;
+			END_IF
+		END_IF
+
+	3:(* Convert one PLC record to CSV format *)
+		sCSVLine := '';
+		fbWriter.eCmd := eEnumCmd_First;(* Write first field value *)
+		IF nRow <= m_MAX_CSV_ROWS THEN
+
+			FOR nColumn := 0 TO m_MAX_CSV_COLUMNS BY 1 DO
+
+				sCSVField := STRING_TO_CSVFIELD( mdatabase[ nRow, nColumn ], FALSE );(* TODO: Get field value from your application *)
+
+				(* Add new field to the record buffer *)
+				fbWriter( 	pBuffer := ADR( sCSVLine ), cbBuffer := SIZEOF( sCSVLine ) - 1, putValue := sCSVField, pValue := 0, cbValue := 0,
+							bCRLF := ( nColumn = m_MAX_CSV_COLUMNS ) );(* bCRLF == TRUE => Write CRLF after the last field value *)
+				IF fbWriter.bOk THEN
+					fbWriter.eCmd := eEnumCmd_Next;(* Write next field value *)
+				ELSE(* Error *)
+					step := 100;
+					RETURN;
+				END_IF
+
+			END_FOR(* FOR nColumn := 0... *)
+
+			(* FB_FilePuts adds allready CR (carriage return) to the written line.
+			We have to replace the $R$L characters with $L character to avoid double CR. *)
+			IF RIGHT( sCSVLine, 2 ) = '$R$L' THEN
+				sCSVLine := REPLACE( sCSVLine, '$L', 2, LEN( sCSVLine ) - 1 );
+			END_IF
+
+			nRow := nRow + 1;(* Increment number of created records (rows) *)
+			step := 4;(* Write record to the file *)
+
+		ELSE(* All rows written => Close file *)
+			step := 10;
+		END_IF
+
+	4:	(* Write single text line *)
+		fbFilePuts( bExecute := FALSE );
+		fbFilePuts( sNetId := sNetId, hFile := hFile, sLine := sCSVLine, bExecute := TRUE );
+		step := 5;
+
+	5:(* Wait until write not busy *)
+		fbFilePuts( bExecute := FALSE, bError => bError, nErrID => nErrID );
+		IF NOT fbFilePuts.bBusy THEN
+			IF NOT fbFilePuts.bError THEN
+				step := 3;(* Write next record *)
+			ELSE(* Error *)
+				step := 100;
+			END_IF
+		END_IF
+
+	10:	(* Close source file *)
+		fbFileClose( bExecute := FALSE );
+		fbFileClose( sNetId := sNetId, hFile := hFile, bExecute := TRUE );
+		step := 11;
+
+	11:(* Wait until close not busy *)
+		fbFileClose( bExecute := FALSE, bError => bError, nErrID => nErrID );
+		IF ( NOT fbFileClose.bBusy ) THEN
+			hFile := 0;
+			step := 100;
+		END_IF
+
+	100: (* Error or ready step => cleanup *)
+		IF ( hFile <> 0 ) THEN
+			step := 10; (* Close the source file *)
+		ELSE
+			bBusy := FALSE;
+			step := 0;	(* Ready *)
+			msucceed := TRUE;
+		END_IF
+
+END_CASE
+
+RETURN (fbFileOpen.bError AND fbFilePuts.bError AND  fbFileClose.bError);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_CSVWrite">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CSVWrite.init">
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CSVWrite.isSucceed">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CSVWrite.run">
+      <LineId Id="105" Count="0" />
+      <LineId Id="6" Count="95" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="106" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

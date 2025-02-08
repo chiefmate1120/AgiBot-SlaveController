@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Instrument" Id="{8c0067f5-f42b-4462-b105-279d3ba7139d}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Instrument
 
@@ -39,6 +39,9 @@ VAR
 	
 	// reduction from motor joint to endoscope rotate joint
 	m_endoscopeRotateReduction :LREAL := 2.0/3.0;
+	
+	// endoscope rotation joint index
+	m_endoscopeRotJntIdx :INT :=8;
 	
 	//endoscope type
 	m_curEndoscopeType :E_EndoscopeType:=EndoScopeType_30;
@@ -114,7 +117,15 @@ END_FOR
 IF NOT(checkInstruType) THEN
 	RETURN;
 END_IF
-m_instruType := m_onChipData.m_InstruID;
+IF m_onChipData.m_InstruID = InstruType_NewEndoscope THEN
+	m_instruType := InstruType_Endoscope;
+	m_endoscopeRotateReduction := 1.0;
+	m_endoscopeRotJntIdx := 7;
+ELSE
+	m_instruType := m_onChipData.m_InstruID;
+	m_endoscopeRotateReduction := 2.0/3.0;
+	m_endoscopeRotJntIdx := 8;
+END_IF
 
 // update DH joint limit
 m_instruTypeInfo.m_rodLength := m_instruTypeInfo.m_rodLength - GVL_SlaveArmKinematic.g_panelHeight;
@@ -280,7 +291,7 @@ k23:=m_instruTypeInfo.m_k3;
 
 // ################## endoscope ############################
 IF m_instruType = InstruType_endoscope THEN
-	r_DHJntPos[4]:=m_endoscopeRotateReduction*(i_jntPos[8]-m_jntPosOffset[8]);
+	r_DHJntPos[4]:=m_endoscopeRotateReduction*(i_jntPos[m_endoscopeRotJntIdx]-m_jntPosOffset[m_endoscopeRotJntIdx]);
 	IF m_curEndoscopeType = EndoScopeType_30 THEN
 		r_DHJntPos[5]:=-pi/2+30*g_deg2Rad;
 	ELSE
@@ -409,14 +420,14 @@ k13:=m_instruTypeInfo.m_k3;
 k23:=m_instruTypeInfo.m_k3;
 
 // ################## endoscope ############################
-IF m_instruType = InstruType_endoscope THEN
-	o_jntPos[8] := i_DHJntPos[4]/m_endoscopeRotateReduction + m_jntPosOffset[8];
-	o_jntPos[4]:=0;
-	o_jntPos[5]:=0;
-	o_jntPos[6]:=0;
-	o_jntPos[7]:=0;
-	RETURN;
-END_IF
+//IF m_instruType = InstruType_endoscope THEN
+//	o_jntPos[8] := i_DHJntPos[4]/m_endoscopeRotateReduction + m_jntPosOffset[m_endoscopeRotJntIdx];
+//	o_jntPos[4]:=0;
+//	o_jntPos[5]:=0;
+//	o_jntPos[6]:=0;
+//	o_jntPos[7]:=0;
+//	RETURN;
+//END_IF
 
 //################### gripper angle handle #################
 IF (InstruType_ProGraspForceps=m_instruType OR InstruType_ForceBipolar=m_instruType) THEN//细齿无创抓钳
@@ -688,6 +699,7 @@ END_VAR
 
 VAR
 	paramIdx :INT;
+	endoscopeData:UINT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// TODO: read m_kinematic parameters from chip 
@@ -743,6 +755,13 @@ CASE m_Step OF
 	50://处理序列号，低30位
 		m_onChipData.m_InstruseriesNum:=SHL(m_IDResult,31)+(16#7FFFFFFF AND m_SeriesReadResult);
 		m_onChipData.m_InstruID:=LREAL_TO_INT(FLOOR(lr_in:= m_onChipData.m_InstruseriesNum/EXPT(10,9))); //取十进制前三位为器械ID
+		IF m_onChipData.m_InstruID = InstruType_Endoscope THEN
+			endoscopeData := LREAL_TO_UINT(FLOOR(lr_in:= m_onChipData.m_InstruseriesNum/EXPT(10,7)));
+			endoscopeData := endoscopeData MOD 100;
+			IF endoscopeData>= 25 THEN
+				m_onChipData.m_InstruID := InstruType_NewEndoscope;
+			END_IF
+		END_IF
 		m_Step:=60;
 		
 		
@@ -1042,22 +1061,37 @@ VAR_OUTPUT
 END_VAR
 VAR
 	posCode:UDINT;
+	ultraKnifePos : UDINT;
+	posDir : UDINT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// joint3
-posCode := i_posCode AND 16#3FF;
-o_q3 := g_2pi *  posCode/16#3FF;
-
-// joint2
-i_posCode := SHR(i_posCode, 10);
-posCode := i_posCode AND 16#3FF;
-o_q2 := g_2pi *  posCode/16#3FF;
-
-// joint1
-i_posCode := SHR(i_posCode, 10);
-posCode := i_posCode AND 16#3FF;
-o_q1 := g_2pi *  posCode/16#3FF;
+        <ST><![CDATA[// ultrasound knife 
+IF (InstruType_UltrasoundKnifeS = m_onChipData.m_InstruID OR InstruType_UltrasoundKnifeU = m_onChipData.m_InstruID) THEN
+	ultraKnifePos := i_posCode;
+	posCode := i_posCode AND 16#FFFFF;
+	posDir := SHR(ultraKnifePos,20);
+	IF posDir = 0 THEN
+		o_q3 := (UDINT_TO_LREAL(posCode)/1000);
+	ELSIF posDir = 1 THEN
+		o_q3 := g_2pi - (UDINT_TO_LREAL(posCode)/1000);
+	END_IF
+ELSE
+	
+	// joint3
+	posCode := i_posCode AND 16#3FF;
+	o_q3 := g_2pi *  posCode/16#3FF;
+	
+	// joint2
+	i_posCode := SHR(i_posCode, 10);
+	posCode := i_posCode AND 16#3FF;
+	o_q2 := g_2pi *  posCode/16#3FF;
+	
+	// joint1
+	i_posCode := SHR(i_posCode, 10);
+	posCode := i_posCode AND 16#3FF;
+	o_q1 := g_2pi *  posCode/16#3FF;
+END_IF
 ]]></ST>
       </Implementation>
     </Method>
@@ -1074,6 +1108,7 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="536" Count="0" />
       <LineId Id="476" Count="1" />
       <LineId Id="479" Count="2" />
+      <LineId Id="556" Count="7" />
       <LineId Id="542" Count="0" />
       <LineId Id="503" Count="1" />
       <LineId Id="549" Count="0" />
@@ -1119,7 +1154,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="508" Count="0" />
       <LineId Id="511" Count="3" />
       <LineId Id="509" Count="0" />
-      <LineId Id="428" Count="57" />
+      <LineId Id="428" Count="1" />
+      <LineId Id="535" Count="8" />
+      <LineId Id="439" Count="46" />
       <LineId Id="159" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.InstruIDRecord">
@@ -1192,7 +1229,11 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="31" Count="5" />
     </LineIds>
     <LineIds Name="FB_Instrument.readParameters">
-      <LineId Id="1256" Count="128" />
+      <LineId Id="1256" Count="52" />
+      <LineId Id="1392" Count="1" />
+      <LineId Id="1396" Count="3" />
+      <LineId Id="1394" Count="0" />
+      <LineId Id="1309" Count="75" />
       <LineId Id="28" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.reset">
@@ -1257,16 +1298,9 @@ o_q1 := g_2pi *  posCode/16#3FF;
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Instrument.zeroPosDecode">
-      <LineId Id="40" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="68" Count="3" />
-      <LineId Id="67" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="88" Count="23" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>

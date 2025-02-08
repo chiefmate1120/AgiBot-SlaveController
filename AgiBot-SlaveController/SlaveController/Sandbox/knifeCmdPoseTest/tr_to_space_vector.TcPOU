@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="tr_to_space_vector" Id="{b52e7568-0877-46d6-8b2b-a046f2b156b4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK tr_to_space_vector 
+VAR_INPUT
+	tr:ARRAY[1..4,1..4] OF LREAL; 
+END_VAR
+VAR_OUTPUT
+	x,y,z,rx,ry,rz:LREAL;
+	Space_Vector:ARRAY[1..6] OF LREAL;
+END_VAR
+VAR
+	tr_to_rpy_1:tr_to_rpy;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+tr_to_rpy_1(matrix_input:= tr, rot_x=> rx, rot_y=> ry, rot_z=> rz);
+
+x:=tr[1,4];
+y:=tr[2,4];
+z:=tr[3,4];
+
+Space_Vector[1]:=x; Space_Vector[2]:=y; Space_Vector[3]:=z;
+Space_Vector[4]:=rx; Space_Vector[5]:=ry; Space_Vector[6]:=rz;
+]]></ST>
+    </Implementation>
+    <LineIds Name="tr_to_space_vector">
+      <LineId Id="13" Count="3" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="32" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

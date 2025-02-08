@@ -9,7 +9,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// scope motion master-salve scale
-	m_MSMotionScale :LREAL :=-0.5;
+	m_MSMotionScale :LREAL :=-0.3;
 	
 	// scope motion singularity scale
 	m_singMotionScale :LREAL :=1;
@@ -34,6 +34,9 @@ VAR
 	// scope command linear velocity in base coordinate
 	m_cmdVel:Vec3d;
 	
+	// rotate compensation velocity 
+	m_rotCompVel :LREAL;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -55,6 +58,7 @@ VAR
 
 	cmdVelScale :LREAL;
 	jnt3Limit :LREAL;
+	scopeRotJntIdx:INT:=8;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -106,20 +110,32 @@ IF (armDHJntVel[3] > 0 AND  i_slaveArm.simDHJntPos[3] + armDHJntVel[3]*g_slaveAr
 	armDHJntVel[3]:=0;
 END_IF
 
-// limit rotate joint veloicyt
-m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLocal, GVL_SlaveMotorParameters.g_maxJntVel[8]);
-
-// set command joint velocity
+// final arm joint command velocity
 m_cmdJntVel[1]:= armDHJntVel[1];
 m_cmdJntVel[2]:= armDHJntVel[2];
 m_cmdJntVel[3]:= armDHJntVel[3];
-m_cmdJntVel[8]:= -m_cmdWVelLocal/i_slaveArm.instrument.m_endoscopeRotateReduction;
+
+// limit rotate joint veloicyt
+m_cmdWVelLocal := LIMIT (-GVL_SlaveMotorParameters.g_maxJntVel[8],  m_cmdWVelLocal, GVL_SlaveMotorParameters.g_maxJntVel[8]);
+
+// as there are two types scope holder, need to determin the rotate joint index
+IF i_slaveArm.instrument.onChipData.m_InstruID = InstruType_NewEndoscope THEN
+	scopeRotJntIdx :=7;
+	m_jntOPMode[6] := DriverOPMode_Trq;
+ELSE
+	scopeRotJntIdx:=8;
+END_IF
+
+// compensate view rotation cause by joint6 
+m_rotCompVel := rotateCompensate(i_slaveArm);
+
+m_cmdJntVel[scopeRotJntIdx]:= (m_rotCompVel-m_cmdWVelLocal)/i_slaveArm.instrument.m_endoscopeRotateReduction;
 
 // integral to command joint position
 m_cmdJntPos[1]:=m_simJntPos[1]+m_cmdJntVel[1]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[2]:=m_simJntPos[2]+m_cmdJntVel[2]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[3]:=m_simJntPos[3]+m_cmdJntVel[3]*g_slaveArmCtrlCycleTime;
-m_cmdJntPos[8]:=m_simJntPos[8]+m_cmdJntVel[8]*g_slaveArmCtrlCycleTime;
+m_cmdJntPos[scopeRotJntIdx]:=m_simJntPos[scopeRotJntIdx]+m_cmdJntVel[scopeRotJntIdx]*g_slaveArmCtrlCycleTime;
 
 m_simJntPos := m_cmdJntPos;
 
@@ -229,47 +245,44 @@ ELSE
 END_IF]]></ST>
       </Implementation>
     </Method>
+    <Method Name="rotateCompensate" Id="{12aa838c-6da2-4e79-9090-dd1b1185923e}">
+      <Declaration><![CDATA[METHOD rotateCompensate : LREAL
+VAR_IN_OUT CONSTANT
+	i_slaveArm :FB_SlaveArm;
+END_VAR
+VAR
+	rotJaco:Mat3d;
+	armJntVel:Vec3d;
+	i,j:INT;
+	wVelWrd :Vec3d;
+	jnt4JacoInv :Vec3d;
+	jnt4JacoNorm:LREAL;
+	rotT:Mat3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 3 DO 
+	FOR j:=1 TO 3 DO 
+		rotJaco[i,j] := i_slaveArm.jaco[i+3, j];
+	END_FOR
+	armJntVel[i] := m_cmdJntVel[i];
+	jnt4JacoInv[i] := i_slaveArm.jaco[i+3,4];
+END_FOR
+
+// get rotate velocity 
+MatMultiVec(rotJaco, armJntVel, wVelWrd);
+
+jnt4JacoNorm := norm(jnt4JacoInv);
+vecSelfMultiNum(jnt4JacoInv, 1.0/(jnt4JacoNorm*jnt4JacoNorm));
+
+rotateCompensate := -vecDot(jnt4JacoInv, wVelWrd);]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_SlaveCtrlEndoscope">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
-      <LineId Id="459" Count="3" />
-      <LineId Id="1064" Count="0" />
-      <LineId Id="1063" Count="0" />
-      <LineId Id="1085" Count="0" />
-      <LineId Id="1084" Count="0" />
-      <LineId Id="1086" Count="3" />
-      <LineId Id="1070" Count="0" />
-      <LineId Id="1069" Count="0" />
-      <LineId Id="1071" Count="0" />
-      <LineId Id="1073" Count="0" />
-      <LineId Id="1072" Count="0" />
-      <LineId Id="1074" Count="1" />
-      <LineId Id="1081" Count="0" />
-      <LineId Id="1080" Count="0" />
-      <LineId Id="1076" Count="0" />
-      <LineId Id="1082" Count="0" />
-      <LineId Id="1092" Count="0" />
-      <LineId Id="1091" Count="0" />
-      <LineId Id="1093" Count="0" />
-      <LineId Id="1095" Count="0" />
-      <LineId Id="1119" Count="7" />
-      <LineId Id="1128" Count="3" />
-      <LineId Id="1133" Count="4" />
-      <LineId Id="1139" Count="1" />
-      <LineId Id="1142" Count="0" />
-      <LineId Id="1151" Count="0" />
-      <LineId Id="1150" Count="0" />
-      <LineId Id="1153" Count="1" />
-      <LineId Id="1083" Count="0" />
-      <LineId Id="1155" Count="2" />
-      <LineId Id="1159" Count="0" />
-      <LineId Id="1161" Count="0" />
-      <LineId Id="1160" Count="0" />
-      <LineId Id="1162" Count="3" />
-      <LineId Id="1167" Count="0" />
-      <LineId Id="1166" Count="0" />
-      <LineId Id="1066" Count="0" />
+      <LineId Id="1201" Count="76" />
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.cmdVelCalc">
@@ -329,6 +342,10 @@ END_IF]]></ST>
       <LineId Id="22" Count="1" />
       <LineId Id="31" Count="0" />
       <LineId Id="18" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlEndoscope.rotateCompensate">
+      <LineId Id="3" Count="13" />
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

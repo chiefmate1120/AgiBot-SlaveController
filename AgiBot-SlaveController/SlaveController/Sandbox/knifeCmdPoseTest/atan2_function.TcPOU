@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="atan2_function" Id="{9d9004af-e093-4f28-821c-d20e07110acc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK atan2_function
+VAR_INPUT
+	y:lreal;
+	x:lreal;	
+END_VAR
+VAR_OUTPUT
+	angle:lreal;
+END_VAR
+VAR
+	Denominator_Min: LREAL:=EXPT(10,-20);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//防止分母过小，导致系统报错
+IF ABS(x)<Denominator_Min THEN	
+	IF (ABS(x)*1000)>ABS(y) THEN
+		//如果分母的绝对值特别小，分子的绝对值也很小，此时应该归一化
+		x:=x/x; y:=y/x;
+	ELSE
+		x:=0; //如果分母非常小，分子正常，则将X赋值为0
+	END_IF	
+END_IF
+
+
+IF (x>0 AND y>0) THEN  //第1象限
+	angle:=ATAN(y/x);
+	
+ELSIF(x<0 AND y>0) THEN  //第2象限
+	angle:=ATAN(y/x)+pi;
+
+ELSIF(x<0 AND y<0) THEN  //第3象限
+	angle:=ATAN(y/x)-pi;
+
+ELSIF(x>0 AND y<0) THEN  //第4象限
+	angle:=ATAN(y/x);
+
+ELSIF (x=0 AND y>0) THEN  //正Y轴
+	angle:=pi/2;
+
+ELSIF (x=0 AND y<0) THEN  //负Y轴
+	angle:=-pi/2;
+	
+ELSIF (x>0 AND y=0) THEN  //正X轴
+	angle:=0;
+
+ELSIF (x<0 AND y=0) THEN  //负X轴
+	angle:=pi;	
+	
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="atan2_function">
+      <LineId Id="72" Count="35" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -16,6 +16,7 @@
 	InstruType_CauteryHook :=16,
 	InstruType_CauterySpatula :=17,
 	InstruType_Endoscope := 20,
+	InstruType_NewEndoscope := 31,
 	InstruType_UltrasoundKnifeS :=42,
 	InstruType_UltrasoundKnifeU :=43,
 	InstruType_TipUpFenestratedGrasper :=44,
