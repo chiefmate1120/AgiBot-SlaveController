@@ -39,6 +39,11 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// traj plan
 m_jntOTG.run(m_targetRotJntPos, 0.0, o_cmdAcc=>m_cmdJntAcc[8],o_cmdVel=>m_cmdJntVel[8],o_cmdPos=>m_cmdJntPos[8]);
 
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
+
 // reach target check
 trackErr := ABS(i_slaveArm.curJntPos[8] - m_targetRotJntPos);
 m_isFinished := trackErr <2*g_jntCtrlAngTolHigh AND i_slaveArm.curJntVel[8]<g_jntStaticVelThres;]]></ST>
@@ -93,7 +98,9 @@ copyCmds(r_slaveArmCtrlCmd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlScopeToggle.calcCmdJntPos">
-      <LineId Id="191" Count="1" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="226" Count="4" />
       <LineId Id="141" Count="0" />
       <LineId Id="123" Count="0" />
       <LineId Id="205" Count="0" />

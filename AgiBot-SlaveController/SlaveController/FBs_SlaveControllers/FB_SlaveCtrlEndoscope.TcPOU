@@ -137,6 +137,12 @@ m_cmdJntPos[2]:=m_simJntPos[2]+m_cmdJntVel[2]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[3]:=m_simJntPos[3]+m_cmdJntVel[3]*g_slaveArmCtrlCycleTime;
 m_cmdJntPos[scopeRotJntIdx]:=m_simJntPos[scopeRotJntIdx]+m_cmdJntVel[scopeRotJntIdx]*g_slaveArmCtrlCycleTime;
 
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
+
+
 m_simJntPos := m_cmdJntPos;
 
 ]]></ST>
@@ -282,7 +288,10 @@ rotateCompensate := -vecDot(jnt4JacoInv, wVelWrd);]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.calcCmdJntPos">
-      <LineId Id="1201" Count="76" />
+      <LineId Id="1201" Count="73" />
+      <LineId Id="1297" Count="4" />
+      <LineId Id="1295" Count="0" />
+      <LineId Id="1275" Count="2" />
       <LineId Id="206" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlEndoscope.cmdVelCalc">

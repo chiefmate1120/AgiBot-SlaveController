@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_SlaveArmCtrlBase" Id="{dee0ec68-3abc-4720-b67c-0fb3fd57933b}" SpecialFunc="None">
     <Declaration><![CDATA[// Slave Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_SlaveArmCtrlBase IMPLEMENTS I_SlaveArmCtrl
@@ -81,10 +81,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF isFinished THEN
 	RETURN;
-END_IF
-
-// set joint torque to zero in default
-m_cmdJntTrq := g_zeroVec8d;]]></ST>
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="checkToHoldLastCmds" Id="{90f04ad1-6a41-4802-98b4-abd6341aeded}">
@@ -260,9 +257,6 @@ END_VAR
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.calcCmdJntTrq">
       <LineId Id="36" Count="2" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveArmCtrlBase.checkToHoldLastCmds">
       <LineId Id="6" Count="6" />

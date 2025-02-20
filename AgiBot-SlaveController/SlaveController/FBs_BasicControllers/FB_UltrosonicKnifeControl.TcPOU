@@ -99,6 +99,15 @@ FOR i:=3 TO 3 DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="clearBacklash" Id="{5c1e7fd9-63cb-443e-8044-3bf1be981ad8}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntBacklash := g_zeroVec5d;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{6e920412-a4cf-4cf4-9a5a-71c3a35e14a6}">
       <Declaration><![CDATA[METHOD init : BOOL
 VAR_IN_OUT CONSTANT
@@ -188,6 +197,9 @@ o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
     <LineIds Name="FB_UltrosonicKnifeControl.calcBacklash">
       <LineId Id="3" Count="26" />
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_UltrosonicKnifeControl.clearBacklash">
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_UltrosonicKnifeControl.init">
       <LineId Id="102" Count="2" />

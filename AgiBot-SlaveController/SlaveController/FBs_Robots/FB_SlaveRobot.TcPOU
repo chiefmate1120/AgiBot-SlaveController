@@ -291,6 +291,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 VAR
 	i,j:INT;
+	potentGripTrig :BOOL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check instrument state
@@ -300,7 +301,10 @@ FOR i:=1 TO g_sArmNum DO
 		m_panelMountedFlag[i]:=FALSE;
 	END_IF
 	IF m_slaveArms[i].instruOn = FALSE THEN
-		m_instrumentMountedFlag[i]:=FALSE;			
+		m_instrumentMountedFlag[i]:=FALSE;
+		// clear instrument control backlash
+		m_slaveArms[i].instruJntBacklash:=g_zeroVec5d;		
+		m_armMasterSlave[i].clearBacklash();
 	END_IF
 END_FOR
 
@@ -455,13 +459,13 @@ FOR i:=1 TO g_sArmNum DO
 		
 		//master slave control
 		SlaveArmState_MasterSlave:
+			m_slaveArms[i].instruJntBacklash :=  m_armMasterSlave[i].InstruBacklash;
 			// to Adjust
 			IF (m_slaveArms[i].adjustOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Adjust;
 			// to stop
 			ELSIF MasterArmState_MasterSlave <> m_matchedMasterArmState[i] OR m_armCtrl[i].isFinished THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_Stop;
-				m_armStop[i].setInstruBacklash(m_armMasterSlave[i].InstruBacklash);
 			// to instrument retract
 			ELSIF  NOT(m_slaveArms[i].panelOn) OR NOT(m_slaveArms[i].instruOn) THEN
 				m_nextSlaveArmState[i]:=SlaveArmState_InstruRetract;
@@ -710,7 +714,16 @@ m_lastEndoScopePostureUI := GVL_interactUI.g_scopeUpDown;
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.stateMachine">
-      <LineId Id="1828" Count="326" />
+      <LineId Id="1828" Count="7" />
+      <LineId Id="2178" Count="0" />
+      <LineId Id="2174" Count="0" />
+      <LineId Id="2177" Count="0" />
+      <LineId Id="1836" Count="121" />
+      <LineId Id="2163" Count="0" />
+      <LineId Id="1959" Count="29" />
+      <LineId Id="2179" Count="1" />
+      <LineId Id="1990" Count="5" />
+      <LineId Id="1997" Count="157" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveRobot.updateScopeUIInfo">

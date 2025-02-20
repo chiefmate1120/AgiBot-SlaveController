@@ -171,6 +171,15 @@ FOR i:=1 TO 4 DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="clearBacklash" Id="{be952804-e2b5-49e4-ae4f-cb40af1d0d31}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntBacklash := g_zeroVec5d;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{ad68ad31-14f3-42f4-bf27-26d385743fba}">
       <Declaration><![CDATA[METHOD init : BOOL
 VAR_IN_OUT CONSTANT
@@ -189,7 +198,6 @@ m_currentRatioMotor2Jnt:=GVL_SlaveMotorParameters.g_motorTrqConst[4]*GVL_SlaveMo
 m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;
 m_maxGripCtrlForce := m_maxGripCtrlCurrent * m_currentRatioMotor2Jnt;
 FOR i:=1 TO 4 DO
-	m_jntBacklash[i] := 0;
 	m_instruCmdJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	
 	m_instruCmdJntVel[i]:=0;
@@ -247,7 +255,7 @@ FOR i:=1 TO 4 DO
 	m_instruCmdJntVel[i]:=i_cmdInstruJntVel[i];
 	m_instruCurJntPos[i]:=i_slaveArm.curJntPos[i+3];
 	m_instruCurJntVel[i]:= i_slaveArm.curJntVel[i+3];
-	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i] + m_jntBacklash[i] ,m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
+	m_instruJntCtrlTrq[i]:=m_instruJntCtrl[i].run(m_instruCmdJntPos[i] ,m_instruCurJntPos[i], m_instruCmdJntVel[i], m_instruCurJntVel[i]);
 END_FOR
 m_instruJntCtrlTrq[5]:=0;
 
@@ -279,8 +287,8 @@ END_IF
 o_cmdJntTrq := m_instruJntCtrlTrq;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="setMaxGripTrq" Id="{706b708e-8243-42e7-8f22-9cefa55af9b4}">
-      <Declaration><![CDATA[METHOD PUBLIC setMaxGripTrq : BOOL
+    <Method Name="setMaxGripTrq" Id="{bb3c440d-4ac6-4283-81ed-1c22dc0afb05}">
+      <Declaration><![CDATA[METHOD setMaxGripTrq : BOOL
 VAR_INPUT
 	i_maxGripTrq:LREAL;
 END_VAR
@@ -297,8 +305,14 @@ m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;]]></ST>
     <LineIds Name="FB_BasicInstruControl.calcBacklash">
       <LineId Id="402" Count="69" />
     </LineIds>
+    <LineIds Name="FB_BasicInstruControl.clearBacklash">
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_BasicInstruControl.init">
-      <LineId Id="229" Count="17" />
+      <LineId Id="229" Count="2" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="233" Count="3" />
+      <LineId Id="238" Count="8" />
       <LineId Id="220" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.run">
@@ -307,7 +321,7 @@ m_maxGripForce := m_maxGripCurrent * m_currentRatioMotor2Jnt;]]></ST>
       <LineId Id="70" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicInstruControl.setMaxGripTrq">
-      <LineId Id="2" Count="0" />
+      <LineId Id="5" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
   </POU>

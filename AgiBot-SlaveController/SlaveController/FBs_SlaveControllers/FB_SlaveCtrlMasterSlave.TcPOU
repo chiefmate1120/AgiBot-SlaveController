@@ -355,6 +355,7 @@ m_cmdYawVel := m_cmdYawVelLpf.run(m_simDHJointVel[6]);
 // check if to exert larger grip force
 setMaxGripTrq(i_masterStatus, i_slaveArm);
 
+
 IF i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeS OR i_slaveArm.instrument.instruType = InstruType_UltrasoundKnifeU THEN
 	m_usKnifeController.run(instruCmdJntPos,instruCmdJntVel, m_slaveCmdGripForceLevel, i_slaveArm, o_cmdJntTrq=>instruJntCtrlTrq);
 ELSE
@@ -405,6 +406,16 @@ END_IF
 
 
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clearBacklash" Id="{974369ce-a041-475c-b112-317ab8d645f8}">
+      <Declaration><![CDATA[METHOD PUBLIC clearBacklash : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_basicInstruController.clearBacklash();
+m_usKnifeController.clearBacklash();]]></ST>
       </Implementation>
     </Method>
     <Method Name="gripperControl" Id="{19c9d86a-3bea-4759-9ef1-8287a84124de}">
@@ -498,7 +509,7 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[IF m_instruType = InstruType_UltrasoundKnifeS OR m_instruType = InstruType_UltrasoundKnifeU THEN
-	instruBacklash := g_zeroVec5d;
+	instruBacklash := m_usKnifeController.m_jntBacklash;
 ELSE
 	instruBacklash := m_basicInstruController.m_jntBacklash;
 END_IF]]></ST>
@@ -604,7 +615,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 VAR
 	i:INT;
-	peakGripTrqScale :LREAL := 2;
+	 peakGripTrqScale :LREAL := 2;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// only valid for ForceBipolar
@@ -616,13 +627,14 @@ END_IF
 IF m_slaveCmdGripForceLevel > g_smallNum  THEN
 	RETURN;
 END_IF; 
+
 // decide matched master arm index
 FOR i:=1 TO g_mArmNum DO 
 	IF i_masterStatus.m_teleSlaveArmIdx[i] = i_slaveArm.armIdx THEN
 		IF i_masterStatus.m_pedalHover[i] AND i_masterStatus.m_electricKnifePedalTrigger[i] =1 THEN
-			m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq * peakGripTrqScale);
+		   m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq * peakGripTrqScale);
 		ELSE
-			m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq);
+		   m_basicInstruController.setMaxGripTrq(i_slaveArm.instrument.instruTypeInfo.m_normGripTrq);
 		END_IF
 	END_IF
 END_FOR]]></ST>
@@ -884,15 +896,19 @@ END_FOR
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcCmdJntTrq">
       <LineId Id="173" Count="13" />
-      <LineId Id="210" Count="0" />
-      <LineId Id="209" Count="0" />
       <LineId Id="211" Count="0" />
+      <LineId Id="226" Count="1" />
+      <LineId Id="225" Count="0" />
       <LineId Id="187" Count="8" />
       <LineId Id="55" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.calcMSErrInScope">
       <LineId Id="158" Count="23" />
       <LineId Id="28" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SlaveCtrlMasterSlave.clearBacklash">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMasterSlave.gripperControl">
       <LineId Id="23" Count="0" />
@@ -958,8 +974,9 @@ END_FOR
       <LineId Id="29" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="30" Count="2" />
+      <LineId Id="54" Count="0" />
       <LineId Id="8" Count="2" />
-      <LineId Id="12" Count="4" />
+      <LineId Id="74" Count="4" />
       <LineId Id="18" Count="0" />
       <LineId Id="2" Count="0" />
     </LineIds>

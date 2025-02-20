@@ -432,6 +432,11 @@ FOR i:=1 TO 5 DO
 	m_jntOTG[i].run(m_targetMountPos[i+3],0.0, o_cmdAcc=>m_cmdJntAcc[3+i],o_cmdVel=>m_cmdJntVel[3+i],o_cmdPos=>m_cmdJntPos[i+3]);
 END_FOR
 
+// joint6 output torque to help rotation motion
+IF m_jntOPMode[6] = DriverOPMode_Trq THEN
+	m_cmdJntTrq[6] := -0.5*i_slaveArm.cmdJntTrq[7];
+END_IF
+
 
 ]]></ST>
       </Implementation>
@@ -577,7 +582,12 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountNewEndoscope">
-      <LineId Id="3" Count="66" />
+      <LineId Id="3" Count="64" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="81" Count="1" />
+      <LineId Id="68" Count="1" />
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_SlaveCtrlMountInstru.mountUltraKnife">
