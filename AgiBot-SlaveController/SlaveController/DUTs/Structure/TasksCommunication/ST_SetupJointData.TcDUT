@@ -4,25 +4,25 @@
     <Declaration><![CDATA[TYPE ST_SetupJointData :
 STRUCT
 	// joint position compute with motor encoder
-	m_curMotorPos :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_curMotorPos :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 	// joint position compute with link/abs encoder
-	m_curLinkPos :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_curLinkPos :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 	// target joint position 
-	m_cmdJntPos :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_cmdJntPos :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 	// current joint position 
-	m_curJntPos :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_curJntPos :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 	// current joint position 
-	m_curJntVel :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_curJntVel :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 	// raw joint current  
-	m_rawJntCurrent :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_rawJntCurrent :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 	// command joint current 
-	m_cmdJntCurrent :ARRAY[1..g_setupJntNum] OF Vec5d;
+	m_cmdJntCurrent :ARRAY[1..g_sArmNum] OF Vec5d;
 	
 END_STRUCT
 END_TYPE

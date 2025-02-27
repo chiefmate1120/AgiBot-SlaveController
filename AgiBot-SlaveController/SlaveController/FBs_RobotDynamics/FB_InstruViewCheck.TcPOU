@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_InstruViewCheck" Id="{7964d976-fe93-456f-842c-b0386e5ee4c4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_InstruViewCheck
+VAR
+	
+	// scoep projection matrix 
+	//SN: HA21938730
+	m_scopeRot :Mat3d :=[0.9983, -0.0327, 0.048, 
+						0.0319, 0.9993, 0.0179,
+						-0.0486, -0.0164, 0.9987];
+	m_scopePos :Vec3d:= [0.005, 0.000214, 0.00386];
+	m_scopeFocal :LREAL :=1400;
+	
+//	//SN: HA20160831
+//	m_scopeRot :Mat3d :=[0.9952, 0.0185, 0.0961, 
+//						-0.0177, 0.9998, -0.0099,
+//						-0.0963, 0.0081, 0.9953];
+//	m_scopePos :Vec3d:= [-0.0006967, 0.001848, -0.005];
+//	m_scopeFocal :LREAL :=1420;
+
+	// arm kinematic function block
+	m_armKinematic :ARRAY[1..g_sArmNum] OF FB_FullArmKinematic;
+	
+	// instrument pose
+	m_instruReady:ARRAY[1..g_sArmNum] OF BOOL;
+	m_instruPose :ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// endoscope pose
+	m_scopeReady :BOOL;
+	m_scopePose : ST_Frame;
+	
+	// instrument pose in scope 
+	m_instruPoseInScope :ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// instrument position in image([x_pixel, y_pixel, z_dir])
+	m_instruImgPos :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	// out-view instrument position on image boundary([x_pixel, y_pixel, z_dir])
+	 m_instruImgBoundPos :ARRAY[1..g_sArmNum] OF Vec3i;
+	 
+	 // image boundary
+	 m_imgWidth :INT := 960;
+	 m_ImgHeight :INT :=540;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{15e2d30a-31b4-4b83-bf76-03796ae588be}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
+	m_instruReady[i]:=FALSE;
+	m_armKinematic[i].init(i);
+	m_instruImgPos[i]:=g_zeroVec3d;
+	m_instruImgBoundPos[i]:=g_zeroVec3i;
+END_FOR
+m_scopeReady:=FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{1b33c268-2743-42e9-adb1-5a34b212184f}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// setup joint position
+	i_setupJntPos :ARRAY[1..g_sArmNum] OF Vec5d;
+	
+	// slave joint position
+	i_slaveDHJntPos :ARRAY[1..g_sArmNum] OF Vec6d;
+	
+	// instrument info
+	i_instruInfo : ARRAY[1..g_sArmNum] OF ST_InstruStatus;
+END_VAR
+
+VAR
+	i:INT;
+	tmpFrame: ST_Frame;
+	newPos:Vec3d ;
+	xb,yb : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_scopeReady := FALSE;
+// update instrument and endoscope pose
+FOR i:=1 TO g_sArmNum DO 
+	m_instruReady[i]:=FALSE;
+	IF i_instruInfo[i].m_ready THEN
+		m_instruReady[i]:=TRUE;
+		m_armKinematic[i].run(i_setupJntPos[i],i_slaveDHJntPos[i], i_instruInfo[i], m_instruPose[i]);
+		IF i_instruInfo[i].m_type = InstruType_Endoscope THEN
+			m_scopePose := m_instruPose[i];
+			m_scopeReady := TRUE;
+		END_IF
+	END_IF
+	
+	m_instruImgPos[i]:=g_zeroVec3d;
+	m_instruImgBoundPos[i]:=g_zeroVec3i;
+END_FOR
+
+IF m_scopeReady THEN
+	FOR i:=1 TO g_sArmNum DO
+		IF m_instruReady[i] THEN
+			// calculate instrument pose in endoscope
+			tmpFrame :=invFrame(m_scopePose);
+			m_instruPoseInScope[i] := transform(tmpFrame, m_instruPose[i]);
+			
+			// calculate instrument in image
+			IF ABS(m_instruPoseInScope[i].m_pos[3])>0.02 THEN
+				MatMultiVec(m_scopeRot, m_instruPoseInScope[i].m_pos, newPos);
+				vecSelfAdd(newPos, m_scopePos);
+				m_instruImgPos[i][1]:= m_scopeFocal* newPos[1]/ABS(newPos[3]);
+				m_instruImgPos[i][2]:= -m_scopeFocal * newPos[2]/ABS(newPos[3]);
+				m_instruImgPos[i][3] := sign(newPos[3]); 
+			END_IF
+			
+			// check if instrument is  out of view
+			IF ABS(m_instruImgPos[i][1])>m_imgWidth OR ABS(m_instruImgPos[i][2])>m_ImgHeight THEN
+				IF ABS(m_instruImgPos[i][2]/m_instruImgPos[i][1]) > INT_TO_LREAL( m_ImgHeight)/INT_TO_LREAL(m_imgWidth) THEN
+					yb:=sign(m_instruImgPos[i][2])*m_ImgHeight;
+					xb:=LREAL_TO_INT(m_instruImgPos[i][1]*yb/m_instruImgPos[i][2]);
+				ELSE
+					xb:=sign(m_instruImgPos[i][1])*m_imgWidth;
+					yb:=LREAL_TO_INT(m_instruImgPos[i][2]*xb/m_instruImgPos[i][1]);
+				END_IF
+				m_instruImgBoundPos[i][1]:=xb;
+				m_instruImgBoundPos[i][2]:=yb;
+				m_instruImgBoundPos[i][3]:=LREAL_TO_INT(m_instruImgPos[i][3]);
+			END_IF
+						
+		END_IF
+	END_FOR
+END_IF
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_InstruViewCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruViewCheck.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_InstruViewCheck.run">
+      <LineId Id="29" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="77" Count="2" />
+      <LineId Id="109" Count="1" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

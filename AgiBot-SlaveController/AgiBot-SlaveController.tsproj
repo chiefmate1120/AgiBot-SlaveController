@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -515,8 +515,17 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{74B5FCA7-5252-49C0-519F-FB3BA531DFC6}" AutoDeleteType="true">ST_SlaveDynaData</Name>
-			<BitSize>3072</BitSize>
+			<Name GUID="{03730B53-93F7-721E-9845-8E305C59C968}" AutoDeleteType="true">Vec3i</Name>
+			<BitSize>48</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>3</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{B32D39E7-E972-BF67-BDCB-3DB7B11C4C7A}" AutoDeleteType="true">ST_SlaveDynaData</Name>
+			<BitSize>3264</BitSize>
 			<SubItem>
 				<Name>m_massMat</Name>
 				<Type GUID="{82407ADD-AF7C-C511-3D2B-13966734510B}">Mat3d</Type>
@@ -538,6 +547,17 @@
 				<Comment><![CDATA[ gravity]]></Comment>
 				<BitSize>768</BitSize>
 				<BitOffs>2304</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_insruViewData</Name>
+				<Type GUID="{03730B53-93F7-721E-9845-8E305C59C968}">Vec3i</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ instrument out-of-view data]]></Comment>
+				<BitSize>192</BitSize>
+				<BitOffs>3072</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1238,8 +1258,8 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}" AutoDeleteType="true">ST_SlaveJointData</Name>
-			<BitSize>14336</BitSize>
+			<Name GUID="{886FF550-7428-6104-5BA5-3C0CF982B0DD}" AutoDeleteType="true">ST_SlaveJointData</Name>
+			<BitSize>15872</BitSize>
 			<SubItem>
 				<Name>m_curMotorPos</Name>
 				<Type GUID="{0707D546-1DA1-7F4D-4D09-7672F2ECC112}">Vec8d</Type>
@@ -1317,6 +1337,17 @@
 				<BitSize>2048</BitSize>
 				<BitOffs>12288</BitOffs>
 			</SubItem>
+			<SubItem>
+				<Name>m_curDHJntPos</Name>
+				<Type GUID="{831F75E9-C113-0166-8F86-6AA81377C84E}">Vec6d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ slave DH joint position ]]></Comment>
+				<BitSize>1536</BitSize>
+				<BitOffs>14336</BitOffs>
+			</SubItem>
 		</DataType>
 		<DataType>
 			<Name GUID="{488B6305-DC6A-E4DC-738A-E6698812A209}" AutoDeleteType="true">ST_MotorOutputs</Name>
@@ -1372,17 +1403,17 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}" AutoDeleteType="true">ST_SetupJointData</Name>
-			<BitSize>11200</BitSize>
+			<Name GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}" AutoDeleteType="true">ST_SetupJointData</Name>
+			<BitSize>8960</BitSize>
 			<SubItem>
 				<Name>m_curMotorPos</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ joint position compute with motor encoder]]></Comment>
-				<BitSize>1600</BitSize>
+				<BitSize>1280</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
@@ -1390,66 +1421,66 @@
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ joint position compute with link/abs encoder]]></Comment>
-				<BitSize>1600</BitSize>
-				<BitOffs>1600</BitOffs>
+				<BitSize>1280</BitSize>
+				<BitOffs>1280</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntPos</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ target joint position ]]></Comment>
-				<BitSize>1600</BitSize>
-				<BitOffs>3200</BitOffs>
+				<BitSize>1280</BitSize>
+				<BitOffs>2560</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curJntPos</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>1600</BitSize>
-				<BitOffs>4800</BitOffs>
+				<BitSize>1280</BitSize>
+				<BitOffs>3840</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curJntVel</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>1600</BitSize>
-				<BitOffs>6400</BitOffs>
+				<BitSize>1280</BitSize>
+				<BitOffs>5120</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_rawJntCurrent</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ raw joint current  ]]></Comment>
-				<BitSize>1600</BitSize>
-				<BitOffs>8000</BitOffs>
+				<BitSize>1280</BitSize>
+				<BitOffs>6400</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntCurrent</Name>
 				<Type GUID="{120C1182-F923-96F6-0D42-2FA7D8D71406}">Vec5d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>5</Elements>
+					<Elements>4</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ command joint current ]]></Comment>
-				<BitSize>1600</BitSize>
-				<BitOffs>9600</BitOffs>
+				<BitSize>1280</BitSize>
+				<BitOffs>7680</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1884,7 +1915,7 @@
 		<ImageData Id="1006">424dd6020000000000003600000028000000100000000e000000010018000000000000000000c40e0000c40e0000000000000000000000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808000d8ff00d8ff00000000000000000000d8ff00d8ff00000000000000000000d8ff00d8ff80808080808080808080808000000000d8ff00d8ff00000000000000d8ff00d8ff00000000000000d8ff00d8ff00000080808080808080808080808000000000000000d8ff00d8ff00000000d8ff00d8ff00000000d8ff00d8ff00000000000080808080808080808080808000000000000000000000d8ff00d8ff00d8ff00d8ff00d8ff00d8ff0000000000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff00000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808080808080808080808080808080808000d8ff00d8ff80808080808080808080808080808080808080808080808080808080808080808080808080808080808000d8ff00d8ff808080808080808080808080808080808080808080</ImageData>
 		<ImageData Id="1007">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="8" NonWinCpus="2">
 				<Cpu CpuId="1" RtLimit="90"/>
@@ -1918,7 +1949,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{1F131E3D-A67A-0CB0-560D-1C3F1EFC1DD6}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1946,7 +1977,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveInputDataPool.m_slaveDynaData</Name>
 							<Comment><![CDATA[ slave dynamic data]]></Comment>
-							<Type GUID="{74B5FCA7-5252-49C0-519F-FB3BA531DFC6}">ST_SlaveDynaData</Type>
+							<Type GUID="{B32D39E7-E972-BF67-BDCB-3DB7B11C4C7A}">ST_SlaveDynaData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorInputs</Name>
@@ -2169,7 +2200,7 @@
 						<Var>
 							<Name>SlaveArmControl.m_slaveJointsData</Name>
 							<Comment><![CDATA[ slave robot joint data, output to other tasks]]></Comment>
-							<Type GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}">ST_SlaveJointData</Type>
+							<Type GUID="{886FF550-7428-6104-5BA5-3C0CF982B0DD}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>SlaveArmControl.m_slaveRobot.m_slaveArms[1].m_joints[1].m_motorOutputs</Name>
@@ -2305,12 +2336,12 @@
 						<Var>
 							<Name>RobotDynamics.m_slaveJointsData</Name>
 							<Comment><![CDATA[ slave robot arms joint data]]></Comment>
-							<Type GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}">ST_SlaveJointData</Type>
+							<Type GUID="{886FF550-7428-6104-5BA5-3C0CF982B0DD}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>RobotDynamics.m_setupJointData</Name>
 							<Comment><![CDATA[ setup joint5 position]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
 							<Name>RobotDynamics.m_instruInfo</Name>
@@ -2323,7 +2354,7 @@
 						<Var>
 							<Name>RobotDynamics.m_slaveDynaData</Name>
 							<Comment><![CDATA[ dynamic output]]></Comment>
-							<Type GUID="{74B5FCA7-5252-49C0-519F-FB3BA531DFC6}">ST_SlaveDynaData</Type>
+							<Type GUID="{B32D39E7-E972-BF67-BDCB-3DB7B11C4C7A}">ST_SlaveDynaData</Type>
 						</Var>
 						<Var>
 							<Name>RobotDynamics.m_setupJnt3Gravity</Name>
@@ -2581,7 +2612,7 @@
 						<Var>
 							<Name>SetupArmControl.m_setupJointsData</Name>
 							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="3" AreaNo="48">
@@ -2781,10 +2812,6 @@
 					<Vars VarGrpType="1" ContextId="4" AreaNo="64">
 						<Name>TaskSafetyCheck Inputs</Name>
 						<Var>
-							<Name>SafetyCheck.m_emergencyStopButton</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
 							<Type GUID="{823291E6-519D-0433-D37E-5EF545799841}">ST_SlaveStatus</Type>
@@ -2792,7 +2819,7 @@
 						<Var>
 							<Name>SafetyCheck.m_slaveJointData</Name>
 							<Comment><![CDATA[ slave robot joint data]]></Comment>
-							<Type GUID="{937F3884-3CE3-429B-D47A-F45A38295C93}">ST_SlaveJointData</Type>
+							<Type GUID="{886FF550-7428-6104-5BA5-3C0CF982B0DD}">ST_SlaveJointData</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_setupStatus</Name>
@@ -2802,12 +2829,16 @@
 						<Var>
 							<Name>SafetyCheck.m_setupJointsData</Name>
 							<Comment><![CDATA[ setup robot joint data]]></Comment>
-							<Type GUID="{1A915D10-5106-7CE3-481F-ABD7A49B79D6}">ST_SetupJointData</Type>
+							<Type GUID="{3312EA40-469B-3080-213E-9B2F98E38E6C}">ST_SetupJointData</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterRobotData</Name>
 							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
 							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_emergencyStopButton</Name>
+							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartStatus</Name>
@@ -2938,7 +2969,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
+							<Id NeedCalleeCall="true">0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2947,7 +2978,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
+							<Id NeedCalleeCall="true">1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2956,7 +2987,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>2</Id>
+							<Id NeedCalleeCall="true">2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2965,7 +2996,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>3</Id>
+							<Id NeedCalleeCall="true">3</Id>
 							<Name>TaskCartControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010070</OTCID>
@@ -2974,7 +3005,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>4</Id>
+							<Id NeedCalleeCall="true">4</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
@@ -8866,7 +8897,7 @@
 		<MappingInfo Identifier="{08502001-2005-0850-0020-500803205008}" Id="#x02030120" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502002-2003-0850-0120-500802205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-0100-0304-0020-500800010403}" Id="#x020300e0" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502003-2004-0850-0220-500804205008}" Id="#x020301d0" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502003-2004-0850-0220-500804205008}" Id="#x02030260" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-2005-0850-0220-500803205008}" Id="#x020301c0" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-00A0-0304-0020-5008A0000403}" Id="#x020300a0" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502003-00C0-0304-0020-5008C0000403}" Id="#x02030050" Watchdog="00000000000000000000000000000000"/>

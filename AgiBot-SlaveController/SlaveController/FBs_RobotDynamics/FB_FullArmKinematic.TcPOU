@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_FullArmKinematic" Id="{2526554a-7558-45f9-b47d-4505bfe6ad08}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_FullArmKinematic
+VAR
+	m_armIdx :INT :=1;
+	
+	// nominal DH parameters
+	//% setup arm
+//% 1        0      0   q1      0
+//% 2        90     a2   0      q2
+//% 3        -90     0   0       q3
+//% 4        0       0   q4      d4
+//% 5        -90      0   q5      0
+
+//% paramters definiton:
+//% a: distance from joint5 to joint 6 on tool
+//% b: distantce form joint 6 to tcp on tool
+//% DH definition:
+//% index    alpha   a        theta           d
+//% 1        90      0        J1+180          0
+//% 2        90     42.45     J2-61.935       0
+//% P1       0      254       -J2-200.065     0
+//% P2       0      305       J2+82              0
+//% 3        -90     119.5    0               J3-224.133
+//% 4        0       0        J4              -L
+//% 5        90      0        J5              0
+//% 6        90      a        J6              0
+//% tcp      0       b        0               0
+	m_armNominalDH :ARRAY[1..14] OF Vec4d;
+	
+	// calibrated DH parameters err
+//	% setupDHErr=[   0   0   dq1     0;
+//%                0  da2   0      dq2;
+//%                0  0   0       dq3;
+//%                0  0   dq4      0;
+//%                0  da5  dq5      0];
+//% slaveDHErr=[  0       0           dq6      0;
+//%               0      0            dq7      da7;
+//%               0      0            dq8       0;
+//%               0     0               dq9       0;
+//%               0     0           0          dq10;
+//%                 0       0          0      0];
+// m_DHErr=[dq1,da2,dq2, dq3, dq4, da5, dq5,  dq6, dq7, da7, dq8, dq9, dq10]
+	m_DHErr:ARRAY[1..13] OF LREAL := [13(0.0)];
+	
+	// hanger base matrix
+	m_baseRadiu :LREAL :=0.17;
+	m_baseAng:LREAL := 60.0*g_deg2rad;
+	m_baseFrame :ST_Frame;
+	
+	m_currentDH :ARRAY[1..14] OF Vec4d;
+	
+	m_tcpFrame :ST_Frame;
+	
+	m_useCaliData :BOOL:=true;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{428f8200-b099-470e-bf15-14dc4950df7d}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_armIdx:INT;
+END_VAR
+VAR 
+	i,j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx := i_armIdx;
+
+FOR i:=1 TO 5 DO 
+	FOR j:=1 TO 4 DO
+		m_armNominalDH[i][j]:= GVL_SetupArmKinematic.g_setupArmDH[i,j];
+	END_FOR	
+END_FOR
+m_armNominalDH[2][2]:=GVL_SetupArmKinematic.g_setupA2[m_armIdx];
+m_armNominalDH[4][4]:=GVL_SetupArmKinematic.g_setupD4[m_armIdx];
+
+FOR i:=1 TO 9 DO 
+	FOR j:=1 TO 4 DO
+		m_armNominalDH[i+5][j]:= GVL_SlaveArmKinematic.g_slaveArmFullDH[i,j];
+	END_FOR	
+END_FOR
+
+
+FOR i:=1 TO 13 DO
+	IF m_useCaliData THEN
+		m_DHErr[i] := GVL_SlaveArmKinematic.g_slaveArmDHErr[m_armIdx, i];
+	ELSE
+		m_DHErr[i]:=0;
+	END_IF
+END_FOR
+
+
+
+m_armNominalDH[1][3]:=m_armNominalDH[1][3]+m_DHErr[1];
+m_armNominalDH[2][2]:=m_armNominalDH[2][2]+m_DHErr[2];
+m_armNominalDH[2][4]:=m_armNominalDH[2][4]+m_DHErr[3];
+m_armNominalDH[3][4]:=m_armNominalDH[3][4]+m_DHErr[4];
+m_armNominalDH[4][3]:=m_armNominalDH[4][3]+m_DHErr[5];
+m_armNominalDH[5][2]:=m_armNominalDH[5][2]+m_DHErr[6];
+m_armNominalDH[5][3]:=m_armNominalDH[5][3]+m_DHErr[7];
+
+m_armNominalDH[6][3]:=m_armNominalDH[6][3]+m_DHErr[8];
+m_armNominalDH[7][3]:=m_armNominalDH[7][3]+m_DHErr[9];
+m_armNominalDH[7][4]:=m_armNominalDH[7][4]+m_DHErr[10];
+m_armNominalDH[8][3]:=m_armNominalDH[8][3]+m_DHErr[11];
+m_armNominalDH[9][3]:=m_armNominalDH[9][3]+m_DHErr[12];
+m_armNominalDH[10][4]:=m_armNominalDH[10][4]+m_DHErr[13];
+
+m_baseFrame.m_pos[3]:=0;
+IF (m_armIdx=1) THEN
+	m_baseFrame.m_pos[1]:=-m_baseRadiu; 
+	m_baseFrame.m_pos[2]:=0;
+	
+ELSIF (m_armIdx=2) THEN
+	m_baseFrame.m_pos[1]:=-m_baseRadiu*COS(m_baseAng); 
+	m_baseFrame.m_pos[2]:=-m_baseRadiu*SIN(m_baseAng);
+	
+ELSIF (m_armIdx=3) THEN	
+	m_baseFrame.m_pos[1]:=m_baseRadiu*COS(m_baseAng); 
+	m_baseFrame.m_pos[2]:=-m_baseRadiu*SIN(m_baseAng); 
+	
+ELSIF (m_armIdx=4) THEN	
+	m_baseFrame.m_pos[1]:=m_baseRadiu; 
+	m_baseFrame.m_pos[2]:=0;
+END_IF
+
+IF m_useCaliData THEN
+	m_baseFrame.m_pos[1]:=m_baseFrame.m_pos[1]+GVL_SlaveArmKinematic.g_slaveArmBaseErr[m_armIdx,1];
+	m_baseFrame.m_pos[2]:=m_baseFrame.m_pos[2]+GVL_SlaveArmKinematic.g_slaveArmBaseErr[m_armIdx,2];
+END_IF
+m_baseFrame.m_rot[1,1]:=0;
+m_baseFrame.m_rot[2,1]:=1;
+m_baseFrame.m_rot[3,1]:=0;
+
+m_baseFrame.m_rot[1,2]:=-1;
+m_baseFrame.m_rot[2,2]:=0;
+m_baseFrame.m_rot[3,2]:=0;
+
+m_baseFrame.m_rot[1,3]:=0;
+m_baseFrame.m_rot[2,3]:=0;
+m_baseFrame.m_rot[3,3]:=1;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{31d49cd2-f041-42e0-89ae-b818467c68ae}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_IN_OUT CONSTANT
+	// setup joint angle
+	i_setupPos : vec5d;
+	
+	// slave DH joint angle
+	i_slaveDHJntPos :Vec6d;
+	
+	// instrument
+	i_instruStatus :ST_InstruStatus;
+END_VAR
+VAR_IN_OUT
+	r_tcpPose:ST_Frame;
+END_VAR
+VAR
+	i:INT;
+	T1,T2 :ST_Frame;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// instrument parameters
+m_armNominalDH[11][4]:=-GVL_SlaveArmKinematic.g_L;
+m_armNominalDH[13][2]:=GVL_SlaveArmKinematic.g_a;
+m_armNominalDH[14][2]:=GVL_SlaveArmKinematic.g_b;
+FOR i:=1 TO g_instruTypeNum DO 
+	IF g_instruTypePool[i].m_InstruID = i_instruStatus.m_type THEN
+		m_armNominalDH[11][4]:=-(g_instruTypePool[i].m_rodLength-GVL_SlaveArmKinematic.g_panelHeight);
+		m_armNominalDH[13][2]:=g_instruTypePool[i].m_headLength;
+		m_armNominalDH[14][2]:=g_instruTypePool[i].m_fingerLength;
+		EXIT;
+	END_IF
+END_FOR
+
+// add joint position
+m_currentDH:=m_armNominalDH;
+m_currentDH[1][3]:=m_currentDH[1][3]+i_setupPos[1];
+m_currentDH[2][4]:=m_currentDH[2][4]+i_setupPos[2];
+m_currentDH[3][4]:=m_currentDH[3][4]+i_setupPos[3];
+m_currentDH[4][3]:=m_currentDH[4][3]+i_setupPos[4];
+m_currentDH[5][3]:=m_currentDH[5][3]+i_setupPos[5];
+m_currentDH[6][3]:=m_currentDH[6][3]+i_slaveDHJntPos[1];
+m_currentDH[7][3]:=m_currentDH[7][3]+i_slaveDHJntPos[2];
+m_currentDH[8][3]:=m_currentDH[8][3]-i_slaveDHJntPos[2];
+m_currentDH[9][3]:=m_currentDH[9][3]+i_slaveDHJntPos[2];
+m_currentDH[10][4]:=m_currentDH[10][4]+i_slaveDHJntPos[3];
+m_currentDH[11][3]:=m_currentDH[11][3]+i_slaveDHJntPos[4];
+m_currentDH[12][3]:=m_currentDH[12][3]+i_slaveDHJntPos[5];
+m_currentDH[13][3]:=m_currentDH[13][3]+i_slaveDHJntPos[6];
+
+m_tcpFrame:= m_baseFrame;
+FOR i:=1 TO 14 DO 
+	T1:=DHTrans(m_currentDH[i]);
+	T2:=transform(m_tcpFrame,T1);
+	m_tcpFrame:=T2;
+END_FOR
+matMultiply(T2.m_rot, GVL_SlaveArmKinematic.g_tcpRotation, m_tcpFrame.m_rot);
+
+r_tcpPose:=m_tcpFrame;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_FullArmKinematic">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_FullArmKinematic.init">
+      <LineId Id="21" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="16" Count="4" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="26" Count="13" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="53" Count="2" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="56" Count="2" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="59" Count="2" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="64" Count="2" />
+      <LineId Id="68" Count="3" />
+      <LineId Id="73" Count="3" />
+      <LineId Id="47" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_FullArmKinematic.run">
+      <LineId Id="39" Count="1" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="29" Count="3" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="15" Count="8" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="81" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

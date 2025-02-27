@@ -8,6 +8,9 @@ STRUCT
 	
 	// gravity
 	m_gravity :ARRAY[1..g_sArmNum] OF Vec3d;
+	
+	// instrument out-of-view data
+	m_insruViewData :ARRAY[1..g_sArmNum] OF Vec3i;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

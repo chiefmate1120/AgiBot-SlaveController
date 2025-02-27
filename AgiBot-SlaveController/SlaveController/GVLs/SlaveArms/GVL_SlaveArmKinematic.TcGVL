@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SlaveArmKinematic" Id="{fa1bdebf-5188-4d48-a57d-03bec0a3a2f4}">
     <Declaration><![CDATA[// use slot attribute larger than 49990, which is the default one, if it depends on variable in other file
 {attribute 'global_init_slot' := '49991'} 
@@ -29,15 +29,51 @@ g_a : LREAL :=0.01;// need to be replace by real instrument parameters;
 g_b :LREAL :=0;// need to be replace by real instrument parameters;
 
 //alpha,a,d,theta	
-g_slaveArmDH:ARRAY[1..9,1..4] OF LREAL :=[PI/2,	0,		g_d1,	0,      
+g_slaveArmDH:ARRAY[1..7,1..4] OF LREAL :=[PI/2,	0,		g_d1,	0,      
 											-pi/2,	0,		0,		0,
 											-PI/2,	0,		0,		0,
 									        0,		0,		-g_L,	0,       
 											pi/2,	0,		0,		0,
 								            pi/2,	g_a,	0,		0,
 							         		0,		g_b, 	0,		0];
+			
 
+//%% DH definetion
+//% paramters definiton:
+//% a: distance from joint5 to joint 6 on tool
+//% b: distantce form joint 6 to tcp on tool
+//% DH definition:
+//% index    alpha   a        theta           d
+//% 1        90      0        J1+180          0
+//% 2        90     42.45     J2-61.935       0
+//% P1       0      254       -J2-200.065     0
+//% P2       0      305       J2+82              0
+//% 3        -90     119.5    0               J3-224.133
+//% 4        0       0        J4              -L
+//% 5        90      0        J5              0
+//% 6        90      a        J6              0
+//% tcp      0       b        0               0
+g_slaveArmFullDH:ARRAY[1..9,1..4] OF LREAL :=[ PI/2,   	0,   		PI,      			502.591/1000,
+												PI/2,  	42.45/1000,	-61.935*g_deg2rad,      0,
+												0,      254.0/1000,   -200.065*g_deg2rad,       0,
+												0,   	305.0/1000,   82.0*g_deg2rad,             0,
+												-PI/2,  119.5/1000, 0,       			-224.133/1000,
+												0,      0,   		0,	      			-g_L,
+												PI/2,   0,   		0,      			0,
+												PI/2,   g_a,   		0,      			0,
+												0,       g_b,   	0,      			0];
 
+						
+g_slaveArmDHErr:ARRAY[1..4,1..13] OF LREAL :=[ -0.0251,    0.0032,    0.0200,    -0.0064,   -0.0039,    0.0101,   -0.0153,   -0.0117,   -0.0586,   -0.0021,    0.036,   -0.0058,   -0.0068,
+											  0.0,	   -0.0084,    0.0179,      0.0,   -0.0195,   -0.0137,    0.0001,   -0.0154,   -0.0501,   -0.0033,    0.0379,   -0.0453,   -0.0019,
+											  0.048,	-0.0085,	0.0106,	0.0068,	-0.0076,	-0.0169,	0.0067,	0.0222,	-0.0151,	0.0001,	0.0219,	-0.009,		-0.0065,
+											  13(0)];
+
+g_slaveArmBaseErr:ARRAY[1..4,1..2] OF LREAL :=[ -0.0064,    -0.0129,
+											  0.0,	 0.0,
+											  0.0056,	0.0038,
+											  2(0)];
+	
 // rotation from joint7 to tcp
 g_tcpRotation :Mat3d :=[0.0,	0.0,	1.0,
 					    -1.0,	0.0,	0.0,

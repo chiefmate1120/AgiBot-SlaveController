@@ -298,6 +298,9 @@
     <Compile Include="DUTs\Type\Vec2i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec3i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec4b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -455,6 +458,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_CartControlles\I_CartJointCtrl.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_FullArmKinematic.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_InstruViewCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_RobotDynamics\FB_SlaveDynamic.TcPOU">

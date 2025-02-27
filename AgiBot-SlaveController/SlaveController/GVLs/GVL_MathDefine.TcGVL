@@ -28,6 +28,9 @@
 					 0, 0, 0, 0, 0, 1, 0,
 					 0, 0, 0, 0, 0, 0, 1];
 	
+	g_zeroVec2d :Vec2d:= [2(0)];
+	
+	g_zeroVec3i :Vec3i:= [3(0)];
 	g_zeroVec3d :Vec3d:= [3(0)];
 	g_onesVec3d: Vec3d:=[3(1)];
 	

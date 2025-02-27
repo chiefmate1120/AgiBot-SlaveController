@@ -28,6 +28,8 @@ VAR
 	// slave dynamic block
 	m_slaveDynamicModel :ARRAY[1..g_sArmNum] OF FB_SlaveDynamic;
 	
+	// instument out-of-view check
+	m_instruViewCheck :FB_InstruViewCheck;
 
 	// code execute time measure
 	m_codeTime : Profiler;
@@ -47,6 +49,7 @@ IF m_robotDynaInit =FALSE THEN
 		m_setupGravityModel[i].init(i);
 		m_slaveDynamicModel[i].init(i);
 	END_FOR
+	m_instruViewCheck.init();
 
 	m_robotDynaInit:=TRUE;
 END_IF
@@ -62,6 +65,9 @@ FOR i:=1 TO g_sArmNum DO
 	m_slaveDynaData.m_massMat[i]:= m_slaveDynamicModel[i].jntMassMat;
 END_FOR
 
+m_instruViewCheck.run(m_setupJointData.m_curJntPos, m_slaveJointsData.m_curDHJntPos, m_instruInfo);
+m_slaveDynaData.m_insruViewData:=m_instruViewCheck.m_instruImgBoundPos;
+
 
 m_codeTime(START:=FALSE);
 ]]></ST>
@@ -74,6 +80,7 @@ m_codeTime(START:=FALSE);
       <LineId Id="294" Count="0" />
       <LineId Id="331" Count="0" />
       <LineId Id="26" Count="0" />
+      <LineId Id="374" Count="0" />
       <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="31" Count="0" />
@@ -83,6 +90,9 @@ m_codeTime(START:=FALSE);
       <LineId Id="295" Count="0" />
       <LineId Id="333" Count="3" />
       <LineId Id="27" Count="0" />
+      <LineId Id="376" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="383" Count="0" />
       <LineId Id="260" Count="1" />
       <LineId Id="83" Count="0" />
       <LineId Id="110" Count="0" />

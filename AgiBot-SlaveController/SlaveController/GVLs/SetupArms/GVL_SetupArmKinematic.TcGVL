@@ -7,37 +7,27 @@
 VAR_GLOBAL CONSTANT 
 
 (* 
-% paramters definiton:
-% d1: distance from joint1 to remote center
-% L: instrument length
-% a: distance from joint5 to joint 6 on tool
-% b: distantce form joint 6 to tcp on tool
-% DH definition:
-% index    alpha   a   theta   d
-% 1        90      0   q1      d1
-% 2        -90     0   q2      0
+% setup arm
+% 1        0      0   q1      0
+% 2        90     a2   0      q2
 % 3        -90     0   0       q3
-% 4        0       0   q4      -L
-% 5        90      0   q5      0
-% 6        90      a   q6      0
-% tcp      0       b   0       0
-
-
-g_d1:LREAL:=0.8046229;
+% 4        0       0   q4      d4
+% 5        -90      0   q5      0
+*)
+g_setupA2:ARRAY[1..4] OF LREAL:=[0.019,0.136, 0.136, 0.1825 ];
+g_setupD4:ARRAY[1..4] OF LREAL:=[0.5205,0.3545, 0.3545, 0.5205 ];
 g_L :LREAL:= 0.3;// need to be replace by real instrument parameters;
 g_a : LREAL :=0.01;// need to be replace by real instrument parameters;
 g_b :LREAL :=0;// need to be replace by real instrument parameters;
 
 //alpha,a,d,theta	
-g_slaveArmDH:ARRAY[1..9,1..4] OF LREAL :=[PI/2,	0,		g_d1,	0,      
-											-pi/2,	0,		0,		0,
-											-PI/2,	0,		0,		0,
-									        0,		0,		-g_L,	0,       
-											pi/2,	0,		0,		0,
-								            pi/2,	g_a,	0,		0,
-							         		0,		g_b, 	0,		0];
+g_setupArmDH:ARRAY[1..5,1..4] OF LREAL  :=[   0,   0,   0,     0,
+											PI/2,  g_setupA2[1],   0,      0,
+											-PI/2,  0,   0,       0,
+											0,       0,   0,      g_setupA2[2],
+											-PI/2,   0,   0,      0];
 
-*)
+
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

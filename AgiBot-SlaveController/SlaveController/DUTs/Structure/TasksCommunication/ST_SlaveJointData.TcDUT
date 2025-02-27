@@ -24,6 +24,9 @@ STRUCT
 	
 	// command joint current 
 	m_cmdJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// slave DH joint position 
+	m_curDHJntPos :ARRAY[1..g_sArmNum] OF Vec6d;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
