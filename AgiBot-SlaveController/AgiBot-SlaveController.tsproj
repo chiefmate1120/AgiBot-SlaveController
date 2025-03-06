@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{3CB7ED90-7127-49D3-B07C-B1898FA8B8B3}" PersistentType="true">MSCommu_Vec3d</Name>
@@ -1915,7 +1915,7 @@
 		<ImageData Id="1006">424dd6020000000000003600000028000000100000000e000000010018000000000000000000c40e0000c40e0000000000000000000000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808080808080808080808080808000d8ff00d8ff80808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808080808000d8ff00d8ff80808080808080808000d8ff00d8ff00000000000000000000d8ff00d8ff00000000000000000000d8ff00d8ff80808080808080808080808000000000d8ff00d8ff00000000000000d8ff00d8ff00000000000000d8ff00d8ff00000080808080808080808080808000000000000000d8ff00d8ff00000000d8ff00d8ff00000000d8ff00d8ff00000000000080808080808080808080808000000000000000000000d8ff00d8ff00d8ff00d8ff00d8ff00d8ff0000000000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff0000000000008080808080808080808080800000000000000000ff0000ff0000ff0000ff0000ff0000ff0000ff0000ff00000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808000000000000000000000000000000000d8ff00d8ff00000000000000000000000000000080808080808080808080808080808080808080808080808080808000d8ff00d8ff80808080808080808080808080808080808080808080808080808080808080808080808080808080808000d8ff00d8ff808080808080808080808080808080808080808080</ImageData>
 		<ImageData Id="1007">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="8" NonWinCpus="2">
 				<Cpu CpuId="1" RtLimit="90"/>
@@ -1949,7 +1949,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="SlaveController" PrjFilePath="SlaveController\SlaveController.plcproj" TmcFilePath="SlaveController\SlaveController.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x0000" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="SlaveController\SlaveController.tmc" TmcHash="{C9F100C9-E7A5-A595-72EE-7574240B643F}">
 					<Name>SlaveController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -2812,6 +2812,10 @@
 					<Vars VarGrpType="1" ContextId="4" AreaNo="64">
 						<Name>TaskSafetyCheck Inputs</Name>
 						<Var>
+							<Name>SafetyCheck.m_emergencyStopButton</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>SafetyCheck.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, including arm status and cartesian data]]></Comment>
 							<Type GUID="{823291E6-519D-0433-D37E-5EF545799841}">ST_SlaveStatus</Type>
@@ -2835,10 +2839,6 @@
 							<Name>SafetyCheck.m_masterRobotData</Name>
 							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
 							<Type GUID="{57D525B4-259A-4BD2-9CB2-0E73F7DE8881}">MSCommu_MasterStatus</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_emergencyStopButton</Name>
-							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartStatus</Name>
@@ -2969,7 +2969,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id NeedCalleeCall="true">0</Id>
+							<Id>0</Id>
 							<Name>TaskSlaveArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -2978,7 +2978,7 @@
 							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">1</Id>
+							<Id>1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -2987,7 +2987,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">2</Id>
+							<Id>2</Id>
 							<Name>TaskSetupArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -2996,7 +2996,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">3</Id>
+							<Id>3</Id>
 							<Name>TaskCartControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010070</OTCID>
@@ -3005,7 +3005,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">4</Id>
+							<Id>4</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010010</OTCID>
